@@ -1,34 +1,32 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Monero Suite
 
-## Getting Started
+This project lets you run a Monero node, P2Pool, and MoneroBlock in Docker containers. It also includes Tor for anonymity and Watchtower for auto-updating the containers.
 
-First, run the development server:
+- [monerod](http://getmonero.org) (the Monero daemon)
+- [P2Pool](https://github.com/SChernykh/p2pool) (a decentralized mining pool for Monero)
+- [MoneroBlock](https://github.com/duggavo/MoneroBlock) (a Monero block explorer)
+- [Tor](https://www.torproject.org) (anonymity network for monerod and P2Pool)
+- [Docker Autoheal](https://github.com/willfarrell/docker-autoheal) (auto-restart unhealthy containers)
+- [Watchtower](https://github.com/containrrr/watchtower) (auto-update containers)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+Disclaimer: This project is not affiliated with, endorsed by, or sponsored by the Monero Project.
+
+## Quick Start
+You need to have [Docker](https://docs.docker.com/install/) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
+
+Go to [xmr.guide](https://xmr.guide)
+
+Save the generated docker-compose.yml file to a directory and run the following command in that directory:
+``` 
+docker-compose up -d
 ```
+It will take some time to download the images and start the containers. You can check the status of the containers with:
+```
+docker-compose ps
+```
+or a more interactive view with [Portainer](https://www.portainer.io) or [LazyDocker](https://github.com/jesseduffield/lazydocker).
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Donations
+If you find this project useful, please consider donating to the following address:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+87cQNxrM3oWVkZ8TRWUHi9LmvruKgQSA7AxqoqJDr7n1PgGcZkXhAToVz3rEWxjAMj7caKCcqjYfDSFeLey1Sf4hUF3gmNn
