@@ -26,7 +26,7 @@ export default function Home() {
       header={{
         height: {
           base: 96,
-          xs: 80,
+          xs: 48,
         },
       }}
     >

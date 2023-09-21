@@ -7,7 +7,6 @@ import {
   Input,
   Slider,
   Text,
-  Space,
 } from "@mantine/core";
 
 interface SelectionProps {
@@ -80,18 +79,18 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
         ]}
       />
       {p2PoolMode !== "none" && (
-        <Input.Wrapper
-          label="Monero Payout Address"
-          description="It has to be a primary address. Subaddresses don't work."
-          error={p2poolPayoutAddressError()}
-        >
-          <Input
-            value={p2PoolPayoutAddress}
-            onChange={(e) => setP2PoolPayoutAddress(e.currentTarget.value)}
-          />
-          <Space h={10} />
+        <>
+          <Input.Wrapper
+            label="Monero Payout Address"
+            description="It has to be a primary address. Subaddresses don't work."
+            error={p2poolPayoutAddressError()}
+          >
+            <Input
+              value={p2PoolPayoutAddress}
+              onChange={(e) => setP2PoolPayoutAddress(e.currentTarget.value)}
+            />
+          </Input.Wrapper>
           <Text>Integrated P2Pool Mining</Text>
-          <Space h={10} />
           <Slider
             value={p2PoolMiningThreads}
             onChange={setP2PoolMiningThreads}
@@ -107,7 +106,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
               ? `${p2PoolMiningThreads} Threads`
               : `No mining`}
           </Text>
-        </Input.Wrapper>
+        </>
       )}
       <Checkbox
         checked={isMoneroblock}
