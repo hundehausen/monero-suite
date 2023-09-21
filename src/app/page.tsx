@@ -8,6 +8,7 @@ import {
   Container,
   Flex,
   Grid,
+  Text,
   Title,
   useMantineColorScheme,
 } from "@mantine/core";
@@ -38,6 +39,7 @@ export default function Home() {
               style={{
                 color: "inherit",
                 textDecoration: "none",
+                height: 32,
               }}
             >
               <FaGithub size={32} />
@@ -82,6 +84,21 @@ export default function Home() {
           </Grid>
         </Container>
       </AppShell.Main>
+      <AppShell.Footer>
+        <Container
+          styles={{
+            root: {
+              padding: "8px 0",
+            },
+          }}
+        >
+          <Flex justify="center" align="center">
+            <Text>
+              87cQNxrM3oWVkZ8TRWUHi9LmvruKgQSA7AxqoqJDr7n1PgGcZkXhAToVz3rEWxjAMj7caKCcqjYfDSFeLey1Sf4hUF3gmNn
+            </Text>
+          </Flex>
+        </Container>
+      </AppShell.Footer>
     </AppShell>
   );
 }
