@@ -20,6 +20,7 @@ export interface ServiceMap {
 
 export const useServices = () => {
   const [isMoneroPublicNode, setIsMoneroPublicNode] = useState(true);
+  const [isPrunedNode, setIsPrunedNode] = useState(true);
   const [p2PoolMode, setP2PoolMode] = useState("none");
   const [p2PoolPayoutAddress, setP2PoolPayoutAddress] = useState(
     "48oc8c65B9JPv6FBZBg7UN9xUYmxux6WfEh61WBoKca7Amh7r7bnCZ7JJicLw7UN3DEgEADwqrhwxGBJazPZ14PJGbmMyXX"
@@ -64,8 +65,8 @@ sudo ufw allow 18080/tcp 18089/tcp`
                 "--rpc-restricted-bind-port=18089",
                 "--enable-dns-blocklist",
                 "--no-igd",
-                "--prune-blockchain",
                 "--out-peers=50",
+                ...(isPrunedNode ? ["--prune-blockchain"] : []),
                 ...(isMoneroPublicNode ? ["--public-node"] : []),
                 ...(p2PoolMode !== "none"
                   ? ["--zmq-pub=tcp://0.0.0.0:18083"]
@@ -236,13 +237,14 @@ sudo ufw allow 3333/tcp`
       } as ServiceMap),
     [
       isMoneroPublicNode,
+      isPrunedNode,
       p2PoolMode,
       p2PoolPayoutAddress,
+      p2PoolMiningThreads,
       isMoneroblock,
       isTor,
       isWatchtower,
       isAutoheal,
-      p2PoolMiningThreads,
     ]
   );
 
@@ -265,6 +267,8 @@ sudo ufw allow 3333/tcp`
       setP2PoolPayoutAddress,
       p2PoolMiningThreads,
       setP2PoolMiningThreads,
+      isPrunedNode,
+      setIsPrunedNode,
     },
   };
 };

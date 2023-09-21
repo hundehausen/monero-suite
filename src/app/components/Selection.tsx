@@ -33,6 +33,8 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     setIsMoneroblock,
     isAutoheal,
     setIsAutoheal,
+    isPrunedNode,
+    setIsPrunedNode,
   } = stateFunctions;
 
   const p2poolPayoutAddressError = () => {
@@ -53,6 +55,15 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
         onChange={(event) => setIsMoneroPublicNode(event.currentTarget.checked)}
         onLabel="Public"
         offLabel="Private"
+        size="lg"
+      />
+      <Switch
+        checked={isPrunedNode}
+        label={<span>Pruned Node</span>}
+        labelPosition="left"
+        onChange={(event) => setIsPrunedNode(event.currentTarget.checked)}
+        onLabel="Pruned"
+        offLabel="Full"
         size="lg"
       />
       <SegmentedControl
