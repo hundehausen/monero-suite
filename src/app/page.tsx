@@ -67,13 +67,24 @@ export default function Home() {
             styles={{
               root: {
                 overflow: "initial",
+                padding: "0 8px",
               },
             }}
           >
-            <Grid.Col span={4}>
+            <Grid.Col
+              span={{
+                xs: 12,
+                md: 4,
+              }}
+            >
               <Selection services={services} stateFunctions={stateFunctions} />
             </Grid.Col>
-            <Grid.Col span={8}>
+            <Grid.Col
+              span={{
+                xs: 12,
+                md: 8,
+              }}
+            >
               <Preview
                 services={Object.values(services).filter(
                   (service) =>
