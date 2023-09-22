@@ -1,25 +1,18 @@
 "use client";
 
 import { useServices } from "@/hooks/use-services";
-import Preview from "./components/Preview";
+import ComposePreview from "./components/ComposePreview";
 import Selection from "./components/Selection";
-import {
-  AppShell,
-  Container,
-  Flex,
-  Grid,
-  Text,
-  Title,
-  useMantineColorScheme,
-} from "@mantine/core";
-import { DarkModeSwitch } from "react-toggle-dark-mode";
-import { FaGithub } from "react-icons/fa";
-import Link from "next/link";
-import Image from "next/image";
+import { AppShell, Container, Grid, Text } from "@mantine/core";
+import BashPreview from "./components/BashPreview";
+import Header from "./components/Header";
 
 export default function Home() {
-  const { colorScheme, setColorScheme } = useMantineColorScheme();
   const { services, stateFunctions } = useServices();
+
+  const checkedServices = Object.values(services).filter(
+    (service) => service.checked !== false && service.checked !== "none"
+  );
 
   return (
     <AppShell
@@ -41,101 +34,43 @@ export default function Home() {
           },
         }}
       >
-        <Flex justify="space-between" align="center" w={"100%"}>
-          <Title order={1}>Monero Suite</Title>
-          <Flex
-            align="center"
-            justify="space-between"
-            gap={{
-              base: 12,
-              xs: 16,
-            }}
-          >
-            <Link
-              href="https://x.com/hundehausen/"
-              title="hundehausen's profile on x.com"
-              target="_blank"
-              style={{ color: "inherit", textDecoration: "none", height: 32 }}
-            >
-              <Image
-                src="/hundehausen.png"
-                alt="hundehausen's profile on x.com"
-                style={{ borderRadius: "50%" }}
-                width={32}
-                height={32}
-              />
-            </Link>
-            <Link
-              href="https://sethforprivacy.com/guides/run-a-p2pool-node/"
-              target="_blank"
-              title="Monero related guides from sethforprivacy.com"
-              style={{ color: "inherit", textDecoration: "none", height: 32 }}
-            >
-              <Image
-                src="/seth.png"
-                alt="Monero related guides from sethforprivacy.com"
-                style={{ borderRadius: "50%" }}
-                width={32}
-                height={32}
-              />
-            </Link>
-            <Link
-              href="https://github.com/hundehausen/monero-suite"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Source code on GitHub"
-              style={{
-                color: "inherit",
-                textDecoration: "none",
-                height: 32,
-              }}
-            >
-              <FaGithub size={32} />
-            </Link>
-            <DarkModeSwitch
-              checked={colorScheme === "dark"}
-              onChange={() =>
-                setColorScheme(colorScheme === "dark" ? "light" : "dark")
-              }
-              size={32}
-            />
-          </Flex>
-        </Flex>
+        <Header />
       </AppShell.Header>
       <AppShell.Main>
-        <Container>
-          <Grid
-            gutter="lg"
-            styles={{
-              root: {
-                overflow: "initial",
-                padding: "0 8px",
-              },
+        <Grid
+          gutter="lg"
+          align="stretch"
+          styles={{
+            root: {
+              padding: "0 8px",
+            },
+          }}
+        >
+          <Grid.Col
+            span={{
+              xs: 12,
+              md: 3,
             }}
           >
-            <Grid.Col
-              span={{
-                xs: 12,
-                md: 4,
-              }}
-            >
-              <Selection services={services} stateFunctions={stateFunctions} />
-            </Grid.Col>
-            <Grid.Col
-              span={{
-                xs: 12,
-                md: 8,
-              }}
-            >
-              <Preview
-                services={Object.values(services).filter(
-                  (service) =>
-                    service.checked !== false && service.checked !== "none"
-                )}
-              />
-            </Grid.Col>
-          </Grid>
-        </Container>
+            <Selection services={services} stateFunctions={stateFunctions} />
+          </Grid.Col>
+          <Grid.Col
+            span={{
+              xs: 12,
+              md: 5,
+            }}
+          >
+            <ComposePreview services={checkedServices} />
+          </Grid.Col>
+          <Grid.Col
+            span={{
+              xs: 12,
+              md: 4,
+            }}
+          >
+            <BashPreview services={checkedServices} />
+          </Grid.Col>
+        </Grid>
       </AppShell.Main>
       <AppShell.Footer>
         <Container
