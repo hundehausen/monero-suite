@@ -46,12 +46,7 @@ export default function Home() {
             },
           }}
         >
-          <Grid.Col
-            span={{
-              xs: 12,
-              md: 3,
-            }}
-          >
+          <Grid.Col span={"auto"}>
             <Selection services={services} stateFunctions={stateFunctions} />
           </Grid.Col>
           <Grid.Col

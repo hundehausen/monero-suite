@@ -46,7 +46,14 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
   };
 
   return (
-    <Stack>
+    <Stack
+      styles={{
+        root: {
+          alignItems: "flex-end",
+          width: "100%",
+        },
+      }}
+    >
       <Switch
         checked={isMoneroPublicNode}
         label={<span title={services["monerod"].description}>Monero Node</span>}
