@@ -107,6 +107,12 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
             label={(value) => value + " threads"}
             thumbLabel="always"
             step={1}
+            styles={{
+              root: {
+                width: "100%",
+                maxWidth: "300px",
+              },
+            }}
           />
           <Text size="sm">
             {p2PoolMiningThreads > 0
