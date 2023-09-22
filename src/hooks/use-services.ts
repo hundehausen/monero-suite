@@ -57,7 +57,7 @@ sudo ufw allow 18080/tcp 18089/tcp`
               volumes: ["bitmonero:/home/monero"],
               ports: [
                 "18080:18080",
-                ...(p2PoolMode !== "none" ? ["18083:18083"] : []),
+                ...(p2PoolMode !== "none" ? ["18084:18084"] : []),
                 "18089:18089",
               ],
               command: [
@@ -69,7 +69,7 @@ sudo ufw allow 18080/tcp 18089/tcp`
                 ...(isPrunedNode ? ["--prune-blockchain"] : []),
                 ...(isMoneroPublicNode ? ["--public-node"] : []),
                 ...(p2PoolMode !== "none"
-                  ? ["--zmq-pub=tcp://0.0.0.0:18083"]
+                  ? ["--zmq-pub=tcp://0.0.0.0:18084"]
                   : []),
               ],
             },
