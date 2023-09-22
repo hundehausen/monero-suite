@@ -23,6 +23,7 @@ export default function Home() {
 
   return (
     <AppShell
+      padding={"lg"}
       header={{
         height: {
           base: 96,
@@ -101,7 +102,7 @@ export default function Home() {
           </Flex>
         </Flex>
       </AppShell.Header>
-      <AppShell.Main mt={48}>
+      <AppShell.Main>
         <Container>
           <Grid
             gutter="lg"
@@ -140,15 +141,22 @@ export default function Home() {
         <Container
           styles={{
             root: {
-              padding: "8px 0",
+              padding: "8px",
             },
           }}
         >
-          <Flex justify="center" align="center">
-            <Text>
-              87cQNxrM3oWVkZ8TRWUHi9LmvruKgQSA7AxqoqJDr7n1PgGcZkXhAToVz3rEWxjAMj7caKCcqjYfDSFeLey1Sf4hUF3gmNn
-            </Text>
-          </Flex>
+          <Text
+            ta="center"
+            size="sm"
+            styles={{
+              root: {
+                wordBreak: "keep-all",
+                overflowWrap: "break-word",
+              },
+            }}
+          >
+            87cQNxrM3oWVkZ8TRWUHi9LmvruKgQSA7AxqoqJDr7n1PgGcZkXhAToVz3rEWxjAMj7caKCcqjYfDSFeLey1Sf4hUF3gmNn
+          </Text>
         </Container>
       </AppShell.Footer>
     </AppShell>
