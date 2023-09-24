@@ -9,8 +9,8 @@ export interface Service {
   description: string;
   checked: boolean | string;
   required: boolean;
-  code: PropertiesServices;
   bash?: string;
+  code: PropertiesServices;
   volumes?: PropertiesVolumes;
 }
 
@@ -78,7 +78,7 @@ sudo ufw allow 18080/tcp 18089/tcp`
         p2pool: {
           name: "P2Pool",
           description:
-            "P2Pool is a decentralized mining pool that works by creating a peer-to-peer network of miner nodes.",
+            "P2Pool is a decentralized mining pool that works by creating a peer-to-peer network of miner nodes. For Moneros decentralization it is better to use P2Pool, instead of a centralized mining pool.",
           checked: p2PoolMode,
           required: false,
           volumes: {
@@ -153,7 +153,7 @@ sudo ufw allow 3333/tcp`
         tor: {
           name: "Tor",
           description:
-            "Tor is free and open-source software for enabling anonymous communication.",
+            "Your own private Tor network for Monero and services like Moneroblock and P2Pool. You can share it with others or keep it to yourself.",
           checked: isTor,
           required: false,
           volumes: {
@@ -164,14 +164,21 @@ sudo ufw allow 3333/tcp`
               image: "goldy/tor-hidden-service:latest",
               container_name: "tor",
               restart: "unless-stopped",
-              links: ["monerod", ...(p2PoolMode !== "none" ? ["p2pool"] : [])],
+              links: [
+                "monerod",
+                ...(p2PoolMode !== "none" ? ["p2pool"] : []),
+                ...(isMoneroblock ? ["moneroblock"] : []),
+              ],
               environment: {
                 MONEROD_TOR_SERVICE_HOSTS: "18089:monerod:18089",
-                MONEROD_TOR_SERVICE_VERSION: "3",
                 ...(p2PoolMode !== "none"
                   ? {
                       P2POOL_TOR_SERVICE_HOSTS: "3333:p2pool:3333",
-                      P2POOL_TOR_SERVICE_VERSION: "3",
+                    }
+                  : {}),
+                ...(isMoneroblock
+                  ? {
+                      MONEROBLOCK_TOR_SERVICE_HOSTS: "31312:moneroblock:31312",
                     }
                   : {}),
               },
@@ -182,7 +189,7 @@ sudo ufw allow 3333/tcp`
         watchtower: {
           name: "Watchtower",
           description:
-            "Watchtower is a service that monitors running Docker containers and watches for changes to the images that those containers were originally started from. If watchtower detects that an image has changed, it will automatically restart the container using the new image.",
+            "Watchtower is a service that monitors running Docker and watches for newer images. If there is a new version available, watchtower will autoamtically restart the container with the newest image.",
           checked: isWatchtower,
           required: false,
           code: {
@@ -220,7 +227,7 @@ sudo ufw allow 3333/tcp`
           name: "XMRig",
           description:
             "XMRig is a high performance Monero (XMR) CPU miner, with official support for Windows.",
-          checked: false,
+          checked: isXmrig,
           required: false,
           code: {
             xmrig: {
@@ -241,6 +248,7 @@ sudo ufw allow 3333/tcp`
       p2PoolMode,
       p2PoolPayoutAddress,
       p2PoolMiningThreads,
+      isXmrig,
       isMoneroblock,
       isTor,
       isWatchtower,
@@ -253,8 +261,16 @@ sudo ufw allow 3333/tcp`
     stateFunctions: {
       isMoneroPublicNode,
       setIsMoneroPublicNode,
+      isPrunedNode,
+      setIsPrunedNode,
       p2PoolMode,
       setP2PoolMode,
+      p2PoolPayoutAddress,
+      setP2PoolPayoutAddress,
+      p2PoolMiningThreads,
+      setP2PoolMiningThreads,
+      isXmrig,
+      setIsXmrig,
       isTor,
       setIsTor,
       isWatchtower,
@@ -263,12 +279,6 @@ sudo ufw allow 3333/tcp`
       setIsMoneroblock,
       isAutoheal,
       setIsAutoheal,
-      p2PoolPayoutAddress,
-      setP2PoolPayoutAddress,
-      p2PoolMiningThreads,
-      setP2PoolMiningThreads,
-      isPrunedNode,
-      setIsPrunedNode,
     },
   };
 };

@@ -8,6 +8,7 @@ import {
   Slider,
   Text,
 } from "@mantine/core";
+import ExplainingLabel from "./ExplainingLabel";
 
 interface SelectionProps {
   services: ServiceMap;
@@ -18,12 +19,16 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
   const {
     isMoneroPublicNode,
     setIsMoneroPublicNode,
+    isPrunedNode,
+    setIsPrunedNode,
     p2PoolMode,
     setP2PoolMode,
     p2PoolPayoutAddress,
     setP2PoolPayoutAddress,
     p2PoolMiningThreads,
     setP2PoolMiningThreads,
+    isXmrig,
+    setIsXmrig,
     isTor,
     setIsTor,
     isWatchtower,
@@ -32,8 +37,6 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     setIsMoneroblock,
     isAutoheal,
     setIsAutoheal,
-    isPrunedNode,
-    setIsPrunedNode,
   } = stateFunctions;
 
   const p2poolPayoutAddressError = () => {
@@ -56,33 +59,76 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     >
       <Switch
         checked={isMoneroPublicNode}
-        label={<span title={services["monerod"].description}>Monero Node</span>}
+        label={
+          <ExplainingLabel
+            label="Monero Node"
+            explanation={services["monerod"].description}
+          />
+        }
         labelPosition="left"
         onChange={(event) => setIsMoneroPublicNode(event.currentTarget.checked)}
         onLabel="Public"
         offLabel="Private"
         size="lg"
+        styles={{
+          track: {
+            width: "70px",
+          },
+        }}
       />
+
       <Switch
         checked={isPrunedNode}
-        label={<span>Pruned Node</span>}
+        label={
+          <ExplainingLabel
+            label="Pruned Node"
+            explanation="Pruning allows node operators to save 2/3 of storage space while
+        keeping the full transaction history. Pruning works by removing 7/8
+        of unnecessary ring signature data. There are no privacy or security
+        downsides when using a pruned node."
+          />
+        }
         labelPosition="left"
         onChange={(event) => setIsPrunedNode(event.currentTarget.checked)}
         onLabel="Pruned"
         offLabel="Full"
         size="lg"
+        styles={{
+          track: {
+            width: "70px",
+          },
+        }}
       />
       <SegmentedControl
         value={p2PoolMode}
         onChange={setP2PoolMode}
-        title={services["p2pool"].description}
         data={[
           {
             label: "None",
             value: "none",
           },
-          { label: "P2Pool mini", value: "mini" },
-          { label: "P2Pool full", value: "full" },
+          {
+            label: (
+              <ExplainingLabel
+                label="P2Pool mini"
+                explanation={services["p2pool"].description.concat(
+                  " Use this if you have a low hashrate."
+                )}
+              />
+            ),
+            value: "mini",
+          },
+          {
+            label: (
+              <ExplainingLabel
+                label="P2Pool full"
+                explanation={services["p2pool"].description.concat(
+                  " Use this if you have a lot of hashrate."
+                )}
+              />
+            ),
+            value: "full",
+          },
         ]}
       />
       {p2PoolMode !== "none" && (
@@ -121,35 +167,59 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
           </Text>
         </>
       )}
+      {/* <Checkbox
+        checked={isXmrig}
+        label="XMRig"
+        labelPosition="left"
+        title={services["xmrig"].description}
+        size="lg"
+        onChange={(event) => setIsXmrig(event.currentTarget.checked)}
+      /> */}
       <Checkbox
         checked={isMoneroblock}
-        label="Moneroblock"
+        label={
+          <ExplainingLabel
+            label="Moneroblock"
+            explanation={services["moneroblock"].description}
+          />
+        }
         labelPosition="left"
-        title={services["moneroblock"].description}
         size="lg"
         onChange={(event) => setIsMoneroblock(event.currentTarget.checked)}
       />
       <Checkbox
         checked={isTor}
-        label="Tor"
+        label={
+          <ExplainingLabel
+            label="Tor"
+            explanation={services["tor"].description}
+          />
+        }
         labelPosition="left"
-        title={services["tor"].description}
         size="lg"
         onChange={(event) => setIsTor(event.currentTarget.checked)}
       />
       <Checkbox
         checked={isWatchtower}
-        label="Watchtower"
+        label={
+          <ExplainingLabel
+            label="Watchtower"
+            explanation={services["watchtower"].description}
+          />
+        }
         labelPosition="left"
-        title={services["watchtower"].description}
         size="lg"
         onChange={(event) => setIsWatchtower(event.currentTarget.checked)}
       />
       <Checkbox
         checked={isAutoheal}
-        label="Autoheal"
+        label={
+          <ExplainingLabel
+            label="Autoheal"
+            explanation={services["autoheal"].description}
+          />
+        }
         labelPosition="left"
-        title={services["autoheal"].description}
         size="lg"
         onChange={(event) => setIsAutoheal(event.currentTarget.checked)}
       />

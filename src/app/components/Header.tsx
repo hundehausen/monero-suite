@@ -64,6 +64,7 @@ const Header = () => {
             setColorScheme(colorScheme === "dark" ? "light" : "dark")
           }
           size={32}
+          title="Toggle dark mode"
         />
       </Flex>
     </Flex>
