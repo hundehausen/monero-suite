@@ -29,6 +29,8 @@ export const useServices = () => {
   const [isTor, setIsTor] = useState(false);
   const [isWatchtower, setIsWatchtower] = useState(false);
   const [isMoneroblock, setIsMoneroblock] = useState(false);
+  const [isOnionMoneroBlockchainExplorer, setIsOnionMoneroBlockchainExplorer] =
+    useState(false);
   const [isAutoheal, setIsAutoheal] = useState(false);
   const [isXmrig, setIsXmrig] = useState(false);
 
@@ -150,6 +152,26 @@ sudo ufw allow 3333/tcp`
             },
           },
         },
+        onionMoneroBlockchainExplorer: {
+          name: "Onion Monero Blockchain Explorer",
+          description:
+            "Onion Monero Blockchain Explorer allows you to browse Monero blockchain. It uses no JavaScript, no cookies and no trackers.",
+          checked: isOnionMoneroBlockchainExplorer,
+          required: false,
+          code: {
+            onionMoneroBlockchainExplorer: {
+              image: "vdo1138/xmrblocks:latest",
+              restart: "unless-stopped",
+              container_name: "onion-monero-blockchain-explorer",
+              ports: ["8081:8081"],
+              volumes: ["bitmonero:/home/monero/.bitmonero"],
+              depends_on: ["monerod"],
+              command: [
+                "./xmrblocks --enable-json-api --enable-autorefresh-option --enable-emission-monitor --daemon-url=monerod:18089 --enable-pusher",
+              ],
+            },
+          },
+        },
         tor: {
           name: "Tor",
           description:
@@ -179,6 +201,12 @@ sudo ufw allow 3333/tcp`
                 ...(isMoneroblock
                   ? {
                       MONEROBLOCK_TOR_SERVICE_HOSTS: "31312:moneroblock:31312",
+                    }
+                  : {}),
+                ...(isOnionMoneroBlockchainExplorer
+                  ? {
+                      MONERO_ONION_BLOCKCHAIN_EXPLORER_TOR_SERVICE_HOSTS:
+                        "8081:onion-monero-blockchain-explorer:8081",
                     }
                   : {}),
               },
@@ -250,6 +278,7 @@ sudo ufw allow 3333/tcp`
       p2PoolMiningThreads,
       isXmrig,
       isMoneroblock,
+      isOnionMoneroBlockchainExplorer,
       isTor,
       isWatchtower,
       isAutoheal,
@@ -271,12 +300,14 @@ sudo ufw allow 3333/tcp`
       setP2PoolMiningThreads,
       isXmrig,
       setIsXmrig,
+      isMoneroblock,
+      setIsMoneroblock,
+      isOnionMoneroBlockchainExplorer,
+      setIsOnionMoneroBlockchainExplorer,
       isTor,
       setIsTor,
       isWatchtower,
       setIsWatchtower,
-      isMoneroblock,
-      setIsMoneroblock,
       isAutoheal,
       setIsAutoheal,
     },

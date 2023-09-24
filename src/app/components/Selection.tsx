@@ -29,12 +29,14 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     setP2PoolMiningThreads,
     isXmrig,
     setIsXmrig,
+    isMoneroblock,
+    setIsMoneroblock,
+    isOnionMoneroBlockchainExplorer,
+    setIsOnionMoneroBlockchainExplorer,
     isTor,
     setIsTor,
     isWatchtower,
     setIsWatchtower,
-    isMoneroblock,
-    setIsMoneroblock,
     isAutoheal,
     setIsAutoheal,
   } = stateFunctions;
@@ -186,6 +188,20 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
         labelPosition="left"
         size="lg"
         onChange={(event) => setIsMoneroblock(event.currentTarget.checked)}
+      />
+      <Checkbox
+        checked={isOnionMoneroBlockchainExplorer}
+        label={
+          <ExplainingLabel
+            label="Onion Monero Blockchain Explorer"
+            explanation={services["onionMoneroBlockchainExplorer"].description}
+          />
+        }
+        labelPosition="left"
+        size="lg"
+        onChange={(event) =>
+          setIsOnionMoneroBlockchainExplorer(event.currentTarget.checked)
+        }
       />
       <Checkbox
         checked={isTor}

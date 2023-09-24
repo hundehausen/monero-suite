@@ -5,6 +5,7 @@ This project lets you run a Monero node, P2Pool, and MoneroBlock in Docker conta
 - [monerod](http://getmonero.org) (the Monero daemon)
 - [P2Pool](https://github.com/SChernykh/p2pool) (a decentralized mining pool for Monero)
 - [MoneroBlock](https://github.com/duggavo/MoneroBlock) (a Monero block explorer)
+- [Onion Monero Blockchain Explorer](https://github.com/moneroexamples/onion-monero-blockchain-explorer) (a Monero block explorer without JavaScript)
 - [Tor](https://www.torproject.org) (anonymity network for monerod and P2Pool)
 - [Docker Autoheal](https://github.com/willfarrell/docker-autoheal) (auto-restart unhealthy containers)
 - [Watchtower](https://github.com/containrrr/watchtower) (auto-update containers)
@@ -12,7 +13,7 @@ This project lets you run a Monero node, P2Pool, and MoneroBlock in Docker conta
 Disclaimer: This project is not affiliated with, endorsed by, or sponsored by the Monero Project.
 
 ## Quick Start
-You need to have [Docker](https://docs.docker.com/install/) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
+You need to have [Docker](https://docs.docker.com/install/) and [Docker Compose](https://docs.docker.com/compose/install/) installed. It could also work with Podman, but I haven't tested it.
 
 Go to [xmr.guide](https://xmr.guide)
 

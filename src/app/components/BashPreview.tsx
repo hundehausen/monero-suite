@@ -35,7 +35,7 @@ interface BashPreviewProps {
 }
 
 const BashPreview = ({ services }: BashPreviewProps) => {
-  // replance two or more newlines with one newline
+  // replace two or more newlines with one newline
   const serviceBashCommands = services
     .filter((service) => service.bash)
     .map((service) => service.bash)
