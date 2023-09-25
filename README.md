@@ -27,6 +27,16 @@ docker-compose ps
 ```
 or a more interactive view with [Portainer](https://www.portainer.io) or [LazyDocker](https://github.com/jesseduffield/lazydocker).
 
+## Roadmap
+no particular order
+
+- [] add reverse proxy like [Traefik](https://traefik.io) or [Caddy](https://caddyserver.com)
+- [] add Monero Wallet RPC (if someone needs that?)
+- [] add [xmrig](https://github.com/xmrig/xmrig) and [xmrig-proxy](https://github.com/xmrig/xmrig-proxy)
+- [] add merchant software. Maybe BTCPayServer, [MoneroPay](https://github.com/moneropay/moneropay), [HotShop](https://github.com/CryptoGrampy/HotShop)
+- [] add [Monero Light Wallet Server](https://github.com/vtnerd/monero-lws)
+- [] add [monerod-exporter](https://github.com/hundehausen/monerod-exporter) for Prometheus
+
 ## Donations
 If you find this project useful, please consider donating to the following address:
 
