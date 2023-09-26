@@ -30,6 +30,10 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     isXmrig,
     setIsXmrig,
     isMoneroblock,
+    isMonitoring,
+    grafanaHostname,
+    setGrafanaHostname,
+    setIsMonitoring,
     setIsMoneroblock,
     isMoneroblockLogging,
     setIsMoneroblockLogging,
@@ -320,6 +324,31 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
         size="lg"
         onChange={(event) => setIsWatchtower(event.currentTarget.checked)}
       />
+      <Checkbox
+        checked={isMonitoring}
+        label={
+          <ExplainingLabel
+            label="Monitoring"
+            explanation={services["monitoring"].description}
+          />
+        }
+        labelPosition="left"
+        size="lg"
+        onChange={(event) => setIsMonitoring(event.currentTarget.checked)}
+      />
+      {isMonitoring === true && (
+        <>
+          <Input.Wrapper
+                label="Grafana Hostname"
+                description="Change to desired URL if accessing externally (https://yourdomain.tld)"
+              >
+                <Input
+                  value={grafanaHostname}
+                  onChange={(e) => setGrafanaHostname(e.currentTarget.value)}
+                />
+          </Input.Wrapper>
+        </>
+      )}
       <Checkbox
         checked={isAutoheal}
         label={

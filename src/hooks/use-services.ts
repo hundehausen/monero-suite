@@ -42,6 +42,8 @@ export const useServices = () => {
     onionMoneroBlockchainExplorerDomain,
     setOnionMoneroBlockchainExplorerDomain,
   ] = useState("");
+  const [isMonitoring, setIsMonitoring] = useState(false);
+  const [grafanaDomain, setGrafanaDomain] = useState("grafana.monerosuite.org");
   const [isAutoheal, setIsAutoheal] = useState(false);
   const [isXmrig, setIsXmrig] = useState(false);
   const [isTraefik, setIsTraefik] = useState(false);
@@ -62,6 +64,8 @@ sudo ufw allow 18080/tcp 18089/tcp`
             : undefined,
           volumes: {
             bitmonero: {},
+            grafana: {},
+            prometheus: {},
           },
           code: {
             monerod: {
@@ -85,6 +89,9 @@ sudo ufw allow 18080/tcp 18089/tcp`
               command: [
                 "--rpc-restricted-bind-ip=0.0.0.0",
                 "--rpc-restricted-bind-port=18089",
+                "--rpc-bind-ip=0.0.0.0",
+                "--rpc-bind-port=18083", // unrestricted port for internal use
+                "--confirm-external-bind",
                 "--enable-dns-blocklist",
                 "--no-igd",
                 "--out-peers=50",
@@ -296,6 +303,103 @@ sudo ufw allow 3333/tcp`
             },
           },
         },
+        monitoring: {
+          name: "Monitoring",
+          description:
+            "Monitoring with Prometheus and Grafana: see your node stats visualized in graphs. See on a map where your peers are located.",
+          checked: isMonitoring,
+          required: false,
+          volumes: {
+            grafana: {},
+            prometheus: {},
+          },
+          bash: `
+# Download default Prometheus and Grafana configs/dashboards
+mkdir -p monitoring/grafana/dashboards monitoring/grafana/provisioning/{dashboards,datasources} monitoring/prometheus 
+wget -O monitoring/prometheus/config.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/monitoring/prometheus/config.yaml
+wget -O monitoring/grafana/grafana.ini https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/monitoring/grafana/grafana.ini
+wget -O monitoring/grafana/dashboards/node_stats.json https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/monitoring/grafana/dashboards/node_stats.json
+wget -O monitoring/grafana/provisioning/dashboards/all.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/monitoring/grafana/provisioning/dashboards/all.yaml
+wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/monitoring/grafana/provisioning/datasources/all.yaml
+
+# Optionally customize the Monitoring deployment with environment variables
+cd monitoring
+touch .env
+echo GF_LOG_LEVEL=info >> .env
+echo GF_USERS_ALLOW_SIGN_UP=false >> .env
+echo GF_USERS_ALLOW_ORG_CREATE=false >> .env
+echo GF_AUTH_ANONYMOUS_ENABLED=true >> .env
+echo GF_AUTH_BASIC_ENABLED=false >> .env
+echo GF_AUTH_DISABLE_LOGIN_FORM=true >> .env
+echo GF_SECURITY_ADMIN_PASSWORD=admin >> .env
+echo GF_SECURITY_ADMIN_USER=admin >> .env
+# nano .env
+`,
+          code: {
+            prometheus: {
+              image: "prom/prometheus:latest",
+              container_name: "prometheus",
+              restart: "unless-stopped",
+              command: [
+                "--config.file=/etc/prometheus/config.yaml",
+                "--storage.tsdb.path=/prometheus",
+                "--storage.tsdb.retention.time=${PROM_RETENTION:-360d}",
+              ],
+              volumes: [
+                "prometheus:/prometheus",
+                "./monitoring/prometheus/config.yaml:/etc/prometheus/config.yaml:ro",
+              ],
+            },
+            exporter: {
+              image: "lalanza808/monerod_exporter:latest",
+              container_name: "monerod_exporter",
+              restart: "unless-stopped",
+              command: "--monero-addr=http://monerod:18083",
+            },
+            grafana: {
+              image: "grafana/grafana:latest",
+              container_name: "grafana",
+              user: "1000",
+              command: "-config=/etc/grafana/grafana.ini",
+              restart: "unless-stopped",
+              ports: ["127.0.0.1:${GF_PORT:-3000}:3000"],
+              volumes: [
+                "grafana:/var/lib/grafana",
+                "./monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini:ro",
+                "./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro",
+                "./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro",
+              ],
+              environment: {
+                HOSTNAME: "grafana",
+                GF_SERVER_ROOT_URL: `https://${grafanaDomain}`,
+                GF_ANALYTICS_REPORTING_ENABLED: "false",
+                GF_ANALYTICS_CHECK_FOR_UPDATES: "false",
+                GF_LOG_LEVEL: "${GF_LOG_LEVEL:-error}",
+                GF_USERS_ALLOW_SIGN_UP: "${GF_USERS_ALLOW_SIGN_UP:-false}",
+                GF_USERS_ALLOW_ORG_CREATE:
+                  "${GF_USERS_ALLOW_ORG_CREATE:-false}",
+                GF_AUTH_ANONYMOUS_ENABLED: "${GF_AUTH_ANONYMOUS_ENABLED:-true}",
+                GF_AUTH_BASIC_ENABLED: "${GF_AUTH_BASIC_ENABLED:-false}",
+                GF_AUTH_DISABLE_LOGIN_FORM:
+                  "${GF_AUTH_DISABLE_LOGIN_FORM:-true}",
+                GF_SECURITY_ADMIN_PASSWORD:
+                  "${GF_SECURITY_ADMIN_PASSWORD:-admin}",
+                GF_SECURITY_ADMIN_USER: "${GF_SECURITY_ADMIN_USER:-admin}",
+              },
+            },
+          },
+          labels: isTraefik
+            ? {
+                "traefik.enable": "true",
+                "traefik.http.routers.monitoring.rule": `Host(\`${grafanaDomain}\`)`,
+                "traefik.http.routers.monitoring.entrypoints": "websecure",
+                "traefik.http.routers.monitoring.tls.certresolver":
+                  "monerosuite",
+                "traefik.http.services.monitoring.loadbalancer.server.port":
+                  "31312",
+              }
+            : undefined,
+        },
         autoheal: {
           name: "Autoheal",
           description:
@@ -374,8 +478,10 @@ sudo ufw allow 3333/tcp`
       isMoneroblock,
       isMoneroblockLogging,
       isOnionMoneroBlockchainExplorer,
+      grafanaDomain,
       isTor,
       isWatchtower,
+      isMonitoring,
       isAutoheal,
       isTraefik,
       moneroNodeDomain,
@@ -409,6 +515,10 @@ sudo ufw allow 3333/tcp`
       setIsTor,
       isWatchtower,
       setIsWatchtower,
+      isMonitoring,
+      setIsMonitoring,
+      grafanaDomain,
+      setGrafanaDomain,
       isAutoheal,
       setIsAutoheal,
       isTraefik,
