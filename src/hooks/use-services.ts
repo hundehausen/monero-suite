@@ -121,6 +121,7 @@ sudo ufw allow 3333/tcp`
                 "--stratum 0.0.0.0:3333",
                 `--p2p 0.0.0.0:${p2PoolMode === "mini" ? "37888" : "37889"}`,
                 "--rpc-port 18089",
+                "--zmq-port 18084",
                 "--host monerod",
                 ...(p2PoolMode === "mini"
                   ? ["--addpeers node.portemonero.com:37888", "--mini"]
