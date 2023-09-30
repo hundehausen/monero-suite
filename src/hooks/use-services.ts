@@ -191,6 +191,9 @@ sudo ufw allow 3333/tcp`
                 "monerod",
                 ...(p2PoolMode !== "none" ? ["p2pool"] : []),
                 ...(isMoneroblock ? ["moneroblock"] : []),
+                ...(isOnionMoneroBlockchainExplorer
+                  ? ["onion-monero-blockchain-explorer"]
+                  : []),
               ],
               environment: {
                 MONEROD_TOR_SERVICE_HOSTS: "18089:monerod:18089",
