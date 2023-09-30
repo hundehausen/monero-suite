@@ -10,12 +10,12 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@mantine/code-highlight": "^7.0.1",
-    "@mantine/core": "^7.0.1",
-    "@mantine/hooks": "^7.0.1",
-    "@types/node": "20.6.5",
-    "@types/react": "18.2.22",
-    "@types/react-dom": "18.2.7",
+    "@mantine/code-highlight": "^7.1.0",
+    "@mantine/core": "^7.1.0",
+    "@mantine/hooks": "^7.1.0",
+    "@types/node": "20.8.0",
+    "@types/react": "18.2.23",
+    "@types/react-dom": "18.2.8",
     "autoprefixer": "10.4.16",
     "compose-spec-schema": "^1.0.0",
     "eslint": "8.50.0",
@@ -29,7 +29,7 @@
     "yaml": "^2.3.2"
   },
   "devDependencies": {
-    "postcss": "^8.4.30",
+    "postcss": "^8.4.31",
     "postcss-preset-mantine": "^1.7.0",
     "postcss-simple-vars": "^7.0.1"
   }
