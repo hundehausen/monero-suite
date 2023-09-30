@@ -147,7 +147,7 @@ sudo ufw allow 3333/tcp`
               image: "sethsimmons/moneroblock:latest",
               restart: "unless-stopped",
               container_name: "moneroblock",
-              ports: ["31312:31312"],
+              ports: ["127.0.0.1:31312:31312"],
               command: ["--daemon", "monerod:18089"],
             },
           },
@@ -163,7 +163,7 @@ sudo ufw allow 3333/tcp`
               image: "vdo1138/xmrblocks:latest",
               restart: "unless-stopped",
               container_name: "onion-monero-blockchain-explorer",
-              ports: ["8081:8081"],
+              ports: ["127.0.0.1:8081:8081"],
               volumes: ["bitmonero:/home/monero/.bitmonero"],
               depends_on: ["monerod"],
               command: [
