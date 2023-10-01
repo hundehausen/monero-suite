@@ -20,7 +20,7 @@ export interface ServiceMap {
 
 export const useServices = () => {
   const [isMoneroPublicNode, setIsMoneroPublicNode] = useState(true);
-  const [moneroNodeDomain, setMoneroNodeDomain] = useState("");
+  const [moneroNodeDomain, setMoneroNodeDomain] = useState("node.xmr.guide");
   const [isPrunedNode, setIsPrunedNode] = useState(true);
   const [p2PoolMode, setP2PoolMode] = useState("none");
   const [p2PoolPayoutAddress, setP2PoolPayoutAddress] = useState(
@@ -30,7 +30,8 @@ export const useServices = () => {
   const [isTor, setIsTor] = useState(false);
   const [isWatchtower, setIsWatchtower] = useState(false);
   const [isMoneroblock, setIsMoneroblock] = useState(false);
-  const [moneroBlockDomain, setMoneroBlockDomain] = useState("");
+  const [moneroBlockDomain, setMoneroBlockDomain] =
+    useState("explorer.xmr.guide");
   const [isOnionMoneroBlockchainExplorer, setIsOnionMoneroBlockchainExplorer] =
     useState(false);
   const [

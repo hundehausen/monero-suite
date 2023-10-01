@@ -124,6 +124,11 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
       {isMoneroPublicNode && isTraefik && (
         <>
           <Input.Wrapper
+            styles={{
+              root: {
+                width: "100%",
+              },
+            }}
             label="Monero Node Domain"
             description="The domain where your monero node will be available."
           >
@@ -172,6 +177,11 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
       {p2PoolMode !== "none" && (
         <>
           <Input.Wrapper
+            styles={{
+              root: {
+                width: "100%",
+              },
+            }}
             label="Monero Payout Address"
             description="It has to be a primary address. Subaddresses don't work."
             error={p2poolPayoutAddressError()}
@@ -225,8 +235,13 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
         size="lg"
         onChange={(event) => setIsMoneroblock(event.currentTarget.checked)}
       />
-      {isMoneroblock && (
+      {isMoneroblock && isTraefik && (
         <Input.Wrapper
+          styles={{
+            root: {
+              width: "100%",
+            },
+          }}
           label="Moneroblock Domain"
           description="The domain where your moneroblock will be available."
         >
@@ -250,7 +265,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
           setIsOnionMoneroBlockchainExplorer(event.currentTarget.checked)
         }
       />
-      {isOnionMoneroBlockchainExplorer && (
+      {isOnionMoneroBlockchainExplorer && isTraefik && (
         <Input.Wrapper
           label="Onion Monero Blockchain Explorer Domain"
           description="The domain where your onion monero blockchain explorer will be available."
