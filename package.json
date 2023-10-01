@@ -1,7 +1,7 @@
 {
-  "name": "monero-suite-website",
+  "name": "monero-suite",
   "description": "Build your personal docker-compose.yml file for Monero services.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
