@@ -69,7 +69,11 @@ sudo ufw allow 18080/tcp 18089/tcp`
                 ...(isMoneroPublicNode
                   ? ["18080:18080"]
                   : ["127.0.0.1:18080:18080"]),
-                ...(p2PoolMode !== "none" ? ["18084:18084"] : []),
+                ...(p2PoolMode !== "none"
+                  ? isMoneroPublicNode
+                    ? ["18084:18084"]
+                    : ["127.0.0.1:18084:18084"]
+                  : []),
                 ...(isMoneroPublicNode
                   ? ["18089:18089"]
                   : ["127.0.0.1:18089:18089"]),
