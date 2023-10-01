@@ -14,7 +14,7 @@
     "@mantine/core": "^7.1.0",
     "@mantine/hooks": "^7.1.0",
     "@types/node": "20.8.0",
-    "@types/react": "18.2.23",
+    "@types/react": "18.2.24",
     "@types/react-dom": "18.2.8",
     "autoprefixer": "10.4.16",
     "compose-spec-schema": "^1.0.0",
