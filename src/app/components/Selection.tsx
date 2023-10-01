@@ -39,6 +39,14 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     setIsWatchtower,
     isAutoheal,
     setIsAutoheal,
+    isTraefik,
+    setIsTraefik,
+    moneroNodeDomain,
+    setMoneroNodeDomain,
+    moneroBlockDomain,
+    setMoneroBlockDomain,
+    onionMoneroBlockchainExplorerDomain,
+    setOnionMoneroBlockchainExplorerDomain,
   } = stateFunctions;
 
   const p2poolPayoutAddressError = () => {
@@ -101,6 +109,39 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
           },
         }}
       />
+      <Checkbox
+        checked={isTraefik}
+        label={
+          <ExplainingLabel
+            label="Traefik"
+            explanation={services["traefik"].description}
+          />
+        }
+        labelPosition="left"
+        size="lg"
+        onChange={(event) => setIsTraefik(event.currentTarget.checked)}
+      />
+      {isMoneroPublicNode && isTraefik && (
+        <>
+          <Input.Wrapper
+            styles={{
+              root: {
+                width: "100%",
+              },
+            }}
+            label="Monero Node Domain"
+            description="The domain where your monero node will be available."
+          >
+            <Input
+              value={moneroNodeDomain}
+              onChange={(e) => setMoneroNodeDomain(e.currentTarget.value)}
+            />
+          </Input.Wrapper>
+          {moneroNodeDomain && (
+            <Text size="sm">{`Connect to your remote node from any wallet. Enter ${moneroNodeDomain}:443`}</Text>
+          )}
+        </>
+      )}
       <SegmentedControl
         value={p2PoolMode}
         onChange={setP2PoolMode}
@@ -136,6 +177,11 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
       {p2PoolMode !== "none" && (
         <>
           <Input.Wrapper
+            styles={{
+              root: {
+                width: "100%",
+              },
+            }}
             label="Monero Payout Address"
             description="It has to be a primary address. Subaddresses don't work."
             error={p2poolPayoutAddressError()}
@@ -189,7 +235,23 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
         size="lg"
         onChange={(event) => setIsMoneroblock(event.currentTarget.checked)}
       />
-      <Checkbox
+      {isMoneroblock && isTraefik && (
+        <Input.Wrapper
+          styles={{
+            root: {
+              width: "100%",
+            },
+          }}
+          label="Moneroblock Domain"
+          description="The domain where your moneroblock will be available."
+        >
+          <Input
+            value={moneroBlockDomain}
+            onChange={(e) => setMoneroBlockDomain(e.currentTarget.value)}
+          />
+        </Input.Wrapper>
+      )}
+      {/* <Checkbox
         checked={isOnionMoneroBlockchainExplorer}
         label={
           <ExplainingLabel
@@ -203,6 +265,19 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
           setIsOnionMoneroBlockchainExplorer(event.currentTarget.checked)
         }
       />
+      {isOnionMoneroBlockchainExplorer && isTraefik && (
+        <Input.Wrapper
+          label="Onion Monero Blockchain Explorer Domain"
+          description="The domain where your onion monero blockchain explorer will be available."
+        >
+          <Input
+            value={onionMoneroBlockchainExplorerDomain}
+            onChange={(e) =>
+              setOnionMoneroBlockchainExplorerDomain(e.currentTarget.value)
+            }
+          />
+        </Input.Wrapper>
+      )} */}
       <Checkbox
         checked={isTor}
         label={

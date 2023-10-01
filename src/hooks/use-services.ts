@@ -20,6 +20,7 @@ export interface ServiceMap {
 
 export const useServices = () => {
   const [isMoneroPublicNode, setIsMoneroPublicNode] = useState(true);
+  const [moneroNodeDomain, setMoneroNodeDomain] = useState("node.xmr.guide");
   const [isPrunedNode, setIsPrunedNode] = useState(true);
   const [p2PoolMode, setP2PoolMode] = useState("none");
   const [p2PoolPayoutAddress, setP2PoolPayoutAddress] = useState(
@@ -29,10 +30,17 @@ export const useServices = () => {
   const [isTor, setIsTor] = useState(false);
   const [isWatchtower, setIsWatchtower] = useState(false);
   const [isMoneroblock, setIsMoneroblock] = useState(false);
+  const [moneroBlockDomain, setMoneroBlockDomain] =
+    useState("explorer.xmr.guide");
   const [isOnionMoneroBlockchainExplorer, setIsOnionMoneroBlockchainExplorer] =
     useState(false);
+  const [
+    onionMoneroBlockchainExplorerDomain,
+    setOnionMoneroBlockchainExplorerDomain,
+  ] = useState("");
   const [isAutoheal, setIsAutoheal] = useState(false);
   const [isXmrig, setIsXmrig] = useState(false);
+  const [isTraefik, setIsTraefik] = useState(false);
 
   const services = useMemo<ServiceMap>(
     () =>
@@ -58,9 +66,17 @@ sudo ufw allow 18080/tcp 18089/tcp`
               container_name: "monerod",
               volumes: ["bitmonero:/home/monero"],
               ports: [
-                "18080:18080",
-                ...(p2PoolMode !== "none" ? ["18084:18084"] : []),
-                "18089:18089",
+                ...(isMoneroPublicNode
+                  ? ["18080:18080"]
+                  : ["127.0.0.1:18080:18080"]),
+                ...(p2PoolMode !== "none"
+                  ? isMoneroPublicNode
+                    ? ["18084:18084"]
+                    : ["127.0.0.1:18084:18084"]
+                  : []),
+                ...(isMoneroPublicNode
+                  ? ["18089:18089"]
+                  : ["127.0.0.1:18089:18089"]),
               ],
               command: [
                 "--rpc-restricted-bind-ip=0.0.0.0",
@@ -74,6 +90,14 @@ sudo ufw allow 18080/tcp 18089/tcp`
                   ? ["--zmq-pub=tcp://0.0.0.0:18084"]
                   : []),
               ],
+              labels: isTraefik && {
+                "traefik.enable": "true",
+                "traefik.http.routers.monerod.rule": `Host(\`${moneroNodeDomain}\`)`,
+                "traefik.http.routers.monerod.entrypoints": "websecure",
+                "traefik.http.routers.monerod.tls.certresolver": "monerosuite",
+                "traefik.http.services.monerod.loadbalancer.server.port":
+                  "18089",
+              },
             },
           },
         },
@@ -150,10 +174,19 @@ sudo ufw allow 3333/tcp`
               container_name: "moneroblock",
               ports: ["127.0.0.1:31312:31312"],
               command: ["--daemon", "monerod:18089"],
+              labels: isTraefik && {
+                "traefik.enable": "true",
+                "traefik.http.routers.moneroblock.rule": `Host(\`${moneroBlockDomain}\`)`,
+                "traefik.http.routers.moneroblock.entrypoints": "websecure",
+                "traefik.http.routers.moneroblock.tls.certresolver":
+                  "monerosuite",
+                "traefik.http.services.moneroblock.loadbalancer.server.port":
+                  "31312",
+              },
             },
           },
         },
-        onionMoneroBlockchainExplorer: {
+        "onion-monero-blockchain-explorer": {
           name: "Onion Monero Blockchain Explorer",
           description:
             "Onion Monero Blockchain Explorer allows you to browse Monero blockchain. It uses no JavaScript, no cookies and no trackers.",
@@ -170,6 +203,16 @@ sudo ufw allow 3333/tcp`
               command: [
                 "./xmrblocks --enable-json-api --enable-autorefresh-option --enable-emission-monitor --daemon-url=monerod:18089 --enable-pusher",
               ],
+              labels: isTraefik && {
+                "traefik.enable": "true",
+                "traefik.http.routers.onion-monero-blockchain-explorer.rule": `Host(\`${onionMoneroBlockchainExplorerDomain}\`)`,
+                "traefik.http.routers.onion-monero-blockchain-explorer.entrypoints":
+                  "websecure",
+                "traefik.http.routers.onion-monero-blockchain-explorer.tls.certresolver":
+                  "monerosuite",
+                "traefik.http.services.onion-monero-blockchain-explorer.loadbalancer.server.port":
+                  "8081",
+              },
             },
           },
         },
@@ -273,6 +316,37 @@ sudo ufw allow 3333/tcp`
             },
           },
         },
+        traefik: {
+          name: "Traefik",
+          description:
+            "Traefik is a modern HTTP reverse proxy and load balancer that makes deploying microservices easy.",
+          checked: isTraefik,
+          required: false,
+          volumes: {
+            letsencrypt: {},
+          },
+          code: {
+            traefik: {
+              image: "traefik:latest",
+              container_name: "traefik",
+              restart: "unless-stopped",
+              command: [
+                "--providers.docker=true",
+                "--providers.docker.exposedbydefault=false",
+                "--entrypoints.web.address=:80",
+                "--entrypoints.websecure.address=:443",
+                "--certificatesresolvers.monerosuite.acme.tlschallenge=true",
+                "--certificatesresolvers.monerosuite.acme.storage=/letsencrypt/acme.json",
+              ],
+              ports: ["80:80", "443:443"],
+              volumes: [
+                "/var/run/docker.sock:/var/run/docker.sock",
+                "letsencrypt:/letsencrypt",
+              ],
+            },
+          },
+          bash: "\n# Allow http and https ports\nsudo ufw allow 80/tcp 443/tcp\n",
+        },
       } as ServiceMap),
     [
       isMoneroPublicNode,
@@ -286,6 +360,10 @@ sudo ufw allow 3333/tcp`
       isTor,
       isWatchtower,
       isAutoheal,
+      isTraefik,
+      moneroNodeDomain,
+      moneroBlockDomain,
+      onionMoneroBlockchainExplorerDomain,
     ]
   );
 
@@ -314,6 +392,14 @@ sudo ufw allow 3333/tcp`
       setIsWatchtower,
       isAutoheal,
       setIsAutoheal,
+      isTraefik,
+      setIsTraefik,
+      moneroNodeDomain,
+      setMoneroNodeDomain,
+      moneroBlockDomain,
+      setMoneroBlockDomain,
+      onionMoneroBlockchainExplorerDomain,
+      setOnionMoneroBlockchainExplorerDomain,
     },
   };
 };

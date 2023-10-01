@@ -11,6 +11,7 @@ const baseBashCommands = [
   "sudo sh get-docker.sh",
   "sudo usermod -aG docker $USER",
   "su - $USER",
+  "sudo apt-get install docker-compose-plugin",
   "",
   "# Deny all non-explicitly allowed ports",
   "sudo ufw default deny incoming",
@@ -27,7 +28,7 @@ const finalBashCommands = [
   "# change directory to where the docker-compose.yml file is located",
   "cd ~/monero-suite",
   "# finally, start the containers with:",
-  "docker-compose up -d",
+  "docker compose up -d",
 ];
 
 interface BashPreviewProps {
@@ -58,7 +59,6 @@ const BashPreview = ({ services }: BashPreviewProps) => {
       }}
       styles={{
         root: {
-          maxHeight: "calc(100vh - 150px)",
           overflow: "auto",
           borderRadius: "4px",
         },
