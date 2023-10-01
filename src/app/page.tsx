@@ -67,28 +67,6 @@ export default function Home() {
           </Grid.Col>
         </Grid>
       </AppShell.Main>
-      <AppShell.Footer>
-        <Container
-          styles={{
-            root: {
-              padding: "8px",
-            },
-          }}
-        >
-          <Text
-            ta="center"
-            size="sm"
-            styles={{
-              root: {
-                wordBreak: "keep-all",
-                overflowWrap: "break-word",
-              },
-            }}
-          >
-            87cQNxrM3oWVkZ8TRWUHi9LmvruKgQSA7AxqoqJDr7n1PgGcZkXhAToVz3rEWxjAMj7caKCcqjYfDSFeLey1Sf4hUF3gmNn
-          </Text>
-        </Container>
-      </AppShell.Footer>
     </AppShell>
   );
 }

@@ -48,7 +48,6 @@ const ComposePreview = ({ services }: ComposePreviewProps) => {
       }}
       styles={{
         root: {
-          maxHeight: "calc(100vh - 150px)",
           overflow: "auto",
           borderRadius: "4px",
         },
