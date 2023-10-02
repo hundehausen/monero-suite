@@ -10,9 +10,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@mantine/code-highlight": "^7.1.0",
-    "@mantine/core": "^7.1.0",
-    "@mantine/hooks": "^7.1.0",
+    "@mantine/code-highlight": "^7.1.1",
+    "@mantine/core": "^7.1.1",
+    "@mantine/hooks": "^7.1.1",
     "@types/node": "20.8.0",
     "@types/react": "18.2.24",
     "@types/react-dom": "18.2.8",
@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "postcss": "^8.4.31",
-    "postcss-preset-mantine": "^1.7.0",
+    "postcss-preset-mantine": "^1.8.0",
     "postcss-simple-vars": "^7.0.1"
   }
 }

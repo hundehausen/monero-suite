@@ -31,6 +31,8 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     setIsXmrig,
     isMoneroblock,
     setIsMoneroblock,
+    isMoneroblockLogging,
+    setIsMoneroblockLogging,
     isOnionMoneroBlockchainExplorer,
     setIsOnionMoneroBlockchainExplorer,
     isTor,
@@ -235,6 +237,22 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
         size="lg"
         onChange={(event) => setIsMoneroblock(event.currentTarget.checked)}
       />
+      {isMoneroblock && (
+        <Checkbox
+          checked={!isMoneroblockLogging}
+          label="Disable Moneroblock logging for more privacy"
+          labelPosition="left"
+          size="md"
+          onChange={(event) =>
+            setIsMoneroblockLogging(!event.currentTarget.checked)
+          }
+          styles={{
+            label: {
+              fontSize: "12px",
+            },
+          }}
+        />
+      )}
       {isMoneroblock && isTraefik && (
         <Input.Wrapper
           styles={{

@@ -9,6 +9,13 @@ let dockerCompose: Compose = {
   name: "monero-suite",
   services: {},
   volumes: {},
+  // "x-logging": {
+  //   driver: "json-file",
+  //   options: {
+  //     "max-size": "10m",
+  //     "max-file": "3",
+  //   },
+  // },
 };
 
 interface ComposePreviewProps {

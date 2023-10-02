@@ -30,6 +30,7 @@ export const useServices = () => {
   const [isTor, setIsTor] = useState(false);
   const [isWatchtower, setIsWatchtower] = useState(false);
   const [isMoneroblock, setIsMoneroblock] = useState(false);
+  const [isMoneroblockLogging, setIsMoneroblockLogging] = useState(true);
   const [moneroBlockDomain, setMoneroBlockDomain] =
     useState("explorer.xmr.guide");
   const [isOnionMoneroBlockchainExplorer, setIsOnionMoneroBlockchainExplorer] =
@@ -90,14 +91,17 @@ sudo ufw allow 18080/tcp 18089/tcp`
                   ? ["--zmq-pub=tcp://0.0.0.0:18084"]
                   : []),
               ],
-              labels: isTraefik && {
-                "traefik.enable": "true",
-                "traefik.http.routers.monerod.rule": `Host(\`${moneroNodeDomain}\`)`,
-                "traefik.http.routers.monerod.entrypoints": "websecure",
-                "traefik.http.routers.monerod.tls.certresolver": "monerosuite",
-                "traefik.http.services.monerod.loadbalancer.server.port":
-                  "18089",
-              },
+              labels: isTraefik
+                ? {
+                    "traefik.enable": "true",
+                    "traefik.http.routers.monerod.rule": `Host(\`${moneroNodeDomain}\`)`,
+                    "traefik.http.routers.monerod.entrypoints": "websecure",
+                    "traefik.http.routers.monerod.tls.certresolver":
+                      "monerosuite",
+                    "traefik.http.services.monerod.loadbalancer.server.port":
+                      "18089",
+                  }
+                : undefined,
             },
           },
         },
@@ -174,15 +178,22 @@ sudo ufw allow 3333/tcp`
               container_name: "moneroblock",
               ports: ["127.0.0.1:31312:31312"],
               command: ["--daemon", "monerod:18089"],
-              labels: isTraefik && {
-                "traefik.enable": "true",
-                "traefik.http.routers.moneroblock.rule": `Host(\`${moneroBlockDomain}\`)`,
-                "traefik.http.routers.moneroblock.entrypoints": "websecure",
-                "traefik.http.routers.moneroblock.tls.certresolver":
-                  "monerosuite",
-                "traefik.http.services.moneroblock.loadbalancer.server.port":
-                  "31312",
-              },
+              labels: isTraefik
+                ? {
+                    "traefik.enable": "true",
+                    "traefik.http.routers.moneroblock.rule": `Host(\`${moneroBlockDomain}\`)`,
+                    "traefik.http.routers.moneroblock.entrypoints": "websecure",
+                    "traefik.http.routers.moneroblock.tls.certresolver":
+                      "monerosuite",
+                    "traefik.http.services.moneroblock.loadbalancer.server.port":
+                      "31312",
+                  }
+                : undefined,
+              logging: !isMoneroblockLogging
+                ? {
+                    driver: "none",
+                  }
+                : undefined,
             },
           },
         },
@@ -203,16 +214,18 @@ sudo ufw allow 3333/tcp`
               command: [
                 "./xmrblocks --enable-json-api --enable-autorefresh-option --enable-emission-monitor --daemon-url=monerod:18089 --enable-pusher",
               ],
-              labels: isTraefik && {
-                "traefik.enable": "true",
-                "traefik.http.routers.onion-monero-blockchain-explorer.rule": `Host(\`${onionMoneroBlockchainExplorerDomain}\`)`,
-                "traefik.http.routers.onion-monero-blockchain-explorer.entrypoints":
-                  "websecure",
-                "traefik.http.routers.onion-monero-blockchain-explorer.tls.certresolver":
-                  "monerosuite",
-                "traefik.http.services.onion-monero-blockchain-explorer.loadbalancer.server.port":
-                  "8081",
-              },
+              labels: isTraefik
+                ? {
+                    "traefik.enable": "true",
+                    "traefik.http.routers.onion-monero-blockchain-explorer.rule": `Host(\`${onionMoneroBlockchainExplorerDomain}\`)`,
+                    "traefik.http.routers.onion-monero-blockchain-explorer.entrypoints":
+                      "websecure",
+                    "traefik.http.routers.onion-monero-blockchain-explorer.tls.certresolver":
+                      "monerosuite",
+                    "traefik.http.services.onion-monero-blockchain-explorer.loadbalancer.server.port":
+                      "8081",
+                  }
+                : undefined,
             },
           },
         },
@@ -356,6 +369,7 @@ sudo ufw allow 3333/tcp`
       p2PoolMiningThreads,
       isXmrig,
       isMoneroblock,
+      isMoneroblockLogging,
       isOnionMoneroBlockchainExplorer,
       isTor,
       isWatchtower,
@@ -384,6 +398,8 @@ sudo ufw allow 3333/tcp`
       setIsXmrig,
       isMoneroblock,
       setIsMoneroblock,
+      isMoneroblockLogging,
+      setIsMoneroblockLogging,
       isOnionMoneroBlockchainExplorer,
       setIsOnionMoneroBlockchainExplorer,
       isTor,
