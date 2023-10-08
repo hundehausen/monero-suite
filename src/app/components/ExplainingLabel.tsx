@@ -6,7 +6,7 @@ interface ExplainingLabelProps {
 }
 
 const ExplainingLabel = ({ label, explanation }: ExplainingLabelProps) => (
-  <HoverCard width={280} shadow="md">
+  <HoverCard width={280} shadow="md" openDelay={500}>
     <HoverCard.Target>
       <Text
         style={{

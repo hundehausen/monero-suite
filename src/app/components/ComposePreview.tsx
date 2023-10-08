@@ -9,14 +9,16 @@ let dockerCompose: Compose = {
   name: "monero-suite",
   services: {},
   volumes: {},
-  // "x-logging": {
-  //   driver: "json-file",
-  //   options: {
-  //     "max-size": "10m",
-  //     "max-file": "3",
-  //   },
-  // },
 };
+
+const globalLogSettings = `x-log-config:
+  &log-config
+  logging:
+    driver: json-file
+    options:
+      max-size: "4m"
+      max-file: "3"
+`;
 
 interface ComposePreviewProps {
   services: Service[];
@@ -47,12 +49,16 @@ const ComposePreview = ({ services }: ComposePreviewProps) => {
 
   return (
     <CodeHighlightTabs
-      code={{
-        code: dockerCompose ? YAML.stringify(dockerCompose) : "",
-        language: "yaml",
-        fileName: "docker-compose.yml",
-        icon: <FaDocker />,
-      }}
+      code={[
+        {
+          code: dockerCompose
+            ? YAML.stringify(dockerCompose).concat(globalLogSettings)
+            : "",
+          language: "yaml",
+          fileName: "docker-compose.yml",
+          icon: <FaDocker />,
+        },
+      ]}
       styles={{
         root: {
           overflow: "auto",

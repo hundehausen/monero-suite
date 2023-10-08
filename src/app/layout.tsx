@@ -13,10 +13,11 @@ export const metadata: Metadata = {
   generator: "Next.js",
   keywords: "Monero, Monero Suite, docker, compose, generator, docker-compose",
   viewport: "width=device-width, initial-scale=1",
+  metadataBase: new URL("https://monerosuite.org"),
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://xmr.guide",
+    url: "https://monerosuite.org",
     title: "Monero Suite",
     description:
       "Build your personal docker-compose.yml file for Monero services.",

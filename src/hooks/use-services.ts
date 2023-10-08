@@ -20,7 +20,9 @@ export interface ServiceMap {
 
 export const useServices = () => {
   const [isMoneroPublicNode, setIsMoneroPublicNode] = useState(true);
-  const [moneroNodeDomain, setMoneroNodeDomain] = useState("node.xmr.guide");
+  const [moneroNodeDomain, setMoneroNodeDomain] = useState(
+    "node.monerosuite.org"
+  );
   const [isPrunedNode, setIsPrunedNode] = useState(true);
   const [p2PoolMode, setP2PoolMode] = useState("none");
   const [p2PoolPayoutAddress, setP2PoolPayoutAddress] = useState(
@@ -31,8 +33,9 @@ export const useServices = () => {
   const [isWatchtower, setIsWatchtower] = useState(false);
   const [isMoneroblock, setIsMoneroblock] = useState(false);
   const [isMoneroblockLogging, setIsMoneroblockLogging] = useState(true);
-  const [moneroBlockDomain, setMoneroBlockDomain] =
-    useState("explorer.xmr.guide");
+  const [moneroBlockDomain, setMoneroBlockDomain] = useState(
+    "explorer.monerosuite.org"
+  );
   const [isOnionMoneroBlockchainExplorer, setIsOnionMoneroBlockchainExplorer] =
     useState(false);
   const [
