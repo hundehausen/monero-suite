@@ -279,17 +279,17 @@ sudo ufw allow 3333/tcp`
                   : {}),
                 ...(isMoneroblock
                   ? {
-                      MONEROBLOCK_TOR_SERVICE_HOSTS: "31312:moneroblock:31312",
+                      MONEROBLOCK_TOR_SERVICE_HOSTS: "80:moneroblock:31312",
                     }
                   : {}),
                 ...(isOnionMoneroBlockchainExplorer
                   ? {
                       MONERO_ONION_BLOCKCHAIN_EXPLORER_TOR_SERVICE_HOSTS:
-                        "8081:onion-monero-blockchain-explorer:8081",
+                        "80:onion-monero-blockchain-explorer:8081",
                     }
                   : {}),
                 ...(isMonitoring
-                  ? { GRAFANA_TOR_SERVICE_HOSTS: "3000:grafana:3000" }
+                  ? { GRAFANA_TOR_SERVICE_HOSTS: "80:grafana:3000" }
                   : {}),
               },
               volumes: ["tor-keys:/var/lib/tor/hidden_service/"],
