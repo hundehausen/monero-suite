@@ -328,7 +328,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
         <>
           <Input.Wrapper
             label="Grafana Hostname"
-            description="Change to desired URL if accessing externally (https://yourdomain.tld)"
+            description="The domain where your grafana dashboard will be available."
           >
             <Input
               value={grafanaDomain}
