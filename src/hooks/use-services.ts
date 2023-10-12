@@ -268,6 +268,7 @@ sudo ufw allow 3333/tcp`
                 ...(isOnionMoneroBlockchainExplorer
                   ? ["onion-monero-blockchain-explorer"]
                   : []),
+                ...(isMonitoring ? ["grafana"] : []),
               ],
               environment: {
                 MONEROD_TOR_SERVICE_HOSTS: "18089:monerod:18089",
@@ -286,6 +287,9 @@ sudo ufw allow 3333/tcp`
                       MONERO_ONION_BLOCKCHAIN_EXPLORER_TOR_SERVICE_HOSTS:
                         "8081:onion-monero-blockchain-explorer:8081",
                     }
+                  : {}),
+                ...(isMonitoring
+                  ? { GRAFANA_TOR_SERVICE_HOSTS: "3000:grafana:3000" }
                   : {}),
               },
               volumes: ["tor-keys:/var/lib/tor/hidden_service/"],
@@ -331,7 +335,6 @@ wget -O monitoring/grafana/provisioning/dashboards/all.yaml https://raw.githubus
 wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/provisioning/datasources/all.yaml
 
 # Optionally customize the Monitoring deployment with environment variables
-cd monitoring
 touch .env
 echo GF_LOG_LEVEL=info >> .env
 echo GF_USERS_ALLOW_SIGN_UP=false >> .env
@@ -364,10 +367,19 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
               restart: "unless-stopped",
               command: "--monero-addr=http://monerod:18083",
             },
+            nodemapper: {
+              image: "lalanza808/nodemapper:latest",
+              container_name: "nodemapper",
+              restart: "unless-stopped",
+              environment: {
+                NODE_HOST: "monerod",
+                NODE_PORT: "18083",
+              },
+            },
             grafana: {
               image: "grafana/grafana:latest",
               container_name: "grafana",
-              user: "${UID}:${GID}",
+              user: "1000",
               command: "-config=/etc/grafana/grafana.ini",
               restart: "unless-stopped",
               ports: ["127.0.0.1:${GF_PORT:-3000}:3000"],
