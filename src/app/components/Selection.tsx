@@ -19,6 +19,8 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
   const {
     isMoneroPublicNode,
     setIsMoneroPublicNode,
+    moneroNodeDomain,
+    setMoneroNodeDomain,
     isPrunedNode,
     setIsPrunedNode,
     p2PoolMode,
@@ -30,15 +32,19 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     isXmrig,
     setIsXmrig,
     isMoneroblock,
-    isMonitoring,
-    grafanaDomain,
-    setGrafanaDomain,
-    setIsMonitoring,
     setIsMoneroblock,
+    moneroBlockDomain,
+    setMoneroBlockDomain,
     isMoneroblockLogging,
     setIsMoneroblockLogging,
     isOnionMoneroBlockchainExplorer,
     setIsOnionMoneroBlockchainExplorer,
+    onionMoneroBlockchainExplorerDomain,
+    setOnionMoneroBlockchainExplorerDomain,
+    isMonitoring,
+    setIsMonitoring,
+    grafanaDomain,
+    setGrafanaDomain,
     isTor,
     setIsTor,
     isWatchtower,
@@ -47,12 +53,6 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     setIsAutoheal,
     isTraefik,
     setIsTraefik,
-    moneroNodeDomain,
-    setMoneroNodeDomain,
-    moneroBlockDomain,
-    setMoneroBlockDomain,
-    onionMoneroBlockchainExplorerDomain,
-    setOnionMoneroBlockchainExplorerDomain,
   } = stateFunctions;
 
   const p2poolPayoutAddressError = () => {
@@ -313,18 +313,6 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
         onChange={(event) => setIsTor(event.currentTarget.checked)}
       />
       <Checkbox
-        checked={isWatchtower}
-        label={
-          <ExplainingLabel
-            label="Watchtower"
-            explanation={services["watchtower"].description}
-          />
-        }
-        labelPosition="left"
-        size="lg"
-        onChange={(event) => setIsWatchtower(event.currentTarget.checked)}
-      />
-      <Checkbox
         checked={isMonitoring}
         label={
           <ExplainingLabel
@@ -349,6 +337,18 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
           </Input.Wrapper>
         </>
       )}
+      <Checkbox
+        checked={isWatchtower}
+        label={
+          <ExplainingLabel
+            label="Watchtower"
+            explanation={services["watchtower"].description}
+          />
+        }
+        labelPosition="left"
+        size="lg"
+        onChange={(event) => setIsWatchtower(event.currentTarget.checked)}
+      />
       <Checkbox
         checked={isAutoheal}
         label={

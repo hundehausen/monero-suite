@@ -39,8 +39,8 @@ no particular order
 - add [xmrig](https://github.com/xmrig/xmrig) and [xmrig-proxy](https://github.com/xmrig/xmrig-proxy)
 - add merchant software. Maybe BTCPayServer, [MoneroPay](https://github.com/moneropay/moneropay), [HotShop](https://github.com/CryptoGrampy/HotShop)
 - add [Monero Light Wallet Server](https://github.com/vtnerd/monero-lws)
-- add [monerod-exporter](https://github.com/hundehausen/monerod-exporter) for Prometheus
 - add [Onion Monero Blockchain Explorer](https://github.com/moneroexamples/onion-monero-blockchain-explorer) (a Monero block explorer without JavaScript)
+- add Gitea (a self-hosted Git service) to mirror the Monero repositories
 
 ## Donations
 If you find this project useful, please consider donating to the following address:
