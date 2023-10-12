@@ -31,8 +31,8 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     setIsXmrig,
     isMoneroblock,
     isMonitoring,
-    grafanaHostname,
-    setGrafanaHostname,
+    grafanaDomain,
+    setGrafanaDomain,
     setIsMonitoring,
     setIsMoneroblock,
     isMoneroblockLogging,
@@ -339,13 +339,13 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
       {isMonitoring === true && (
         <>
           <Input.Wrapper
-                label="Grafana Hostname"
-                description="Change to desired URL if accessing externally (https://yourdomain.tld)"
-              >
-                <Input
-                  value={grafanaHostname}
-                  onChange={(e) => setGrafanaHostname(e.currentTarget.value)}
-                />
+            label="Grafana Hostname"
+            description="Change to desired URL if accessing externally (https://yourdomain.tld)"
+          >
+            <Input
+              value={grafanaDomain}
+              onChange={(e) => setGrafanaDomain(e.currentTarget.value)}
+            />
           </Input.Wrapper>
         </>
       )}

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   PropertiesServices,
   PropertiesVolumes,
@@ -47,6 +47,14 @@ export const useServices = () => {
   const [isAutoheal, setIsAutoheal] = useState(false);
   const [isXmrig, setIsXmrig] = useState(false);
   const [isTraefik, setIsTraefik] = useState(false);
+
+  useEffect(() => {
+    if (isTraefik) {
+      setGrafanaDomain("grafana.monerosuite.org");
+    } else {
+      setGrafanaDomain("localhost:3000");
+    }
+  }, [isTraefik]);
 
   const services = useMemo<ServiceMap>(
     () =>
@@ -316,11 +324,11 @@ sudo ufw allow 3333/tcp`
           bash: `
 # Download default Prometheus and Grafana configs/dashboards
 mkdir -p monitoring/grafana/dashboards monitoring/grafana/provisioning/{dashboards,datasources} monitoring/prometheus 
-wget -O monitoring/prometheus/config.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/monitoring/prometheus/config.yaml
-wget -O monitoring/grafana/grafana.ini https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/monitoring/grafana/grafana.ini
-wget -O monitoring/grafana/dashboards/node_stats.json https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/monitoring/grafana/dashboards/node_stats.json
-wget -O monitoring/grafana/provisioning/dashboards/all.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/monitoring/grafana/provisioning/dashboards/all.yaml
-wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/monitoring/grafana/provisioning/datasources/all.yaml
+wget -O monitoring/prometheus/config.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/prometheus/config.yaml
+wget -O monitoring/grafana/grafana.ini https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/grafana.ini
+wget -O monitoring/grafana/dashboards/node_stats.json https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/dashboards/node_stats.json
+wget -O monitoring/grafana/provisioning/dashboards/all.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/provisioning/dashboards/all.yaml
+wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/provisioning/datasources/all.yaml
 
 # Optionally customize the Monitoring deployment with environment variables
 cd monitoring
@@ -359,7 +367,7 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
             grafana: {
               image: "grafana/grafana:latest",
               container_name: "grafana",
-              user: "1000",
+              user: "${UID}:${GID}",
               command: "-config=/etc/grafana/grafana.ini",
               restart: "unless-stopped",
               ports: ["127.0.0.1:${GF_PORT:-3000}:3000"],
@@ -369,9 +377,22 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
                 "./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro",
                 "./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro",
               ],
+              labels: isTraefik
+                ? {
+                    "traefik.enable": "true",
+                    "traefik.http.routers.monitoring.rule": `Host(\`${grafanaDomain}\`)`,
+                    "traefik.http.routers.monitoring.entrypoints": "websecure",
+                    "traefik.http.routers.monitoring.tls.certresolver":
+                      "monerosuite",
+                    "traefik.http.services.monitoring.loadbalancer.server.port":
+                      "31312",
+                  }
+                : undefined,
               environment: {
                 HOSTNAME: "grafana",
-                GF_SERVER_ROOT_URL: `https://${grafanaDomain}`,
+                GF_SERVER_ROOT_URL: isTraefik
+                  ? `https://${grafanaDomain}`
+                  : `http://${grafanaDomain}`,
                 GF_ANALYTICS_REPORTING_ENABLED: "false",
                 GF_ANALYTICS_CHECK_FOR_UPDATES: "false",
                 GF_LOG_LEVEL: "${GF_LOG_LEVEL:-error}",
@@ -388,17 +409,6 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
               },
             },
           },
-          labels: isTraefik
-            ? {
-                "traefik.enable": "true",
-                "traefik.http.routers.monitoring.rule": `Host(\`${grafanaDomain}\`)`,
-                "traefik.http.routers.monitoring.entrypoints": "websecure",
-                "traefik.http.routers.monitoring.tls.certresolver":
-                  "monerosuite",
-                "traefik.http.services.monitoring.loadbalancer.server.port":
-                  "31312",
-              }
-            : undefined,
         },
         autoheal: {
           name: "Autoheal",
