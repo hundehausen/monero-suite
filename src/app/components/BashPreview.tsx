@@ -19,14 +19,16 @@ const baseBashCommands = [
   "",
   "# Allow SSH access",
   "sudo ufw allow ssh",
+  "",
+  "# Create monero-suite folder",
+  "mkdir -p monero-suite",
+  "cd monero-suite",
 ];
 
 const finalBashCommands = [
   "# Enable UFW",
   "sudo ufw enable",
   "",
-  "# change directory to where the docker-compose.yml file is located",
-  "cd ~/monero-suite",
   "# finally, start the containers with:",
   "docker compose up -d",
 ];

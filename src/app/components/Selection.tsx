@@ -19,6 +19,8 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
   const {
     isMoneroPublicNode,
     setIsMoneroPublicNode,
+    moneroNodeDomain,
+    setMoneroNodeDomain,
     isPrunedNode,
     setIsPrunedNode,
     p2PoolMode,
@@ -31,10 +33,18 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     setIsXmrig,
     isMoneroblock,
     setIsMoneroblock,
+    moneroBlockDomain,
+    setMoneroBlockDomain,
     isMoneroblockLogging,
     setIsMoneroblockLogging,
     isOnionMoneroBlockchainExplorer,
     setIsOnionMoneroBlockchainExplorer,
+    onionMoneroBlockchainExplorerDomain,
+    setOnionMoneroBlockchainExplorerDomain,
+    isMonitoring,
+    setIsMonitoring,
+    grafanaDomain,
+    setGrafanaDomain,
     isTor,
     setIsTor,
     isWatchtower,
@@ -43,12 +53,6 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     setIsAutoheal,
     isTraefik,
     setIsTraefik,
-    moneroNodeDomain,
-    setMoneroNodeDomain,
-    moneroBlockDomain,
-    setMoneroBlockDomain,
-    onionMoneroBlockchainExplorerDomain,
-    setOnionMoneroBlockchainExplorerDomain,
   } = stateFunctions;
 
   const p2poolPayoutAddressError = () => {
@@ -308,6 +312,31 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
         size="lg"
         onChange={(event) => setIsTor(event.currentTarget.checked)}
       />
+      <Checkbox
+        checked={isMonitoring}
+        label={
+          <ExplainingLabel
+            label="Monitoring"
+            explanation={services["monitoring"].description}
+          />
+        }
+        labelPosition="left"
+        size="lg"
+        onChange={(event) => setIsMonitoring(event.currentTarget.checked)}
+      />
+      {isMonitoring === true && (
+        <>
+          <Input.Wrapper
+            label="Grafana Hostname"
+            description="Change to desired URL if accessing externally (https://yourdomain.tld)"
+          >
+            <Input
+              value={grafanaDomain}
+              onChange={(e) => setGrafanaDomain(e.currentTarget.value)}
+            />
+          </Input.Wrapper>
+        </>
+      )}
       <Checkbox
         checked={isWatchtower}
         label={
