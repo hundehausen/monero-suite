@@ -4,8 +4,9 @@ This project lets you run a Monero node, P2Pool, and MoneroBlock in Docker conta
 
 - [monerod](http://getmonero.org) (the Monero daemon)
 - [P2Pool](https://github.com/SChernykh/p2pool) (a decentralized mining pool for Monero)
-- [Traefik](https://traefik.io) (a reverse proxy for monerod, P2Pool, and MoneroBlock)
+- [Traefik](https://traefik.io) (a reverse proxy for other services, so they can be reached via a domain name)
 - [MoneroBlock](https://github.com/duggavo/MoneroBlock) (a Monero block explorer)
+- [Monitoring](https://github.com/lalanza808/monero-suite/tree/monitoring-selection) (a monitoring stack with Prometheus, Grafana, and monerod-exporter. It serves a beautiful dashboard with all stats of your node. And it even has a map with all nodes that are connected to your node.)
 - [Tor](https://www.torproject.org) (anonymity network for monerod, P2Pool and MoneroBlock)
 - [Docker Autoheal](https://github.com/willfarrell/docker-autoheal) (auto-restart unhealthy containers)
 - [Watchtower](https://github.com/containrrr/watchtower) (auto-update containers)
@@ -40,7 +41,7 @@ no particular order
 - add merchant software. Maybe BTCPayServer, [MoneroPay](https://github.com/moneropay/moneropay), [HotShop](https://github.com/CryptoGrampy/HotShop)
 - add [Monero Light Wallet Server](https://github.com/vtnerd/monero-lws)
 - add [Onion Monero Blockchain Explorer](https://github.com/moneroexamples/onion-monero-blockchain-explorer) (a Monero block explorer without JavaScript)
-- add Gitea (a self-hosted Git service) to mirror the Monero repositories
+- add [Gitea](https://github.com/go-gitea/gitea) (a self-hosted Git service) to mirror the Monero repositories
 
 ## Donations
 If you find this project useful, please consider donating to the following address:
