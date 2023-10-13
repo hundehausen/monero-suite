@@ -24,6 +24,11 @@ export const useServices = () => {
     "node.monerosuite.org"
   );
   const [isPrunedNode, setIsPrunedNode] = useState(true);
+  const [isStagenetNode, setIsStagenetNode] = useState(false);
+  const [isStagenetNodePublic, setIsStagenetNodePublic] = useState(true);
+  const [stagenetNodeDomain, setStagenetNodeDomain] = useState(
+    "stagenet.monerosuite.org"
+  );
   const [p2PoolMode, setP2PoolMode] = useState("none");
   const [p2PoolPayoutAddress, setP2PoolPayoutAddress] = useState(
     "48oc8c65B9JPv6FBZBg7UN9xUYmxux6WfEh61WBoKca7Amh7r7bnCZ7JJicLw7UN3DEgEADwqrhwxGBJazPZ14PJGbmMyXX"
@@ -117,6 +122,67 @@ sudo ufw allow 18080/tcp 18089/tcp`
                     "traefik.http.routers.monerod.tls.certresolver":
                       "monerosuite",
                     "traefik.http.services.monerod.loadbalancer.server.port":
+                      "18089",
+                  }
+                : undefined,
+            },
+          },
+        },
+        "monerod-stagenet": {
+          name: "Monero Stagenet Node",
+          description:
+            "Run a monerod stagenet node. Stagenet is a testing network for developers. It is a separate blockchain with separate coins from the main Monero network.",
+          checked: isStagenetNode,
+          required: false,
+          bash: isStagenetNodePublic
+            ? `
+# Allow monerod p2p port and restricted rpc port
+sudo ufw allow 38080/tcp 38089/tcp`
+            : undefined,
+          code: {
+            "monerod-stagenet": {
+              image: "sethsimmons/simple-monerod:latest",
+              restart: "unless-stopped",
+              container_name: "monerod",
+              volumes: ["bitmonero:/home/monero"],
+              ports: [
+                ...(isStagenetNodePublic
+                  ? ["38080:38080"]
+                  : ["127.0.0.1:38080:38080"]),
+                ...(isStagenetNodePublic
+                  ? ["38089:38089"]
+                  : ["127.0.0.1:38089:38089"]),
+              ],
+              command: [
+                "--rpc-restricted-bind-ip=0.0.0.0",
+                "--rpc-restricted-bind-port=38089",
+                "--rpc-bind-ip=0.0.0.0",
+                "--rpc-bind-port=38081", // unrestricted port for internal use
+                "--confirm-external-bind",
+                "--enable-dns-blocklist",
+                "--no-igd",
+                "--out-peers=32",
+                ...(isStagenetNodePublic ? ["--public-node"] : []),
+                "--stagenet",
+              ],
+              healthcheck: {
+                test: [
+                  "CMD-SHELL",
+                  "curl --fail http://localhost:38081/get_info || exit 1",
+                ],
+                interval: "30s",
+                timeout: "5s",
+                retries: 3,
+              },
+              labels: isTraefik
+                ? {
+                    "traefik.enable": "true",
+                    "traefik.http.routers.monerod-stagenet.rule": `Host(\`${stagenetNodeDomain}\`)`,
+                    "traefik.http.routers.monerod-stagenet.entrypoints":
+                      "websecure",
+                    "traefik.http.routers.monerod-stagenet.tls.certresolver":
+                      "monerosuite",
+                    "traefik.http.services.monerod-stagenet.loadbalancer.server.port":
                       "18089",
                   }
                 : undefined,
@@ -263,6 +329,7 @@ sudo ufw allow 3333/tcp`
               restart: "unless-stopped",
               links: [
                 "monerod",
+                ...(isStagenetNode ? ["monerod-stagenet"] : []),
                 ...(p2PoolMode !== "none" ? ["p2pool"] : []),
                 ...(isMoneroblock ? ["moneroblock"] : []),
                 ...(isOnionMoneroBlockchainExplorer
@@ -272,6 +339,12 @@ sudo ufw allow 3333/tcp`
               ],
               environment: {
                 MONEROD_TOR_SERVICE_HOSTS: "18089:monerod:18089",
+                ...(isStagenetNode
+                  ? {
+                      MONEROD_STAGENET_TOR_SERVICE_HOSTS:
+                        "38089:monerod-stagenet:38089",
+                    }
+                  : {}),
                 ...(p2PoolMode !== "none"
                   ? {
                       P2POOL_TOR_SERVICE_HOSTS: "3333:p2pool:3333",
@@ -493,6 +566,9 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
     [
       isMoneroPublicNode,
       isPrunedNode,
+      isStagenetNode,
+      isStagenetNodePublic,
+      stagenetNodeDomain,
       p2PoolMode,
       p2PoolPayoutAddress,
       p2PoolMiningThreads,
@@ -519,6 +595,12 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
       setIsMoneroPublicNode,
       isPrunedNode,
       setIsPrunedNode,
+      isStagenetNode,
+      setIsStagenetNode,
+      isStagenetNodePublic,
+      setIsStagenetNodePublic,
+      stagenetNodeDomain,
+      setStagenetNodeDomain,
       p2PoolMode,
       setP2PoolMode,
       p2PoolPayoutAddress,

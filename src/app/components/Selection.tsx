@@ -23,6 +23,12 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     setMoneroNodeDomain,
     isPrunedNode,
     setIsPrunedNode,
+    isStagenetNode,
+    setIsStagenetNode,
+    isStagenetNodePublic,
+    setIsStagenetNodePublic,
+    stagenetNodeDomain,
+    setStagenetNodeDomain,
     p2PoolMode,
     setP2PoolMode,
     p2PoolPayoutAddress,
@@ -115,6 +121,56 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
           },
         }}
       />
+
+      <Checkbox
+        checked={isStagenetNode}
+        label={
+          <ExplainingLabel
+            label="Monero Stagenet Node"
+            explanation={services["monerod-stagenet"].description}
+          />
+        }
+        labelPosition="left"
+        size="md"
+        onChange={(event) => setIsStagenetNode(event.currentTarget.checked)}
+      />
+      {isStagenetNode && (
+        <>
+          <Switch
+            checked={isStagenetNodePublic}
+            label="Stagenet Node"
+            labelPosition="left"
+            onChange={(event) =>
+              setIsStagenetNodePublic(event.currentTarget.checked)
+            }
+            onLabel="Public"
+            offLabel="Private"
+            size="md"
+            styles={{
+              track: {
+                width: "70px",
+              },
+            }}
+          />
+          {isStagenetNodePublic && isTraefik && (
+            <Input.Wrapper
+              styles={{
+                root: {
+                  width: "100%",
+                },
+              }}
+              label="Stagenet Node Domain"
+              description="The domain where your stagenet node will be available."
+            >
+              <Input
+                value={stagenetNodeDomain}
+                onChange={(e) => setStagenetNodeDomain(e.currentTarget.value)}
+              />
+            </Input.Wrapper>
+          )}
+        </>
+      )}
+
       <Checkbox
         checked={isTraefik}
         label={
