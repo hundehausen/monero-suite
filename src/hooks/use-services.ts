@@ -263,7 +263,12 @@ sudo ufw allow 3333/tcp`
               container_name: "monero-wallet-rpc",
               ports: ["127.0.0.1:18083:18083"],
               volumes: ["monero-wallet-rpc-data:/home/monero"],
-              command: ["--deamon-address=monerod:18089", "--trusted-daemon"],
+              command: [
+                "--daemon-address=monerod:18089",
+                "--trusted-daemon",
+                "--rpc-bind-port=18083",
+                "--wallet-dir /home/monero",
+              ],
             },
           },
           volumes: {
