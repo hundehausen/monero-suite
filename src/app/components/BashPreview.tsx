@@ -30,7 +30,7 @@ const finalBashCommands = [
   "sudo ufw enable",
   "",
   "# finally, start the containers with:",
-  "docker compose up -d",
+  `UID="$(id -u)" GID="$(id -g)"  docker compose up -d`,
 ];
 
 interface BashPreviewProps {

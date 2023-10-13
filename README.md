@@ -20,7 +20,7 @@ Go to [monersuite.org](https://monerosuite.org/)
 
 Save the generated docker-compose.yml file to a directory and run the following command in that directory:
 ``` 
-docker compose up -d
+UID="$(id -u)" GID="$(id -g)"  docker compose up -d
 ```
 It will take some time to download the images and start the containers. You can check the status of the containers with:
 ```
