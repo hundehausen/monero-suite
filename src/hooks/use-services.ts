@@ -34,6 +34,7 @@ export const useServices = () => {
     "48oc8c65B9JPv6FBZBg7UN9xUYmxux6WfEh61WBoKca7Amh7r7bnCZ7JJicLw7UN3DEgEADwqrhwxGBJazPZ14PJGbmMyXX"
   );
   const [p2PoolMiningThreads, setP2PoolMiningThreads] = useState(0);
+  const [isMoneroWalletRpc, setIsMoneroWalletRpc] = useState(false);
   const [isTor, setIsTor] = useState(false);
   const [isWatchtower, setIsWatchtower] = useState(false);
   const [isMoneroblock, setIsMoneroblock] = useState(false);
@@ -247,6 +248,26 @@ sudo ufw allow 3333/tcp`
                   : []),
               ].join(" "),
             },
+          },
+        },
+        "monero-wallet-rpc": {
+          name: "Monero Wallet RPC",
+          description:
+            "Monero Wallet RPC is a remote procedure call interface for Monero wallet.",
+          checked: isMoneroWalletRpc,
+          required: false,
+          code: {
+            "monero-wallet-rpc": {
+              image: "sethsimmons/simple-monero-wallet-rpc:latest",
+              restart: "unless-stopped",
+              container_name: "monero-wallet-rpc",
+              ports: ["127.0.0.1:18083:18083"],
+              volumes: ["monero-wallet-rpc-data:/home/monero"],
+              command: ["--deamon-address=monerod:18089", "--trusted-daemon"],
+            },
+          },
+          volumes: {
+            "monero-wallet-rpc-data": {},
           },
         },
         moneroblock: {
@@ -569,6 +590,7 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
       isStagenetNode,
       isStagenetNodePublic,
       stagenetNodeDomain,
+      isMoneroWalletRpc,
       p2PoolMode,
       p2PoolPayoutAddress,
       p2PoolMiningThreads,
@@ -601,6 +623,8 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
       setIsStagenetNodePublic,
       stagenetNodeDomain,
       setStagenetNodeDomain,
+      isMoneroWalletRpc,
+      setIsMoneroWalletRpc,
       p2PoolMode,
       setP2PoolMode,
       p2PoolPayoutAddress,

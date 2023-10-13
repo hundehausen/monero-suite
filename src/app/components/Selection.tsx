@@ -29,6 +29,8 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     setIsStagenetNodePublic,
     stagenetNodeDomain,
     setStagenetNodeDomain,
+    isMoneroWalletRpc,
+    setIsMoneroWalletRpc,
     p2PoolMode,
     setP2PoolMode,
     p2PoolPayoutAddress,
@@ -131,7 +133,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
           />
         }
         labelPosition="left"
-        size="md"
+        size="lg"
         onChange={(event) => setIsStagenetNode(event.currentTarget.checked)}
       />
       {isStagenetNode && (
@@ -145,7 +147,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
             }
             onLabel="Public"
             offLabel="Private"
-            size="md"
+            size="lg"
             styles={{
               track: {
                 width: "70px",
@@ -170,7 +172,18 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
           )}
         </>
       )}
-
+      <Checkbox
+        checked={isMoneroWalletRpc}
+        label={
+          <ExplainingLabel
+            label="Monero Wallet RPC"
+            explanation={services["monero-wallet-rpc"].description}
+          />
+        }
+        labelPosition="left"
+        size="lg"
+        onChange={(event) => setIsMoneroWalletRpc(event.currentTarget.checked)}
+      />
       <Checkbox
         checked={isTraefik}
         label={
