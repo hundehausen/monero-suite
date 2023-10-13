@@ -98,7 +98,7 @@ sudo ufw allow 18080/tcp 18089/tcp`
                 "--rpc-restricted-bind-ip=0.0.0.0",
                 "--rpc-restricted-bind-port=18089",
                 "--rpc-bind-ip=0.0.0.0",
-                "--rpc-bind-port=18083", // unrestricted port for internal use
+                "--rpc-bind-port=18081", // unrestricted port for internal use
                 "--confirm-external-bind",
                 "--enable-dns-blocklist",
                 "--no-igd",
@@ -365,7 +365,7 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
               image: "lalanza808/monerod_exporter:latest",
               container_name: "monerod_exporter",
               restart: "unless-stopped",
-              command: "--monero-addr=http://monerod:18083",
+              command: "--monero-addr=http://monerod:18081",
             },
             nodemapper: {
               image: "lalanza808/nodemapper:latest",
@@ -373,13 +373,13 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
               restart: "unless-stopped",
               environment: {
                 NODE_HOST: "monerod",
-                NODE_PORT: "18083",
+                NODE_PORT: "18081",
               },
             },
             grafana: {
               image: "grafana/grafana:latest",
               container_name: "grafana",
-              user: "1000",
+              user: "${UID:-1000}:${GID:-1000}",
               command: "-config=/etc/grafana/grafana.ini",
               restart: "unless-stopped",
               ports: ["127.0.0.1:${GF_PORT:-3000}:3000"],
