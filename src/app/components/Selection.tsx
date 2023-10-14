@@ -13,11 +13,10 @@ import {
   Text,
   Accordion,
   AccordionStylesNames,
-  Paper,
   Code,
 } from "@mantine/core";
 import ExplainingLabel from "./ExplainingLabel";
-import { CSSProperties } from "react";
+import { CSSProperties, useEffect, useState } from "react";
 
 const panelStyles = {
   content: {
@@ -81,6 +80,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     isTraefik,
     setIsTraefik,
   } = stateFunctions;
+  const [accordionItems, setAccordionItems] = useState(["mainnet-node"]);
 
   const p2poolPayoutAddressError = () => {
     if (p2PoolPayoutAddress.length === 0) return null;
@@ -91,9 +91,30 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     return null;
   };
 
+  useEffect(() => {
+    if (isTraefik) {
+      setAccordionItems((items) => [
+        ...items,
+        ...(isMoneroPublicNode ? ["monero-node"] : []),
+        ...(isStagenetNode && isStagenetNodePublic ? ["stagenet-node"] : []),
+        ...(isMoneroblock ? ["moneroblock"] : []),
+        ...(isMonitoring ? ["monitoring"] : []),
+      ]);
+    }
+  }, [
+    isMoneroPublicNode,
+    isMoneroblock,
+    isMonitoring,
+    isStagenetNode,
+    isStagenetNodePublic,
+    isTraefik,
+  ]);
+
   return (
     <Accordion
       multiple
+      value={accordionItems}
+      onChange={setAccordionItems}
       defaultValue={["mainnet-node"]}
       styles={{
         panel: {
@@ -145,6 +166,27 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
               },
             }}
           />
+          {isMoneroPublicNode && isTraefik && (
+            <>
+              <Input.Wrapper
+                styles={{
+                  root: {
+                    width: "100%",
+                  },
+                }}
+                label="Monero Node Domain"
+                description="The domain where your monero node will be available."
+              >
+                <Input
+                  value={moneroNodeDomain}
+                  onChange={(e) => setMoneroNodeDomain(e.currentTarget.value)}
+                />
+              </Input.Wrapper>
+              {moneroNodeDomain && (
+                <Text size="sm">{`Connect to your remote node from any wallet. Enter ${moneroNodeDomain}:443`}</Text>
+              )}
+            </>
+          )}
         </Accordion.Panel>
       </Accordion.Item>
 
@@ -233,27 +275,6 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
             size="lg"
             onChange={(event) => setIsTraefik(event.currentTarget.checked)}
           />
-          {isMoneroPublicNode && isTraefik && (
-            <>
-              <Input.Wrapper
-                styles={{
-                  root: {
-                    width: "100%",
-                  },
-                }}
-                label="Monero Node Domain"
-                description="The domain where your monero node will be available."
-              >
-                <Input
-                  value={moneroNodeDomain}
-                  onChange={(e) => setMoneroNodeDomain(e.currentTarget.value)}
-                />
-              </Input.Wrapper>
-              {moneroNodeDomain && (
-                <Text size="sm">{`Connect to your remote node from any wallet. Enter ${moneroNodeDomain}:443`}</Text>
-              )}
-            </>
-          )}
         </Accordion.Panel>
       </Accordion.Item>
 

@@ -3,7 +3,7 @@
 import { useServices } from "@/hooks/use-services";
 import ComposePreview from "./components/ComposePreview";
 import Selection from "./components/Selection";
-import { AppShell, Container, Grid, Text } from "@mantine/core";
+import { AppShell, Grid } from "@mantine/core";
 import BashPreview from "./components/BashPreview";
 import Header from "./components/Header";
 
