@@ -18,6 +18,10 @@ export interface ServiceMap {
   [key: string]: Service;
 }
 
+export type P2PoolModes = "none" | "mini" | "full";
+
+export type TorProxyModes = "none" | "tx-only" | "full";
+
 export const useServices = () => {
   const [isMoneroPublicNode, setIsMoneroPublicNode] = useState(true);
   const [moneroNodeDomain, setMoneroNodeDomain] = useState(
@@ -29,13 +33,14 @@ export const useServices = () => {
   const [stagenetNodeDomain, setStagenetNodeDomain] = useState(
     "stagenet.monerosuite.org"
   );
-  const [p2PoolMode, setP2PoolMode] = useState("none");
+  const [p2PoolMode, setP2PoolMode] = useState<P2PoolModes>("none");
   const [p2PoolPayoutAddress, setP2PoolPayoutAddress] = useState(
     "48oc8c65B9JPv6FBZBg7UN9xUYmxux6WfEh61WBoKca7Amh7r7bnCZ7JJicLw7UN3DEgEADwqrhwxGBJazPZ14PJGbmMyXX"
   );
   const [p2PoolMiningThreads, setP2PoolMiningThreads] = useState(0);
   const [isMoneroWalletRpc, setIsMoneroWalletRpc] = useState(false);
-  const [isTor, setIsTor] = useState(false);
+  const [torProxyMode, setTorProxyMode] = useState<TorProxyModes>("none");
+  const [isHiddenServices, setIsHiddenServices] = useState(false);
   const [isWatchtower, setIsWatchtower] = useState(false);
   const [isMoneroblock, setIsMoneroblock] = useState(false);
   const [isMoneroblockLogging, setIsMoneroblockLogging] = useState(true);
@@ -104,15 +109,41 @@ sudo ufw allow 18080/tcp 18089/tcp`
                 "--rpc-restricted-bind-ip=0.0.0.0",
                 "--rpc-restricted-bind-port=18089",
                 "--rpc-bind-ip=0.0.0.0",
-                "--rpc-bind-port=18081", // unrestricted port for internal use
+                "--rpc-bind-port=18081", // 1048576 kB/s == 1GB/s; a raise from default 8192 kB/s; allow for faster initial sync
                 "--confirm-external-bind",
                 "--enable-dns-blocklist",
+                "--check-updates=disabled",
                 "--no-igd",
-                "--out-peers=50",
+                "--out-peers=64",
+                "--limit-rate-down=1048576", // 1 GB/s
                 ...(isPrunedNode ? ["--prune-blockchain"] : []),
                 ...(isMoneroPublicNode ? ["--public-node"] : []),
                 ...(p2PoolMode !== "none"
                   ? ["--zmq-pub=tcp://0.0.0.0:18084"]
+                  : ["--no-zmq"]),
+                ...(torProxyMode === "full"
+                  ? ["--proxy=127.0.0.1:9150"]
+                  : torProxyMode === "tx-only"
+                  ? ["--tx-proxy=tor,127.0.0.1:9150,16"]
+                  : []),
+                ...(torProxyMode === "full"
+                  ? [
+                      [
+                        "--add-peer=xwvz3ekocr3dkyxfkmgm2hvbpzx2ysqmaxgter7znnqrhoicygkfswid.onion:18083",
+                      ],
+                      [
+                        "--add-peer=4pixvbejrvihnkxmduo2agsnmc3rrulrqc7s3cbwwrep6h6hrzsibeqd.onion:18083",
+                      ],
+                      [
+                        "--add-peer=zbjkbsxc5munw3qusl7j2hpcmikhqocdf4pqhnhtpzw5nt5jrmofptid.onion:18083",
+                      ],
+                      [
+                        "--add-peer=plowsof3t5hogddwabaeiyrno25efmzfxyro2vligremt7sxpsclfaid.onion:18083",
+                      ],
+                      [
+                        "--add-peer=plowsoffjexmxalw73tkjmf422gq6575fc7vicuu4javzn2ynnte6tyd.onion:18083",
+                      ],
+                    ]
                   : []),
               ],
               labels: isTraefik
@@ -161,8 +192,10 @@ sudo ufw allow 38080/tcp 38089/tcp`
                 "--rpc-bind-port=38081", // unrestricted port for internal use
                 "--confirm-external-bind",
                 "--enable-dns-blocklist",
+                "--check-updates=disabled",
                 "--no-igd",
                 "--out-peers=32",
+                "--limit-rate-down=1048576", // 1 GB/s
                 ...(isStagenetNodePublic ? ["--public-node"] : []),
                 "--stagenet",
               ],
@@ -246,6 +279,7 @@ sudo ufw allow 3333/tcp`
                 ...(p2PoolMiningThreads > 0
                   ? [`--start-mining ${p2PoolMiningThreads}`]
                   : []),
+                ...(torProxyMode === "full" ? ["--socks5 127.0.0.1:9150"] : []),
               ].join(" "),
             },
           },
@@ -339,19 +373,34 @@ sudo ufw allow 3333/tcp`
             },
           },
         },
-        tor: {
-          name: "Tor",
+        "tor-proxy": {
+          name: "Tor Proxy",
+          description:
+            "Tor Proxy is a proxy server that forwards traffic into the Tor network.",
+          checked: torProxyMode !== "none",
+          required: false,
+          code: {
+            "tor-proxy": {
+              image: "peterdavehello/tor-socks-proxy:latest",
+              container_name: "tor-proxy",
+              restart: "unless-stopped",
+              ports: ["127.0.0.1:9150:9150"],
+            },
+          },
+        },
+        "tor-hidden-service": {
+          name: "Tor Hidden Service",
           description:
             "Your own private Tor network for Monero and services like Moneroblock and P2Pool. You can share it with others or keep it to yourself.",
-          checked: isTor,
+          checked: isHiddenServices,
           required: false,
           volumes: {
             "tor-keys": {},
           },
           code: {
-            tor: {
+            "tor-hidden-service": {
               image: "goldy/tor-hidden-service:latest",
-              container_name: "tor",
+              container_name: "tor-hidden-service",
               restart: "unless-stopped",
               links: [
                 "monerod",
@@ -604,7 +653,8 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
       isMoneroblockLogging,
       isOnionMoneroBlockchainExplorer,
       grafanaDomain,
-      isTor,
+      torProxyMode,
+      isHiddenServices,
       isWatchtower,
       isMonitoring,
       isAutoheal,
@@ -644,8 +694,10 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
       setIsMoneroblockLogging,
       isOnionMoneroBlockchainExplorer,
       setIsOnionMoneroBlockchainExplorer,
-      isTor,
-      setIsTor,
+      torProxyMode,
+      setTorProxyMode,
+      isHiddenServices,
+      setIsHiddenServices,
       isWatchtower,
       setIsWatchtower,
       isMonitoring,

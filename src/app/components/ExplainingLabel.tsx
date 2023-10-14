@@ -1,14 +1,20 @@
-import { HoverCard, Text } from "@mantine/core";
+import { HoverCard, Text, TextProps } from "@mantine/core";
 
 interface ExplainingLabelProps {
   label: string;
   explanation: string;
+  size?: TextProps["size"];
 }
 
-const ExplainingLabel = ({ label, explanation }: ExplainingLabelProps) => (
+const ExplainingLabel = ({
+  label,
+  explanation,
+  size,
+}: ExplainingLabelProps) => (
   <HoverCard width={280} shadow="md" openDelay={500}>
     <HoverCard.Target>
       <Text
+        size={size}
         style={{
           cursor: "pointer",
         }}

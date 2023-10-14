@@ -8,7 +8,7 @@ This project lets you run a Monero node, P2Pool, and MoneroBlock in Docker conta
 - [Traefik](https://traefik.io) (a reverse proxy for other services, so they can be reached via a domain name)
 - [MoneroBlock](https://github.com/duggavo/MoneroBlock) (a Monero block explorer)
 - [Monitoring](https://github.com/lalanza808/docker-monero-node) (a monitoring stack with Prometheus, Grafana, and monerod-exporter. It serves a beautiful dashboard with all stats of your node. And it even has a map with all nodes that are connected to your node.)
-- [Tor](https://www.torproject.org) (anonymity network for monerod, P2Pool and MoneroBlock)
+- [Tor Proxy and Tor Hidden Services](https://www.torproject.org) (anonymity network for monerod, P2Pool and other services)
 - [Docker Autoheal](https://github.com/willfarrell/docker-autoheal) (auto-restart unhealthy containers)
 - [Watchtower](https://github.com/containrrr/watchtower) (auto-update containers)
 
