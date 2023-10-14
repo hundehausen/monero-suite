@@ -447,6 +447,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
                   />
                 ),
                 value: "full",
+                disabled: true,
               },
             ]}
           />
