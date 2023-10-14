@@ -39,6 +39,8 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     setMoneroNodeDomain,
     isPrunedNode,
     setIsPrunedNode,
+    isSyncPrunedBlocks,
+    setIsSyncPrunedBlocks,
     isStagenetNode,
     setIsStagenetNode,
     isStagenetNodePublic,
@@ -166,6 +168,24 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
               },
             }}
           />
+          {isPrunedNode && (
+            <>
+              <Text size="sm">
+                Activating to sync pruned blocks will save your network
+                bandwith. You download only the pruned blocks instead of
+                downloading the full blocks and pruning them afterwards.
+              </Text>
+              <Checkbox
+                checked={isSyncPrunedBlocks}
+                label="Sync Pruned Blocks"
+                labelPosition="left"
+                size="lg"
+                onChange={(event) =>
+                  setIsSyncPrunedBlocks(event.currentTarget.checked)
+                }
+              />
+            </>
+          )}
           {isMoneroPublicNode && isTraefik && (
             <>
               <Input.Wrapper

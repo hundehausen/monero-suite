@@ -28,6 +28,7 @@ export const useServices = () => {
     "node.monerosuite.org"
   );
   const [isPrunedNode, setIsPrunedNode] = useState(true);
+  const [isSyncPrunedBlocks, setIsSyncPrunedBlocks] = useState(false);
   const [isStagenetNode, setIsStagenetNode] = useState(false);
   const [isStagenetNodePublic, setIsStagenetNodePublic] = useState(true);
   const [stagenetNodeDomain, setStagenetNodeDomain] = useState(
@@ -117,6 +118,7 @@ sudo ufw allow 18080/tcp 18089/tcp`
                 "--out-peers=64",
                 "--limit-rate-down=1048576", // 1 GB/s
                 ...(isPrunedNode ? ["--prune-blockchain"] : []),
+                ...(isSyncPrunedBlocks ? ["--sync-pruned-blocks"] : []),
                 ...(isMoneroPublicNode ? ["--public-node"] : []),
                 ...(p2PoolMode !== "none"
                   ? ["--zmq-pub=tcp://0.0.0.0:18084"]
@@ -631,6 +633,7 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
     [
       isMoneroPublicNode,
       isPrunedNode,
+      isSyncPrunedBlocks,
       isStagenetNode,
       isStagenetNodePublic,
       stagenetNodeDomain,
@@ -662,6 +665,8 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
       setIsMoneroPublicNode,
       isPrunedNode,
       setIsPrunedNode,
+      isSyncPrunedBlocks,
+      setIsSyncPrunedBlocks,
       isStagenetNode,
       setIsStagenetNode,
       isStagenetNodePublic,
