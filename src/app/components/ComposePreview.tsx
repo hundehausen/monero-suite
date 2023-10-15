@@ -4,7 +4,7 @@ import { CodeHighlightTabs } from "@mantine/code-highlight";
 import { FaDocker } from "react-icons/fa";
 import { Compose } from "compose-spec-schema";
 
-let dockerCompose: Compose = {
+const dockerComposeBase: Compose = {
   version: "3.8",
   name: "monero-suite",
   services: {},
@@ -31,8 +31,8 @@ const ComposePreview = ({ services }: ComposePreviewProps) => {
     .filter((service) => service.volumes && service.checked)
     .map((service) => service.volumes);
 
-  dockerCompose = {
-    ...dockerCompose,
+  const dockerCompose = {
+    ...dockerComposeBase,
     services: serviceCodes.reduce((acc, service) => {
       return {
         ...acc,
