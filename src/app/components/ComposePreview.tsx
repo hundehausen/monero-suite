@@ -28,7 +28,7 @@ const ComposePreview = ({ services }: ComposePreviewProps) => {
   const serviceCodes = services.map((service) => service.code);
 
   const volumes = services
-    .filter((service) => service.volumes)
+    .filter((service) => service.volumes && service.checked)
     .map((service) => service.volumes);
 
   dockerCompose = {

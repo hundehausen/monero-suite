@@ -88,15 +88,13 @@ sudo ufw allow 18080/tcp 18089/tcp`
             : undefined,
           volumes: {
             bitmonero: {},
-            grafana: {},
-            prometheus: {},
           },
           code: {
             monerod: {
               image: "sethsimmons/simple-monerod:latest",
               restart: "unless-stopped",
               container_name: "monerod",
-              volumes: ["bitmonero:/home/monero"],
+              volumes: ["bitmonero:/home/monero/.bitmonero"],
               ports: [
                 ...(isMoneroPublicNode
                   ? ["18080:18080"]
