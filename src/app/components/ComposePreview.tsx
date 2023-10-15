@@ -51,9 +51,7 @@ const ComposePreview = ({ services }: ComposePreviewProps) => {
     <CodeHighlightTabs
       code={[
         {
-          code: dockerCompose
-            ? YAML.stringify(dockerCompose).concat(globalLogSettings)
-            : "",
+          code: dockerCompose ? YAML.stringify(dockerCompose) : "",
           language: "yaml",
           fileName: "docker-compose.yml",
           icon: <FaDocker />,
