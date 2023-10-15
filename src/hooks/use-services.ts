@@ -68,6 +68,10 @@ export const useServices = () => {
     }
   }, [isTraefik]);
 
+  useEffect(() => {
+    if (!isPrunedNode) setIsSyncPrunedBlocks(false);
+  }, [isPrunedNode]);
+
   const services = useMemo<ServiceMap>(
     () =>
       ({
