@@ -132,7 +132,7 @@ sudo ufw allow 18080/tcp 18089/tcp`
                   : torProxyMode === "tx-only"
                   ? ["--tx-proxy=tor,127.0.0.1:9150,16"]
                   : []),
-                ...(torProxyMode === "full"
+                ...(torProxyMode !== "none"
                   ? [
                       "--add-peer=xwvz3ekocr3dkyxfkmgm2hvbpzx2ysqmaxgter7znnqrhoicygkfswid.onion:18083",
                       "--add-peer=4pixvbejrvihnkxmduo2agsnmc3rrulrqc7s3cbwwrep6h6hrzsibeqd.onion:18083",
