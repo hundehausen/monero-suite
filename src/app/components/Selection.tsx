@@ -463,7 +463,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
                 label: (
                   <ExplainingLabel
                     label="Full"
-                    explanation="Use this to route all traffic through Tor. P2Pool will use this as well."
+                    explanation="Use this to route all traffic of monerod through Tor. This is not availiable yet, because the tor-proxy docker image does only support SOCKS5 and monerod only supports SOCKS4."
                   />
                 ),
                 value: "full",

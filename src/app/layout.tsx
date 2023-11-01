@@ -12,7 +12,6 @@ export const metadata: Metadata = {
   robots: "index, follow",
   generator: "Next.js",
   keywords: "Monero, Monero Suite, docker, compose, generator, docker-compose",
-  viewport: "width=device-width, initial-scale=1",
   metadataBase: new URL("https://monerosuite.org"),
   openGraph: {
     type: "website",
