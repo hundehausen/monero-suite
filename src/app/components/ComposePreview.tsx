@@ -1,6 +1,7 @@
 import type { Service } from "@/hooks/use-services";
 import YAML from "yaml";
 import { CodeHighlightTabs } from "@mantine/code-highlight";
+import "@mantine/code-highlight/styles.css";
 import { FaDocker } from "react-icons/fa";
 import { Compose } from "compose-spec-schema";
 
