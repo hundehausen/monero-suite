@@ -4,6 +4,7 @@ import {
   ServiceMap,
   TorProxyModes,
   useServices,
+  Architectures,
 } from "@/hooks/use-services";
 import {
   Checkbox,
@@ -34,6 +35,8 @@ interface SelectionProps {
 
 const Selection = ({ services, stateFunctions }: SelectionProps) => {
   const {
+    architecture,
+    setArchitecture,
     isMoneroPublicNode,
     setIsMoneroPublicNode,
     moneroNodeDomain,
@@ -83,7 +86,10 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     isTraefik,
     setIsTraefik,
   } = stateFunctions;
-  const [accordionItems, setAccordionItems] = useState(["mainnet-node"]);
+  const [accordionItems, setAccordionItems] = useState([
+    "architecture",
+    "mainnet-node",
+  ]);
 
   const p2poolPayoutAddressError = () => {
     if (p2PoolPayoutAddress.length === 0) return null;
@@ -125,6 +131,37 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
         },
       }}
     >
+      <Accordion.Item value="architecture">
+        <Accordion.Control>
+          <Text size="lg">Architecture</Text>
+        </Accordion.Control>
+        <Accordion.Panel styles={panelStyles}>
+          <SegmentedControl
+            value={architecture}
+            onChange={(value) => setArchitecture(value as Architectures)}
+            styles={{
+              control: {
+                marginLeft: "auto",
+                marginRight: "auto",
+              },
+              label: {
+                fontSize: "16px",
+              },
+            }}
+            data={[
+              {
+                label: "Linux AMD64",
+                value: "linux/amd64",
+              },
+              {
+                label: "Linux ARM64",
+                value: "linux/arm64",
+              },
+            ]}
+          />
+        </Accordion.Panel>
+      </Accordion.Item>
+
       <Accordion.Item value="mainnet-node">
         <Accordion.Control>
           <Text size="lg">Monero Node</Text>
@@ -374,6 +411,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
                   {
                     label: "XMRig",
                     value: "xmrig",
+                    disabled: architecture === "linux/arm64",
                   },
                   {
                     label: (
@@ -464,99 +502,105 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
         </Accordion.Panel>
       </Accordion.Item>
 
-      <Accordion.Item value="tor-proxy">
-        <Accordion.Control>
-          <Text size="lg">Tor Proxy</Text>
-        </Accordion.Control>
-        <Accordion.Panel styles={panelStyles}>
-          <Text size="sm">{services["tor-proxy"].description}</Text>
-          <SegmentedControl
-            value={torProxyMode}
-            onChange={(value) => setTorProxyMode(value as TorProxyModes)}
-            styles={{
-              label: {
-                fontSize: "16px",
-              },
-            }}
-            data={[
-              {
-                label: "None",
-                value: "none",
-              },
-              {
-                label: (
-                  <ExplainingLabel
-                    label="Tx only"
-                    explanation="Use this to send transactions of directly connected wallets via Tor. Other traffic will not be routed through Tor."
-                  />
-                ),
-                value: "tx-only",
-              },
-              {
-                label: (
-                  <ExplainingLabel
-                    label="Full"
-                    explanation="Use this to route all traffic of monerod through Tor. This is not availiable yet, because the tor-proxy docker image does only support SOCKS5 and monerod only supports SOCKS4."
-                  />
-                ),
-                value: "full",
-                disabled: true,
-              },
-            ]}
-          />
-        </Accordion.Panel>
-      </Accordion.Item>
+      {architecture === "linux/amd64" && (
+        <Accordion.Item value="tor-proxy">
+          <Accordion.Control>
+            <Text size="lg">Tor Proxy</Text>
+          </Accordion.Control>
+          <Accordion.Panel styles={panelStyles}>
+            <Text size="sm">{services["tor-proxy"].description}</Text>
+            <SegmentedControl
+              value={torProxyMode}
+              onChange={(value) => setTorProxyMode(value as TorProxyModes)}
+              styles={{
+                label: {
+                  fontSize: "16px",
+                },
+              }}
+              data={[
+                {
+                  label: "None",
+                  value: "none",
+                },
+                {
+                  label: (
+                    <ExplainingLabel
+                      label="Tx only"
+                      explanation="Use this to send transactions of directly connected wallets via Tor. Other traffic will not be routed through Tor."
+                    />
+                  ),
+                  value: "tx-only",
+                },
+                {
+                  label: (
+                    <ExplainingLabel
+                      label="Full"
+                      explanation="Use this to route all traffic of monerod through Tor. This is not availiable yet, because the tor-proxy docker image does only support SOCKS5 and monerod only supports SOCKS4."
+                    />
+                  ),
+                  value: "full",
+                  disabled: true,
+                },
+              ]}
+            />
+          </Accordion.Panel>
+        </Accordion.Item>
+      )}
 
-      <Accordion.Item value="tor-hidden-service">
-        <Accordion.Control>
-          <Text size="lg">Tor hidden service</Text>
-        </Accordion.Control>
-        <Accordion.Panel styles={panelStyles}>
-          <Text size="sm">{services["tor-hidden-service"].description}</Text>
-          <Checkbox
-            checked={isHiddenServices}
-            label="Tor Hidden Services"
-            labelPosition="left"
-            size="lg"
-            onChange={(event) =>
-              setIsHiddenServices(event.currentTarget.checked)
-            }
-          />
-          <Text size="sm">
-            Use <Code>docker logs tor-hidden-service</Code> to get generated
-            onion addresses, after the container has started.
-          </Text>
-        </Accordion.Panel>
-      </Accordion.Item>
+      {architecture === "linux/amd64" && (
+        <Accordion.Item value="tor-hidden-service">
+          <Accordion.Control>
+            <Text size="lg">Tor hidden service</Text>
+          </Accordion.Control>
+          <Accordion.Panel styles={panelStyles}>
+            <Text size="sm">{services["tor-hidden-service"].description}</Text>
+            <Checkbox
+              checked={isHiddenServices}
+              label="Tor Hidden Services"
+              labelPosition="left"
+              size="lg"
+              onChange={(event) =>
+                setIsHiddenServices(event.currentTarget.checked)
+              }
+            />
+            <Text size="sm">
+              Use <Code>docker logs tor-hidden-service</Code> to get generated
+              onion addresses, after the container has started.
+            </Text>
+          </Accordion.Panel>
+        </Accordion.Item>
+      )}
 
-      <Accordion.Item value="monitoring">
-        <Accordion.Control>
-          <Text size="lg">Monitoring</Text>
-        </Accordion.Control>
-        <Accordion.Panel styles={panelStyles}>
-          <Text size="sm">{services["monitoring"].description}</Text>
-          <Checkbox
-            checked={isMonitoring}
-            label="Monitoring"
-            labelPosition="left"
-            size="lg"
-            onChange={(event) => setIsMonitoring(event.currentTarget.checked)}
-          />
-          {isMonitoring === true && (
-            <>
-              <Input.Wrapper
-                label="Grafana Hostname"
-                description="The domain where your grafana dashboard will be available."
-              >
-                <Input
-                  value={grafanaDomain}
-                  onChange={(e) => setGrafanaDomain(e.currentTarget.value)}
-                />
-              </Input.Wrapper>
-            </>
-          )}
-        </Accordion.Panel>
-      </Accordion.Item>
+      {architecture === "linux/amd64" && (
+        <Accordion.Item value="monitoring">
+          <Accordion.Control>
+            <Text size="lg">Monitoring</Text>
+          </Accordion.Control>
+          <Accordion.Panel styles={panelStyles}>
+            <Text size="sm">{services["monitoring"].description}</Text>
+            <Checkbox
+              checked={isMonitoring}
+              label="Monitoring"
+              labelPosition="left"
+              size="lg"
+              onChange={(event) => setIsMonitoring(event.currentTarget.checked)}
+            />
+            {isMonitoring === true && (
+              <>
+                <Input.Wrapper
+                  label="Grafana Hostname"
+                  description="The domain where your grafana dashboard will be available."
+                >
+                  <Input
+                    value={grafanaDomain}
+                    onChange={(e) => setGrafanaDomain(e.currentTarget.value)}
+                  />
+                </Input.Wrapper>
+              </>
+            )}
+          </Accordion.Panel>
+        </Accordion.Item>
+      )}
 
       <Accordion.Item value="watchtower">
         <Accordion.Control>

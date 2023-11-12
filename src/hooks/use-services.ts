@@ -12,6 +12,7 @@ export interface Service {
   bash?: string;
   code: PropertiesServices;
   volumes?: PropertiesVolumes;
+  architecture: Architectures[];
 }
 
 export interface ServiceMap {
@@ -24,7 +25,11 @@ export type MiningModes = "none" | "xmrig" | "p2pool";
 
 export type TorProxyModes = "none" | "tx-only" | "full";
 
+export type Architectures = "linux/amd64" | "linux/arm64";
+
 export const useServices = () => {
+  const [architecture, setArchitecture] =
+    useState<Architectures>("linux/amd64");
   const [isMoneroPublicNode, setIsMoneroPublicNode] = useState(true);
   const [moneroNodeDomain, setMoneroNodeDomain] = useState(
     "node.monerosuite.org"
@@ -84,6 +89,7 @@ export const useServices = () => {
             "The Monero daemon, monerod, is the core software that runs the Monero network. It is responsible for storing the blockchain and synchronizing transactions.",
           checked: true,
           required: true,
+          architecture: ["linux/amd64", "linux/arm64"],
           bash: isMoneroPublicNode
             ? `
 # Allow monerod p2p port and restricted rpc port
@@ -169,6 +175,7 @@ sudo ufw allow 18080/tcp 18089/tcp`
             "Run a monerod stagenet node. Stagenet is a testing network for developers. It is a separate blockchain with separate coins from the main Monero network.",
           checked: isStagenetNode,
           required: false,
+          architecture: ["linux/amd64", "linux/arm64"],
           bash: isStagenetNodePublic
             ? `
 # Allow monerod p2p port and restricted rpc port
@@ -234,6 +241,7 @@ sudo ufw allow 38080/tcp 38089/tcp`
             "P2Pool is a decentralized mining pool that works by creating a peer-to-peer network of miner nodes. For Moneros decentralization it is better to use P2Pool, instead of a centralized mining pool.",
           checked: p2PoolMode,
           required: false,
+          architecture: ["linux/amd64", "linux/arm64"],
           volumes: {
             "p2pool-data": {},
           },
@@ -295,6 +303,7 @@ sudo ufw allow 3333/tcp`
             "Monero Wallet RPC is a remote procedure call interface for Monero wallet.",
           checked: isMoneroWalletRpc,
           required: false,
+          architecture: ["linux/amd64", "linux/arm64"],
           code: {
             "monero-wallet-rpc": {
               image: "sethsimmons/simple-monero-wallet-rpc:latest",
@@ -320,6 +329,7 @@ sudo ufw allow 3333/tcp`
             "Moneroblock is a self-hostable block explorer for monero",
           checked: isMoneroblock,
           required: false,
+          architecture: ["linux/amd64", "linux/arm64"],
           code: {
             moneroblock: {
               image: "sethsimmons/moneroblock:latest",
@@ -352,6 +362,7 @@ sudo ufw allow 3333/tcp`
             "Onion Monero Blockchain Explorer allows you to browse Monero blockchain. It uses no JavaScript, no cookies and no trackers.",
           checked: isOnionMoneroBlockchainExplorer,
           required: false,
+          architecture: ["linux/amd64"],
           code: {
             onionMoneroBlockchainExplorer: {
               image: "vdo1138/xmrblocks:latest",
@@ -384,6 +395,7 @@ sudo ufw allow 3333/tcp`
             "Tor Proxy is a proxy server that forwards traffic into the Tor network.",
           checked: torProxyMode !== "none",
           required: false,
+          architecture: ["linux/amd64"],
           code: {
             "tor-proxy": {
               image: "peterdavehello/tor-socks-proxy:latest",
@@ -399,6 +411,7 @@ sudo ufw allow 3333/tcp`
             "Your own private Tor network for Monero and services like Moneroblock and P2Pool. You can share it with others or keep it to yourself.",
           checked: isHiddenServices,
           required: false,
+          architecture: ["linux/amd64"],
           volumes: {
             "tor-keys": {},
           },
@@ -455,6 +468,7 @@ sudo ufw allow 3333/tcp`
             "Watchtower is a service that monitors running Docker and watches for newer images. If there is a new version available, watchtower will autoamtically restart the container with the newest image.",
           checked: isWatchtower,
           required: false,
+          architecture: ["linux/amd64", "linux/arm64"],
           code: {
             watchtower: {
               image: "containrrr/watchtower:latest",
@@ -474,6 +488,7 @@ sudo ufw allow 3333/tcp`
             "Monitoring with Prometheus and Grafana: see your node stats visualized in graphs. See on a map where your peers are located.",
           checked: isMonitoring,
           required: false,
+          architecture: ["linux/amd64"],
           volumes: {
             grafana: {},
             prometheus: {},
@@ -581,6 +596,7 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
             "Autoheal is a simple Docker container that will monitor and restart unhealthy docker containers.",
           checked: isAutoheal,
           required: false,
+          architecture: ["linux/amd64", "linux/arm64"],
           code: {
             autoheal: {
               image: "willfarrell/autoheal:latest",
@@ -599,6 +615,7 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
             "XMRig is a high performance miner for Monero / RandomX. It supports both CPU and GPU mining, but this service is only meant to run on CPU.",
           checked: miningMode === "xmrig",
           required: false,
+          architecture: ["linux/amd64"],
           code: {
             xmrig: {
               image: "metal3d/xmrig:latest",
@@ -622,6 +639,7 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
             "Traefik is a modern HTTP reverse proxy and load balancer that makes deploying microservices easy.",
           checked: isTraefik,
           required: false,
+          architecture: ["linux/amd64", "linux/arm64"],
           volumes: {
             letsencrypt: {},
           },
@@ -679,9 +697,21 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
     ]
   );
 
+  const filteredServices = useMemo<ServiceMap>(
+    () =>
+      Object.fromEntries(
+        Object.entries(services).filter(([, service]) =>
+          service.architecture?.includes(architecture)
+        )
+      ),
+    [architecture, services]
+  );
+
   return {
-    services,
+    services: filteredServices,
     stateFunctions: {
+      architecture,
+      setArchitecture,
       isMoneroPublicNode,
       setIsMoneroPublicNode,
       isPrunedNode,
