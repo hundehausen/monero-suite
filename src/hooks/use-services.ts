@@ -20,6 +20,8 @@ export interface ServiceMap {
 
 export type P2PoolModes = "none" | "mini" | "full";
 
+export type MiningModes = "none" | "xmrig" | "p2pool";
+
 export type TorProxyModes = "none" | "tx-only" | "full";
 
 export const useServices = () => {
@@ -38,7 +40,9 @@ export const useServices = () => {
   const [p2PoolPayoutAddress, setP2PoolPayoutAddress] = useState(
     "48oc8c65B9JPv6FBZBg7UN9xUYmxux6WfEh61WBoKca7Amh7r7bnCZ7JJicLw7UN3DEgEADwqrhwxGBJazPZ14PJGbmMyXX"
   );
-  const [p2PoolMiningThreads, setP2PoolMiningThreads] = useState(0);
+  const [miningMode, setMiningMode] = useState<MiningModes>("none");
+  const [xmrigDonateLevel, setXmrigDonateLevel] = useState(1);
+  const [p2PoolMiningThreads, setP2PoolMiningThreads] = useState(4);
   const [isMoneroWalletRpc, setIsMoneroWalletRpc] = useState(false);
   const [torProxyMode, setTorProxyMode] = useState<TorProxyModes>("none");
   const [isHiddenServices, setIsHiddenServices] = useState(false);
@@ -57,7 +61,6 @@ export const useServices = () => {
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [grafanaDomain, setGrafanaDomain] = useState("grafana.monerosuite.org");
   const [isAutoheal, setIsAutoheal] = useState(false);
-  const [isXmrig, setIsXmrig] = useState(false);
   const [isTraefik, setIsTraefik] = useState(false);
 
   useEffect(() => {
@@ -278,7 +281,7 @@ sudo ufw allow 3333/tcp`
                       "--addpeers 65.21.227.114:37889,node.sethforprivacy.com:37889",
                     ]
                   : []),
-                ...(p2PoolMiningThreads > 0
+                ...(miningMode === "p2pool"
                   ? [`--start-mining ${p2PoolMiningThreads}`]
                   : []),
                 ...(torProxyMode === "full" ? ["--socks5 127.0.0.1:9150"] : []),
@@ -593,18 +596,23 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
         xmrig: {
           name: "XMRig",
           description:
-            "XMRig is a high performance Monero (XMR) CPU miner, with official support for Windows.",
-          checked: isXmrig,
+            "XMRig is a high performance miner for Monero / RandomX. It supports both CPU and GPU mining, but this service is only meant to run on CPU.",
+          checked: miningMode === "xmrig",
           required: false,
           code: {
             xmrig: {
-              image: "minerboy/xmrig:latest",
+              image: "metal3d/xmrig:latest",
               container_name: "xmrig",
               restart: "unless-stopped",
               cap_add: ["SYS_ADMIN", "SYS_RAWIO"],
               devices: ["/dev/cpu", "/dev/mem"],
               volumes: ["/lib/modules:/lib/modules"],
-              command: ["-o p2pool:3333"],
+              environment: {
+                POOL_URL: "p2pool:3333",
+                POOL_USER: "xmrig",
+                POOL_PASS: "",
+                DONATE_LEVEL: xmrigDonateLevel,
+              },
             },
           },
         },
@@ -644,29 +652,30 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
       } as ServiceMap),
     [
       isMoneroPublicNode,
+      p2PoolMode,
       isPrunedNode,
       isSyncPrunedBlocks,
+      isHiddenServices,
+      torProxyMode,
+      isTraefik,
+      moneroNodeDomain,
       isStagenetNode,
       isStagenetNodePublic,
       stagenetNodeDomain,
-      isMoneroWalletRpc,
-      p2PoolMode,
       p2PoolPayoutAddress,
       p2PoolMiningThreads,
-      isXmrig,
+      isMoneroWalletRpc,
       isMoneroblock,
+      moneroBlockDomain,
       isMoneroblockLogging,
       isOnionMoneroBlockchainExplorer,
-      grafanaDomain,
-      torProxyMode,
-      isHiddenServices,
-      isWatchtower,
-      isMonitoring,
-      isAutoheal,
-      isTraefik,
-      moneroNodeDomain,
-      moneroBlockDomain,
       onionMoneroBlockchainExplorerDomain,
+      isMonitoring,
+      isWatchtower,
+      grafanaDomain,
+      isAutoheal,
+      miningMode,
+      xmrigDonateLevel,
     ]
   );
 
@@ -691,10 +700,10 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
       setP2PoolMode,
       p2PoolPayoutAddress,
       setP2PoolPayoutAddress,
+      miningMode,
+      setMiningMode,
       p2PoolMiningThreads,
       setP2PoolMiningThreads,
-      isXmrig,
-      setIsXmrig,
       isMoneroblock,
       setIsMoneroblock,
       isMoneroblockLogging,

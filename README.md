@@ -5,6 +5,7 @@ This project lets you run a Monero node, P2Pool, and MoneroBlock in Docker conta
 - [monerod](http://getmonero.org) (the Monero daemon)
 - [monero-wallet-rpc](https://web.getmonero.org/resources/developer-guides/wallet-rpc.html) (the Monero wallet RPC - control a wallet with code)
 - [P2Pool](https://github.com/SChernykh/p2pool) (a decentralized mining pool for Monero)
+- [XMRig](https://xmrig.com/) (an efficient Monero CPU miner - runs on the P2Pool node)
 - [Traefik](https://traefik.io) (a reverse proxy for other services, so they can be reached via a domain name)
 - [MoneroBlock](https://github.com/duggavo/MoneroBlock) (a Monero block explorer)
 - [Monitoring](https://github.com/lalanza808/docker-monero-node) (a monitoring stack with Prometheus, Grafana, and monerod-exporter. It serves a beautiful dashboard with all stats of your node. And it even has a map with all nodes that are connected to your node.)

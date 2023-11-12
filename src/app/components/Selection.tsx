@@ -1,5 +1,6 @@
 import {
   P2PoolModes,
+  MiningModes,
   ServiceMap,
   TorProxyModes,
   useServices,
@@ -55,8 +56,8 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     setP2PoolPayoutAddress,
     p2PoolMiningThreads,
     setP2PoolMiningThreads,
-    isXmrig,
-    setIsXmrig,
+    miningMode,
+    setMiningMode,
     isMoneroblock,
     setIsMoneroblock,
     moneroBlockDomain,
@@ -356,28 +357,60 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
                   }
                 />
               </Input.Wrapper>
-              <Text>Integrated P2Pool Mining</Text>
-              <Slider
-                value={p2PoolMiningThreads}
-                onChange={setP2PoolMiningThreads}
-                defaultValue={0}
-                min={0}
-                max={16}
-                label={(value) => value + " threads"}
-                thumbLabel="always"
-                step={1}
+              <Text>CPU Mining</Text>
+              <SegmentedControl
+                value={miningMode}
+                onChange={(value) => setMiningMode(value as MiningModes)}
                 styles={{
-                  root: {
-                    width: "100%",
-                    maxWidth: "300px",
+                  label: {
+                    fontSize: "16px",
                   },
                 }}
+                data={[
+                  {
+                    label: "None",
+                    value: "none",
+                  },
+                  {
+                    label: "XMRig",
+                    value: "xmrig",
+                  },
+                  {
+                    label: (
+                      <ExplainingLabel
+                        label="P2Pool"
+                        explanation="The P2Pool software has a integrated CPU miner. XMRig might be more efficient."
+                      />
+                    ),
+                    value: "p2pool",
+                  },
+                ]}
               />
-              <Text size="sm">
-                {p2PoolMiningThreads > 0
-                  ? `${p2PoolMiningThreads} Threads`
-                  : `No mining`}
-              </Text>
+              {miningMode === "p2pool" && (
+                <>
+                  <Slider
+                    value={p2PoolMiningThreads}
+                    onChange={setP2PoolMiningThreads}
+                    defaultValue={1}
+                    min={1}
+                    max={16}
+                    label={(value) =>
+                      `${value} ${value > 1 ? `Threads` : `Thread`}`
+                    }
+                    thumbLabel="always"
+                    step={1}
+                    styles={{
+                      root: {
+                        width: "100%",
+                        maxWidth: "300px",
+                      },
+                    }}
+                  />
+                  <Text size="sm">{`${p2PoolMiningThreads} ${
+                    p2PoolMiningThreads > 1 ? `Threads` : `Thread`
+                  }`}</Text>
+                </>
+              )}
             </>
           )}
         </Accordion.Panel>
