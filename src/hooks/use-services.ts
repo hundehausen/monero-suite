@@ -31,6 +31,7 @@ export const useServices = () => {
   const [architecture, setArchitecture] =
     useState<Architectures>("linux/amd64");
   const [isMoneroPublicNode, setIsMoneroPublicNode] = useState(true);
+  const [moneroNodeNoLogs, setMoneroNodeNoLogs] = useState(false);
   const [moneroNodeDomain, setMoneroNodeDomain] = useState(
     "node.monerosuite.org"
   );
@@ -125,8 +126,9 @@ sudo ufw allow 18080/tcp 18089/tcp`
                 "--confirm-external-bind",
                 "--enable-dns-blocklist",
                 "--check-updates=disabled",
-                "--max-log-files=3",
-                "--max-log-file-size=1048576",
+                ...(moneroNodeNoLogs
+                  ? ["--log-file=/dev/null", "--max-log-file-size=0"]
+                  : ["--max-log-files=3", "--max-log-file-size=1048576"]),
                 "--no-igd",
                 "--out-peers=64",
                 "--limit-rate-down=1048576",
@@ -155,6 +157,7 @@ sudo ufw allow 18080/tcp 18089/tcp`
                     ]
                   : []),
               ],
+              logging: moneroNodeNoLogs ? { driver: "none" } : undefined,
               labels: isTraefik
                 ? {
                     "traefik.enable": "true",
@@ -204,13 +207,15 @@ sudo ufw allow 38080/tcp 38089/tcp`
                 "--enable-dns-blocklist",
                 "--check-updates=disabled",
                 "--no-igd",
-                "--max-log-files=3",
-                "--max-log-file-size=1048576",
+                ...(moneroNodeNoLogs
+                  ? ["--log-file=/dev/null"]
+                  : ["--max-log-files=3", "--max-log-file-size=1048576"]),
                 "--out-peers=32",
                 "--limit-rate-down=1048576",
                 ...(isStagenetNodePublic ? ["--public-node"] : []),
                 "--stagenet",
               ],
+              logging: !moneroNodeNoLogs ? undefined : { driver: "none" },
               healthcheck: {
                 test: [
                   "CMD-SHELL",
@@ -670,6 +675,7 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
       } as ServiceMap),
     [
       isMoneroPublicNode,
+      moneroNodeNoLogs,
       p2PoolMode,
       isPrunedNode,
       isSyncPrunedBlocks,
@@ -718,6 +724,8 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env
       setIsPrunedNode,
       isSyncPrunedBlocks,
       setIsSyncPrunedBlocks,
+      moneroNodeNoLogs,
+      setMoneroNodeNoLogs,
       isStagenetNode,
       setIsStagenetNode,
       isStagenetNodePublic,

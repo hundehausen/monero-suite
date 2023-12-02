@@ -39,6 +39,8 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     setArchitecture,
     isMoneroPublicNode,
     setIsMoneroPublicNode,
+    moneroNodeNoLogs,
+    setMoneroNodeNoLogs,
     moneroNodeDomain,
     setMoneroNodeDomain,
     isPrunedNode,
@@ -224,6 +226,15 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
               />
             </>
           )}
+          <Checkbox
+            checked={moneroNodeNoLogs}
+            label="Disable Monero Node logging"
+            labelPosition="left"
+            size="md"
+            onChange={(event) =>
+              setMoneroNodeNoLogs(event.currentTarget.checked)
+            }
+          />
           {isMoneroPublicNode && isTraefik && (
             <>
               <Input.Wrapper
@@ -278,6 +289,15 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
                     width: "70px",
                   },
                 }}
+              />
+              <Checkbox
+                checked={moneroNodeNoLogs}
+                label="Disable Monero Node logging"
+                labelPosition="left"
+                size="md"
+                onChange={(event) =>
+                  setMoneroNodeNoLogs(event.currentTarget.checked)
+                }
               />
               {isStagenetNodePublic && isTraefik && (
                 <Input.Wrapper
@@ -470,7 +490,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
           {isMoneroblock && (
             <Checkbox
               checked={!isMoneroblockLogging}
-              label="Disable Moneroblock logging for more privacy"
+              label="Disable Moneroblock logging"
               labelPosition="left"
               size="md"
               onChange={(event) =>
