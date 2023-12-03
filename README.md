@@ -1,6 +1,11 @@
 # Monero Suite
+<p align="center">
+  <img align="center" src="public/monero-suite-logo-transparent-small.png" alt="...">
+</p>
 
 This project lets you run a Monero node, P2Pool, and MoneroBlock in Docker containers. It also includes Tor for anonymity and Watchtower for auto-updating the containers.
+
+## Features
 
 - [monerod](http://getmonero.org) (the Monero daemon)
 - [monero-wallet-rpc](https://web.getmonero.org/resources/developer-guides/wallet-rpc.html) (the Monero wallet RPC - control a wallet with code)
