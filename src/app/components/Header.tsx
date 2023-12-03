@@ -3,12 +3,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { FaGithub } from "react-icons/fa";
 import { DarkModeSwitch } from "react-toggle-dark-mode";
+import Logo from "../../../public/monero-suite-logo-transparent.png";
 
 const Header = () => {
   const { colorScheme, setColorScheme } = useMantineColorScheme();
   return (
     <Flex justify="space-between" align="center" w={"100%"}>
-      <Title order={1}>Monero Suite</Title>
+      <Flex align="center" gap={16}>
+        <Image src={Logo} alt="Monero Suite logo" width={40} height={40} />
+        <Title order={1}>Monero Suite</Title>
+      </Flex>
       <Flex
         align="center"
         justify="space-between"
