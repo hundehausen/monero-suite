@@ -43,11 +43,10 @@ docker compose logs tor
 ## Roadmap
 no particular order
 
-- add [xmrig](https://github.com/xmrig/xmrig) and [xmrig-proxy](https://github.com/xmrig/xmrig-proxy)
 - add merchant software. Maybe BTCPayServer, [MoneroPay](https://github.com/moneropay/moneropay), [HotShop](https://github.com/CryptoGrampy/HotShop)
 - add [Monero Light Wallet Server](https://github.com/vtnerd/monero-lws)
 - add [Onion Monero Blockchain Explorer](https://github.com/moneroexamples/onion-monero-blockchain-explorer) (a Monero block explorer without JavaScript)
-- add [Gitea](https://github.com/go-gitea/gitea) (a self-hosted Git service) to mirror the Monero repositories
+- add [nerostr](https://github.com/pluja/nerostr) (a nostr monero-paid relay)
 - make configurations shareable
 
 ## Donations
