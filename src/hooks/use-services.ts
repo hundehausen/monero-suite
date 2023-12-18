@@ -135,7 +135,7 @@ sudo ufw allow 18080/tcp 18089/tcp`
                 ...(isPrunedNode ? ["--prune-blockchain"] : []),
                 ...(isSyncPrunedBlocks ? ["--sync-pruned-blocks"] : []),
                 ...(isMoneroPublicNode ? ["--public-node"] : []),
-                ...(p2PoolMode !== "none"
+                ...(p2PoolMode !== "none" || isMonitoring
                   ? ["--zmq-pub=tcp://0.0.0.0:18084"]
                   : ["--no-zmq"]),
                 ...(isHiddenServices ? ["--disable-rpc-ban"] : []),
