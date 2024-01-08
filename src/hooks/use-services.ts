@@ -243,7 +243,7 @@ sudo ufw allow 38080/tcp 38089/tcp`
         p2pool: {
           name: "P2Pool",
           description:
-            "P2Pool is a decentralized mining pool that works by creating a peer-to-peer network of miner nodes. For Moneros decentralization it is better to use P2Pool, instead of a centralized mining pool.",
+            "P2Pool is a decentralized mining pool that works by creating a peer-to-peer network of miner nodes. For Monero's decentralization, it is better to use P2Pool instead of a centralized mining pool.",
           checked: p2PoolMode,
           required: false,
           architecture: ["linux/amd64", "linux/arm64"],
@@ -470,7 +470,7 @@ sudo ufw allow 3333/tcp`
         watchtower: {
           name: "Watchtower",
           description:
-            "Watchtower is a service that monitors running Docker and watches for newer images. If there is a new version available, watchtower will autoamtically restart the container with the newest image.",
+            "Watchtower is a service that monitors running Docker and watches for newer images. If there is a new version available, watchtower will automatically restart the container with the newest image.",
           checked: isWatchtower,
           required: false,
           architecture: ["linux/amd64", "linux/arm64"],
