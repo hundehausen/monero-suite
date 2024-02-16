@@ -10,10 +10,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@mantine/code-highlight": "^7.5.1",
-    "@mantine/core": "^7.5.1",
-    "@mantine/hooks": "^7.5.1",
-    "@types/node": "20.11.17",
+    "@mantine/code-highlight": "^7.5.3",
+    "@mantine/core": "^7.5.3",
+    "@mantine/hooks": "^7.5.3",
+    "@types/node": "20.11.19",
     "@types/react": "18.2.55",
     "@types/react-dom": "18.2.19",
     "autoprefixer": "10.4.17",
