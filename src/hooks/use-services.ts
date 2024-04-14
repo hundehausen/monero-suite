@@ -191,12 +191,15 @@ sudo ufw allow 18080/tcp 18089/tcp`
 # Allow monerod p2p port and restricted rpc port
 sudo ufw allow 38080/tcp 38089/tcp`
             : undefined,
+          volumes: {
+            "bitmonero-stagenet": {},
+          },
           code: {
             "monerod-stagenet": {
               image: "sethsimmons/simple-monerod:latest",
               restart: "unless-stopped",
-              container_name: "monerod",
-              volumes: ["bitmonero:/home/monero"],
+              container_name: "monerod-stagenet",
+              volumes: ["bitmonero-stagenet:/home/monero"],
               ports: [
                 ...(isStagenetNodePublic
                   ? ["38080:38080"]
