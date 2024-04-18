@@ -101,7 +101,7 @@ sudo ufw allow 18080/tcp 18089/tcp`
           },
           code: {
             monerod: {
-              image: "sethsimmons/simple-monerod:latest",
+              image: "ghcr.io/sethforprivacy/simple-monerod:latest",
               restart: "unless-stopped",
               container_name: "monerod",
               volumes: ["bitmonero:/home/monero/.bitmonero"],
@@ -196,7 +196,7 @@ sudo ufw allow 38080/tcp 38089/tcp`
           },
           code: {
             "monerod-stagenet": {
-              image: "sethsimmons/simple-monerod:latest",
+              image: "ghcr.io/sethforprivacy/simple-monerod:latest",
               restart: "unless-stopped",
               container_name: "monerod-stagenet",
               volumes: ["bitmonero-stagenet:/home/monero"],
@@ -276,7 +276,7 @@ sudo ufw allow 3333/tcp`
               : undefined,
           code: {
             p2pool: {
-              image: "sethsimmons/p2pool:latest",
+              image: "ghcr.io/sethforprivacy/p2pool:latest",
               restart: "unless-stopped",
               container_name: "p2pool",
               tty: true,
