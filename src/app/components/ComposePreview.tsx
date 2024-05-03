@@ -6,7 +6,6 @@ import { FaDocker } from "react-icons/fa";
 import { Compose } from "compose-spec-schema";
 
 const dockerComposeBase: Compose = {
-  version: "3.8",
   name: "monero-suite",
   services: {},
   volumes: {},
