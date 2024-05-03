@@ -12,45 +12,71 @@ export interface Service {
   bash?: string;
   code: PropertiesServices;
   volumes?: PropertiesVolumes;
-  architecture: Architectures[];
+  architecture: Architecture[];
 }
 
 export interface ServiceMap {
   [key: string]: Service;
 }
 
-export type P2PoolModes = "none" | "mini" | "full";
+const p2poolModes = {
+  none: "none",
+  mini: "mini",
+  full: "full",
+} as const;
 
-export type MiningModes = "none" | "xmrig" | "p2pool";
+export type P2PoolMode = (typeof p2poolModes)[keyof typeof p2poolModes];
 
-export type TorProxyModes = "none" | "tx-only" | "full";
+const minigModes = {
+  none: "none",
+  xmrig: "xmrig",
+  p2pool: "p2pool",
+} as const;
 
-export type Architectures = "linux/amd64" | "linux/arm64";
+export type MiningMode = (typeof minigModes)[keyof typeof minigModes];
+
+const torProxyModes = {
+  none: "none",
+  txonly: "tx-only",
+  full: "full",
+} as const;
+
+export type TorProxyMode = (typeof torProxyModes)[keyof typeof torProxyModes];
+
+const architectures = {
+  linuxAmd: "linux/amd64",
+  linuxArm: "linux/arm64",
+} as const;
+
+export type Architecture = (typeof architectures)[keyof typeof architectures];
 
 export const useServices = () => {
-  const [architecture, setArchitecture] =
-    useState<Architectures>("linux/amd64");
+  const [architecture, setArchitecture] = useState<Architecture>(
+    architectures.linuxAmd
+  );
   const [isMoneroPublicNode, setIsMoneroPublicNode] = useState(true);
   const [moneroNodeNoLogs, setMoneroNodeNoLogs] = useState(false);
   const [moneroNodeDomain, setMoneroNodeDomain] = useState(
     "node.monerosuite.org"
   );
-  const [isPrunedNode, setIsPrunedNode] = useState(true);
+  const [isPrunedNode, setIsPrunedNode] = useState(false);
   const [isSyncPrunedBlocks, setIsSyncPrunedBlocks] = useState(false);
   const [isStagenetNode, setIsStagenetNode] = useState(false);
   const [isStagenetNodePublic, setIsStagenetNodePublic] = useState(true);
   const [stagenetNodeDomain, setStagenetNodeDomain] = useState(
     "stagenet.monerosuite.org"
   );
-  const [p2PoolMode, setP2PoolMode] = useState<P2PoolModes>("none");
+  const [p2PoolMode, setP2PoolMode] = useState<P2PoolMode>(p2poolModes.none);
   const [p2PoolPayoutAddress, setP2PoolPayoutAddress] = useState(
     "48oc8c65B9JPv6FBZBg7UN9xUYmxux6WfEh61WBoKca7Amh7r7bnCZ7JJicLw7UN3DEgEADwqrhwxGBJazPZ14PJGbmMyXX"
   );
-  const [miningMode, setMiningMode] = useState<MiningModes>("none");
+  const [miningMode, setMiningMode] = useState<MiningMode>(minigModes.none);
   const [xmrigDonateLevel, setXmrigDonateLevel] = useState(1);
   const [p2PoolMiningThreads, setP2PoolMiningThreads] = useState(4);
   const [isMoneroWalletRpc, setIsMoneroWalletRpc] = useState(false);
-  const [torProxyMode, setTorProxyMode] = useState<TorProxyModes>("none");
+  const [torProxyMode, setTorProxyMode] = useState<TorProxyMode>(
+    torProxyModes.none
+  );
   const [isHiddenServices, setIsHiddenServices] = useState(false);
   const [isWatchtower, setIsWatchtower] = useState(false);
   const [isMoneroblock, setIsMoneroblock] = useState(false);
@@ -90,7 +116,7 @@ export const useServices = () => {
             "The Monero daemon, monerod, is the core software that runs the Monero network. It is responsible for storing the blockchain and synchronizing transactions.",
           checked: true,
           required: true,
-          architecture: ["linux/amd64", "linux/arm64"],
+          architecture: [architectures.linuxAmd, architectures.linuxArm],
           bash: isMoneroPublicNode
             ? `
 # Allow monerod p2p port and restricted rpc port
@@ -109,7 +135,7 @@ sudo ufw allow 18080/tcp 18089/tcp`
                 ...(isMoneroPublicNode
                   ? ["18080:18080"]
                   : ["127.0.0.1:18080:18080"]),
-                ...(p2PoolMode !== "none"
+                ...(p2PoolMode !== p2poolModes.none
                   ? isMoneroPublicNode
                     ? ["18084:18084"]
                     : ["127.0.0.1:18084:18084"]
@@ -135,19 +161,19 @@ sudo ufw allow 18080/tcp 18089/tcp`
                 ...(isPrunedNode ? ["--prune-blockchain"] : []),
                 ...(isSyncPrunedBlocks ? ["--sync-pruned-blocks"] : []),
                 ...(isMoneroPublicNode ? ["--public-node"] : []),
-                ...(p2PoolMode !== "none" || isMonitoring
+                ...(p2PoolMode !== p2poolModes.none || isMonitoring
                   ? ["--zmq-pub=tcp://0.0.0.0:18084"]
                   : ["--no-zmq"]),
                 ...(isHiddenServices ? ["--disable-rpc-ban"] : []),
                 ...(isHiddenServices && !isMoneroPublicNode
                   ? ["--rpc-ssl=disabled"]
                   : []),
-                ...(torProxyMode === "full"
+                ...(torProxyMode === torProxyModes.full
                   ? ["--proxy=127.0.0.1:9150"]
-                  : torProxyMode === "tx-only"
+                  : torProxyMode === torProxyModes.txonly
                   ? ["--tx-proxy=tor,127.0.0.1:9150,32"]
                   : []),
-                ...(torProxyMode !== "none"
+                ...(torProxyMode !== torProxyModes.none
                   ? [
                       "--add-priority-node=xwvz3ekocr3dkyxfkmgm2hvbpzx2ysqmaxgter7znnqrhoicygkfswid.onion:18083",
                       "--add-priority-node=4pixvbejrvihnkxmduo2agsnmc3rrulrqc7s3cbwwrep6h6hrzsibeqd.onion:18083",
@@ -185,7 +211,7 @@ sudo ufw allow 18080/tcp 18089/tcp`
             "Run a monerod stagenet node. Stagenet is a testing network for developers. It is a separate blockchain with separate coins from the main Monero network.",
           checked: isStagenetNode,
           required: false,
-          architecture: ["linux/amd64", "linux/arm64"],
+          architecture: [architectures.linuxAmd, architectures.linuxArm],
           bash: isStagenetNodePublic
             ? `
 # Allow monerod p2p port and restricted rpc port
@@ -256,18 +282,18 @@ sudo ufw allow 38080/tcp 38089/tcp`
             "P2Pool is a decentralized mining pool that works by creating a peer-to-peer network of miner nodes. For Monero's decentralization, it is better to use P2Pool instead of a centralized mining pool.",
           checked: p2PoolMode,
           required: false,
-          architecture: ["linux/amd64", "linux/arm64"],
+          architecture: [architectures.linuxAmd, architectures.linuxArm],
           volumes: {
             "p2pool-data": {},
           },
           bash:
-            p2PoolMode === "mini"
+            p2PoolMode === p2poolModes.mini
               ? `
 # Allow p2pool mini p2p port
 sudo ufw allow 37888/tcp
 # Allow p2pool stratum port
 sudo ufw allow 3333/tcp`
-              : p2PoolMode === "full"
+              : p2PoolMode === p2poolModes.full
               ? `
 # Allow p2pool p2p port
 sudo ufw allow 37889/tcp
@@ -287,27 +313,31 @@ sudo ufw allow 3333/tcp`
               ],
               ports: [
                 "3333:3333",
-                ...(p2PoolMode === "mini" ? ["37888:37888"] : []),
-                ...(p2PoolMode === "full" ? ["37889:37889"] : []),
+                ...(p2PoolMode === p2poolModes.mini ? ["37888:37888"] : []),
+                ...(p2PoolMode === p2poolModes.full ? ["37889:37889"] : []),
               ],
               command: [
                 `--wallet ${p2PoolPayoutAddress}`,
                 "--stratum 0.0.0.0:3333",
-                `--p2p 0.0.0.0:${p2PoolMode === "mini" ? "37888" : "37889"}`,
+                `--p2p 0.0.0.0:${
+                  p2PoolMode === p2poolModes.mini ? "37888" : "37889"
+                }`,
                 "--rpc-port 18089",
                 "--zmq-port 18084",
                 "--host monerod",
-                ...(p2PoolMode === "mini"
+                ...(p2PoolMode === p2poolModes.mini
                   ? ["--addpeers node.portemonero.com:37888", "--mini"]
-                  : p2PoolMode === "full"
+                  : p2PoolMode === p2poolModes.full
                   ? [
                       "--addpeers 65.21.227.114:37889,node.sethforprivacy.com:37889",
                     ]
                   : []),
-                ...(miningMode === "p2pool"
+                ...(miningMode === minigModes.p2pool
                   ? [`--start-mining ${p2PoolMiningThreads}`]
                   : []),
-                ...(torProxyMode === "full" ? ["--socks5 127.0.0.1:9150"] : []),
+                ...(torProxyMode === torProxyModes.full
+                  ? ["--socks5 127.0.0.1:9150"]
+                  : []),
               ].join(" "),
             },
           },
@@ -318,7 +348,7 @@ sudo ufw allow 3333/tcp`
             "Monero Wallet RPC is a remote procedure call interface for Monero wallet.",
           checked: isMoneroWalletRpc,
           required: false,
-          architecture: ["linux/amd64", "linux/arm64"],
+          architecture: [architectures.linuxAmd, architectures.linuxArm],
           code: {
             "monero-wallet-rpc": {
               image: "sethsimmons/simple-monero-wallet-rpc:latest",
@@ -344,7 +374,7 @@ sudo ufw allow 3333/tcp`
             "Moneroblock is a self-hostable block explorer for monero",
           checked: isMoneroblock,
           required: false,
-          architecture: ["linux/amd64", "linux/arm64"],
+          architecture: [architectures.linuxAmd, architectures.linuxArm],
           code: {
             moneroblock: {
               image: "sethsimmons/moneroblock:latest",
@@ -377,7 +407,7 @@ sudo ufw allow 3333/tcp`
             "Onion Monero Blockchain Explorer allows you to browse Monero blockchain. It uses no JavaScript, no cookies and no trackers.",
           checked: isOnionMoneroBlockchainExplorer,
           required: false,
-          architecture: ["linux/amd64"],
+          architecture: [architectures.linuxAmd],
           code: {
             onionMoneroBlockchainExplorer: {
               image: "vdo1138/xmrblocks:latest",
@@ -408,9 +438,9 @@ sudo ufw allow 3333/tcp`
           name: "Tor Proxy",
           description:
             "Tor Proxy is a proxy server that forwards traffic into the Tor network.",
-          checked: torProxyMode !== "none",
+          checked: torProxyMode !== torProxyModes.none,
           required: false,
-          architecture: ["linux/amd64"],
+          architecture: [architectures.linuxAmd],
           code: {
             "tor-proxy": {
               image: "peterdavehello/tor-socks-proxy:latest",
@@ -426,7 +456,7 @@ sudo ufw allow 3333/tcp`
             "Your own private Tor network for Monero and services like Moneroblock and P2Pool. You can share it with others or keep it to yourself.",
           checked: isHiddenServices,
           required: false,
-          architecture: ["linux/amd64"],
+          architecture: [architectures.linuxAmd],
           volumes: {
             "tor-keys": {},
           },
@@ -438,7 +468,7 @@ sudo ufw allow 3333/tcp`
               links: [
                 "monerod",
                 ...(isStagenetNode ? ["monerod-stagenet"] : []),
-                ...(p2PoolMode !== "none" ? ["p2pool"] : []),
+                ...(p2PoolMode !== p2poolModes.none ? ["p2pool"] : []),
                 ...(isMoneroblock ? ["moneroblock"] : []),
                 ...(isOnionMoneroBlockchainExplorer
                   ? ["onion-monero-blockchain-explorer"]
@@ -453,7 +483,7 @@ sudo ufw allow 3333/tcp`
                         "38089:monerod-stagenet:38089",
                     }
                   : {}),
-                ...(p2PoolMode !== "none"
+                ...(p2PoolMode !== p2poolModes.none
                   ? {
                       P2POOL_TOR_SERVICE_HOSTS: "3333:p2pool:3333",
                     }
@@ -483,7 +513,7 @@ sudo ufw allow 3333/tcp`
             "Watchtower is a service that monitors running Docker and watches for newer images. If there is a new version available, watchtower will automatically restart the container with the newest image.",
           checked: isWatchtower,
           required: false,
-          architecture: ["linux/amd64", "linux/arm64"],
+          architecture: [architectures.linuxAmd, architectures.linuxArm],
           code: {
             watchtower: {
               image: "containrrr/watchtower:latest",
@@ -503,7 +533,7 @@ sudo ufw allow 3333/tcp`
             "Monitoring with Prometheus and Grafana: see your node stats visualized in graphs. See on a map where your peers are located.",
           checked: isMonitoring,
           required: false,
-          architecture: ["linux/amd64"],
+          architecture: [architectures.linuxAmd],
           volumes: {
             grafana: {},
             prometheus: {},
@@ -612,7 +642,7 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env`,
             "Autoheal is a simple Docker container that will monitor and restart unhealthy docker containers.",
           checked: isAutoheal,
           required: false,
-          architecture: ["linux/amd64", "linux/arm64"],
+          architecture: [architectures.linuxAmd, architectures.linuxArm],
           code: {
             autoheal: {
               image: "willfarrell/autoheal:latest",
@@ -629,9 +659,9 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env`,
           name: "XMRig",
           description:
             "XMRig is a high performance miner for Monero / RandomX. It supports both CPU and GPU mining, but this service is only meant to run on CPU.",
-          checked: miningMode === "xmrig",
+          checked: miningMode === minigModes.xmrig,
           required: false,
-          architecture: ["linux/amd64"],
+          architecture: [architectures.linuxAmd],
           code: {
             xmrig: {
               image: "metal3d/xmrig:latest",
@@ -655,7 +685,7 @@ echo GF_SECURITY_ADMIN_USER=admin >> .env`,
             "Traefik is a modern HTTP reverse proxy and load balancer that makes deploying microservices easy.",
           checked: isTraefik,
           required: false,
-          architecture: ["linux/amd64", "linux/arm64"],
+          architecture: [architectures.linuxAmd, architectures.linuxArm],
           volumes: {
             letsencrypt: {},
           },
