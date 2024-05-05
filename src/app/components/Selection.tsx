@@ -1,10 +1,10 @@
 import {
-  P2PoolModes,
-  MiningModes,
+  P2PoolMode,
+  MiningMode,
   ServiceMap,
-  TorProxyModes,
+  TorProxyMode,
   useServices,
-  Architectures,
+  Architecture,
 } from "@/hooks/use-services";
 import {
   Checkbox,
@@ -140,7 +140,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
         <Accordion.Panel styles={panelStyles}>
           <SegmentedControl
             value={architecture}
-            onChange={(value) => setArchitecture(value as Architectures)}
+            onChange={(value) => setArchitecture(value as Architecture)}
             styles={{
               control: {
                 marginLeft: "auto",
@@ -364,7 +364,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
           <Text size="sm">{services["p2pool"].description}</Text>
           <SegmentedControl
             value={p2PoolMode}
-            onChange={(value) => setP2PoolMode(value as P2PoolModes)}
+            onChange={(value) => setP2PoolMode(value as P2PoolMode)}
             styles={{
               label: {
                 fontSize: "16px",
@@ -417,7 +417,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
               <Text>CPU Mining</Text>
               <SegmentedControl
                 value={miningMode}
-                onChange={(value) => setMiningMode(value as MiningModes)}
+                onChange={(value) => setMiningMode(value as MiningMode)}
                 styles={{
                   label: {
                     fontSize: "16px",
@@ -531,7 +531,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
             <Text size="sm">{services["tor-proxy"].description}</Text>
             <SegmentedControl
               value={torProxyMode}
-              onChange={(value) => setTorProxyMode(value as TorProxyModes)}
+              onChange={(value) => setTorProxyMode(value as TorProxyMode)}
               styles={{
                 label: {
                   fontSize: "16px",
