@@ -443,7 +443,7 @@ sudo ufw allow 3333/tcp`
           architecture: [architectures.linuxAmd],
           code: {
             "tor-proxy": {
-              image: "peterdavehello/tor-socks-proxy:latest",
+              image: "ghcr.io/peterdavehello/tor-socks-proxy:latest",
               container_name: "tor-proxy",
               restart: "unless-stopped",
               ports: ["127.0.0.1:9150:9150"],
@@ -540,6 +540,7 @@ sudo ufw allow 3333/tcp`
           },
           bash: `
 # Download default Prometheus and Grafana configs/dashboards
+# Execute line by line
 mkdir -p monitoring/grafana/dashboards monitoring/grafana/provisioning/{dashboards,datasources} monitoring/prometheus 
 wget -O monitoring/prometheus/config.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/prometheus/config.yaml
 wget -O monitoring/grafana/grafana.ini https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/grafana.ini
