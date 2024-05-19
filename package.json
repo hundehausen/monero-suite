@@ -10,11 +10,11 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@mantine/code-highlight": "^7.9.0",
-    "@mantine/core": "^7.9.0",
-    "@mantine/hooks": "^7.9.0",
-    "@types/node": "20.12.8",
-    "@types/react": "18.3.1",
+    "@mantine/code-highlight": "^7.9.2",
+    "@mantine/core": "^7.9.2",
+    "@mantine/hooks": "^7.9.2",
+    "@types/node": "20.12.12",
+    "@types/react": "18.3.2",
     "@types/react-dom": "18.3.0",
     "autoprefixer": "10.4.19",
     "compose-spec-schema": "^1.0.0",
@@ -23,7 +23,7 @@
     "next": "14.2.3",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-icons": "^5.2.0",
+    "react-icons": "^5.2.1",
     "react-toggle-dark-mode": "^1.1.1",
     "typescript": "5.4.5",
     "yaml": "^2.4.2"
