@@ -144,6 +144,21 @@ sudo ufw allow 18080/tcp 18089/tcp`
                   ? ["18089:18089"]
                   : ["127.0.0.1:18089:18089"]),
               ],
+              depends_on:
+                torProxyMode !== "none"
+                  ? {
+                      "tor-proxy": {
+                        condition: "service_started",
+                      },
+                    }
+                  : undefined,
+              healthcheck: {
+                test: "curl --fail http://localhost:18081/get_height || exit 1",
+                interval: "60s",
+                timeout: "5s",
+                retries: 10,
+                start_period: "40s",
+              },
               command: [
                 "--rpc-restricted-bind-ip=0.0.0.0",
                 "--rpc-restricted-bind-port=18089",
