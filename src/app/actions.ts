@@ -10,25 +10,29 @@ export async function generateInstallationScript(
   bashCommands: string,
   envString?: string
 ) {
-  const uploadDockerComposeFileResult = await uploadDockerComposeFile(
-    dockerCompose,
-    configId
-  );
+  try {
+    const uploadDockerComposeFileResult = await uploadDockerComposeFile(
+      dockerCompose,
+      configId
+    );
 
-  const uploadEnvFileResult = envString
-    ? await uploadEnvFile(envString, configId)
-    : undefined;
+    const uploadEnvFileResult = envString
+      ? await uploadEnvFile(envString, configId)
+      : undefined;
 
-  const uploadBashCommandsResult = await uploadBashCommandsFile(
-    bashCommands,
-    configId
-  );
+    const uploadBashCommandsResult = await uploadBashCommandsFile(
+      bashCommands,
+      configId
+    );
 
-  return {
-    uploadDockerComposeFileResult,
-    uploadEnvFileResult,
-    uploadBashCommandsResult,
-  };
+    return {
+      uploadDockerComposeFileResult,
+      uploadEnvFileResult,
+      uploadBashCommandsResult,
+    };
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 async function uploadDockerComposeFile(
