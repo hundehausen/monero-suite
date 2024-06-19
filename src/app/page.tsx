@@ -129,7 +129,7 @@ export default function Home() {
                         envString
                       );
                       setInstallationCommand(
-                        `curl -sSL http://${window.location.host}/install/${configId} | bash`
+                        `curl -sSL ${window.location.href}/install/${configId} | bash`
                       );
                       generateNewId();
                     }}
