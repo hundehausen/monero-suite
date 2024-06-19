@@ -3,16 +3,60 @@
 import { useServices } from "@/hooks/use-services";
 import ComposePreview from "./components/ComposePreview";
 import Selection from "./components/Selection";
-import { AppShell, Grid } from "@mantine/core";
+import { TbCheck, TbCopy } from "react-icons/tb";
+import {
+  Accordion,
+  AccordionStylesNames,
+  ActionIcon,
+  AppShell,
+  Button,
+  CopyButton,
+  Grid,
+  Text,
+  TextInput,
+  Tooltip,
+  rem,
+} from "@mantine/core";
 import BashPreview from "./components/BashPreview";
 import Header from "./components/Header";
+import { nanoid } from "nanoid";
+import { CSSProperties, useState } from "react";
+import {
+  generateBashScriptFile,
+  generateDockerComposeFile,
+  generateEnvFile,
+} from "./utils";
+import { generateInstallationScript } from "./actions";
+import EnvPreview from "./components/EnvPreview";
+
+const panelStyles = {
+  content: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+  },
+} as Partial<Record<AccordionStylesNames, CSSProperties>>;
 
 export default function Home() {
   const { services, stateFunctions } = useServices();
+  const [configId, setConfigId] = useState<string>(nanoid());
+  const [installationCommand, setInstallationCommand] = useState<string>();
+  const [accordionItems, setAccordionItems] = useState([
+    "install-script",
+    "docker-compose",
+  ]);
 
   const checkedServices = Object.values(services).filter(
     (service) => service.checked !== false && service.checked !== "none"
   );
+
+  const dockerCompose = generateDockerComposeFile(checkedServices);
+
+  const bashCommands = generateBashScriptFile(checkedServices);
+
+  const envString = generateEnvFile(checkedServices);
+
+  const generateNewId = () => setConfigId(nanoid());
 
   return (
     <AppShell
@@ -49,7 +93,7 @@ export default function Home() {
           <Grid.Col
             span={{
               xs: 12,
-              md: 3,
+              md: 4,
             }}
           >
             <Selection services={services} stateFunctions={stateFunctions} />
@@ -57,18 +101,105 @@ export default function Home() {
           <Grid.Col
             span={{
               xs: 12,
-              md: 5,
+              md: 8,
             }}
           >
-            <ComposePreview services={checkedServices} />
-          </Grid.Col>
-          <Grid.Col
-            span={{
-              xs: 12,
-              md: 4,
-            }}
-          >
-            <BashPreview services={checkedServices} />
+            <Accordion
+              multiple
+              value={accordionItems}
+              onChange={setAccordionItems}
+              defaultValue={["mainnet-node"]}
+              styles={{
+                panel: {
+                  paddingTop: "8px",
+                },
+              }}
+            >
+              <Accordion.Item value="install-script">
+                <Accordion.Control>
+                  <Text size="lg">Installation Script for Ubuntu</Text>
+                </Accordion.Control>
+                <Accordion.Panel styles={panelStyles}>
+                  <Button
+                    onClick={() => {
+                      generateInstallationScript(
+                        configId,
+                        dockerCompose,
+                        bashCommands,
+                        envString
+                      );
+                      setInstallationCommand(
+                        `curl -sSL http://${window.location.host}/install/${configId} | bash`
+                      );
+                      generateNewId();
+                    }}
+                  >
+                    Generate Installation Script
+                  </Button>
+                  <TextInput
+                    placeholder="Press Generate Installation Script Button"
+                    label="Paste this into your terminal"
+                    value={installationCommand}
+                    disabled={!installationCommand}
+                    rightSection={
+                      <CopyButton
+                        value={installationCommand ?? ""}
+                        timeout={2000}
+                      >
+                        {({ copied, copy }) => (
+                          <Tooltip
+                            label={copied ? "Copied" : "Copy"}
+                            withArrow
+                            position="right"
+                          >
+                            <ActionIcon
+                              color={copied ? "teal" : "gray"}
+                              variant="subtle"
+                              onClick={copy}
+                            >
+                              {copied ? (
+                                <TbCheck style={{ width: rem(16) }} />
+                              ) : (
+                                <TbCopy style={{ width: rem(16) }} />
+                              )}
+                            </ActionIcon>
+                          </Tooltip>
+                        )}
+                      </CopyButton>
+                    }
+                  />
+                </Accordion.Panel>
+              </Accordion.Item>
+
+              <Accordion.Item value="docker-compose">
+                <Accordion.Control>
+                  <Text size="lg">Docker Compose File</Text>
+                </Accordion.Control>
+                <Accordion.Panel styles={panelStyles}>
+                  <ComposePreview dockerCompose={dockerCompose} />
+                </Accordion.Panel>
+              </Accordion.Item>
+
+              <Accordion.Item value="bash-script">
+                <Accordion.Control>
+                  <Text size="lg">Bash Commands</Text>
+                </Accordion.Control>
+                <Accordion.Panel styles={panelStyles}>
+                  <BashPreview bashCommands={bashCommands} />
+                </Accordion.Panel>
+              </Accordion.Item>
+
+              {envString && (
+                <Accordion.Item value="env">
+                  <Accordion.Control>
+                    <Text size="lg">Environement Variables</Text>
+                  </Accordion.Control>
+                  <Accordion.Panel styles={panelStyles}>
+                    <EnvPreview env={envString} />
+                  </Accordion.Panel>
+                </Accordion.Item>
+              )}
+            </Accordion>
           </Grid.Col>
         </Grid>
       </AppShell.Main>

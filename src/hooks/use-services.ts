@@ -10,6 +10,9 @@ export interface Service {
   checked: boolean | string;
   required: boolean;
   bash?: string;
+  env?: {
+    [key: string]: string | number | boolean;
+  };
   code: PropertiesServices;
   volumes?: PropertiesVolumes;
   architecture: Architecture[];
@@ -553,6 +556,19 @@ sudo ufw allow 3333/tcp`
             grafana: {},
             prometheus: {},
           },
+          env: {
+            P2P_PORT: 18080,
+            RESTRICTED_PORT: 18089,
+            ZMQ_PORT: 18084,
+            UNRESTRICTED_PORT: 18081,
+            GF_USERS_ALLOW_SIGN_UP: false,
+            GF_USERS_ALLOW_ORG_CREATE: false,
+            GF_AUTH_ANONYMOUS_ENABLED: true,
+            GF_AUTH_BASIC_ENABLED: false,
+            GF_AUTH_DISABLE_LOGIN_FORM: true,
+            GF_SECURITY_ADMIN_PASSWORD: "admin",
+            GF_SECURITY_ADMIN_USER: "admin",
+          },
           bash: `
 # Download default Prometheus and Grafana configs/dashboards
 # Execute line by line
@@ -562,20 +578,7 @@ wget -O monitoring/grafana/grafana.ini https://raw.githubusercontent.com/lalanza
 wget -O monitoring/grafana/dashboards/node_stats.json https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/dashboards/node_stats.json
 wget -O monitoring/grafana/provisioning/dashboards/all.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/provisioning/dashboards/all.yaml
 wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/provisioning/datasources/all.yaml
-
-# Customize the Monitoring deployment with environment variables
-touch .env
-echo P2P_PORT=18080 >> .env
-echo RESTRICTED_PORT=18089 >> .env
-echo ZMQ_PORT=18084 >> .env
-echo UNRESTRICTED_PORT=18081 >> .env
-echo GF_USERS_ALLOW_SIGN_UP=false >> .env
-echo GF_USERS_ALLOW_ORG_CREATE=false >> .env
-echo GF_AUTH_ANONYMOUS_ENABLED=true >> .env
-echo GF_AUTH_BASIC_ENABLED=false >> .env
-echo GF_AUTH_DISABLE_LOGIN_FORM=true >> .env
-echo GF_SECURITY_ADMIN_PASSWORD=admin >> .env
-echo GF_SECURITY_ADMIN_USER=admin >> .env`,
+`,
           code: {
             prometheus: {
               image: "prom/prometheus:latest",
