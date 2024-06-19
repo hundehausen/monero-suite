@@ -29,50 +29,49 @@ export async function generateInstallationScript(
     uploadEnvFileResult,
     uploadBashCommandsResult,
   };
+}
 
-  async function uploadDockerComposeFile(
-    dockerCompose: ComposeSpecification,
-    configId: string
-  ) {
-    const yamlString = stringify(dockerCompose);
-    const yamlBlob = new Blob([yamlString], { type: "text/yaml" });
-    const fileName = `docker-compose.yml`;
-    const filePathName = `${configId}/${fileName}`;
-    const dockerComposeFile = new File([yamlBlob], fileName, {
-      type: "text/yaml",
-    });
-    return put(filePathName, dockerComposeFile, {
-      access: "public",
-      addRandomSuffix: false,
-    });
-  }
+async function uploadDockerComposeFile(
+  dockerCompose: ComposeSpecification,
+  configId: string
+) {
+  const yamlString = stringify(dockerCompose);
+  const yamlBlob = new Blob([yamlString], { type: "text/yaml" });
+  const fileName = `docker-compose.yml`;
+  const filePathName = `${configId}/${fileName}`;
+  const dockerComposeFile = new File([yamlBlob], fileName, {
+    type: "text/yaml",
+  });
+  return put(filePathName, dockerComposeFile, {
+    access: "public",
+    addRandomSuffix: false,
+  });
+}
 
-  async function uploadEnvFile(envString: string, configId: string) {
-    const envBlob = new Blob([envString], { type: "text/plain" });
-    const fileName = `.env`;
-    const filePathName = `${configId}/${fileName}`;
-    const envFile = new File([envBlob], fileName, {
-      type: "text/plain",
-    });
-    return put(filePathName, envFile, {
-      access: "public",
-      addRandomSuffix: false,
-    });
-  }
+async function uploadEnvFile(envString: string, configId: string) {
+  const envBlob = new Blob([envString], { type: "text/plain" });
+  const fileName = `.env`;
+  const filePathName = `${configId}/${fileName}`;
+  const envFile = new File([envBlob], fileName, {
+    type: "text/plain",
+  });
 
-  async function uploadBashCommandsFile(
-    bashCommands: string,
-    configId: string
-  ) {
-    const envBlob = new Blob([bashCommands], { type: "text/plain" });
-    const fileName = `bash-commands.txt`;
-    const filePathName = `${configId}/${fileName}`;
-    const envFile = new File([envBlob], fileName, {
-      type: "text/plain",
-    });
-    return put(filePathName, envFile, {
-      access: "public",
-      addRandomSuffix: false,
-    });
-  }
+  return put(filePathName, envFile, {
+    access: "public",
+    addRandomSuffix: false,
+  });
+}
+
+async function uploadBashCommandsFile(bashCommands: string, configId: string) {
+  const envBlob = new Blob([bashCommands], { type: "text/plain" });
+  const fileName = `bash-commands.txt`;
+  const filePathName = `${configId}/${fileName}`;
+  const envFile = new File([envBlob], fileName, {
+    type: "text/plain",
+  });
+
+  return put(filePathName, envFile, {
+    access: "public",
+    addRandomSuffix: false,
+  });
 }
