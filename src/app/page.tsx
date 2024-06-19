@@ -45,6 +45,7 @@ export default function Home() {
     "install-script",
     "docker-compose",
   ]);
+  const [isUploading, setIsUploading] = useState(false);
 
   const checkedServices = Object.values(services).filter(
     (service) => service.checked !== false && service.checked !== "none"
@@ -121,18 +122,20 @@ export default function Home() {
                 </Accordion.Control>
                 <Accordion.Panel styles={panelStyles}>
                   <Button
-                    onClick={() => {
-                      generateInstallationScript(
+                    onClick={async () => {
+                      setIsUploading(true);
+                      await generateInstallationScript(
                         configId,
                         dockerCompose,
                         bashCommands,
                         envString
                       );
+                      setIsUploading(false);
                       setInstallationCommand(
                         `curl -sSL ${window.location.href}/install/${configId} | bash`
                       );
-                      generateNewId();
                     }}
+                    loading={isUploading}
                   >
                     Generate Installation Script
                   </Button>
