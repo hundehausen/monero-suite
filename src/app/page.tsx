@@ -45,6 +45,7 @@ const panelStyles = {
 export default function Home() {
   const { services, stateFunctions } = useServices();
   const [configId, setConfigId] = useState<string>(nanoid());
+  const [scriptUrl, setScriptUrl] = useState<string>();
   const [installationCommand, setInstallationCommand] = useState<string>();
   const [accordionItems, setAccordionItems] = useState([
     "install-script",
@@ -65,7 +66,10 @@ export default function Home() {
 
   const generateNewId = () => setConfigId(nanoid());
 
-  const scriptUrl = `${window.location.origin}/install/${configId}`;
+  useEffect(
+    () => setScriptUrl(`${window.location.origin}/install/${configId}`),
+    [configId]
+  );
 
   useEffect(() => {
     generateNewId();
