@@ -29,9 +29,13 @@ export async function GET(
     return new Response("Could not find matching config", { status: 404 });
   }
 
+  const customBashCommands = await fetch(bashCommandsDownloadUrl).then((res) =>
+    res.text()
+  );
+
   const installationScript = generateInstallationScript(
     dockerComposeDownloadUrl,
-    bashCommandsDownloadUrl,
+    customBashCommands,
     envFileDownloadUrl
   );
 
@@ -40,7 +44,7 @@ export async function GET(
 
 const generateInstallationScript = (
   dockerComposeDownloadUrl: string,
-  bashCommandsDownloadUrl: string,
+  customBashCommands: string,
   envFileDownloadUrl?: string
 ) => {
   let installationScript = `#!/bin/bash\n\n`;
@@ -51,13 +55,14 @@ const generateInstallationScript = (
 mkdir -p /opt/monero-suite
 
 # Download the Docker Compose file and .env file
-curl -sLO ${dockerComposeDownloadUrl} -o /opt/monero-suite/docker-compose.yml
-curl -sLO ${bashCommandsDownloadUrl} -o /opt/monero-suite/bash-commands.txt`);
+curl -sLO ${dockerComposeDownloadUrl} -o /opt/monero-suite/docker-compose.yml\n`);
   if (envFileDownloadUrl) {
     installationScript = installationScript.concat(
       `curl -sLO ${envFileDownloadUrl} -o /opt/monero-suite/.env`
     );
   }
+
+  installationScript = installationScript.concat(customBashCommands);
 
   installationScript = installationScript.concat(`\n
 # Start the Docker Compose file

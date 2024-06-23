@@ -41,15 +41,9 @@ export const generateDockerComposeFile = (services: Service[]) => {
 };
 
 const baseBashCommands = [
+  "\n\n# Install updates & Install firewall",
   "sudo apt-get update && sudo apt-get upgrade -y",
   "sudo apt-get install -y ufw curl",
-  "",
-  "# Install Docker",
-  "curl -fsSL https://get.docker.com -o get-docker.sh",
-  "sudo sh get-docker.sh",
-  "sudo usermod -aG docker $USER",
-  "su - $USER",
-  "sudo apt-get install docker-compose-plugin",
   "",
   "# Deny all non-explicitly allowed ports",
   "sudo ufw default deny incoming",
@@ -57,20 +51,9 @@ const baseBashCommands = [
   "",
   "# Allow SSH access",
   "sudo ufw allow ssh",
-  "",
-  "# Create monero-suite folder",
-  "mkdir -p monero-suite",
-  "cd monero-suite",
 ];
 
-const finalBashCommands = [
-  "",
-  "# Enable UFW",
-  "sudo ufw enable",
-  "",
-  "# finally, start the containers with:",
-  `UID="$(id -u)" GID="$(id -g)" docker compose up -d`,
-];
+const finalBashCommands = ["", "# Enable UFW", "sudo ufw enable"];
 
 export const generateBashScriptFile = (services: Service[]) => {
   // replace two or more newlines with one newline
