@@ -7,7 +7,7 @@ This project lets you run a Monero node, P2Pool, and MoneroBlock in Docker conta
 
 ## Features
 
-- [monerod](http://getmonero.org) (the Monero daemon)
+- [monerod](https://getmonero.org) (the Monero daemon)
 - [monero-wallet-rpc](https://web.getmonero.org/resources/developer-guides/wallet-rpc.html) (the Monero wallet RPC - control a wallet with code)
 - [P2Pool](https://github.com/SChernykh/p2pool) (a decentralized mining pool for Monero)
 - [XMRig](https://xmrig.com/) (an efficient Monero CPU miner - runs on the P2Pool node)

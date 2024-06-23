@@ -1,17 +1,17 @@
 import { CodeHighlightTabs } from "@mantine/code-highlight";
 import { SiGnubash } from "react-icons/si";
 
-interface BashPreviewProps {
-  bashCommands: string;
+interface EnvPreviewProps {
+  env: string;
 }
 
-const BashPreview = ({ bashCommands }: BashPreviewProps) => {
+const EnvPreview = ({ env }: EnvPreviewProps) => {
   return (
     <CodeHighlightTabs
       code={{
-        code: bashCommands,
-        language: "bash",
-        fileName: "bash",
+        code: env,
+        language: "TOML",
+        fileName: ".env",
         icon: <SiGnubash />,
       }}
       styles={{
@@ -24,4 +24,4 @@ const BashPreview = ({ bashCommands }: BashPreviewProps) => {
   );
 };
 
-export default BashPreview;
+export default EnvPreview;
