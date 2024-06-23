@@ -39,7 +39,7 @@ else
 fi
 
 # Check if Docker Compose is installed
-if ! command_exists docker-compose; then
+if ! command_exists docker compose; then
     echo "Docker Compose is not installed. Installing Docker Compose..."
 
     # Download the latest version of Docker Compose

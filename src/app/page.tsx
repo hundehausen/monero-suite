@@ -9,8 +9,10 @@ import {
   AccordionStylesNames,
   ActionIcon,
   AppShell,
+  Badge,
   Button,
   CopyButton,
+  Flex,
   Grid,
   Text,
   TextInput,
@@ -28,6 +30,9 @@ import {
 } from "./utils";
 import { generateInstallationScript } from "./actions";
 import EnvPreview from "./components/EnvPreview";
+import { FaDocker, FaUbuntu } from "react-icons/fa";
+import { SiDotenv, SiGnubash } from "react-icons/si";
+import InstallScriptInfoCard from "./components/InstallScriptInfoCard";
 
 const panelStyles = {
   content: {
@@ -117,10 +122,17 @@ export default function Home() {
               }}
             >
               <Accordion.Item value="install-script">
-                <Accordion.Control>
-                  <Text size="lg">Installation Script for Ubuntu</Text>
+                <Accordion.Control icon={<FaUbuntu />}>
+                  <Flex direction={"row"} gap={16} align={"center"}>
+                    <Text size="lg">Installation Script for Ubuntu</Text>
+                    <Badge>New!</Badge>
+                  </Flex>
                 </Accordion.Control>
-                <Accordion.Panel styles={panelStyles}>
+                <Accordion.Panel
+                  styles={panelStyles}
+                  style={{ maxWidth: "800px" }}
+                >
+                  <InstallScriptInfoCard />
                   <Button
                     onClick={async () => {
                       setIsUploading(true);
@@ -175,7 +187,7 @@ export default function Home() {
               </Accordion.Item>
 
               <Accordion.Item value="docker-compose">
-                <Accordion.Control>
+                <Accordion.Control icon={<FaDocker />}>
                   <Text size="lg">Docker Compose File</Text>
                 </Accordion.Control>
                 <Accordion.Panel styles={panelStyles}>
@@ -184,7 +196,7 @@ export default function Home() {
               </Accordion.Item>
 
               <Accordion.Item value="bash-script">
-                <Accordion.Control>
+                <Accordion.Control icon={<SiGnubash />}>
                   <Text size="lg">Bash Commands</Text>
                 </Accordion.Control>
                 <Accordion.Panel styles={panelStyles}>
@@ -194,7 +206,7 @@ export default function Home() {
 
               {envString && (
                 <Accordion.Item value="env">
-                  <Accordion.Control>
+                  <Accordion.Control icon={<SiDotenv />}>
                     <Text size="lg">Environement Variables</Text>
                   </Accordion.Control>
                   <Accordion.Panel styles={panelStyles}>

@@ -123,7 +123,8 @@ export const useServices = () => {
           bash: isMoneroPublicNode
             ? `
 # Allow monerod p2p port and restricted rpc port
-sudo ufw allow 18080/tcp 18089/tcp`
+sudo ufw allow 18080/tcp
+sudo ufw allow 18089/tcp`
             : undefined,
           volumes: {
             bitmonero: {},
@@ -233,7 +234,8 @@ sudo ufw allow 18080/tcp 18089/tcp`
           bash: isStagenetNodePublic
             ? `
 # Allow monerod p2p port and restricted rpc port
-sudo ufw allow 38080/tcp 38089/tcp`
+sudo ufw allow 38080/tcp
+sudo ufw allow 38089/tcp`
             : undefined,
           volumes: {
             "bitmonero-stagenet": {},

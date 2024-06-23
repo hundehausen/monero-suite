@@ -43,7 +43,7 @@ export const generateDockerComposeFile = (services: Service[]) => {
 const baseBashCommands = [
   "\n\n# Install updates & Install firewall",
   "sudo apt-get update && sudo apt-get upgrade -y",
-  "sudo apt-get install -y ufw curl",
+  "sudo apt-get install -y ufw curl wget",
   "",
   "# Deny all non-explicitly allowed ports",
   "sudo ufw default deny incoming",
@@ -53,7 +53,7 @@ const baseBashCommands = [
   "sudo ufw allow ssh",
 ];
 
-const finalBashCommands = ["", "# Enable UFW", "sudo ufw enable"];
+const finalBashCommands = ["", "# Enable UFW", "sudo ufw --force enable"];
 
 export const generateBashScriptFile = (services: Service[]) => {
   // replace two or more newlines with one newline

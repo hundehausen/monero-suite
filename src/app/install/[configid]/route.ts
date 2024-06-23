@@ -55,10 +55,10 @@ const generateInstallationScript = (
 mkdir -p /opt/monero-suite
 
 # Download the Docker Compose file and .env file
-curl -sLO ${dockerComposeDownloadUrl} -o /opt/monero-suite/docker-compose.yml\n`);
+wget -O /opt/monero-suite/docker-compose.yml ${dockerComposeDownloadUrl}\n`);
   if (envFileDownloadUrl) {
     installationScript = installationScript.concat(
-      `curl -sLO ${envFileDownloadUrl} -o /opt/monero-suite/.env`
+      `wget -O /opt/monero-suite/.env ${envFileDownloadUrl}`
     );
   }
 
