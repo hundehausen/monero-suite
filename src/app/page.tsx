@@ -144,7 +144,7 @@ export default function Home() {
                       );
                       setIsUploading(false);
                       setInstallationCommand(
-                        `curl -sSL ${window.location.href}/install/${configId} | bash`
+                        `curl -sSL ${window.location.origin}/install/${configId} | bash`
                       );
                     }}
                     loading={isUploading}
