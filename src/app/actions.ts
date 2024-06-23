@@ -46,6 +46,7 @@ async function uploadDockerComposeFile(
   const dockerComposeFile = new File([yamlBlob], fileName, {
     type: "text/yaml",
   });
+
   return put(filePathName, dockerComposeFile, {
     access: "public",
     addRandomSuffix: false,

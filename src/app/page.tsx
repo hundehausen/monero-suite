@@ -51,6 +51,7 @@ export default function Home() {
     "docker-compose",
   ]);
   const [isUploading, setIsUploading] = useState(false);
+  const [currentConfigIsUploaded, setCurrentConfigIsUploaded] = useState(false);
 
   const checkedServices = Object.values(services).filter(
     (service) => service.checked !== false && service.checked !== "none"
@@ -64,8 +65,11 @@ export default function Home() {
 
   const generateNewId = () => setConfigId(nanoid());
 
+  const scriptUrl = `${window.location.origin}/install/${configId}`;
+
   useEffect(() => {
     generateNewId();
+    setCurrentConfigIsUploaded(false);
   }, [services]);
 
   return (
@@ -132,10 +136,7 @@ export default function Home() {
                     <Badge>New!</Badge>
                   </Flex>
                 </Accordion.Control>
-                <Accordion.Panel
-                  styles={panelStyles}
-                  style={{ maxWidth: "800px" }}
-                >
+                <Accordion.Panel styles={panelStyles}>
                   <InstallScriptInfoCard />
                   <Button
                     onClick={async () => {
@@ -147,17 +148,17 @@ export default function Home() {
                         envString
                       );
                       setIsUploading(false);
-                      setInstallationCommand(
-                        `curl -sSL ${window.location.origin}/install/${configId} | bash`
-                      );
+                      setCurrentConfigIsUploaded(true);
+                      setInstallationCommand(`curl -sSL ${scriptUrl} | bash`);
                     }}
+                    disabled={currentConfigIsUploaded}
                     loading={isUploading}
                   >
                     Generate Installation Script
                   </Button>
                   <TextInput
                     placeholder="Press Generate Installation Script Button"
-                    label="Paste this into your terminal"
+                    label="Paste this into your terminal:"
                     value={installationCommand}
                     disabled={!installationCommand}
                     rightSection={
@@ -192,6 +193,14 @@ export default function Home() {
                     scripts. Only run the command if you accept running these on
                     your own risk.
                   </Text>
+                  <Button
+                    disabled={!installationCommand || !currentConfigIsUploaded}
+                    onClick={() => {
+                      window.open(scriptUrl, "_blank");
+                    }}
+                  >
+                    Preview script in new tab
+                  </Button>
                 </Accordion.Panel>
               </Accordion.Item>
 
