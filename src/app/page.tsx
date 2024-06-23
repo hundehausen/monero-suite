@@ -22,7 +22,7 @@ import {
 import BashPreview from "./components/BashPreview";
 import Header from "./components/Header";
 import { nanoid } from "nanoid";
-import { CSSProperties, useState } from "react";
+import { CSSProperties, useEffect, useState } from "react";
 import {
   generateBashScriptFile,
   generateDockerComposeFile,
@@ -63,6 +63,10 @@ export default function Home() {
   const envString = generateEnvFile(checkedServices);
 
   const generateNewId = () => setConfigId(nanoid());
+
+  useEffect(() => {
+    generateNewId();
+  }, [services]);
 
   return (
     <AppShell
@@ -183,6 +187,11 @@ export default function Home() {
                       </CopyButton>
                     }
                   />
+                  <Text c="red" size="sm">
+                    Make sure to read the docker-compose file and the bash
+                    scripts. Only run the command if you accept running these on
+                    your own risk.
+                  </Text>
                 </Accordion.Panel>
               </Accordion.Item>
 
