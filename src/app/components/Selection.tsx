@@ -89,6 +89,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     setIsTraefik,
     isPortainer,
     setIsPortainer,
+    portainerDomain,
     setPortainerDomain,
   } = stateFunctions;
 
@@ -639,6 +640,27 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
             size="lg"
             onChange={(event) => setIsPortainer(event.currentTarget.checked)}
           />
+          {isPortainer && isTraefik && (
+            <>
+              <Input.Wrapper
+                styles={{
+                  root: {
+                    width: "100%",
+                  },
+                }}
+                label="Portainer Domain"
+                description="The domain where your portainer instance will be available."
+              >
+                <Input
+                  value={portainerDomain}
+                  onChange={(e) => setPortainerDomain(e.currentTarget.value)}
+                />
+              </Input.Wrapper>
+              {portainerDomain && (
+                <Text size="sm">{`Connect to your remote node from any wallet. Enter https://${moneroNodeDomain}`}</Text>
+              )}
+            </>
+          )}
         </Accordion.Panel>
       </Accordion.Item>
 

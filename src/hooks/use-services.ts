@@ -744,7 +744,7 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
           name: "Portainer",
           required: false,
           description:
-            "Webapp to manage your Monero Suite Docker services. Visit http://localhost:8000 or https://localhost:9443 if Portainer is running.",
+            "Webapp to manage your Monero Suite Docker services. You can view logs, start, stop and restart containers easly. Visit http://localhost:8000 or https://localhost:9443 if Portainer is running.",
           volumes: {
             portainer_data: {},
           },
@@ -872,6 +872,7 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
       setOnionMoneroBlockchainExplorerDomain,
       isPortainer,
       setIsPortainer,
+      portainerDomain,
       setPortainerDomain,
     },
   };
