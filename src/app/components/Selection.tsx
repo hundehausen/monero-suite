@@ -87,7 +87,11 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     setIsAutoheal,
     isTraefik,
     setIsTraefik,
+    isPortainer,
+    setIsPortainer,
+    setPortainerDomain,
   } = stateFunctions;
+
   const [accordionItems, setAccordionItems] = useState([
     "architecture",
     "mainnet-node",
@@ -621,6 +625,22 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
           </Accordion.Panel>
         </Accordion.Item>
       )}
+
+      <Accordion.Item value="portainer">
+        <Accordion.Control>
+          <Text size="lg">Portainer</Text>
+        </Accordion.Control>
+        <Accordion.Panel styles={panelStyles}>
+          <Text size="sm">{services["portainer"].description}</Text>
+          <Checkbox
+            checked={isPortainer}
+            label="Portainer"
+            labelPosition="left"
+            size="lg"
+            onChange={(event) => setIsPortainer(event.currentTarget.checked)}
+          />
+        </Accordion.Panel>
+      </Accordion.Item>
 
       <Accordion.Item value="watchtower">
         <Accordion.Control>

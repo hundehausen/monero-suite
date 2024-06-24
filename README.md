@@ -17,6 +17,7 @@ This project lets you run a Monero node, P2Pool, and MoneroBlock in Docker conta
 - [Tor Proxy and Tor Hidden Services](https://www.torproject.org) (anonymity network for monerod, P2Pool and other services)
 - [Docker Autoheal](https://github.com/willfarrell/docker-autoheal) (auto-restart unhealthy containers)
 - [Watchtower](https://github.com/containrrr/watchtower) (auto-update containers)
+- [Portainer](https://github.com/portainer/portainer) (manage your docker services with a GUI in your browser)
 
 Disclaimer: This project is not affiliated with, endorsed by, or sponsored by the Monero Project.
 

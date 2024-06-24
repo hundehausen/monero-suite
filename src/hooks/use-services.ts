@@ -97,6 +97,10 @@ export const useServices = () => {
   const [grafanaDomain, setGrafanaDomain] = useState("grafana.monerosuite.org");
   const [isAutoheal, setIsAutoheal] = useState(false);
   const [isTraefik, setIsTraefik] = useState(false);
+  const [isPortainer, setIsPortainer] = useState(false);
+  const [portainerDomain, setPortainerDomain] = useState(
+    "portainer.monerosuite.org"
+  );
 
   useEffect(() => {
     if (isTraefik) {
@@ -734,6 +738,40 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
           },
           bash: "\n# Allow http and https ports\nsudo ufw allow 80/tcp 443/tcp\n",
         },
+        portainer: {
+          architecture: [architectures.linuxAmd, architectures.linuxArm],
+          checked: isPortainer,
+          name: "Portainer",
+          required: false,
+          description:
+            "Webapp to manage your Monero Suite Docker services. Visit http://localhost:8000 or https://localhost:9443 if Portainer is running.",
+          volumes: {
+            portainer_data: {},
+          },
+          code: {
+            portainer: {
+              image: "portainer/portainer-ce:latest",
+              restart: "unless-stopped",
+              container_name: "portainer",
+              ports: ["8000:8000", "9443:9443"],
+              volumes: [
+                "portainer_data:/data",
+                "/var/run/docker.sock:/var/run/docker.sock",
+              ],
+              labels: isTraefik
+                ? {
+                    "traefik.enable": "true",
+                    "traefik.http.routers.monitoring.rule": `Host(\`${portainerDomain}\`)`,
+                    "traefik.http.routers.monitoring.entrypoints": "websecure",
+                    "traefik.http.routers.monitoring.tls.certresolver":
+                      "monerosuite",
+                    "traefik.http.services.monitoring.loadbalancer.server.port":
+                      "8000",
+                  }
+                : undefined,
+            },
+          },
+        },
       } as ServiceMap),
     [
       isMoneroPublicNode,
@@ -762,6 +800,8 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
       isAutoheal,
       miningMode,
       xmrigDonateLevel,
+      isPortainer,
+      portainerDomain,
     ]
   );
 
@@ -830,6 +870,9 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
       setMoneroBlockDomain,
       onionMoneroBlockchainExplorerDomain,
       setOnionMoneroBlockchainExplorerDomain,
+      isPortainer,
+      setIsPortainer,
+      setPortainerDomain,
     },
   };
 };
