@@ -13,7 +13,10 @@ const Header = () => {
         <Image src={Logo} alt="Monero Suite logo" width={40} height={40} />
         <Title order={1}>Monero Suite</Title>
       </Flex>
-      <Text>Monero Suite is this</Text>
+      <Text>
+        Monero Suite brings Monero related services to your machine using
+        Docker.
+      </Text>
       <Flex
         align="center"
         justify="space-between"
