@@ -193,11 +193,13 @@ export default function Home() {
                       </CopyButton>
                     }
                   />
-                  <Text c="red" size="sm">
-                    Make sure to read the docker-compose file and the bash
-                    scripts. Only run the command if you accept running these on
-                    your own risk.
-                  </Text>
+                  {installationCommand && (
+                    <Text c="red" size="sm">
+                      Make sure to read the docker-compose file and the bash
+                      scripts. Only run the command if you accept running these
+                      on your own risk.
+                    </Text>
+                  )}
                   <Button
                     disabled={!installationCommand || !currentConfigIsUploaded}
                     onClick={() => {
