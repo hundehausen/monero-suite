@@ -130,6 +130,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     <Accordion
       multiple
       value={accordionItems}
+      variant="separated"
       onChange={setAccordionItems}
       defaultValue={["mainnet-node"]}
       styles={{

@@ -127,6 +127,7 @@ export default function Home() {
               value={accordionItems}
               onChange={setAccordionItems}
               defaultValue={["mainnet-node"]}
+              variant="separated"
               styles={{
                 panel: {
                   paddingTop: "8px",
