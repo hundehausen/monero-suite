@@ -12,6 +12,7 @@ import {
   SegmentedControl,
   Input,
   Slider,
+  Anchor,
   Text,
   Accordion,
   AccordionStylesNames,
@@ -19,6 +20,7 @@ import {
 } from "@mantine/core";
 import ExplainingLabel from "./ExplainingLabel";
 import { CSSProperties, useEffect, useState } from "react";
+import Link from "next/link";
 
 const panelStyles = {
   content: {
@@ -262,6 +264,14 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
               )}
             </>
           )}
+          <Anchor
+            href="https://getmonero.dev/interacting/monerod#options"
+            target="_blank"
+            fw={400}
+            fz="sm"
+          >
+            All monerod options explained
+          </Anchor>
         </Accordion.Panel>
       </Accordion.Item>
 

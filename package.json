@@ -20,6 +20,7 @@
     "@vercel/kv": "^2.0.0",
     "autoprefixer": "10.4.19",
     "compose-spec-schema": "^1.0.0",
+    "date-fns": "^3.6.0",
     "eslint": "8.56.0",
     "eslint-config-next": "14.2.4",
     "nanoid": "^5.0.7",

@@ -21,7 +21,20 @@ This project lets you run a Monero node, P2Pool, and MoneroBlock in Docker conta
 
 Disclaimer: This project is not affiliated with, endorsed by, or sponsored by the Monero Project.
 
-## Quick Start
+## Quick Start (for Debian based systems) BETA
+
+Still in Beta, use at your own risk.
+
+1. On the left side, select the service you want and configure them
+2. Generate a bash command with your installation script
+3. Verify the script via the preview button
+4. Copy that command and paste it into your terminal
+
+Et voilà: Docker is installed and then all services will be started in the background.
+
+Generated configs get deleted after 24 hours.
+
+## Manual Installation (for all systems)
 You need to have [Docker](https://docs.docker.com/install/) and [Docker Compose](https://docs.docker.com/compose/install/) installed. It could also work with Podman, but I haven't tested it.
 
 Go to [monersuite.org](https://monerosuite.org/)
@@ -34,7 +47,7 @@ It will take some time to download the images and start the containers. You can 
 ```
 docker compose ps
 ```
-or a more interactive view with [Portainer](https://www.portainer.io) or [LazyDocker](https://github.com/jesseduffield/lazydocker).
+or a more interactive view with [Portainer](https://www.portainer.io) which is available in Monero Suite or [LazyDocker](https://github.com/jesseduffield/lazydocker) which is a CLI tool.
 
 If you are looking for the urls of the hidden services that were generated when starting the tor container for the first time, you can find them in the container logs:
 ```
@@ -49,6 +62,8 @@ no particular order
 - add [Onion Monero Blockchain Explorer](https://github.com/moneroexamples/onion-monero-blockchain-explorer) (a Monero block explorer without JavaScript)
 - add [nerostr](https://github.com/pluja/nerostr) (a nostr monero-paid relay)
 - make configurations shareable
+- full monerod.conf generator with explanations
+- support installation script for more linux based operating systems
 
 ## Donations
 If you find this project useful, please consider donating to the following address:
