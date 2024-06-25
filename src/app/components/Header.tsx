@@ -1,7 +1,7 @@
-import { Flex, Title, useMantineColorScheme } from "@mantine/core";
+import { Flex, Title, Text, useMantineColorScheme } from "@mantine/core";
 import Link from "next/link";
 import Image from "next/image";
-import { FaGithub } from "react-icons/fa";
+import { FaDocker, FaGithub } from "react-icons/fa";
 import { DarkModeSwitch } from "react-toggle-dark-mode";
 import Logo from "../../../public/monero-suite-logo-transparent.png";
 
@@ -13,6 +13,7 @@ const Header = () => {
         <Image src={Logo} alt="Monero Suite logo" width={40} height={40} />
         <Title order={1}>Monero Suite</Title>
       </Flex>
+      <Text>Monero Suite is this</Text>
       <Flex
         align="center"
         justify="space-between"
@@ -61,6 +62,14 @@ const Header = () => {
           }}
         >
           <FaGithub size={32} />
+        </Link>
+        <Link
+          href="https://docs.docker.com/get-started/docker_cheatsheet.pdf"
+          title="Cheatsheet with all important commands for the docker cli"
+          target="_blank"
+          style={{ color: "inherit", textDecoration: "none", height: 32 }}
+        >
+          <FaDocker size={32} />
         </Link>
         <DarkModeSwitch
           checked={colorScheme === "dark"}
