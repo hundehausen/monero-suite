@@ -3,11 +3,13 @@
 import { ComposeSpecification } from "compose-spec-schema/lib/type";
 import { stringify } from "yaml";
 import { put } from "@vercel/blob";
+import { generateBashScriptFile } from "./utils";
+import { Service } from "@/hooks/use-services";
 
 export async function generateInstallationScript(
   configId: string,
+  services: Service[],
   dockerCompose: ComposeSpecification,
-  bashCommands: string,
   envString?: string
 ) {
   try {
@@ -21,7 +23,7 @@ export async function generateInstallationScript(
       : undefined;
 
     const uploadBashCommandsResult = await uploadBashCommandsFile(
-      bashCommands,
+      services,
       configId
     );
 
@@ -67,7 +69,8 @@ async function uploadEnvFile(envString: string, configId: string) {
   });
 }
 
-async function uploadBashCommandsFile(bashCommands: string, configId: string) {
+async function uploadBashCommandsFile(services: Service[], configId: string) {
+  const bashCommands = generateBashScriptFile(services);
   const envBlob = new Blob([bashCommands], { type: "text/plain" });
   const fileName = `bash-commands.txt`;
   const filePathName = `${configId}/${fileName}`;

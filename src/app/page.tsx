@@ -148,8 +148,8 @@ export default function Home() {
                       setIsUploading(true);
                       await generateInstallationScript(
                         configId,
+                        checkedServices,
                         dockerCompose,
-                        bashCommands,
                         envString
                       );
                       setIsUploading(false);
