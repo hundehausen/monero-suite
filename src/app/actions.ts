@@ -5,33 +5,23 @@ import { stringify } from "yaml";
 import { put } from "@vercel/blob";
 import { generateBashScriptFile } from "./utils";
 import { Service } from "@/hooks/use-services";
+import { nanoid } from "nanoid";
 
 export async function generateInstallationScript(
-  configId: string,
   services: Service[],
   dockerCompose: ComposeSpecification,
   envString?: string
 ) {
   try {
-    const uploadDockerComposeFileResult = await uploadDockerComposeFile(
-      dockerCompose,
-      configId
-    );
+    const configId = nanoid();
 
-    const uploadEnvFileResult = envString
-      ? await uploadEnvFile(envString, configId)
-      : undefined;
+    await uploadDockerComposeFile(dockerCompose, configId);
 
-    const uploadBashCommandsResult = await uploadBashCommandsFile(
-      services,
-      configId
-    );
+    envString ? await uploadEnvFile(envString, configId) : undefined;
 
-    return {
-      uploadDockerComposeFileResult,
-      uploadEnvFileResult,
-      uploadBashCommandsResult,
-    };
+    await uploadBashCommandsFile(services, configId);
+
+    return configId;
   } catch (error) {
     console.error(error);
   }

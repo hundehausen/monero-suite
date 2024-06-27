@@ -21,7 +21,6 @@ import {
 } from "@mantine/core";
 import BashPreview from "./components/BashPreview";
 import Header from "./components/Header";
-import { nanoid } from "nanoid";
 import { CSSProperties, useEffect, useState } from "react";
 import {
   generateBashScriptFile,
@@ -44,7 +43,6 @@ const panelStyles = {
 
 export default function Home() {
   const { services, stateFunctions } = useServices();
-  const [configId, setConfigId] = useState<string>(nanoid());
   const [scriptUrl, setScriptUrl] = useState<string>();
   const [installationCommand, setInstallationCommand] = useState<string>();
   const [accordionItems, setAccordionItems] = useState([
@@ -64,17 +62,29 @@ export default function Home() {
 
   const envString = generateEnvFile(checkedServices);
 
-  const generateNewId = () => setConfigId(nanoid());
-
-  useEffect(
-    () => setScriptUrl(`${window.location.origin}/install/${configId}`),
-    [configId]
-  );
+  const handleScriptGeneration = async () => {
+    setIsUploading(true);
+    const configId = await generateInstallationScript(
+      checkedServices,
+      dockerCompose,
+      envString
+    );
+    setIsUploading(false);
+    if (!configId) {
+      return;
+    }
+    setCurrentConfigIsUploaded(true);
+    setScriptUrl(`${window.location.origin}/install/${configId}`);
+  };
 
   useEffect(() => {
-    generateNewId();
-    setCurrentConfigIsUploaded(false);
-  }, [services]);
+    if (!scriptUrl) {
+      return;
+    }
+    setInstallationCommand(`curl -sSL ${scriptUrl} | bash`);
+  }, [scriptUrl]);
+
+  useEffect(() => setCurrentConfigIsUploaded(false), [services]);
 
   return (
     <AppShell
@@ -144,18 +154,7 @@ export default function Home() {
                 <Accordion.Panel styles={panelStyles}>
                   <InstallScriptInfoCard />
                   <Button
-                    onClick={async () => {
-                      setIsUploading(true);
-                      await generateInstallationScript(
-                        configId,
-                        checkedServices,
-                        dockerCompose,
-                        envString
-                      );
-                      setIsUploading(false);
-                      setCurrentConfigIsUploaded(true);
-                      setInstallationCommand(`curl -sSL ${scriptUrl} | bash`);
-                    }}
+                    onClick={handleScriptGeneration}
                     disabled={currentConfigIsUploaded}
                     loading={isUploading}
                   >
