@@ -11,6 +11,7 @@ import {
   AppShell,
   Badge,
   Button,
+  Checkbox,
   CopyButton,
   Flex,
   Grid,
@@ -51,6 +52,8 @@ export default function Home() {
   ]);
   const [isUploading, setIsUploading] = useState(false);
   const [currentConfigIsUploaded, setCurrentConfigIsUploaded] = useState(false);
+  const [agreeOwnRisk, setAgreeOwnRisk] = useState(false);
+  const [agreePreview, setAgreePreview] = useState(false);
 
   const checkedServices = Object.values(services).filter(
     (service) => service.checked !== false && service.checked !== "none"
@@ -63,6 +66,9 @@ export default function Home() {
   const envString = generateEnvFile(checkedServices);
 
   const handleScriptGeneration = async () => {
+    if (!agreeOwnRisk || !agreePreview) {
+      return;
+    }
     setIsUploading(true);
     const configId = await generateInstallationScript(
       checkedServices,
@@ -153,9 +159,26 @@ export default function Home() {
                 </Accordion.Control>
                 <Accordion.Panel styles={panelStyles}>
                   <InstallScriptInfoCard />
+                  <Text fw={500}>Please accept to continue:</Text>
+                  <Checkbox
+                    checked={agreeOwnRisk}
+                    onChange={(event) =>
+                      setAgreeOwnRisk(event.currentTarget.checked)
+                    }
+                    label="I use this beta feature at my own risk"
+                  />
+                  <Checkbox
+                    checked={agreePreview}
+                    onChange={(event) =>
+                      setAgreePreview(event.currentTarget.checked)
+                    }
+                    label="I will preview the script before executing it"
+                  />
                   <Button
                     onClick={handleScriptGeneration}
-                    disabled={currentConfigIsUploaded}
+                    disabled={
+                      currentConfigIsUploaded || !agreeOwnRisk || !agreePreview
+                    }
                     loading={isUploading}
                   >
                     Generate Installation Script
@@ -194,9 +217,8 @@ export default function Home() {
                   />
                   {installationCommand && (
                     <Text c="red" size="sm">
-                      Make sure to read the docker-compose file and the bash
-                      scripts. Only run the command if you accept running these
-                      on your own risk.
+                      {`Always preview the script, especially if you haven't
+                      generated it by yourself!`}
                     </Text>
                   )}
                   <Button
