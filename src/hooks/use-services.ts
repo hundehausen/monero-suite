@@ -53,9 +53,19 @@ const architectures = {
 
 export type Architecture = (typeof architectures)[keyof typeof architectures];
 
+const networkModes = {
+  exposed: "exposed",
+  local: "local",
+} as const;
+
+export type NetworkMode = (typeof networkModes)[keyof typeof networkModes];
+
 export const useServices = () => {
   const [architecture, setArchitecture] = useState<Architecture>(
     architectures.linuxAmd
+  );
+  const [networkMode, setNetworkMode] = useState<NetworkMode>(
+    networkModes.local
   );
   const [isMoneroPublicNode, setIsMoneroPublicNode] = useState(true);
   const [moneroNodeNoLogs, setMoneroNodeNoLogs] = useState(false);
@@ -124,12 +134,13 @@ export const useServices = () => {
           checked: true,
           required: true,
           architecture: [architectures.linuxAmd, architectures.linuxArm],
-          bash: isMoneroPublicNode
-            ? `
+          bash:
+            isMoneroPublicNode && networkMode === networkModes.exposed
+              ? `
 # Allow monerod p2p port and restricted rpc port
 sudo ufw allow 18080/tcp
 sudo ufw allow 18089/tcp`
-            : undefined,
+              : undefined,
           volumes: {
             bitmonero: {},
           },
@@ -140,15 +151,15 @@ sudo ufw allow 18089/tcp`
               container_name: "monerod",
               volumes: ["bitmonero:/home/monero/.bitmonero"],
               ports: [
-                ...(isMoneroPublicNode
+                ...(isMoneroPublicNode || networkMode === networkModes.local
                   ? ["18080:18080"]
                   : ["127.0.0.1:18080:18080"]),
                 ...(p2PoolMode !== p2poolModes.none
-                  ? isMoneroPublicNode
+                  ? isMoneroPublicNode || networkMode === networkModes.local
                     ? ["18084:18084"]
                     : ["127.0.0.1:18084:18084"]
                   : []),
-                ...(isMoneroPublicNode
+                ...(isMoneroPublicNode || networkMode === networkModes.local
                   ? ["18089:18089"]
                   : ["127.0.0.1:18089:18089"]),
               ],
@@ -235,12 +246,13 @@ sudo ufw allow 18089/tcp`
           checked: isStagenetNode,
           required: false,
           architecture: [architectures.linuxAmd, architectures.linuxArm],
-          bash: isStagenetNodePublic
-            ? `
+          bash:
+            isStagenetNodePublic && networkMode === networkModes.exposed
+              ? `
 # Allow monerod p2p port and restricted rpc port
 sudo ufw allow 38080/tcp
 sudo ufw allow 38089/tcp`
-            : undefined,
+              : undefined,
           volumes: {
             "bitmonero-stagenet": {},
           },
@@ -251,10 +263,10 @@ sudo ufw allow 38089/tcp`
               container_name: "monerod-stagenet",
               volumes: ["bitmonero-stagenet:/home/monero"],
               ports: [
-                ...(isStagenetNodePublic
+                ...(isStagenetNodePublic || networkMode === networkModes.local
                   ? ["38080:38080"]
                   : ["127.0.0.1:38080:38080"]),
-                ...(isStagenetNodePublic
+                ...(isStagenetNodePublic || networkMode === networkModes.local
                   ? ["38089:38089"]
                   : ["127.0.0.1:38089:38089"]),
               ],
@@ -311,13 +323,15 @@ sudo ufw allow 38089/tcp`
             "p2pool-data": {},
           },
           bash:
-            p2PoolMode === p2poolModes.mini
+            p2PoolMode === p2poolModes.mini &&
+            networkMode === networkModes.exposed
               ? `
 # Allow p2pool mini p2p port
 sudo ufw allow 37888/tcp
 # Allow p2pool stratum port
 sudo ufw allow 3333/tcp`
-              : p2PoolMode === p2poolModes.full
+              : p2PoolMode === p2poolModes.full &&
+                networkMode === networkModes.exposed
               ? `
 # Allow p2pool p2p port
 sudo ufw allow 37889/tcp
@@ -378,7 +392,11 @@ sudo ufw allow 3333/tcp`
               image: "sethsimmons/simple-monero-wallet-rpc:latest",
               restart: "unless-stopped",
               container_name: "monero-wallet-rpc",
-              ports: ["127.0.0.1:18083:18083"],
+              ports: [
+                ...(networkMode === networkModes.local
+                  ? ["18083:18083"]
+                  : ["127.0.0.1:18083:18083"]),
+              ],
               volumes: ["monero-wallet-rpc-data:/home/monero"],
               command: [
                 "--daemon-address=monerod:18089",
@@ -404,7 +422,11 @@ sudo ufw allow 3333/tcp`
               image: "sethsimmons/moneroblock:latest",
               restart: "unless-stopped",
               container_name: "moneroblock",
-              ports: ["127.0.0.1:31312:31312"],
+              ports: [
+                ...(networkMode === networkModes.local
+                  ? ["31312:31312"]
+                  : ["127.0.0.1:31312:31312"]),
+              ],
               command: ["--daemon", "monerod:18089"],
               labels: isTraefik
                 ? {
@@ -437,7 +459,11 @@ sudo ufw allow 3333/tcp`
               image: "vdo1138/xmrblocks:latest",
               restart: "unless-stopped",
               container_name: "onion-monero-blockchain-explorer",
-              ports: ["127.0.0.1:8081:8081"],
+              ports: [
+                ...(networkMode === networkModes.local
+                  ? ["8081:8081"]
+                  : ["127.0.0.1:8081:8081"]),
+              ],
               volumes: ["bitmonero:/home/monero/.bitmonero"],
               depends_on: ["monerod"],
               command: [
@@ -470,7 +496,11 @@ sudo ufw allow 3333/tcp`
               image: "ghcr.io/peterdavehello/tor-socks-proxy:latest",
               container_name: "tor-proxy",
               restart: "unless-stopped",
-              ports: ["127.0.0.1:9150:9150"],
+              ports: [
+                ...(networkMode === networkModes.local
+                  ? ["9150:9150"]
+                  : ["127.0.0.1:9150:9150"]),
+              ],
             },
           },
         },
@@ -621,7 +651,11 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
               user: "${UID:-1000}:${GID:-1000}",
               command: "-config=/etc/grafana/grafana.ini",
               restart: "unless-stopped",
-              ports: ["127.0.0.1:${GF_PORT:-3000}:3000"],
+              ports: [
+                ...(networkMode === networkModes.local
+                  ? ["3000:3000"]
+                  : ["127.0.0.1:3000:3000"]),
+              ],
               volumes: [
                 "grafana:/var/lib/grafana",
                 "./monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini:ro",
@@ -753,7 +787,11 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
               image: "portainer/portainer-ce:latest",
               restart: "unless-stopped",
               container_name: "portainer",
-              ports: ["8000:8000", "9443:9443"],
+              ports: [
+                ...(networkMode === networkModes.local
+                  ? ["8000:8000", "9443:9443"]
+                  : ["127.0.0.1:8000:8000", "127.0.0.1:9443:9443"]),
+              ],
               volumes: [
                 "portainer_data:/data",
                 "/var/run/docker.sock:/var/run/docker.sock",
@@ -775,6 +813,7 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
       } as ServiceMap),
     [
       isMoneroPublicNode,
+      networkMode,
       moneroNodeNoLogs,
       p2PoolMode,
       isPrunedNode,
@@ -820,6 +859,8 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
     stateFunctions: {
       architecture,
       setArchitecture,
+      networkMode,
+      setNetworkMode,
       isMoneroPublicNode,
       setIsMoneroPublicNode,
       isPrunedNode,

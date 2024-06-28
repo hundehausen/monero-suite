@@ -127,7 +127,7 @@ export default function Home() {
           <Grid.Col
             span={{
               xs: 12,
-              md: 4,
+              md: 5,
             }}
           >
             <Selection services={services} stateFunctions={stateFunctions} />
@@ -135,7 +135,7 @@ export default function Home() {
           <Grid.Col
             span={{
               xs: 12,
-              md: 8,
+              md: 7,
             }}
           >
             <Accordion
