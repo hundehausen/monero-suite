@@ -1,6 +1,6 @@
 "use client";
 
-import { useServices } from "@/hooks/use-services";
+import { networkModes, useServices } from "@/hooks/use-services";
 import ComposePreview from "./components/ComposePreview";
 import Selection from "./components/Selection";
 import { TbCheck, TbCopy } from "react-icons/tb";
@@ -61,7 +61,10 @@ export default function Home() {
 
   const dockerCompose = generateDockerComposeFile(checkedServices);
 
-  const bashCommands = generateBashScriptFile(checkedServices);
+  const bashCommands = generateBashScriptFile(
+    checkedServices,
+    stateFunctions.networkMode === networkModes.exposed
+  );
 
   const envString = generateEnvFile(checkedServices);
 
@@ -73,12 +76,15 @@ export default function Home() {
     const configId = await generateInstallationScript(
       checkedServices,
       dockerCompose,
-      envString
+      envString,
+      stateFunctions.networkMode === networkModes.exposed
     );
     setIsUploading(false);
+
     if (!configId) {
       return;
     }
+
     setCurrentConfigIsUploaded(true);
     setScriptUrl(`${window.location.origin}/install/${configId}`);
   };

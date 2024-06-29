@@ -10,7 +10,8 @@ import { nanoid } from "nanoid";
 export async function generateInstallationScript(
   services: Service[],
   dockerCompose: ComposeSpecification,
-  envString?: string
+  envString?: string,
+  isExposed = false
 ) {
   try {
     const configId = nanoid();
@@ -19,7 +20,7 @@ export async function generateInstallationScript(
 
     envString ? await uploadEnvFile(envString, configId) : undefined;
 
-    await uploadBashCommandsFile(services, configId);
+    await uploadBashCommandsFile(services, configId, isExposed);
 
     return configId;
   } catch (error) {
@@ -59,8 +60,12 @@ async function uploadEnvFile(envString: string, configId: string) {
   });
 }
 
-async function uploadBashCommandsFile(services: Service[], configId: string) {
-  const bashCommands = generateBashScriptFile(services);
+async function uploadBashCommandsFile(
+  services: Service[],
+  configId: string,
+  isExposed = false
+) {
+  const bashCommands = generateBashScriptFile(services, isExposed);
   const envBlob = new Blob([bashCommands], { type: "text/plain" });
   const fileName = `bash-commands.txt`;
   const filePathName = `${configId}/${fileName}`;

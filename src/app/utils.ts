@@ -40,22 +40,38 @@ export const generateDockerComposeFile = (services: Service[]) => {
   } as Compose;
 };
 
-const baseBashCommands = [
+const baseBashCommands = (installUfw = false) => [
+  "",
   "\n\n# Install updates & Install firewall",
   "sudo apt-get update && sudo apt-get upgrade -y",
-  "sudo apt-get install -y ufw curl wget",
+  `sudo apt-get install -y curl wget${installUfw ? " ufw" : ""}`,
   "",
-  "# Deny all non-explicitly allowed ports",
-  "sudo ufw default deny incoming",
-  "sudo ufw default allow outgoing",
-  "",
-  "# Allow SSH access",
-  "sudo ufw allow ssh",
 ];
 
-const finalBashCommands = ["", "# Enable UFW", "sudo ufw --force enable"];
+const ufwCommands = (allowPorts: (string | undefined)[]) => {
+  let baseUfwCommands = [
+    "# Deny all non-explicitly allowed ports",
+    "sudo ufw default deny incoming",
+    "sudo ufw default allow outgoing",
+    "",
+    "# Allow SSH access",
+    "sudo ufw allow ssh",
+  ];
 
-export const generateBashScriptFile = (services: Service[]) => {
+  allowPorts?.forEach((allowPort) => {
+    baseUfwCommands = baseUfwCommands.concat(`sudo ufw allow ${allowPort}`);
+  });
+
+  return [
+    ...baseUfwCommands,
+    ...["", "# Enable UFW", "sudo ufw --force enable"],
+  ].flat();
+};
+
+export const generateBashScriptFile = (
+  services: Service[],
+  installUfw = false
+) => {
   // replace two or more newlines with one newline
   const serviceBashCommands = services
     .filter((service) => service.bash)
@@ -63,10 +79,15 @@ export const generateBashScriptFile = (services: Service[]) => {
     .join("\n")
     .replace(/\n{2,}/g, "\n\n");
 
+  const ufwAllowPorts = services
+    .filter((service) => service.ufw)
+    .map((service) => service.ufw)
+    .flat();
+
   const bashCommands = [
-    ...baseBashCommands,
+    ...baseBashCommands(installUfw),
+    ...(installUfw ? ufwCommands(ufwAllowPorts) : []),
     serviceBashCommands,
-    ...finalBashCommands,
   ].join("\n");
 
   return bashCommands;

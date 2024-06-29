@@ -1,6 +1,8 @@
 import { installDockerForUbuntu } from "@/app/installation-script-snippets";
 import { list } from "@vercel/blob";
 
+const installationPath = "/opt/monero-suite" as const;
+
 export async function GET(
   request: Request,
   { params }: { params: { configid: string } }
@@ -51,14 +53,14 @@ const generateInstallationScript = (
   installationScript = installationScript.concat(installDockerForUbuntu);
 
   installationScript =
-    installationScript.concat(`# Create a new folder for the Monero suite
-mkdir -p /opt/monero-suite
+    installationScript.concat(`\n\n# Create a new folder for the Monero suite
+mkdir -p ${installationPath}
 
 # Download the Docker Compose file and .env file
-wget -O /opt/monero-suite/docker-compose.yml ${dockerComposeDownloadUrl}\n`);
+wget -O ${installationPath}/docker-compose.yml ${dockerComposeDownloadUrl}\n`);
   if (envFileDownloadUrl) {
     installationScript = installationScript.concat(
-      `wget -O /opt/monero-suite/.env ${envFileDownloadUrl}`
+      `wget -O ${installationPath}/.env ${envFileDownloadUrl}`
     );
   }
 
@@ -66,7 +68,8 @@ wget -O /opt/monero-suite/docker-compose.yml ${dockerComposeDownloadUrl}\n`);
 
   installationScript = installationScript.concat(`\n
 # Start the Docker Compose file
-cd /opt/monero-suite && docker compose up -d`);
+cd ${installationPath}
+docker compose up -d`);
 
   return installationScript;
 };

@@ -34,6 +34,8 @@ Et voilà: Docker is installed and then all services will be started in the back
 
 Generated configs get deleted after 24 - 48 hours.
 
+Pentested by [Unkn8wn69](https://github.com/Unkn8wn69)
+
 ## Manual Installation (for all systems)
 You need to have [Docker](https://docs.docker.com/install/) and [Docker Compose](https://docs.docker.com/compose/install/) installed. It could also work with Podman, but I haven't tested it.
 

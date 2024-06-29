@@ -18,6 +18,7 @@ import {
   Accordion,
   AccordionStylesNames,
   Code,
+  Box,
 } from "@mantine/core";
 import ExplainingLabel from "./ExplainingLabel";
 import { CSSProperties, useEffect, useState } from "react";
@@ -504,7 +505,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
                 ]}
               />
               {miningMode === "p2pool" && (
-                <>
+                <Box mx="auto" p={16}>
                   <Slider
                     value={p2PoolMiningThreads}
                     onChange={setP2PoolMiningThreads}
@@ -518,15 +519,14 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
                     step={1}
                     styles={{
                       root: {
-                        width: "100%",
-                        maxWidth: "300px",
+                        width: "300px",
                       },
                     }}
                   />
                   <Text size="sm">{`${p2PoolMiningThreads} ${
                     p2PoolMiningThreads > 1 ? `Threads` : `Thread`
                   }`}</Text>
-                </>
+                </Box>
               )}
             </>
           )}

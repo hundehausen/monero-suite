@@ -16,6 +16,7 @@ export interface Service {
   code: PropertiesServices;
   volumes?: PropertiesVolumes;
   architecture: Architecture[];
+  ufw?: string[];
 }
 
 export interface ServiceMap {
@@ -53,7 +54,7 @@ const architectures = {
 
 export type Architecture = (typeof architectures)[keyof typeof architectures];
 
-const networkModes = {
+export const networkModes = {
   exposed: "exposed",
   local: "local",
 } as const;
@@ -134,12 +135,9 @@ export const useServices = () => {
           checked: true,
           required: true,
           architecture: [architectures.linuxAmd, architectures.linuxArm],
-          bash:
+          ufw:
             isMoneroPublicNode && networkMode === networkModes.exposed
-              ? `
-# Allow monerod p2p port and restricted rpc port
-sudo ufw allow 18080/tcp
-sudo ufw allow 18089/tcp`
+              ? ["18080/tcp", "18089/tcp"]
               : undefined,
           volumes: {
             bitmonero: {},
@@ -246,12 +244,9 @@ sudo ufw allow 18089/tcp`
           checked: isStagenetNode,
           required: false,
           architecture: [architectures.linuxAmd, architectures.linuxArm],
-          bash:
-            isStagenetNodePublic && networkMode === networkModes.exposed
-              ? `
-# Allow monerod p2p port and restricted rpc port
-sudo ufw allow 38080/tcp
-sudo ufw allow 38089/tcp`
+          ufw:
+            isMoneroPublicNode && networkMode === networkModes.exposed
+              ? ["38080/tcp", "38089/tcp"]
               : undefined,
           volumes: {
             "bitmonero-stagenet": {},
@@ -322,21 +317,13 @@ sudo ufw allow 38089/tcp`
           volumes: {
             "p2pool-data": {},
           },
-          bash:
+          ufw:
             p2PoolMode === p2poolModes.mini &&
             networkMode === networkModes.exposed
-              ? `
-# Allow p2pool mini p2p port
-sudo ufw allow 37888/tcp
-# Allow p2pool stratum port
-sudo ufw allow 3333/tcp`
+              ? ["37888/tcp", "3333/tcp"]
               : p2PoolMode === p2poolModes.full &&
                 networkMode === networkModes.exposed
-              ? `
-# Allow p2pool p2p port
-sudo ufw allow 37889/tcp
-# Allow p2pool stratum port
-sudo ufw allow 3333/tcp`
+              ? ["37889/tcp", "3333/tcp"]
               : undefined,
           code: {
             p2pool: {
@@ -770,7 +757,7 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
               ],
             },
           },
-          bash: "\n# Allow http and https ports\nsudo ufw allow 80/tcp 443/tcp\n",
+          ufw: ["443/tcp", "80/tcp"],
         },
         portainer: {
           architecture: [architectures.linuxAmd, architectures.linuxArm],
