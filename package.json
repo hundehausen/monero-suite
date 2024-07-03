@@ -10,19 +10,13 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@mantine/code-highlight": "^7.10.2",
-    "@mantine/core": "^7.10.2",
-    "@mantine/hooks": "^7.10.2",
-    "@types/node": "20.14.8",
-    "@types/react": "18.3.3",
-    "@types/react-dom": "18.3.0",
-    "@vercel/blob": "^0.23.3",
+    "@mantine/code-highlight": "^7.11.1",
+    "@mantine/core": "^7.11.1",
+    "@mantine/hooks": "^7.11.1",
+    "@vercel/blob": "^0.23.4",
     "@vercel/kv": "^2.0.0",
-    "autoprefixer": "10.4.19",
     "compose-spec-schema": "^1.0.0",
     "date-fns": "^3.6.0",
-    "eslint": "8.56.0",
-    "eslint-config-next": "14.2.4",
     "nanoid": "^5.0.7",
     "next": "14.2.4",
     "react": "18.3.1",
@@ -30,12 +24,19 @@
     "react-icons": "^5.2.1",
     "react-toggle-dark-mode": "^1.1.1",
     "sharp": "^0.33.4",
-    "typescript": "5.5.2",
+    "typescript": "5.5.3",
     "yaml": "^2.4.5"
   },
   "devDependencies": {
-    "postcss": "^8.4.38",
+    "@types/node": "20.14.9",
+    "@types/react-dom": "18.3.0",
+    "@types/react": "18.3.3",
+    "autoprefixer": "10.4.19",
+    "eslint-config-next": "14.2.4",
+    "eslint": "8.56.0",
     "postcss-preset-mantine": "^1.15.0",
-    "postcss-simple-vars": "^7.0.1"
-  }
+    "postcss-simple-vars": "^7.0.1",
+    "postcss": "^8.4.39"
+  },
+  "packageManager": "pnpm@9.4.0+sha512.f549b8a52c9d2b8536762f99c0722205efc5af913e77835dbccc3b0b0b2ca9e7dc8022b78062c17291c48e88749c70ce88eb5a74f1fa8c4bf5e18bb46c8bd83a"
 }
