@@ -1,6 +1,7 @@
 import { del, list } from "@vercel/blob";
 import { isBefore, subHours } from "date-fns";
 
+export const dynamic = "force-dynamic";
 export async function GET() {
   const { blobs } = await list();
   const blobsToDelete = blobs.filter((blob) =>
