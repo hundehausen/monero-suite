@@ -503,7 +503,7 @@ export const useServices = () => {
           },
           code: {
             "tor-hidden-service": {
-              image: "goldy/tor-hidden-service:latest",
+              image: "ghcr.io/sethforprivacy/tor:latest",
               container_name: "tor-hidden-service",
               restart: "unless-stopped",
               links: [
