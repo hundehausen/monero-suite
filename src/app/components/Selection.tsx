@@ -108,7 +108,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     if (p2PoolPayoutAddress.length === 0) return null;
     if (p2PoolPayoutAddress.length < 95) return "Address too short";
     if (p2PoolPayoutAddress.length > 95) return "Address too long";
-    if (p2PoolPayoutAddress[0] !== "4")
+    if (!p2PoolPayoutAddress.startsWith("4"))
       return "Address must start with 4. Subaddresses are not supported by P2Pool.";
     return null;
   };
@@ -665,17 +665,15 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
               onChange={(event) => setIsMonitoring(event.currentTarget.checked)}
             />
             {isMonitoring === true && (
-              <>
-                <Input.Wrapper
-                  label="Grafana Hostname"
-                  description="The domain where your grafana dashboard will be available."
-                >
-                  <Input
-                    value={grafanaDomain}
-                    onChange={(e) => setGrafanaDomain(e.currentTarget.value)}
-                  />
-                </Input.Wrapper>
-              </>
+              <Input.Wrapper
+                label="Grafana Hostname"
+                description="The domain where your grafana dashboard will be available."
+              >
+                <Input
+                  value={grafanaDomain}
+                  onChange={(e) => setGrafanaDomain(e.currentTarget.value)}
+                />
+              </Input.Wrapper>
             )}
           </Accordion.Panel>
         </Accordion.Item>

@@ -18,7 +18,9 @@ export async function generateInstallationScript(
 
     await uploadDockerComposeFile(dockerCompose, configId);
 
-    envString ? await uploadEnvFile(envString, configId) : undefined;
+    if (envString) {
+      await uploadEnvFile(envString, configId);
+    }
 
     await uploadBashCommandsFile(services, configId, isExposed);
 

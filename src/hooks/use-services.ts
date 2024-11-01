@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import {
+import type {
   PropertiesServices,
   PropertiesVolumes,
-} from "../../node_modules/compose-spec-schema/lib/type";
+} from "compose-spec-schema/lib/type";
+import { useEffect, useMemo, useState } from "react";
 
 export interface Service {
   name: string;

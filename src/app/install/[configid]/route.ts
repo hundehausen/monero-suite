@@ -1,7 +1,7 @@
 import { installDockerForUbuntu } from "@/app/installation-script-snippets";
 import { list } from "@vercel/blob";
 
-const installationPath = "/opt/monero-suite" as const;
+const installationPath = "/opt/monero-suite";
 
 export async function GET(
   request: Request,
