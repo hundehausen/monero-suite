@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "@mantine/core/styles.css";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { ColorSchemeScript } from "@mantine/core";
 import Provider from "./providers";
@@ -33,7 +34,9 @@ export default function RootLayout({
         <ColorSchemeScript defaultColorScheme="dark" />
       </head>
       <body>
-        <Provider>{children}</Provider>
+        <NuqsAdapter>
+          <Provider>{children}</Provider>
+        </NuqsAdapter>
       </body>
     </html>
   );

@@ -511,7 +511,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
                     onChange={setP2PoolMiningThreads}
                     defaultValue={1}
                     min={1}
-                    max={16}
+                    max={32}
                     label={(value) =>
                       `${value} ${value > 1 ? `Threads` : `Thread`}`
                     }

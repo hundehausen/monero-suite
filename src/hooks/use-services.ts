@@ -2,7 +2,14 @@ import type {
   PropertiesServices,
   PropertiesVolumes,
 } from "compose-spec-schema/lib/type";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
+import {
+  parseAsBoolean,
+  parseAsString,
+  parseAsStringEnum,
+  parseAsInteger,
+  useQueryState,
+} from "nuqs";
 
 export interface Service {
   name: string;
@@ -62,55 +69,137 @@ export const networkModes = {
 export type NetworkMode = (typeof networkModes)[keyof typeof networkModes];
 
 export const useServices = () => {
-  const [architecture, setArchitecture] = useState<Architecture>(
-    architectures.linuxAmd
+  const [architecture, setArchitecture] = useQueryState<Architecture>(
+    "architecture",
+    parseAsStringEnum(Object.values(architectures)).withDefault(
+      architectures.linuxAmd
+    )
   );
-  const [networkMode, setNetworkMode] = useState<NetworkMode>(
-    networkModes.local
+  const [networkMode, setNetworkMode] = useQueryState<NetworkMode>(
+    "networkMode",
+    parseAsStringEnum(Object.values(networkModes)).withDefault(
+      networkModes.local
+    )
   );
-  const [isMoneroPublicNode, setIsMoneroPublicNode] = useState(true);
-  const [moneroNodeNoLogs, setMoneroNodeNoLogs] = useState(false);
-  const [moneroNodeDomain, setMoneroNodeDomain] = useState(
-    "node.monerosuite.org"
+  const [isMoneroPublicNode, setIsMoneroPublicNode] = useQueryState(
+    "isMoneroPublicNode",
+    parseAsBoolean.withDefault(true)
   );
-  const [isPrunedNode, setIsPrunedNode] = useState(false);
-  const [isSyncPrunedBlocks, setIsSyncPrunedBlocks] = useState(false);
-  const [isStagenetNode, setIsStagenetNode] = useState(false);
-  const [isStagenetNodePublic, setIsStagenetNodePublic] = useState(true);
-  const [stagenetNodeDomain, setStagenetNodeDomain] = useState(
-    "stagenet.monerosuite.org"
+  const [moneroNodeNoLogs, setMoneroNodeNoLogs] = useQueryState(
+    "moneroNodeNoLogs",
+    parseAsBoolean.withDefault(false)
   );
-  const [p2PoolMode, setP2PoolMode] = useState<P2PoolMode>(p2poolModes.none);
-  const [p2PoolPayoutAddress, setP2PoolPayoutAddress] = useState(
-    "48oc8c65B9JPv6FBZBg7UN9xUYmxux6WfEh61WBoKca7Amh7r7bnCZ7JJicLw7UN3DEgEADwqrhwxGBJazPZ14PJGbmMyXX"
+  const [moneroNodeDomain, setMoneroNodeDomain] = useQueryState(
+    "moneroNodeDomain",
+    parseAsString.withDefault("node.monerosuite.org")
   );
-  const [miningMode, setMiningMode] = useState<MiningMode>(minigModes.none);
-  const [xmrigDonateLevel, setXmrigDonateLevel] = useState(1);
-  const [p2PoolMiningThreads, setP2PoolMiningThreads] = useState(4);
-  const [isMoneroWalletRpc, setIsMoneroWalletRpc] = useState(false);
-  const [torProxyMode, setTorProxyMode] = useState<TorProxyMode>(
-    torProxyModes.none
+  const [isPrunedNode, setIsPrunedNode] = useQueryState(
+    "isPrunedNode",
+    parseAsBoolean.withDefault(false)
   );
-  const [isHiddenServices, setIsHiddenServices] = useState(false);
-  const [isWatchtower, setIsWatchtower] = useState(false);
-  const [isMoneroblock, setIsMoneroblock] = useState(false);
-  const [isMoneroblockLogging, setIsMoneroblockLogging] = useState(true);
-  const [moneroBlockDomain, setMoneroBlockDomain] = useState(
-    "explorer.monerosuite.org"
+  const [isSyncPrunedBlocks, setIsSyncPrunedBlocks] = useQueryState(
+    "isSyncPrunedBlocks",
+    parseAsBoolean.withDefault(false)
+  );
+  const [isStagenetNode, setIsStagenetNode] = useQueryState(
+    "isStagenetNode",
+    parseAsBoolean.withDefault(false)
+  );
+  const [isStagenetNodePublic, setIsStagenetNodePublic] = useQueryState(
+    "isStagenetNodePublic",
+    parseAsBoolean.withDefault(true)
+  );
+  const [stagenetNodeDomain, setStagenetNodeDomain] = useQueryState(
+    "stagenetNodeDomain",
+    parseAsString.withDefault("stagenet.monerosuite.org")
+  );
+  const [p2PoolMode, setP2PoolMode] = useQueryState<P2PoolMode>(
+    "p2PoolMode",
+    parseAsStringEnum(Object.values(p2poolModes)).withDefault(p2poolModes.none)
+  );
+  const [p2PoolPayoutAddress, setP2PoolPayoutAddress] = useQueryState(
+    "p2PoolPayoutAddress",
+    parseAsString.withDefault(
+      "48oc8c65B9JPv6FBZBg7UN9xUYmxux6WfEh61WBoKca7Amh7r7bnCZ7JJicLw7UN3DEgEADwqrhwxGBJazPZ14PJGbmMyXX"
+    )
+  );
+  const [miningMode, setMiningMode] = useQueryState<MiningMode>(
+    "miningMode",
+    parseAsStringEnum(Object.values(minigModes)).withDefault(minigModes.none)
+  );
+  const [xmrigDonateLevel, setXmrigDonateLevel] = useQueryState(
+    "xmrigDonateLevel",
+    parseAsInteger.withDefault(1)
+  );
+  const [p2PoolMiningThreads, setP2PoolMiningThreads] = useQueryState(
+    "p2PoolMiningThreads",
+    parseAsInteger.withDefault(4)
+  );
+  const [isMoneroWalletRpc, setIsMoneroWalletRpc] = useQueryState(
+    "isMoneroWalletRpc",
+    parseAsBoolean.withDefault(false)
+  );
+  const [torProxyMode, setTorProxyMode] = useQueryState<TorProxyMode>(
+    "torProxyMode",
+    parseAsStringEnum(Object.values(torProxyModes)).withDefault(
+      torProxyModes.none
+    )
+  );
+  const [isHiddenServices, setIsHiddenServices] = useQueryState(
+    "isHiddenServices",
+    parseAsBoolean.withDefault(false)
+  );
+  const [isWatchtower, setIsWatchtower] = useQueryState(
+    "isWatchtower",
+    parseAsBoolean.withDefault(false)
+  );
+  const [isMonitoring, setIsMonitoring] = useQueryState(
+    "isMonitoring",
+    parseAsBoolean.withDefault(false)
+  );
+  const [grafanaDomain, setGrafanaDomain] = useQueryState(
+    "grafanaDomain",
+    parseAsString.withDefault("localhost:3000")
+  );
+  const [isAutoheal, setIsAutoheal] = useQueryState(
+    "isAutoheal",
+    parseAsBoolean.withDefault(false)
+  );
+  const [isTraefik, setIsTraefik] = useQueryState(
+    "isTraefik",
+    parseAsBoolean.withDefault(false)
+  );
+  const [moneroBlockDomain, setMoneroBlockDomain] = useQueryState(
+    "moneroBlockDomain",
+    parseAsString.withDefault("explorer.monerosuite.org")
   );
   const [isOnionMoneroBlockchainExplorer, setIsOnionMoneroBlockchainExplorer] =
-    useState(false);
+    useQueryState(
+      "isOnionMoneroBlockchainExplorer",
+      parseAsBoolean.withDefault(false)
+    );
   const [
     onionMoneroBlockchainExplorerDomain,
     setOnionMoneroBlockchainExplorerDomain,
-  ] = useState("");
-  const [isMonitoring, setIsMonitoring] = useState(false);
-  const [grafanaDomain, setGrafanaDomain] = useState("grafana.monerosuite.org");
-  const [isAutoheal, setIsAutoheal] = useState(false);
-  const [isTraefik, setIsTraefik] = useState(false);
-  const [isPortainer, setIsPortainer] = useState(false);
-  const [portainerDomain, setPortainerDomain] = useState(
-    "portainer.monerosuite.org"
+  ] = useQueryState(
+    "onionMoneroBlockchainExplorerDomain",
+    parseAsString.withDefault("")
+  );
+  const [isMoneroblock, setIsMoneroblock] = useQueryState(
+    "isMoneroblock",
+    parseAsBoolean.withDefault(false)
+  );
+  const [isMoneroblockLogging, setIsMoneroblockLogging] = useQueryState(
+    "isMoneroblockLogging",
+    parseAsBoolean.withDefault(true)
+  );
+  const [isPortainer, setIsPortainer] = useQueryState(
+    "isPortainer",
+    parseAsBoolean.withDefault(false)
+  );
+  const [portainerDomain, setPortainerDomain] = useQueryState(
+    "portainerDomain",
+    parseAsString.withDefault("portainer.monerosuite.org")
   );
 
   useEffect(() => {
@@ -350,13 +439,6 @@ export const useServices = () => {
                 "--rpc-port 18089",
                 "--zmq-port 18084",
                 "--host monerod",
-                ...(p2PoolMode === p2poolModes.mini
-                  ? ["--addpeers node.portemonero.com:37888", "--mini"]
-                  : p2PoolMode === p2poolModes.full
-                  ? [
-                      "--addpeers 65.21.227.114:37889,node.sethforprivacy.com:37889",
-                    ]
-                  : []),
                 ...(miningMode === minigModes.p2pool
                   ? [`--start-mining ${p2PoolMiningThreads}`]
                   : []),
