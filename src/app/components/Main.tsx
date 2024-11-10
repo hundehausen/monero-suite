@@ -41,7 +41,7 @@ const panelStyles = {
 export default function Main() {
   const { services, stateFunctions } = useServices();
   const [scriptUrl, setScriptUrl] = useState<string>();
-  const [installationCommand, setInstallationCommand] = useState<string>();
+  const [installationCommand, setInstallationCommand] = useState<string>("");
   const [accordionItems, setAccordionItems] = useState([
     "install-script",
     "docker-compose",

@@ -19,6 +19,7 @@ import {
   AccordionStylesNames,
   Code,
   Box,
+  TextInput,
 } from "@mantine/core";
 import ExplainingLabel from "./ExplainingLabel";
 import { CSSProperties, useEffect, useState } from "react";
@@ -298,7 +299,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
                 label="Monero Node Domain"
                 description="The domain where your monero node will be available."
               >
-                <Input
+                <TextInput
                   value={moneroNodeDomain}
                   onChange={(e) => setMoneroNodeDomain(e.currentTarget.value)}
                 />
@@ -369,7 +370,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
                   label="Stagenet Node Domain"
                   description="The domain where your stagenet node will be available."
                 >
-                  <Input
+                  <TextInput
                     value={stagenetNodeDomain}
                     onChange={(e) =>
                       setStagenetNodeDomain(e.currentTarget.value)
@@ -467,7 +468,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
                 description="It has to be a primary address. Subaddresses don't work."
                 error={p2poolPayoutAddressError()}
               >
-                <Input
+                <TextInput
                   value={p2PoolPayoutAddress}
                   onChange={(e) =>
                     setP2PoolPayoutAddress(e.currentTarget.value)
@@ -572,7 +573,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
               label="Moneroblock Domain"
               description="The domain where your moneroblock will be available."
             >
-              <Input
+              <TextInput
                 value={moneroBlockDomain}
                 onChange={(e) => setMoneroBlockDomain(e.currentTarget.value)}
               />
@@ -669,7 +670,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
                 label="Grafana Hostname"
                 description="The domain where your grafana dashboard will be available."
               >
-                <Input
+                <TextInput
                   value={grafanaDomain}
                   onChange={(e) => setGrafanaDomain(e.currentTarget.value)}
                 />
@@ -703,7 +704,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
                 label="Portainer Domain"
                 description="The domain where your portainer instance will be available."
               >
-                <Input
+                <TextInput
                   value={portainerDomain}
                   onChange={(e) => setPortainerDomain(e.currentTarget.value)}
                 />
