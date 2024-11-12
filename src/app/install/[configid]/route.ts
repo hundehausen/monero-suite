@@ -1,9 +1,12 @@
 import { installDockerForUbuntu } from "@/app/installation-script-snippets";
 import { list } from "@vercel/blob";
 
-const installationPath = "/opt/monero-suite";
+const installationPath = "~/monero-suite";
 
-export async function GET(request: Request, props: { params: Promise<{ configid: string }> }) {
+export async function GET(
+  request: Request,
+  props: { params: Promise<{ configid: string }> }
+) {
   const params = await props.params;
   const configId = params.configid;
 
