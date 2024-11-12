@@ -69,7 +69,11 @@ wget -O ${installationPath}/docker-compose.yml ${dockerComposeDownloadUrl}\n`);
   installationScript = installationScript.concat(`\n
 # Start the Docker Compose file
 cd ${installationPath}
-docker compose up -d`);
+docker compose up -d
+echo "Monero Suite installed successfully."
+echo "Run 'docker compose ps' to check the status of the containers."
+echo "Run 'docker compose logs -f' to see the logs of the containers."
+`);
 
   return installationScript;
 };

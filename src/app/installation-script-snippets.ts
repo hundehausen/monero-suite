@@ -31,9 +31,12 @@ if ! command_exists docker; then
 
     echo "Docker installed successfully."
 
+    echo "Applying post installation steps for Docker..."
     sudo groupadd docker
     sudo usermod -aG docker $USER
     newgrp docker
+    
+    # If you're running Linux in a virtual machine, it may be necessary to restart the virtual machine for changes to take effect.
 else
     echo "Docker is already installed."
 fi
