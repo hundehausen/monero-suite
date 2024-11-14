@@ -19,6 +19,7 @@ import {
   AccordionStylesNames,
   Code,
   Box,
+  TextInput,
 } from "@mantine/core";
 import ExplainingLabel from "./ExplainingLabel";
 import { CSSProperties, useEffect, useState } from "react";
@@ -52,6 +53,14 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     setIsPrunedNode,
     isSyncPrunedBlocks,
     setIsSyncPrunedBlocks,
+    isMoneroMainnetVolume,
+    setIsMoneroMainnetVolume,
+    moneroMainnetBlockchainLocation,
+    setMoneroMainnetBlockchainLocation,
+    isMoneroStagenetVolume,
+    setIsMoneroStagenetVolume,
+    moneroStagenetBlockchainLocation,
+    setMoneroStagenetBlockchainLocation,
     isStagenetNode,
     setIsStagenetNode,
     isStagenetNodePublic,
@@ -279,6 +288,32 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
             </>
           )}
           <Checkbox
+            checked={!isMoneroMainnetVolume}
+            label="Custom location for Monero mainnet blockchain"
+            labelPosition="left"
+            size="md"
+            onChange={(event) =>
+              setIsMoneroMainnetVolume(!event.currentTarget.checked)
+            }
+          ></Checkbox>
+          {!isMoneroMainnetVolume && (
+            <Input.Wrapper
+              styles={{
+                root: {
+                  width: "100%",
+                },
+              }}
+              description="The location where the monero blockchain will be stored."
+            >
+              <TextInput
+                value={moneroMainnetBlockchainLocation}
+                onChange={(e) =>
+                  setMoneroMainnetBlockchainLocation(e.currentTarget.value)
+                }
+              />
+            </Input.Wrapper>
+          )}
+          <Checkbox
             checked={moneroNodeNoLogs}
             label="Disable Monero Node logging"
             labelPosition="left"
@@ -350,6 +385,32 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
                   },
                 }}
               />
+              <Checkbox
+                checked={!isMoneroStagenetVolume}
+                label="Custom location for Monero stagenet blockchain"
+                labelPosition="left"
+                size="md"
+                onChange={(event) =>
+                  setIsMoneroStagenetVolume(!event.currentTarget.checked)
+                }
+              ></Checkbox>
+              {!isMoneroStagenetVolume && (
+                <Input.Wrapper
+                  styles={{
+                    root: {
+                      width: "100%",
+                    },
+                  }}
+                  description="The location where the monero blockchain will be stored."
+                >
+                  <TextInput
+                    value={moneroStagenetBlockchainLocation}
+                    onChange={(e) =>
+                      setMoneroStagenetBlockchainLocation(e.currentTarget.value)
+                    }
+                  />
+                </Input.Wrapper>
+              )}
               <Checkbox
                 checked={moneroNodeNoLogs}
                 label="Disable Monero Node logging"

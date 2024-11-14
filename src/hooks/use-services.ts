@@ -101,6 +101,15 @@ export const useServices = () => {
     "isSyncPrunedBlocks",
     parseAsBoolean.withDefault(false)
   );
+  const [isMoneroMainnetVolume, setIsMoneroMainnetVolume] = useQueryState(
+    "isMoneroMainnetVolume",
+    parseAsBoolean.withDefault(true)
+  );
+  const [moneroMainnetBlockchainLocation, setMoneroMainnetBlockchainLocation] =
+    useQueryState(
+      "moneroMainnetBlockchainLocation",
+      parseAsString.withDefault("~/.bitmonero")
+    );
   const [isStagenetNode, setIsStagenetNode] = useQueryState(
     "isStagenetNode",
     parseAsBoolean.withDefault(false)
@@ -108,6 +117,17 @@ export const useServices = () => {
   const [isStagenetNodePublic, setIsStagenetNodePublic] = useQueryState(
     "isStagenetNodePublic",
     parseAsBoolean.withDefault(true)
+  );
+  const [isMoneroStagenetVolume, setIsMoneroStagenetVolume] = useQueryState(
+    "isMoneroStagenetVolume",
+    parseAsBoolean.withDefault(true)
+  );
+  const [
+    moneroStagenetBlockchainLocation,
+    setMoneroStagenetBlockchainLocation,
+  ] = useQueryState(
+    "moneroStagenetBlockchainLocation",
+    parseAsString.withDefault("~/.bitmonero")
   );
   const [stagenetNodeDomain, setStagenetNodeDomain] = useQueryState(
     "stagenetNodeDomain",
@@ -228,15 +248,23 @@ export const useServices = () => {
             isMoneroPublicNode && networkMode === networkModes.exposed
               ? ["18080/tcp", "18089/tcp"]
               : undefined,
-          volumes: {
-            bitmonero: {},
-          },
+          volumes: isMoneroMainnetVolume
+            ? {
+                bitmonero: {},
+              }
+            : undefined,
           code: {
             monerod: {
               image: "ghcr.io/sethforprivacy/simple-monerod:latest",
               restart: "unless-stopped",
               container_name: "monerod",
-              volumes: ["bitmonero:/home/monero/.bitmonero"],
+              volumes: [
+                ...(isMoneroMainnetVolume
+                  ? ["bitmonero:/home/monero/.bitmonero"]
+                  : [
+                      `${moneroMainnetBlockchainLocation}:/home/monero/.bitmonero`,
+                    ]),
+              ],
               ports: [
                 ...(isMoneroPublicNode || networkMode === networkModes.local
                   ? ["18080:18080"]
@@ -337,15 +365,23 @@ export const useServices = () => {
             isMoneroPublicNode && networkMode === networkModes.exposed
               ? ["38080/tcp", "38089/tcp"]
               : undefined,
-          volumes: {
-            "bitmonero-stagenet": {},
-          },
+          volumes: isMoneroStagenetVolume
+            ? {
+                "bitmonero-stagenet": {},
+              }
+            : undefined,
           code: {
             "monerod-stagenet": {
               image: "ghcr.io/sethforprivacy/simple-monerod:latest",
               restart: "unless-stopped",
               container_name: "monerod-stagenet",
-              volumes: ["bitmonero-stagenet:/home/monero"],
+              volumes: [
+                ...(isMoneroStagenetVolume
+                  ? ["bitmonero-stagenet:/home/monero"]
+                  : [
+                      `${moneroStagenetBlockchainLocation}:/home/monero/.bitmonero`,
+                    ]),
+              ],
               ports: [
                 ...(isStagenetNodePublic || networkMode === networkModes.local
                   ? ["38080:38080"]
@@ -883,18 +919,24 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
     [
       isMoneroPublicNode,
       networkMode,
-      moneroNodeNoLogs,
+      isMoneroMainnetVolume,
+      moneroMainnetBlockchainLocation,
       p2PoolMode,
+      torProxyMode,
+      moneroNodeNoLogs,
       isPrunedNode,
       isSyncPrunedBlocks,
+      isMonitoring,
       isHiddenServices,
-      torProxyMode,
       isTraefik,
       moneroNodeDomain,
       isStagenetNode,
+      isMoneroStagenetVolume,
+      moneroStagenetBlockchainLocation,
       isStagenetNodePublic,
       stagenetNodeDomain,
       p2PoolPayoutAddress,
+      miningMode,
       p2PoolMiningThreads,
       isMoneroWalletRpc,
       isMoneroblock,
@@ -902,11 +944,9 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
       isMoneroblockLogging,
       isOnionMoneroBlockchainExplorer,
       onionMoneroBlockchainExplorerDomain,
-      isMonitoring,
       isWatchtower,
       grafanaDomain,
       isAutoheal,
-      miningMode,
       xmrigDonateLevel,
       isPortainer,
       portainerDomain,
@@ -938,6 +978,14 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
       setIsSyncPrunedBlocks,
       moneroNodeNoLogs,
       setMoneroNodeNoLogs,
+      isMoneroMainnetVolume,
+      setIsMoneroMainnetVolume,
+      moneroMainnetBlockchainLocation,
+      setMoneroMainnetBlockchainLocation,
+      isMoneroStagenetVolume,
+      setIsMoneroStagenetVolume,
+      moneroStagenetBlockchainLocation,
+      setMoneroStagenetBlockchainLocation,
       isStagenetNode,
       setIsStagenetNode,
       isStagenetNodePublic,
