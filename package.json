@@ -10,15 +10,15 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@mantine/code-highlight": "7.13.4",
-    "@mantine/core": "7.13.4",
-    "@mantine/hooks": "7.13.4",
-    "@vercel/blob": "0.25.1",
+    "@mantine/code-highlight": "7.14.0",
+    "@mantine/core": "7.14.0",
+    "@mantine/hooks": "7.14.0",
+    "@vercel/blob": "0.26.0",
     "compose-spec-schema": "1.0.0",
     "date-fns": "4.1.0",
     "nanoid": "5.0.8",
     "next": "14.2.15",
-    "nuqs": "2.1.1",
+    "nuqs": "2.2.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-icons": "5.3.0",
@@ -34,9 +34,9 @@
     "autoprefixer": "10.4.20",
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.15",
-    "postcss": "8.4.47",
+    "postcss": "8.4.49",
     "postcss-preset-mantine": "1.17.0",
     "postcss-simple-vars": "7.0.1"
   },
-  "packageManager": "pnpm@9.12.3+sha512.cce0f9de9c5a7c95bef944169cc5dfe8741abfb145078c0d508b868056848a87c81e626246cb60967cbd7fd29a6c062ef73ff840d96b3c86c40ac92cf4a813ee"
+  "packageManager": "pnpm@9.13.1+sha512.5ac37545851c55ec58521b6c285db6f848f93ca70889beb4145f5b40fe234e4ea4faee4dad12ac5c139e494374c65d9c3a6ec9a25954378fa286a250e68d2f20"
 }
