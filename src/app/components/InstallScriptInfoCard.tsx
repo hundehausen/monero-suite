@@ -17,7 +17,7 @@ export default function InstallScriptInfoCard() {
         the services you selected. This script will install docker and docker
         compose. You might have to enter your password. You can always copy the
         files and commands manually. You need to do it manually, when you are
-        not using a Debian based distro like Ubunutu.
+        not using a Debian based distro like Ubuntu.
       </Text>
     </Card>
   );
