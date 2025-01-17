@@ -7,12 +7,15 @@ import Provider from "./providers";
 
 export const metadata: Metadata = {
   title: "Monero Suite",
+
   description:
     "Build your personal docker-compose.yml file for Monero services.",
+
   robots: "index, follow",
   generator: "Next.js",
   keywords: "Monero, Monero Suite, docker, compose, generator, docker-compose",
   metadataBase: new URL("https://monerosuite.org"),
+
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -20,7 +23,7 @@ export const metadata: Metadata = {
     title: "Monero Suite",
     description:
       "Build your personal docker-compose.yml file for Monero services.",
-  },
+  }
 };
 
 export default function RootLayout({
