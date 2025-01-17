@@ -3,10 +3,8 @@ import { list } from "@vercel/blob";
 
 const installationPath = "~/monero-suite";
 
-export async function GET(
-  request: Request,
-  { params }: { params: { configid: string } }
-) {
+export async function GET(request: Request, props: { params: Promise<{ configid: string }> }) {
+  const params = await props.params;
   const configId = params.configid;
 
   const { blobs } = await list({
