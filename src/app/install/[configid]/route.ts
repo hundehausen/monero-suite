@@ -1,77 +1,30 @@
-import { installDockerForUbuntu } from "@/app/installation-script-snippets";
-import { list } from "@vercel/blob";
+import { getConfigFiles } from "@/app/lib/config-files";
+import { generateInstallationScript } from "@/app/lib/script-generator";
 
-const installationPath = "~/monero-suite";
+export async function GET(
+  request: Request,
+  props: { params: Promise<{ configid: string }> }
+) {
+  try {
+    const params = await props.params;
+    const { dockerComposeUrl, bashCommandsUrl, envFileUrl } =
+      await getConfigFiles(params.configid);
 
-export async function GET(request: Request, props: { params: Promise<{ configid: string }> }) {
-  const params = await props.params;
-  const configId = params.configid;
+    const customBashCommands = await fetch(bashCommandsUrl).then((res) =>
+      res.text()
+    );
 
-  const { blobs } = await list({
-    prefix: configId,
-  });
+    const installationScript = generateInstallationScript(
+      dockerComposeUrl,
+      customBashCommands,
+      envFileUrl
+    );
 
-  const dockerComposeDownloadUrl = blobs
-    .filter((blob) =>
-      blob.pathname.startsWith(`${configId}/docker-compose.yml`)
-    )
-    .at(0)?.downloadUrl;
-
-  const bashCommandsDownloadUrl = blobs
-    .filter((blob) => blob.pathname.startsWith(`${configId}/bash-commands.txt`))
-    .at(0)?.downloadUrl;
-
-  const envFileDownloadUrl = blobs
-    .filter((blob) => blob.pathname.startsWith(`${configId}/.env`))
-    .at(0)?.downloadUrl;
-
-  if (!dockerComposeDownloadUrl || !bashCommandsDownloadUrl) {
-    return new Response("Could not find matching config", { status: 404 });
-  }
-
-  const customBashCommands = await fetch(bashCommandsDownloadUrl).then((res) =>
-    res.text()
-  );
-
-  const installationScript = generateInstallationScript(
-    dockerComposeDownloadUrl,
-    customBashCommands,
-    envFileDownloadUrl
-  );
-
-  return new Response(installationScript);
-}
-
-const generateInstallationScript = (
-  dockerComposeDownloadUrl: string,
-  customBashCommands: string,
-  envFileDownloadUrl?: string
-) => {
-  let installationScript = `#!/bin/bash\n\n`;
-  installationScript = installationScript.concat(installDockerForUbuntu);
-
-  installationScript =
-    installationScript.concat(`\n\n# Create a new folder for the Monero suite
-mkdir -p ${installationPath}
-
-# Download the Docker Compose file and .env file
-wget -O ${installationPath}/docker-compose.yml ${dockerComposeDownloadUrl}\n`);
-  if (envFileDownloadUrl) {
-    installationScript = installationScript.concat(
-      `wget -O ${installationPath}/.env ${envFileDownloadUrl}`
+    return new Response(installationScript);
+  } catch (error) {
+    return new Response(
+      `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      { status: 404 }
     );
   }
-
-  installationScript = installationScript.concat(customBashCommands);
-
-  installationScript = installationScript.concat(`\n
-# Start the Docker Compose file
-cd ${installationPath}
-docker compose up -d
-echo "Monero Suite installed successfully."
-echo "Run 'docker compose ps' to check the status of the containers."
-echo "Run 'docker compose logs -f' to see the logs of the containers."
-`);
-
-  return installationScript;
-};
+}

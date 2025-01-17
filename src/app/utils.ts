@@ -42,7 +42,7 @@ export const generateDockerComposeFile = (services: Service[]) => {
 
 const baseBashCommands = (installUfw = false) => [
   "",
-  "\n\n# Install updates & Install firewall",
+  `\n\n# Install updates${installUfw ? " and UFW (firewall)" : ""}`,
   "sudo apt-get update && sudo apt-get upgrade -y",
   `sudo apt-get install -y curl wget${installUfw ? " ufw" : ""}`,
   "",
