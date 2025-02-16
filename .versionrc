@@ -1,0 +1,14 @@
+{
+  "types": [
+    {"type": "feat", "section": "Features"},
+    {"type": "fix", "section": "Bug Fixes"},
+    {"type": "chore", "section": "Chore"},
+    {"type": "docs", "section": "Documentation"},
+    {"type": "style", "hidden": true},
+    {"type": "refactor", "section": "Code Refactoring"},
+    {"type": "perf", "section": "Performance Improvements"},
+    {"type": "test", "hidden": true}
+  ],
+  "commitUrlFormat": "https://github.com/hundehausen/monero-suite/commits/{{hash}}",
+  "compareUrlFormat": "https://github.com/hundehausen/monero-suite/compare/{{previousTag}}...{{currentTag}}"
+} 
