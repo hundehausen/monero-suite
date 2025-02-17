@@ -7,6 +7,8 @@ import { generateBashScriptFile } from "./utils";
 import { Service } from "@/hooks/use-services";
 import { nanoid } from "nanoid";
 
+const MAX_FILE_SIZE = 1024 * 512;
+
 export async function generateInstallationScript(
   services: Service[],
   dockerCompose: ComposeSpecification,
@@ -26,7 +28,11 @@ export async function generateInstallationScript(
 
     return configId;
   } catch (error) {
-    console.error(error);
+    console.error(
+      "Failed to generate installation script:",
+      error instanceof Error ? error.message : "Unknown error"
+    );
+    throw new Error("Failed to generate installation script");
   }
 }
 
@@ -36,6 +42,11 @@ async function uploadDockerComposeFile(
 ) {
   const yamlString = stringify(dockerCompose);
   const yamlBlob = new Blob([yamlString], { type: "text/yaml" });
+
+  if (yamlBlob.size > MAX_FILE_SIZE) {
+    throw new Error("Docker compose file too large");
+  }
+
   const fileName = `docker-compose.yml`;
   const filePathName = `${configId}/${fileName}`;
   const dockerComposeFile = new File([yamlBlob], fileName, {
@@ -50,6 +61,11 @@ async function uploadDockerComposeFile(
 
 async function uploadEnvFile(envString: string, configId: string) {
   const envBlob = new Blob([envString], { type: "text/plain" });
+
+  if (envBlob.size > MAX_FILE_SIZE) {
+    throw new Error("Environment file too large");
+  }
+
   const fileName = `.env`;
   const filePathName = `${configId}/${fileName}`;
   const envFile = new File([envBlob], fileName, {
@@ -69,6 +85,11 @@ async function uploadBashCommandsFile(
 ) {
   const bashCommands = generateBashScriptFile(services, isExposed);
   const envBlob = new Blob([bashCommands], { type: "text/plain" });
+
+  if (envBlob.size > MAX_FILE_SIZE) {
+    throw new Error("Bash commands file too large");
+  }
+
   const fileName = `bash-commands.txt`;
   const filePathName = `${configId}/${fileName}`;
   const envFile = new File([envBlob], fileName, {
