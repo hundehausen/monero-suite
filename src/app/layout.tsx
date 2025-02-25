@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "@mantine/core/styles.css";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
-import { ColorSchemeScript } from "@mantine/core";
+import { ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
 import Provider from "./providers";
 
 export const metadata: Metadata = {
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: "Monero Suite",
     description:
       "Build your personal docker-compose.yml file for Monero services.",
-  }
+  },
 };
 
 export default function RootLayout({
@@ -32,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" {...mantineHtmlProps}>
       <head>
         <ColorSchemeScript defaultColorScheme="dark" />
       </head>
