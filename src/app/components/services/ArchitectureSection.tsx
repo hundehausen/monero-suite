@@ -8,7 +8,7 @@ const ArchitectureSection = ({ stateFunctions }: ServiceComponentProps) => {
   return (
     <Accordion.Item value="architecture">
       <Accordion.Control>
-        <Text size="lg">Architecture</Text>
+        <Text size="lg">CPU Architecture</Text>
       </Accordion.Control>
       <Accordion.Panel styles={panelStyles}>
         <SegmentedControl
