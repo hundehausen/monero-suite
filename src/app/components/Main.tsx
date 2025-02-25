@@ -22,7 +22,7 @@ import { FaDocker, FaUbuntu } from "react-icons/fa";
 import { SiDotenv, SiGnubash } from "react-icons/si";
 import InstallScriptInfoCard from "./InstallScriptInfoCard";
 import { useServices, networkModes } from "@/hooks/use-services";
-import { useState, useEffect, CSSProperties } from "react";
+import { useState, useEffect, CSSProperties, useRef } from "react";
 import { generateInstallationScript } from "../actions";
 import {
   generateDockerComposeFile,
@@ -50,6 +50,15 @@ export default function Main() {
   const [currentConfigIsUploaded, setCurrentConfigIsUploaded] = useState(false);
   const [agreeOwnRisk, setAgreeOwnRisk] = useState(false);
   const [agreePreview, setAgreePreview] = useState(false);
+
+  // Store the last uploaded configuration for comparison
+  const lastUploadedConfig = useRef<{
+    services: string | null;
+    networkMode: string | null;
+  }>({
+    services: null,
+    networkMode: null,
+  });
 
   const checkedServices = Object.values(services).filter(
     (service) => service.checked !== false && service.checked !== "none"
@@ -81,9 +90,30 @@ export default function Main() {
       return;
     }
 
+    // Store the current configuration that was uploaded
+    lastUploadedConfig.current = {
+      services: JSON.stringify(checkedServices),
+      networkMode: stateFunctions.networkMode,
+    };
+
     setCurrentConfigIsUploaded(true);
     setScriptUrl(`${window.location.origin}/install/${configId}`);
   };
+
+  // Reset currentConfigIsUploaded if services or network mode changes
+  useEffect(() => {
+    if (!currentConfigIsUploaded) return;
+
+    const currentServicesString = JSON.stringify(checkedServices);
+    const currentNetworkMode = stateFunctions.networkMode;
+
+    if (
+      lastUploadedConfig.current.services !== currentServicesString ||
+      lastUploadedConfig.current.networkMode !== currentNetworkMode
+    ) {
+      setCurrentConfigIsUploaded(false);
+    }
+  }, [checkedServices, stateFunctions.networkMode, currentConfigIsUploaded]);
 
   useEffect(() => {
     if (!scriptUrl) {
@@ -92,7 +122,6 @@ export default function Main() {
     setInstallationCommand(`curl -sSL ${scriptUrl} | bash`);
   }, [scriptUrl]);
 
-  useEffect(() => setCurrentConfigIsUploaded(false), [services]);
   return (
     <Grid
       gutter="lg"
