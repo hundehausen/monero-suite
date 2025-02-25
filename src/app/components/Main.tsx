@@ -132,7 +132,7 @@ export default function Main() {
           <Accordion.Item value="install-script">
             <Accordion.Control icon={<FaUbuntu />}>
               <Flex direction={"row"} gap={16} align={"center"}>
-                <Text size="lg">Installation Script for Ubuntu</Text>
+                <Text size="lg">Installation Script for Debian / Ubuntu</Text>
                 <Badge>New!</Badge>
               </Flex>
             </Accordion.Control>
