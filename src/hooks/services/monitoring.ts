@@ -13,7 +13,8 @@ export const useMonitoringService = () => {
 
   const getMonitoringService = (
     networkMode: NetworkMode,
-    isTraefik: boolean
+    isTraefik: boolean,
+    certResolverName: string = "monerosuite"
   ): Service => ({
     name: "Monitoring",
     description:
@@ -100,9 +101,10 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
               "traefik.enable": "true",
               "traefik.http.routers.monitoring.rule": `Host(\`${grafanaDomain}\`)`,
               "traefik.http.routers.monitoring.entrypoints": "websecure",
-              "traefik.http.routers.monitoring.tls.certresolver": "monerosuite",
+              "traefik.http.routers.monitoring.tls.certresolver":
+                certResolverName,
               "traefik.http.services.monitoring.loadbalancer.server.port":
-                "31312",
+                "3000",
             }
           : undefined,
         environment: {

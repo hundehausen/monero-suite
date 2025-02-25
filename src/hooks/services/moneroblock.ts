@@ -17,7 +17,8 @@ export const useMoneroblockService = () => {
 
   const getMoneroblockService = (
     networkMode: NetworkMode,
-    isTraefik: boolean
+    isTraefik: boolean,
+    certResolverName: string = "monerosuite"
   ): Service => ({
     name: "Moneroblock",
     description: "Moneroblock is a self-hostable block explorer for monero",
@@ -41,7 +42,7 @@ export const useMoneroblockService = () => {
               "traefik.http.routers.moneroblock.rule": `Host(\`${moneroBlockDomain}\`)`,
               "traefik.http.routers.moneroblock.entrypoints": "websecure",
               "traefik.http.routers.moneroblock.tls.certresolver":
-                "monerosuite",
+                certResolverName,
               "traefik.http.services.moneroblock.loadbalancer.server.port":
                 "31312",
             }

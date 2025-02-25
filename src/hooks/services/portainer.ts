@@ -13,7 +13,8 @@ export const usePortainerService = () => {
 
   const getPortainerService = (
     networkMode: NetworkMode,
-    isTraefik: boolean
+    isTraefik: boolean,
+    certResolverName: string = "monerosuite"
   ): Service => ({
     architecture: [architectures.linuxAmd, architectures.linuxArm],
     checked: isPortainer,
@@ -43,7 +44,8 @@ export const usePortainerService = () => {
               "traefik.enable": "true",
               "traefik.http.routers.monitoring.rule": `Host(\`${portainerDomain}\`)`,
               "traefik.http.routers.monitoring.entrypoints": "websecure",
-              "traefik.http.routers.monitoring.tls.certresolver": "monerosuite",
+              "traefik.http.routers.monitoring.tls.certresolver":
+                certResolverName,
               "traefik.http.services.monitoring.loadbalancer.server.port":
                 "8000",
             }

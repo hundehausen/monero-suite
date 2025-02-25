@@ -32,7 +32,8 @@ export const useMonerodStagenetService = () => {
 
   const getMonerodStagenetService = (
     networkMode: NetworkMode,
-    isTraefik: boolean
+    isTraefik: boolean,
+    certResolverName: string = "monerosuite"
   ): Service => ({
     name: "Monero Stagenet Node",
     description:
@@ -100,9 +101,9 @@ export const useMonerodStagenetService = () => {
               "traefik.http.routers.monerod-stagenet.rule": `Host(\`${stagenetNodeDomain}\`)`,
               "traefik.http.routers.monerod-stagenet.entrypoints": "websecure",
               "traefik.http.routers.monerod-stagenet.tls.certresolver":
-                "monerosuite",
+                certResolverName,
               "traefik.http.services.monerod-stagenet.loadbalancer.server.port":
-                "18089",
+                "38089",
             }
           : undefined,
       },

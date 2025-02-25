@@ -57,17 +57,36 @@ export const useServices = () => {
   const portainerService = usePortainerService();
 
   // Extract state functions from each service
-  const { isTraefik } = traefikService.stateFunctions;
+  const { isTraefik, mainDomain } = traefikService.stateFunctions;
   const { isMonitoring, setGrafanaDomain } = monitoringService.stateFunctions;
   const { isPrunedNode, isSyncPrunedBlocks } = monerodService.stateFunctions;
+  const { setMoneroBlockDomain } = moneroblockService.stateFunctions;
+  const { setStagenetNodeDomain } = monerodStagenetService.stateFunctions;
+  const { setMoneroNodeDomain } = monerodService.stateFunctions;
+  const { setPortainerDomain } = portainerService.stateFunctions;
+
+  // Get the certificate resolver name
+  const certResolverName = traefikService.getCertResolverName();
 
   useEffect(() => {
     if (isTraefik) {
-      setGrafanaDomain("grafana.monerosuite.org");
+      setGrafanaDomain(`grafana.${mainDomain}`);
+      setMoneroBlockDomain(`explorer.${mainDomain}`);
+      setStagenetNodeDomain(`stagenet.${mainDomain}`);
+      setMoneroNodeDomain(`node.${mainDomain}`);
+      setPortainerDomain(`portainer.${mainDomain}`);
     } else {
       setGrafanaDomain("localhost:3000");
     }
-  }, [isTraefik, setGrafanaDomain]);
+  }, [
+    isTraefik,
+    mainDomain,
+    setGrafanaDomain,
+    setMoneroBlockDomain,
+    setStagenetNodeDomain,
+    setMoneroNodeDomain,
+    setPortainerDomain,
+  ]);
 
   useEffect(() => {
     if (!isPrunedNode)
@@ -83,11 +102,13 @@ export const useServices = () => {
         torProxyService.stateFunctions.torProxyMode,
         isMonitoring,
         torHiddenServiceService.stateFunctions.isHiddenServices,
-        isTraefik
+        isTraefik,
+        certResolverName
       ),
       "monerod-stagenet": monerodStagenetService.getMonerodStagenetService(
         networkMode,
-        isTraefik
+        isTraefik,
+        certResolverName
       ),
       p2pool: p2PoolService.getP2PoolService(
         networkMode,
@@ -98,7 +119,8 @@ export const useServices = () => {
         moneroWalletRpcService.getMoneroWalletRpcService(networkMode),
       moneroblock: moneroblockService.getMoneroblockService(
         networkMode,
-        isTraefik
+        isTraefik,
+        certResolverName
       ),
       "onion-monero-blockchain-explorer":
         onionMoneroBlockchainExplorerService.getOnionMoneroBlockchainExplorerService(
@@ -117,12 +139,17 @@ export const useServices = () => {
       watchtower: watchtowerService.getWatchtowerService(),
       monitoring: monitoringService.getMonitoringService(
         networkMode,
-        isTraefik
+        isTraefik,
+        certResolverName
       ),
       autoheal: autohealService.getAutohealService(),
       xmrig: xmrigService.getXmrigService(),
       traefik: traefikService.getTraefikService(),
-      portainer: portainerService.getPortainerService(networkMode, isTraefik),
+      portainer: portainerService.getPortainerService(
+        networkMode,
+        isTraefik,
+        certResolverName
+      ),
     }),
     [
       networkMode,
@@ -142,6 +169,7 @@ export const useServices = () => {
       portainerService,
       isMonitoring,
       isTraefik,
+      certResolverName,
     ]
   );
 

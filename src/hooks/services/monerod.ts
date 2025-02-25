@@ -46,7 +46,8 @@ export const useMonerodService = () => {
     torProxyMode: string,
     isMonitoring: boolean,
     isHiddenServices: boolean,
-    isTraefik: boolean
+    isTraefik: boolean,
+    certResolverName: string = "monerosuite"
   ): Service => ({
     name: "Monero Node",
     description:
@@ -153,7 +154,7 @@ export const useMonerodService = () => {
               "traefik.enable": "true",
               "traefik.http.routers.monerod.rule": `Host(\`${moneroNodeDomain}\`)`,
               "traefik.http.routers.monerod.entrypoints": "websecure",
-              "traefik.http.routers.monerod.tls.certresolver": "monerosuite",
+              "traefik.http.routers.monerod.tls.certresolver": certResolverName,
               "traefik.http.services.monerod.loadbalancer.server.port": "18089",
             }
           : undefined,
