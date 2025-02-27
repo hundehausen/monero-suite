@@ -194,7 +194,7 @@ export default function Main() {
               <TextInput
                 placeholder="Press Generate Installation Script Button"
                 label="Paste this into your terminal:"
-                value={installationCommand}
+                value={installationCommand ?? ""}
                 disabled={!installationCommand}
                 rightSection={
                   <CopyButton value={installationCommand ?? ""} timeout={2000}>
