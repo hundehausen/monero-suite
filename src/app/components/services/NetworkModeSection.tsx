@@ -23,10 +23,10 @@ const NetworkModeSection = ({
         <Text size="sm">
           If you specify a docker port mapping like this: &quot;3000:3000&quot;
           it will expose that port on all network interfaces, even if you block
-          it with an ufw rule. If you select the option 'directly exposed to the
-          internet', some of the services will bind their ports on localhost, so
-          they won't be reachable from the internet, but the other services can
-          still communicate with each other.
+          it with an ufw rule. If you select the option &apos;directly exposed
+          to the internet&apos;, some of the services will bind their ports on
+          localhost, so they won&apos;t be reachable from the internet, but the
+          other services can still communicate with each other.
         </Text>
         <SegmentedControl
           value={networkMode}
