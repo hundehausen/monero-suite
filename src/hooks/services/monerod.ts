@@ -1,5 +1,4 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
-import { useMemo } from "react";
 import {
   Service,
   architectures,
@@ -8,6 +7,7 @@ import {
   torProxyModes,
   NetworkMode,
 } from "./types";
+import { TOR_IP, MONEROD_IP } from "./tor";
 
 export const useMonerodService = () => {
   const [isMoneroPublicNode, setIsMoneroPublicNode] = useQueryState(
@@ -51,7 +51,7 @@ export const useMonerodService = () => {
   ): Service => ({
     name: "Monero Node",
     description:
-      "The Monero daemon, monerod, is the core software that runs the Monero network. It is responsible for storing the blockchain and synchronizing transactions.",
+      "The Monero daemon is the core of the Monero network. It verifies transactions and blocks, and helps other nodes to synchronize.",
     checked: true,
     required: true,
     architecture: [architectures.linuxAmd, architectures.linuxArm],
@@ -90,7 +90,7 @@ export const useMonerodService = () => {
         depends_on:
           torProxyMode !== "none"
             ? {
-                "tor-proxy": {
+                tor: {
                   condition: "service_started",
                 },
               }
@@ -102,6 +102,16 @@ export const useMonerodService = () => {
           retries: 10,
           start_period: "40s",
         },
+        // Add network configuration if Tor proxy is enabled
+        ...(torProxyMode !== torProxyModes.none
+          ? {
+              networks: {
+                monero_suite_net: {
+                  ipv4_address: MONEROD_IP
+                }
+              }
+            }
+          : {}),
         command: [
           "--rpc-restricted-bind-ip=0.0.0.0",
           "--rpc-restricted-bind-port=18089",
@@ -127,12 +137,11 @@ export const useMonerodService = () => {
             ? ["--rpc-ssl=disabled"]
             : []),
           ...(torProxyMode === torProxyModes.full
-            ? ["--proxy=127.0.0.1:9150"]
-            : torProxyMode === torProxyModes.txonly
-            ? ["--tx-proxy=tor,127.0.0.1:9150,32"]
+            ? [`--proxy=${TOR_IP}:9050`]
             : []),
           ...(torProxyMode !== torProxyModes.none
             ? [
+                `--tx-proxy=tor,${TOR_IP}:9050,32`,
                 "--add-priority-node=xwvz3ekocr3dkyxfkmgm2hvbpzx2ysqmaxgter7znnqrhoicygkfswid.onion:18083",
                 "--add-priority-node=4pixvbejrvihnkxmduo2agsnmc3rrulrqc7s3cbwwrep6h6hrzsibeqd.onion:18083",
                 "--add-priority-node=zbjkbsxc5munw3qusl7j2hpcmikhqocdf4pqhnhtpzw5nt5jrmofptid.onion:18083",

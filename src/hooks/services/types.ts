@@ -1,4 +1,5 @@
 import type {
+  PropertiesNetworks,
   PropertiesServices,
   PropertiesVolumes,
 } from "compose-spec-schema/lib/type";
@@ -16,6 +17,7 @@ export interface Service {
   volumes?: PropertiesVolumes;
   architecture: Architecture[];
   ufw?: string[];
+  networks?: PropertiesNetworks;
 }
 
 export interface ServiceMap {

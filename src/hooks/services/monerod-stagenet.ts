@@ -1,5 +1,6 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
-import { Service, architectures, networkModes, NetworkMode } from "./types";
+import { Service, architectures, networkModes, NetworkMode, torProxyModes } from "./types";
+import { TOR_IP, MONEROD_STAGENET_IP } from "./tor";
 
 export const useMonerodStagenetService = () => {
   const [isStagenetNode, setIsStagenetNode] = useQueryState(
@@ -33,7 +34,8 @@ export const useMonerodStagenetService = () => {
   const getMonerodStagenetService = (
     networkMode: NetworkMode,
     isTraefik: boolean,
-    certResolverName: string = "monerosuite"
+    certResolverName: string = "monerosuite",
+    torProxyMode: string = torProxyModes.none
   ): Service => ({
     name: "Monero Stagenet Node",
     description:
@@ -57,44 +59,63 @@ export const useMonerodStagenetService = () => {
         container_name: "monerod-stagenet",
         volumes: [
           ...(isMoneroStagenetVolume
-            ? ["bitmonero-stagenet:/home/monero"]
-            : [`${moneroStagenetBlockchainLocation}:/home/monero/.bitmonero`]),
+            ? ["bitmonero-stagenet:/home/monero/.bitmonero"]
+            : [
+                `${moneroStagenetBlockchainLocation}:/home/monero/.bitmonero`,
+              ]),
         ],
         ports: [
           ...(isStagenetNodePublic || networkMode === networkModes.local
-            ? ["38080:38080"]
-            : ["127.0.0.1:38080:38080"]),
+            ? ["38080:18080"]
+            : ["127.0.0.1:38080:18080"]),
           ...(isStagenetNodePublic || networkMode === networkModes.local
-            ? ["38089:38089"]
-            : ["127.0.0.1:38089:38089"]),
+            ? ["38081:18081"]
+            : ["127.0.0.1:38081:18081"]),
+          ...(isStagenetNodePublic || networkMode === networkModes.local
+            ? ["38089:18089"]
+            : ["127.0.0.1:38089:18089"]),
         ],
+        depends_on:
+          torProxyMode !== torProxyModes.none
+            ? {
+                tor: {
+                  condition: "service_started",
+                },
+              }
+            : undefined,
+        // Add network configuration if Tor proxy is enabled
+        ...(torProxyMode !== torProxyModes.none
+          ? {
+              networks: {
+                monero_suite_net: {
+                  ipv4_address: MONEROD_STAGENET_IP
+                }
+              }
+            }
+          : {}),
         command: [
+          "--stagenet",
           "--rpc-restricted-bind-ip=0.0.0.0",
-          "--rpc-restricted-bind-port=38089",
+          "--rpc-restricted-bind-port=18089",
           "--rpc-bind-ip=0.0.0.0",
-          "--rpc-bind-port=38081",
+          "--rpc-bind-port=18081",
           "--confirm-external-bind",
           "--enable-dns-blocklist",
           "--check-updates=disabled",
-          "--no-igd",
           ...(moneroNodeNoLogs
-            ? ["--log-file=/dev/null"]
+            ? ["--log-file=/dev/null", "--max-log-file-size=0"]
             : ["--max-log-files=3", "--max-log-file-size=1048576"]),
-          "--out-peers=32",
+          "--no-igd",
+          "--out-peers=64",
           "--limit-rate-down=1048576",
           ...(isStagenetNodePublic ? ["--public-node"] : []),
-          "--stagenet",
+          ...(torProxyMode === torProxyModes.full
+            ? [`--proxy=${TOR_IP}:9050`]
+            : torProxyMode === torProxyModes.txonly
+            ? [`--tx-proxy=tor,${TOR_IP}:9050,32`]
+            : []),
         ],
-        logging: !moneroNodeNoLogs ? undefined : { driver: "none" },
-        healthcheck: {
-          test: [
-            "CMD-SHELL",
-            "curl --fail http://localhost:38081/get_info || exit 1",
-          ],
-          interval: "30s",
-          timeout: "5s",
-          retries: 3,
-        },
+        logging: moneroNodeNoLogs ? { driver: "none" } : undefined,
         labels: isTraefik
           ? {
               "traefik.enable": "true",
@@ -103,7 +124,7 @@ export const useMonerodStagenetService = () => {
               "traefik.http.routers.monerod-stagenet.tls.certresolver":
                 certResolverName,
               "traefik.http.services.monerod-stagenet.loadbalancer.server.port":
-                "38089",
+                "18089",
             }
           : undefined,
       },

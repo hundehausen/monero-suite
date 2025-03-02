@@ -15,6 +15,7 @@ import {
   torProxyModes,
   NetworkMode,
 } from "./types";
+import { TOR_IP, P2POOL_IP, MONEROD_IP } from "./tor";
 
 export const useP2PoolService = () => {
   const [p2PoolMode, setP2PoolMode] = useQueryState<P2PoolMode>(
@@ -69,6 +70,21 @@ export const useP2PoolService = () => {
           ...(p2PoolMode === p2poolModes.mini ? ["37888:37888"] : []),
           ...(p2PoolMode === p2poolModes.full ? ["37889:37889"] : []),
         ],
+        // Add network configuration if Tor proxy is enabled
+        ...(torProxyMode !== torProxyModes.none
+          ? {
+              networks: {
+                monero_suite_net: {
+                  ipv4_address: P2POOL_IP
+                }
+              },
+              depends_on: {
+                tor: {
+                  condition: "service_started",
+                },
+              }
+            }
+          : {}),
         command: [
           `--wallet ${p2PoolPayoutAddress}`,
           "--stratum 0.0.0.0:3333",
@@ -77,13 +93,13 @@ export const useP2PoolService = () => {
           }`,
           "--rpc-port 18089",
           "--zmq-port 18084",
-          "--host monerod",
+          ...(torProxyMode !== torProxyModes.none
+            ? [`--host ${MONEROD_IP}`, "--no-dns"]
+            : ["--host monerod"]),
           ...(miningMode === minigModes.p2pool
             ? [`--start-mining ${p2PoolMiningThreads}`]
             : []),
-          ...(torProxyMode === torProxyModes.full
-            ? ["--socks5 127.0.0.1:9150"]
-            : []),
+          ...(torProxyMode === torProxyModes.full ? [`--socks5 ${TOR_IP}:9050`] : []),
         ].join(" "),
       },
     },

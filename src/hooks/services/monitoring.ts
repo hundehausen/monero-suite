@@ -1,5 +1,6 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
-import { Service, architectures, networkModes, NetworkMode } from "./types";
+import { Service, architectures, networkModes, NetworkMode, torProxyModes } from "./types";
+import { GRAFANA_IP } from "./tor";
 
 export const useMonitoringService = () => {
   const [isMonitoring, setIsMonitoring] = useQueryState(
@@ -14,7 +15,8 @@ export const useMonitoringService = () => {
   const getMonitoringService = (
     networkMode: NetworkMode,
     isTraefik: boolean,
-    certResolverName: string = "monerosuite"
+    certResolverName: string = "monerosuite",
+    torProxyMode: string = torProxyModes.none
   ): Service => ({
     name: "Monitoring",
     description:
@@ -98,14 +100,14 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
         ],
         labels: isTraefik
           ? {
-              "traefik.enable": "true",
-              "traefik.http.routers.monitoring.rule": `Host(\`${grafanaDomain}\`)`,
-              "traefik.http.routers.monitoring.entrypoints": "websecure",
-              "traefik.http.routers.monitoring.tls.certresolver":
-                certResolverName,
-              "traefik.http.services.monitoring.loadbalancer.server.port":
-                "3000",
-            }
+            "traefik.enable": "true",
+            "traefik.http.routers.monitoring.rule": `Host(\`${grafanaDomain}\`)`,
+            "traefik.http.routers.monitoring.entrypoints": "websecure",
+            "traefik.http.routers.monitoring.tls.certresolver":
+              certResolverName,
+            "traefik.http.services.monitoring.loadbalancer.server.port":
+              "3000",
+          }
           : undefined,
         environment: {
           HOSTNAME: "grafana",
@@ -123,6 +125,21 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
           GF_SECURITY_ADMIN_PASSWORD: "${GF_SECURITY_ADMIN_PASSWORD:-admin}",
           GF_SECURITY_ADMIN_USER: "${GF_SECURITY_ADMIN_USER:-admin}",
         },
+        // Add network configuration if Tor proxy is enabled
+        ...(torProxyMode !== torProxyModes.none
+          ? {
+            networks: {
+              monero_suite_net: {
+                ipv4_address: GRAFANA_IP
+              }
+            },
+            depends_on: {
+              tor: {
+                condition: "service_started",
+              },
+            }
+          }
+          : {}),
       },
     },
   });

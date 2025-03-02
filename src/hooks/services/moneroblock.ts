@@ -1,5 +1,6 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
-import { Service, architectures, networkModes, NetworkMode } from "./types";
+import { Service, architectures, networkModes, NetworkMode, torProxyModes } from "./types";
+import { MONEROD_IP, MONEROBLOCK_IP } from "./tor";
 
 export const useMoneroblockService = () => {
   const [isMoneroblock, setIsMoneroblock] = useQueryState(
@@ -18,7 +19,8 @@ export const useMoneroblockService = () => {
   const getMoneroblockService = (
     networkMode: NetworkMode,
     isTraefik: boolean,
-    certResolverName: string = "monerosuite"
+    certResolverName: string = "monerosuite",
+    torProxyMode: string = torProxyModes.none
   ): Service => ({
     name: "Moneroblock",
     description: "Moneroblock is a self-hostable block explorer for monero",
@@ -35,7 +37,24 @@ export const useMoneroblockService = () => {
             ? ["31312:31312"]
             : ["127.0.0.1:31312:31312"]),
         ],
-        command: ["--daemon", "monerod:18089"],
+        // Add network configuration if Tor proxy is enabled
+        ...(torProxyMode !== torProxyModes.none
+          ? {
+              networks: {
+                monero_suite_net: {
+                  ipv4_address: MONEROBLOCK_IP
+                }
+              },
+              depends_on: {
+                tor: {
+                  condition: "service_started",
+                },
+              },
+              command: [`--daemon ${MONEROD_IP}:18089`]
+            }
+          : {
+              command: ["--daemon", "monerod:18089"]
+            }),
         labels: isTraefik
           ? {
               "traefik.enable": "true",
