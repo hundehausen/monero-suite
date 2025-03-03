@@ -88,14 +88,6 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
       <NetworkModeSection
         services={services}
         stateFunctions={stateFunctions}
-        value={accordionItems.includes("exposed") ? "exposed" : ""}
-        onChange={(value) =>
-          setAccordionItems((prev) =>
-            prev.includes("exposed")
-              ? prev.filter((item) => item !== "exposed")
-              : [...prev, "exposed"]
-          )
-        }
       />
 
       <MoneroNodeSection services={services} stateFunctions={stateFunctions} />
