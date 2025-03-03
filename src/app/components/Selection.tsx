@@ -10,8 +10,7 @@ import {
   P2PoolSection,
   MoneroblockSection,
   TraefikSection,
-  TorProxySection,
-  TorHiddenServiceSection,
+  TorSection,
   MonitoringSection,
   PortainerSection,
   WatchtowerSection,
@@ -117,12 +116,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
 
       <MoneroblockSection services={services} stateFunctions={stateFunctions} />
 
-      <TorProxySection services={services} stateFunctions={stateFunctions} />
-
-      <TorHiddenServiceSection
-        services={services}
-        stateFunctions={stateFunctions}
-      />
+      <TorSection services={services} stateFunctions={stateFunctions} />
 
       <MonitoringSection services={services} stateFunctions={stateFunctions} />
 

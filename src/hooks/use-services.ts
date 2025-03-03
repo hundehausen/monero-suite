@@ -13,8 +13,7 @@ import {
   useMoneroWalletRpcService,
   useMoneroblockService,
   useOnionMoneroBlockchainExplorerService,
-  useTorProxyService,
-  useTorHiddenServiceService,
+  useTorService,
   useWatchtowerService,
   useMonitoringService,
   useAutohealService,
@@ -47,8 +46,7 @@ export const useServices = () => {
   const moneroblockService = useMoneroblockService();
   const onionMoneroBlockchainExplorerService =
     useOnionMoneroBlockchainExplorerService();
-  const torProxyService = useTorProxyService();
-  const torHiddenServiceService = useTorHiddenServiceService();
+  const torService = useTorService({ networkMode });
   const watchtowerService = useWatchtowerService();
   const monitoringService = useMonitoringService();
   const autohealService = useAutohealService();
@@ -99,36 +97,40 @@ export const useServices = () => {
       monerod: monerodService.getMonerodService(
         networkMode,
         p2PoolService.stateFunctions.p2PoolMode,
-        torProxyService.stateFunctions.torProxyMode,
+        torService.stateFunctions.torProxyMode,
         isMonitoring,
-        torHiddenServiceService.stateFunctions.isHiddenServices,
+        torService.stateFunctions.isHiddenServices,
         isTraefik,
         certResolverName
       ),
       "monerod-stagenet": monerodStagenetService.getMonerodStagenetService(
         networkMode,
         isTraefik,
-        certResolverName
+        certResolverName,
+        torService.stateFunctions.torProxyMode
       ),
       p2pool: p2PoolService.getP2PoolService(
         networkMode,
         xmrigService.stateFunctions.miningMode,
-        torProxyService.stateFunctions.torProxyMode
+        torService.stateFunctions.torProxyMode
       ),
       "monero-wallet-rpc":
         moneroWalletRpcService.getMoneroWalletRpcService(networkMode),
       moneroblock: moneroblockService.getMoneroblockService(
         networkMode,
         isTraefik,
-        certResolverName
+        certResolverName,
+        torService.stateFunctions.torProxyMode
       ),
       "onion-monero-blockchain-explorer":
         onionMoneroBlockchainExplorerService.getOnionMoneroBlockchainExplorerService(
           networkMode,
-          isTraefik
+          isTraefik,
+          certResolverName,
+          torService.stateFunctions.torProxyMode
         ),
-      "tor-proxy": torProxyService.getTorProxyService(networkMode),
-      "tor-hidden-service": torHiddenServiceService.getTorHiddenServiceService(
+      tor: torService.getTorService(
+        networkMode,
         monerodStagenetService.stateFunctions.isStagenetNode,
         p2PoolService.stateFunctions.p2PoolMode,
         moneroblockService.stateFunctions.isMoneroblock,
@@ -140,7 +142,8 @@ export const useServices = () => {
       monitoring: monitoringService.getMonitoringService(
         networkMode,
         isTraefik,
-        certResolverName
+        certResolverName,
+        torService.stateFunctions.torProxyMode
       ),
       autoheal: autohealService.getAutohealService(),
       xmrig: xmrigService.getXmrigService(),
@@ -159,8 +162,7 @@ export const useServices = () => {
       moneroWalletRpcService,
       moneroblockService,
       onionMoneroBlockchainExplorerService,
-      torProxyService,
-      torHiddenServiceService,
+      torService,
       watchtowerService,
       monitoringService,
       autohealService,
@@ -195,8 +197,7 @@ export const useServices = () => {
     ...moneroWalletRpcService.stateFunctions,
     ...moneroblockService.stateFunctions,
     ...onionMoneroBlockchainExplorerService.stateFunctions,
-    ...torProxyService.stateFunctions,
-    ...torHiddenServiceService.stateFunctions,
+    ...torService.stateFunctions,
     ...watchtowerService.stateFunctions,
     ...monitoringService.stateFunctions,
     ...autohealService.stateFunctions,

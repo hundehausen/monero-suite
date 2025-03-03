@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.5.0](https://github.com/hundehausen/monero-suite/compare/v0.4.0...v0.5.0) (2025-03-03)
+
+
+### Features
+
+* new tor service, workaround for proxy in docker network ([ed1191b](https://github.com/hundehausen/monero-suite/commits/ed1191bd9c44829afc035419d62a85833e9ee2e6))
+* use new modern tor image ([9272592](https://github.com/hundehausen/monero-suite/commits/9272592ce9fa99f77aea7319d21c714d5014af40))
+
+
+### Bug Fixes
+
+* ensure TextInput is a controlled component ([1cc04d6](https://github.com/hundehausen/monero-suite/commits/1cc04d683ec762e136a9846b2cd090837e4601d8))
+
+
+### Documentation
+
+* clarify network mode description for service port exposure ([ea10055](https://github.com/hundehausen/monero-suite/commits/ea1005563b796daf1c6872641246174bed684f2c))
+
+
+### Chore
+
+* update dependencies to latest versions ([5c73b7b](https://github.com/hundehausen/monero-suite/commits/5c73b7beae0eb2340e03a558354b4cecfe511327))
+* update network section description ([3c90925](https://github.com/hundehausen/monero-suite/commits/3c909258185d52223a10f00cda7cc210787ba8ea))
+* upgrade Next.js and related dependencies to version 15.2.0 ([0f3fe15](https://github.com/hundehausen/monero-suite/commits/0f3fe15ef0610abdc93746de41740b79ad4ba0ff))
+
 ## [0.4.0](https://github.com/hundehausen/monero-suite/compare/v0.3.1...v0.4.0) (2025-02-25)
 
 

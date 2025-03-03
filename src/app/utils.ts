@@ -14,6 +14,7 @@ const dockerComposeBase: Compose = {
   name: "monero-suite",
   services: {},
   volumes: {},
+  networks: {}
 };
 
 export const generateDockerComposeFile = (services: Service[]) => {
@@ -22,6 +23,10 @@ export const generateDockerComposeFile = (services: Service[]) => {
   const volumes = services
     .filter((service) => service.volumes && service.checked)
     .map((service) => service.volumes);
+
+  const networks = services
+    .filter((service) => service.networks && service.checked)
+    .map((service) => service.networks);
 
   return {
     ...dockerComposeBase,
@@ -35,6 +40,12 @@ export const generateDockerComposeFile = (services: Service[]) => {
       return {
         ...acc,
         ...volume,
+      };
+    }, {}),
+    networks: networks.reduce((acc, network) => {
+      return {
+        ...acc,
+        ...network,
       };
     }, {}),
   } as Compose;
