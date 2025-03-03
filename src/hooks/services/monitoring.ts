@@ -130,7 +130,7 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
           ? {
             networks: {
               monero_suite_net: {
-                ipv4_address: GRAFANA_IP
+                aliases: ["grafana"]
               }
             },
             depends_on: {

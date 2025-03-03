@@ -15,7 +15,7 @@ import {
   torProxyModes,
   NetworkMode,
 } from "./types";
-import { TOR_IP, P2POOL_IP, MONEROD_IP } from "./tor";
+import { P2POOL_IP, MONEROD_IP } from "./tor";
 
 export const useP2PoolService = () => {
   const [p2PoolMode, setP2PoolMode] = useQueryState<P2PoolMode>(
@@ -75,7 +75,8 @@ export const useP2PoolService = () => {
           ? {
               networks: {
                 monero_suite_net: {
-                  ipv4_address: P2POOL_IP
+                  ipv4_address: P2POOL_IP,
+                  aliases: ["p2pool"]
                 }
               },
               depends_on: {
@@ -99,7 +100,7 @@ export const useP2PoolService = () => {
           ...(miningMode === minigModes.p2pool
             ? [`--start-mining ${p2PoolMiningThreads}`]
             : []),
-          ...(torProxyMode === torProxyModes.full ? [`--socks5 ${TOR_IP}:9050`] : []),
+          ...(torProxyMode === torProxyModes.full ? ["--socks5 tor:9050"] : []),
         ].join(" "),
       },
     },

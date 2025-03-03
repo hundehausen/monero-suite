@@ -46,7 +46,7 @@ export const useServices = () => {
   const moneroblockService = useMoneroblockService();
   const onionMoneroBlockchainExplorerService =
     useOnionMoneroBlockchainExplorerService();
-  const torService = useTorService();
+  const torService = useTorService({ networkMode });
   const watchtowerService = useWatchtowerService();
   const monitoringService = useMonitoringService();
   const autohealService = useAutohealService();

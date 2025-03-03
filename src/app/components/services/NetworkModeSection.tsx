@@ -2,16 +2,9 @@ import { NetworkMode } from "@/hooks/use-services";
 import { Accordion, SegmentedControl, Text } from "@mantine/core";
 import { ServiceComponentProps, panelStyles } from "./types";
 
-interface NetworkModeSectionProps extends ServiceComponentProps {
-  value: string;
-  onChange: (value: string) => void;
-}
-
 const NetworkModeSection = ({
-  stateFunctions,
-  value,
-  onChange,
-}: NetworkModeSectionProps) => {
+  stateFunctions
+}: ServiceComponentProps) => {
   const { networkMode, setNetworkMode } = stateFunctions;
 
   return (

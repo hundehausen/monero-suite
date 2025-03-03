@@ -66,14 +66,14 @@ export const useMonerodStagenetService = () => {
         ],
         ports: [
           ...(isStagenetNodePublic || networkMode === networkModes.local
-            ? ["38080:18080"]
-            : ["127.0.0.1:38080:18080"]),
+            ? ["38080:38080"]
+            : ["127.0.0.1:38080:38080"]),
           ...(isStagenetNodePublic || networkMode === networkModes.local
-            ? ["38081:18081"]
-            : ["127.0.0.1:38081:18081"]),
+            ? ["38081:38081"]
+            : ["127.0.0.1:38081:38081"]),
           ...(isStagenetNodePublic || networkMode === networkModes.local
-            ? ["38089:18089"]
-            : ["127.0.0.1:38089:18089"]),
+            ? ["38089:38089"]
+            : ["127.0.0.1:38089:38089"]),
         ],
         depends_on:
           torProxyMode !== torProxyModes.none
@@ -96,9 +96,9 @@ export const useMonerodStagenetService = () => {
         command: [
           "--stagenet",
           "--rpc-restricted-bind-ip=0.0.0.0",
-          "--rpc-restricted-bind-port=18089",
+          "--rpc-restricted-bind-port=38089",
           "--rpc-bind-ip=0.0.0.0",
-          "--rpc-bind-port=18081",
+          "--rpc-bind-port=38081",
           "--confirm-external-bind",
           "--enable-dns-blocklist",
           "--check-updates=disabled",

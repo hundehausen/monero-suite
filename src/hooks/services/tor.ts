@@ -9,6 +9,7 @@ import {
   p2poolModes,
   P2PoolMode,
 } from "./types";
+import { useEffect } from "react";
 
 // Define fixed IP addresses for the tor network
 export const TOR_IP = "172.28.1.2";
@@ -19,7 +20,7 @@ export const MONEROBLOCK_IP = "172.28.1.6";
 export const EXPLORER_IP = "172.28.1.7";
 export const GRAFANA_IP = "172.28.1.8";
 
-export const useTorService = () => {
+export const useTorService = ({networkMode}: {networkMode: NetworkMode}) => {
   // State for Tor Proxy functionality
   const [torProxyMode, setTorProxyMode] = useQueryState<TorProxyMode>(
     "torProxyMode",
@@ -34,16 +35,18 @@ export const useTorService = () => {
     parseAsBoolean.withDefault(false)
   );
 
-  /**
-   * Get the Tor service configuration
-   * @param networkMode - The network mode (exposed or local)
-   * @param isStagenetNode - Whether the node is a stagenet node
-   * @param p2PoolMode - The P2Pool mode (none, mini, or full)
-   * @param isMoneroblock - Whether to include Moneroblock
-   * @param isOnionMoneroBlockchainExplorer - Whether to include Onion Monero Blockchain Explorer
-   * @param isMonitoring - Whether to include monitoring
-   * @returns The Tor service configuration
-   */
+  // State for global Tor proxy (binding to 0.0.0.0)
+  const [isGlobalTorProxy, setIsGlobalTorProxy] = useQueryState(
+    "isGlobalTorProxy",
+    parseAsBoolean.withDefault(false)
+  );
+
+  useEffect(() => {
+    if (networkMode === "exposed") {
+      setIsGlobalTorProxy(false);
+    }
+  }, [networkMode]);
+
   const getTorService = (
     networkMode: NetworkMode,
     isStagenetNode: boolean = false,
@@ -77,7 +80,8 @@ export const useTorService = () => {
     if (isProxyEnabled) {
       service.code.tor.networks = {
         monero_suite_net: {
-          ipv4_address: TOR_IP
+          ipv4_address: TOR_IP,
+          aliases: ["tor"]
         }
       };
 
@@ -97,12 +101,12 @@ export const useTorService = () => {
     }
 
     // Add proxy-specific configuration if proxy is enabled
-    if (isProxyEnabled) {
-      service.code.tor.ports = [
-        ...(networkMode === networkModes.local
-          ? ["9050:9050"]
-          : ["127.0.0.1:9050:9050"]),
-      ];
+    if (isProxyEnabled && isGlobalTorProxy) {
+      // Determine port binding based on network mode and global proxy setting
+      // Only allow host binding proxy (0.0.0.0) if in local network mode
+      const portBinding = networkMode === networkModes.local ? "9050:9050" : "127.0.0.1:9050:9050";
+      
+      service.code.tor.ports = [portBinding];
     }
 
     // Add hidden service-specific configuration if hidden services are enabled
@@ -156,6 +160,10 @@ export const useTorService = () => {
       // Hidden service state functions
       isHiddenServices,
       setIsHiddenServices,
+
+      // Global proxy state functions
+      isGlobalTorProxy,
+      setIsGlobalTorProxy,
     },
   };
 };

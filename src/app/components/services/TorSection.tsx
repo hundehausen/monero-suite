@@ -11,14 +11,19 @@ const TorSection = ({
     torProxyMode, 
     setTorProxyMode, 
     isHiddenServices, 
-    setIsHiddenServices
+    setIsHiddenServices,
+    isGlobalTorProxy,
+    setIsGlobalTorProxy,
+    networkMode
   } = stateFunctions;
 
+  // Only show global tor proxy option when in local network mode
+  const isLocalNetworkMode = networkMode === "local";
 
   return (
     <Accordion.Item value="tor">
       <Accordion.Control>
-        <Text size="lg">Tor Service</Text>
+        <Text size="lg">Tor Proxy & Tor Hidden Services</Text>
       </Accordion.Control>
       <Accordion.Panel styles={panelStyles}>
         <Text size="sm">{services["tor"].description}</Text>
@@ -45,7 +50,7 @@ const TorSection = ({
                   label: (
                     <ExplainingLabel
                       label="Tx only"
-                      explanation="Use this to send transactions of directly connected wallets via Tor. Other traffic will not be routed through Tor."
+                      explanation="Use this to send transactions of directly connected wallets via the Tor network. Other traffic will not be routed through Tor."
                     />
                   ),
                   value: "tx-only",
@@ -54,7 +59,7 @@ const TorSection = ({
                   label: (
                     <ExplainingLabel
                       label="Full"
-                      explanation="Use this to route all traffic of monerod through Tor. This is not availiable yet, because the tor-proxy docker image does only support SOCKS5 and monerod only supports SOCKS4."
+                      explanation="Use this option to route all of monerods IPv4 traffic through Tor. It uses SOCKS4."
                     />
                   ),
                   value: "full",
@@ -62,6 +67,21 @@ const TorSection = ({
                 },
               ]}
             />
+            
+            {/* Global Tor Proxy Option - only visible when in local network mode and proxy is enabled */}
+            {isLocalNetworkMode && torProxyMode !== "none" && (
+              <Checkbox
+                mt="md"
+                checked={isGlobalTorProxy}
+                label={
+                  <ExplainingLabel
+                    label="Make Tor proxy available outside Docker network"
+                    explanation="This will bind the SOCKS5 port of the Tor service to all network interfaces of the host, making it accessible from other devices on your local network. This option is only available when you're behind NAT. Do not use this option, if your host is part of a public network."
+                  />
+                }
+                onChange={(event) => setIsGlobalTorProxy(event.currentTarget.checked)}
+              />
+            )}
           </div>
 
           <Divider />
