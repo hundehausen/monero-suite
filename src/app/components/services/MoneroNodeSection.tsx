@@ -2,13 +2,15 @@ import { ServiceComponentProps, panelStyles } from "./types";
 import {
   Accordion,
   Anchor,
-  Checkbox,
+  Button,
+  Group,
   Input,
   Switch,
   Text,
-  TextInput,
 } from "@mantine/core";
+import { useDisclosure } from '@mantine/hooks';
 import ExplainingLabel from "../ExplainingLabel";
+import AdvancedConfigModal from "./MoneroNode/AdvancedConfigModal";
 
 const MoneroNodeSection = ({
   services,
@@ -17,20 +19,15 @@ const MoneroNodeSection = ({
   const {
     isMoneroPublicNode,
     setIsMoneroPublicNode,
-    moneroNodeNoLogs,
-    setMoneroNodeNoLogs,
     moneroNodeDomain,
     setMoneroNodeDomain,
     isPrunedNode,
     setIsPrunedNode,
-    isSyncPrunedBlocks,
-    setIsSyncPrunedBlocks,
-    isMoneroMainnetVolume,
-    setIsMoneroMainnetVolume,
-    moneroMainnetBlockchainLocation,
-    setMoneroMainnetBlockchainLocation,
-    isTraefik,
+    isTraefik
   } = stateFunctions;
+
+  // State for modal
+  const [opened, { open, close }] = useDisclosure(false);
 
   return (
     <Accordion.Item value="mainnet-node">
@@ -77,57 +74,7 @@ const MoneroNodeSection = ({
             },
           }}
         />
-        {isPrunedNode && (
-          <>
-            <Text size="sm">
-              Activating to sync pruned blocks will save your network bandwith.
-              You download only the pruned blocks instead of downloading the
-              full blocks and pruning them afterwards.
-            </Text>
-            <Checkbox
-              checked={isSyncPrunedBlocks}
-              label="Sync Pruned Blocks"
-              labelPosition="left"
-              size="lg"
-              onChange={(event) =>
-                setIsSyncPrunedBlocks(event.currentTarget.checked)
-              }
-            />
-          </>
-        )}
-        <Checkbox
-          checked={!isMoneroMainnetVolume}
-          label="Custom location for Monero mainnet blockchain"
-          labelPosition="left"
-          size="md"
-          onChange={(event) =>
-            setIsMoneroMainnetVolume(!event.currentTarget.checked)
-          }
-        ></Checkbox>
-        {!isMoneroMainnetVolume && (
-          <Input.Wrapper
-            styles={{
-              root: {
-                width: "100%",
-              },
-            }}
-            description="The location where the monero blockchain will be stored."
-          >
-            <TextInput
-              value={moneroMainnetBlockchainLocation}
-              onChange={(e) =>
-                setMoneroMainnetBlockchainLocation(e.currentTarget.value)
-              }
-            />
-          </Input.Wrapper>
-        )}
-        <Checkbox
-          checked={moneroNodeNoLogs}
-          label="Disable Monero Node logging"
-          labelPosition="left"
-          size="md"
-          onChange={(event) => setMoneroNodeNoLogs(event.currentTarget.checked)}
-        />
+
         {isMoneroPublicNode && isTraefik && (
           <>
             <Input.Wrapper
@@ -149,14 +96,18 @@ const MoneroNodeSection = ({
             )}
           </>
         )}
-        <Anchor
-          href="https://getmonero.dev/interacting/monerod#options"
-          target="_blank"
-          fw={400}
-          fz="sm"
-        >
-          All monerod options explained
-        </Anchor>
+        
+        {/* Advanced Configuration Button */}
+        <Group mt="md">
+          <Button onClick={open} variant="outline">Advanced Configuration</Button>
+        </Group>
+        
+        {/* Advanced Configuration Modal */}
+        <AdvancedConfigModal 
+          opened={opened} 
+          onClose={close} 
+          stateFunctions={stateFunctions}
+        />
       </Accordion.Panel>
     </Accordion.Item>
   );
