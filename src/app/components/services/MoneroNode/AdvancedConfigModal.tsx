@@ -40,8 +40,8 @@ const AdvancedConfigModal = ({ opened, onClose, stateFunctions }: AdvancedConfig
       }}
     >
       <Text mb="md">
-        Configure advanced options for your Monero node. These settings provide fine-grained control
-        over the node's behavior, performance, and resource usage.
+        {`Configure advanced options for your Monero node. These settings provide fine-grained control
+        over the node's behavior, performance, and resource usage.`}
       </Text>
       
       <Accordion multiple defaultValue={['logging']}>

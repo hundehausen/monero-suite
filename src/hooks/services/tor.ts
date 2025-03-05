@@ -45,7 +45,7 @@ export const useTorService = ({networkMode}: {networkMode: NetworkMode}) => {
     if (networkMode === "exposed") {
       setIsGlobalTorProxy(false);
     }
-  }, [networkMode]);
+  }, [networkMode, setIsGlobalTorProxy]);
 
   const getTorService = (
     networkMode: NetworkMode,

@@ -1,6 +1,5 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
 import { Service, architectures, networkModes, NetworkMode, torProxyModes } from "./types";
-import { GRAFANA_IP } from "./tor";
 
 export const useMonitoringService = () => {
   const [isMonitoring, setIsMonitoring] = useQueryState(
