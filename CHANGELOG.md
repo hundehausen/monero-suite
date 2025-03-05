@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.6.0](https://github.com/hundehausen/monero-suite/compare/v0.5.0...v0.6.0) (2025-03-05)
+
+
+### Features
+
+* advanced monero configuration ([c89c869](https://github.com/hundehausen/monero-suite/commits/c89c8696265741ed537227e1167d869affa85f0c))
+
+
+### Chore
+
+* remove unused code ([1d3457f](https://github.com/hundehausen/monero-suite/commits/1d3457f2bbe41b330ac2442873671de1e75a541a))
+
 ## [0.5.0](https://github.com/hundehausen/monero-suite/compare/v0.4.0...v0.5.0) (2025-03-03)
 
 
