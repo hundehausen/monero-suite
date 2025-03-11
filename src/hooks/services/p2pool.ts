@@ -33,6 +33,8 @@ export const useP2PoolService = () => {
     parseAsInteger.withDefault(4)
   );
 
+  const p2PoolContainerName = p2PoolMode === p2poolModes.mini ? "p2pool-mini" : "p2pool"
+
   const getP2PoolService = (
     networkMode: NetworkMode,
     miningMode: MiningMode,
@@ -55,14 +57,15 @@ export const useP2PoolService = () => {
         ? ["37889/tcp", "3333/tcp"]
         : undefined,
     code: {
-      p2pool: {
+      [p2PoolContainerName]: {
         image: "ghcr.io/sethforprivacy/p2pool:latest",
         restart: "unless-stopped",
-        container_name: "p2pool",
+        container_name: p2PoolContainerName,
         tty: true,
         stdin_open: true,
         volumes: [
           "p2pool-data:/home/p2pool",
+          "/dev/null:/home/p2pool/.p2pool/p2pool.log:rw",
           "/dev/hugepages:/dev/hugepages:rw",
         ],
         ports: [
@@ -76,12 +79,12 @@ export const useP2PoolService = () => {
               networks: {
                 monero_suite_net: {
                   ipv4_address: P2POOL_IP,
-                  aliases: ["p2pool"]
+                  aliases: [p2PoolContainerName]
                 }
               },
               depends_on: {
-                tor: {
-                  condition: "service_started",
+                monerod: {
+                  condition: "service_healthy",
                 },
               }
             }
@@ -100,7 +103,8 @@ export const useP2PoolService = () => {
           ...(miningMode === minigModes.p2pool
             ? [`--start-mining ${p2PoolMiningThreads}`]
             : []),
-          ...(torProxyMode === torProxyModes.full ? ["--socks5 tor:9050"] : []),
+         // ...(torProxyMode === torProxyModes.full ? ["--socks5 tor:9050"] : []),
+          ...(p2PoolMode === p2poolModes.mini ? ["--mini"] : [])
         ].join(" "),
       },
     },

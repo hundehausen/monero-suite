@@ -119,15 +119,20 @@ export const useTorService = ({networkMode}: {networkMode: NetworkMode}) => {
       
       // Add environment variables for hidden services
       service.code.tor.environment = {
-        HS_MONEROD_MAINNET: `${MONEROD_IP}:18089:18089`,
+        HS_MONEROD_MAINNET: `monerod:18089:18089`,
         ...(isStagenetNode
           ? {
-              HS_MONEROD_MAINNET_STAGENET: `${MONEROD_STAGENET_IP}:38089:38089`,
+              HS_MONEROD_MAINNET_STAGENET: `monerod-stagenet:38089:38089`,
             }
           : {}),
-        ...(p2PoolMode !== p2poolModes.none
+        ...(p2PoolMode === p2poolModes.full
           ? {
               HS_P2POOL: "p2pool:3333:3333",
+            }
+          : {}),
+        ...(p2PoolMode === p2poolModes.mini
+          ? {
+              HS_P2POOL_MINI: "p2pool-mini:3333:3333",
             }
           : {}),
         ...(isMoneroblock

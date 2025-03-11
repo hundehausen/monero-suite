@@ -79,7 +79,7 @@ export const useMonerodStagenetService = () => {
           torProxyMode !== torProxyModes.none
             ? {
                 tor: {
-                  condition: "service_started",
+                  condition: "service_healthy",
                 },
               }
             : undefined,
