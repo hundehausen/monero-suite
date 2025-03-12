@@ -1,5 +1,6 @@
-import { Accordion, Checkbox, Text } from "@mantine/core";
-import { ServiceComponentProps, panelStyles } from "./types";
+import { Checkbox, Text } from "@mantine/core";
+import { ServiceComponentProps } from "./types";
+import AccordionItemComponent from "./AccordionItemComponent";
 
 const AutohealSection = ({
   services,
@@ -8,21 +9,19 @@ const AutohealSection = ({
   const { isAutoheal, setIsAutoheal } = stateFunctions;
 
   return (
-    <Accordion.Item value="autoheal">
-      <Accordion.Control>
-        <Text size="lg">Autoheal</Text>
-      </Accordion.Control>
-      <Accordion.Panel styles={panelStyles}>
-        <Text size="sm">{services["autoheal"].description}</Text>
-        <Checkbox
-          checked={isAutoheal}
-          label="Autoheal"
-          labelPosition="left"
-          size="lg"
-          onChange={(event) => setIsAutoheal(event.currentTarget.checked)}
-        />
-      </Accordion.Panel>
-    </Accordion.Item>
+    <AccordionItemComponent
+      value="autoheal"
+      title="Autoheal"
+    >
+      <Text size="sm">{services["autoheal"].description}</Text>
+      <Checkbox
+        checked={isAutoheal}
+        label="Autoheal"
+        labelPosition="left"
+        size="lg"
+        onChange={(event) => setIsAutoheal(event.currentTarget.checked)}
+      />
+    </AccordionItemComponent>
   );
 };
 
