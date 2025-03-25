@@ -32,7 +32,7 @@ export const useCuprateService = () => {
           volumes: [
             "cuprate-data:/home/cuprate/.local/share/cuprate"
           ],
-          ports: networkMode === networkModes.exposed ? ["18082:18080"] : ["127.0.0.1:18080:18080"],
+          ports: networkMode === networkModes.exposed ? ["18082:18080"] : ["127.0.0.1:18082:18080"],
           networks: ["monero-network"],
         },
       },
