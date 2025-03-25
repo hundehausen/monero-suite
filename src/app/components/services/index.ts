@@ -11,4 +11,5 @@ export { default as MonitoringSection } from "./MonitoringSection";
 export { default as PortainerSection } from "./PortainerSection";
 export { default as WatchtowerSection } from "./WatchtowerSection";
 export { default as AutohealSection } from "./AutohealSection";
+export { default as CuprateSection } from "./CuprateSection";
 export * from "./types";

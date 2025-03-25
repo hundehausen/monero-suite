@@ -20,6 +20,7 @@ import {
   useXmrigService,
   useTraefikService,
   usePortainerService,
+  useCuprateService,
 } from "./services";
 
 export * from "./services";
@@ -53,6 +54,7 @@ export const useServices = () => {
   const xmrigService = useXmrigService();
   const traefikService = useTraefikService();
   const portainerService = usePortainerService();
+  const cuprateService = useCuprateService();
 
   // Extract state functions from each service
   const { isTraefik, mainDomain } = traefikService.stateFunctions;
@@ -153,6 +155,9 @@ export const useServices = () => {
         isTraefik,
         certResolverName
       ),
+      cuprate: cuprateService.getCuprateService(
+        networkMode
+      ),
     }),
     [
       networkMode,
@@ -169,9 +174,7 @@ export const useServices = () => {
       xmrigService,
       traefikService,
       portainerService,
-      isMonitoring,
-      isTraefik,
-      certResolverName,
+      cuprateService,
     ]
   );
 
@@ -204,6 +207,7 @@ export const useServices = () => {
     ...xmrigService.stateFunctions,
     ...traefikService.stateFunctions,
     ...portainerService.stateFunctions,
+    ...cuprateService.stateFunctions,
   };
 
   return {

@@ -15,6 +15,7 @@ import {
   PortainerSection,
   WatchtowerSection,
   AutohealSection,
+  CuprateSection,
 } from "./services";
 
 interface SelectionProps {
@@ -30,7 +31,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     p2PoolPayoutAddress,
     isMoneroblock,
     isMonitoring,
-    isTraefik,
+    isTraefik
   } = stateFunctions;
 
   const [accordionItems, setAccordionItems] = useState([
@@ -64,7 +65,7 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
     isMonitoring,
     isStagenetNode,
     isStagenetNodePublic,
-    isTraefik,
+    isTraefik
   ]);
 
   return (
@@ -117,6 +118,8 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
       <WatchtowerSection services={services} stateFunctions={stateFunctions} />
 
       <AutohealSection services={services} stateFunctions={stateFunctions} />
+
+      <CuprateSection services={services} stateFunctions={stateFunctions} />
     </Accordion>
   );
 };
