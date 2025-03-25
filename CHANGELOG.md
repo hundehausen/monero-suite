@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.7.0](https://github.com/hundehausen/monero-suite/compare/v0.5.0...v0.7.0) (2025-03-25)
+
+
+### Features
+
+* add cuprate experimental ([7d27516](https://github.com/hundehausen/monero-suite/commits/7d2751622cb9d773441261bdcca30cb6d189e707))
+* advanced monero configuration ([e7bf621](https://github.com/hundehausen/monero-suite/commits/e7bf621b8714446a8d18bfd14c48a501afbd7430))
+* advanced monero configuration ([c89c869](https://github.com/hundehausen/monero-suite/commits/c89c8696265741ed537227e1167d869affa85f0c))
+
+
+### Bug Fixes
+
+* fix cuprate port localhost binding ([c9f43a5](https://github.com/hundehausen/monero-suite/commits/c9f43a5c38131a852719f801e5e54de0d9a6522b))
+* p2pool mini not applied ([08e8997](https://github.com/hundehausen/monero-suite/commits/08e8997f2577f212dd63042b2d1a0bc2c22145d1))
+
+
+### Chore
+
+* add small note for different p2p host port mapping for cuprate ([f2d8341](https://github.com/hundehausen/monero-suite/commits/f2d8341427c066011a5f0a7f5ad47f78ec8eb7e1))
+* custom AccordionItem component ([bc04ca9](https://github.com/hundehausen/monero-suite/commits/bc04ca991336e95328fac72e96849231d8ef3eb1))
+* refactor monerod service ([ccc1cf0](https://github.com/hundehausen/monero-suite/commits/ccc1cf08646cb403e42ed8e555ba1e81c4395e3a))
+* remove unused code ([1d3457f](https://github.com/hundehausen/monero-suite/commits/1d3457f2bbe41b330ac2442873671de1e75a541a))
+* update dependecies ([a35cea7](https://github.com/hundehausen/monero-suite/commits/a35cea734f2231df962059b7aa478526ad74a987))
+* update next ([8127d20](https://github.com/hundehausen/monero-suite/commits/8127d20ab155f3ca05b7a923dcefadd865fba679))
+
 ## [0.6.0](https://github.com/hundehausen/monero-suite/compare/v0.5.0...v0.6.0) (2025-03-05)
 
 
