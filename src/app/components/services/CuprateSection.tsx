@@ -28,9 +28,9 @@ const CuprateSection = ({
     >
       <Text size="sm">{services["cuprate"].description}</Text>
       <Anchor href="https://github.com/Cuprate/cuprate" target="_blank">
-        Learn more about Cuprate
+        Learn more about Cuprate.
       </Anchor>
-      
+
       <Checkbox
         checked={isCuprateEnabled}
         label="Enable Cuprate Node"
@@ -40,6 +40,8 @@ const CuprateSection = ({
         }
         size="lg"
       />
+
+      <Text size="sm">The port mapping on the host is on port 18082, the internal port is 18080. This is to avoid an overlapping port conflict with monerod.</Text>
 
     </AccordionItemComponent>
   );
