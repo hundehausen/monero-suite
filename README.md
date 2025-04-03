@@ -3,7 +3,7 @@
   <img align="center" src="public/monero-suite-logo-transparent-small.png" alt="...">
 </p>
 
-This project lets you run a Monero node, P2Pool, and MoneroBlock in Docker containers. It also includes Tor for anonymity and Watchtower for auto-updating the containers. It lets you monitor the health of you Monero node and you can configure a reverse proxy to make the services reachable from the internet securely.
+This project lets you run a Monero node and multiple services that relate to Monero in Docker containers. It also includes a Tor proxy and hidden services for anonymity and Watchtower for auto-updating the containers. It lets you monitor the health of you Monero node and you can configure a reverse proxy to make the services reachable from the internet with a domain name you own.
 
 ## Features
 
@@ -18,6 +18,7 @@ This project lets you run a Monero node, P2Pool, and MoneroBlock in Docker conta
 - [Docker Autoheal](https://github.com/willfarrell/docker-autoheal) (auto-restart unhealthy containers)
 - [Watchtower](https://github.com/containrrr/watchtower) (auto-update containers)
 - [Portainer](https://github.com/portainer/portainer) (manage your docker services with a GUI in your browser)
+- [Cuprate](https://github.com/cuprate/cuprate) (an alternative Monero node implementation written in Rust) EXPERIMENTAL
 
 Disclaimer: This project is not affiliated with, endorsed by, or sponsored by the Monero Project.
 
