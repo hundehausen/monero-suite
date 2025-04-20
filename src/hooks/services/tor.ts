@@ -115,7 +115,7 @@ export const useTorService = ({networkMode}: {networkMode: NetworkMode}) => {
         "tor-data": {},
       };
       
-      service.code.tor.volumes = ["tor-data:/var/lib/tor/hidden_service/"];
+      service.code.tor.volumes = ["tor-data:/var/lib/tor/"];
       
       // Add environment variables for hidden services
       service.code.tor.environment = {
