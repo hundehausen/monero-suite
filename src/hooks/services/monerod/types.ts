@@ -96,8 +96,6 @@ export interface MonerodState {
   setZmqPubEnabled: (value: boolean) => void;
   zmqPubBindPort: string;
   setZmqPubBindPort: (value: string) => void;
-  rpcRestricted: boolean;
-  setRpcRestricted: (value: boolean) => void;
   rpcSsl: string;
   setRpcSsl: (value: string) => void;
   rpcLogin: string;

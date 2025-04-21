@@ -13,12 +13,7 @@ export const useZmqRpcConfig = () => {
     "zmqPubBindPort", 
     parseAsString.withDefault("18084")
   );
-  
-  const [rpcRestricted, setRpcRestricted] = useQueryState(
-    "rpcRestricted", 
-    parseAsBoolean.withDefault(true)
-  );
-  
+
   const [rpcSsl, setRpcSsl] = useQueryState(
     "rpcSsl", 
     parseAsString.withDefault("autodetect")
@@ -39,8 +34,6 @@ export const useZmqRpcConfig = () => {
     setZmqPubEnabled,
     zmqPubBindPort,
     setZmqPubBindPort,
-    rpcRestricted,
-    setRpcRestricted,
     rpcSsl,
     setRpcSsl,
     rpcLogin,

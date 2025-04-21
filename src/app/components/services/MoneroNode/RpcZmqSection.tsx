@@ -9,8 +9,6 @@ const RpcZmqSection = ({ stateFunctions, zmqPubEnabled }: RpcZmqSectionProps) =>
     setRpcLogin,
     disableRpcBan,
     setDisableRpcBan,
-    rpcRestricted,
-    setRpcRestricted,
     rpcSsl,
     setRpcSsl,
     zmqPubEnabled: pubEnabled,
@@ -49,16 +47,6 @@ const RpcZmqSection = ({ stateFunctions, zmqPubEnabled }: RpcZmqSectionProps) =>
           }
           checked={disableRpcBan}
           onChange={(event) => setDisableRpcBan(event.currentTarget.checked)}
-        />
-        <Switch
-          label={
-            <ExplainingLabel
-              label="Restricted RPC"
-              explanation="When enabled, restricts RPC access to a more limited set of commands for safety."
-            />
-          }
-          checked={rpcRestricted}
-          onChange={(event) => setRpcRestricted(event.currentTarget.checked)}
         />
         <Select
           label={

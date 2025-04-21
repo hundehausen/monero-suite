@@ -56,7 +56,6 @@ export const createMonerodService = (
     bootstrapDaemonLogin,
     zmqPubEnabled,
     zmqPubBindPort,
-    rpcRestricted,
     rpcSsl,
     rpcLogin,
     disableRpcBan,
@@ -180,7 +179,6 @@ export const createMonerodService = (
               : ((p2PoolMode !== p2poolModes.none || isMonitoring)
                  ? ["--zmq-pub=tcp://0.0.0.0:18084"]
                  : ["--no-zmq"])),
-          ...(rpcRestricted ? ["--restricted-rpc"] : []),
           ...(rpcSsl !== "autodetect" ? [`--rpc-ssl=${rpcSsl}`] : []),
           ...(rpcLogin ? [`--rpc-login=${rpcLogin}`] : []),
           ...(disableRpcBan || isHiddenServices ? ["--disable-rpc-ban"] : []),
