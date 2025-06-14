@@ -5,9 +5,11 @@ import { CodeHighlightAdapterProvider, createHighlightJsAdapter } from '@mantine
 import hljs from 'highlight.js/lib/core';
 import bashLang from 'highlight.js/lib/languages/bash';
 import yamlLang from 'highlight.js/lib/languages/yaml';
+import iniLang from 'highlight.js/lib/languages/ini';
 
 hljs.registerLanguage('bash', bashLang);
 hljs.registerLanguage('yaml', yamlLang);
+hljs.registerLanguage('ini', iniLang);
 
 const highlightJsAdapter = createHighlightJsAdapter(hljs);
 

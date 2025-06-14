@@ -8,12 +8,12 @@ interface EnvPreviewProps {
 const EnvPreview = ({ env }: EnvPreviewProps) => {
   return (
     <CodeHighlightTabs
-      code={{
+      code={[{
         code: env,
         language: "TOML",
         fileName: ".env",
         icon: <SiGnubash />,
-      }}
+      }]}
       styles={{
         root: {
           overflow: "auto",
