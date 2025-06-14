@@ -8,12 +8,12 @@ interface BashPreviewProps {
 const BashPreview = ({ bashCommands }: BashPreviewProps) => {
   return (
     <CodeHighlightTabs
-      code={{
+      code={[{
         code: bashCommands,
         language: "bash",
         fileName: "bash",
         icon: <SiGnubash />,
-      }}
+      }]}
       styles={{
         root: {
           overflow: "auto",

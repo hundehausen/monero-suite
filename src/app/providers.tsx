@@ -1,6 +1,15 @@
 "use client";
 
 import { MantineProvider, createTheme } from "@mantine/core";
+import { CodeHighlightAdapterProvider, createHighlightJsAdapter } from '@mantine/code-highlight';
+import hljs from 'highlight.js/lib/core';
+import bashLang from 'highlight.js/lib/languages/bash';
+import yamlLang from 'highlight.js/lib/languages/yaml';
+
+hljs.registerLanguage('bash', bashLang);
+hljs.registerLanguage('yaml', yamlLang);
+
+const highlightJsAdapter = createHighlightJsAdapter(hljs);
 
 const customTheme = createTheme({
   primaryColor: "monero-orange",
@@ -22,7 +31,9 @@ const customTheme = createTheme({
 
 const Provider = ({ children }: { children: React.ReactNode }) => (
   <MantineProvider defaultColorScheme="dark" theme={customTheme}>
+    <CodeHighlightAdapterProvider adapter={highlightJsAdapter}>
     {children}
+    </CodeHighlightAdapterProvider>
   </MantineProvider>
 );
 
