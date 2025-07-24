@@ -6,7 +6,7 @@ import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
 export const useNetworkSecurityConfig = () => {
   const [banList, setBanList] = useQueryState(
     "banList",
-    parseAsString.withDefault("")
+    parseAsString.withDefault("/home/monero/ban_list.txt")
   );
   
   const [enableDnsBlocklist, setEnableDnsBlocklist] = useQueryState(
