@@ -15,6 +15,13 @@ export const createMonerodService = (
   isTraefik: boolean,
   certResolverName: string = "monerosuite"
 ): Service => {
+  const splitHostsIntoList = (hosts: string | undefined): string[] => {
+    if (!hosts) return [];
+    return hosts
+      .split(/[\s,]+/)
+      .map((entry) => entry.trim())
+      .filter((entry) => entry.length > 0);
+  };
   const {
     isMoneroPublicNode,
     moneroNodeNoLogs,
@@ -207,9 +214,9 @@ export const createMonerodService = (
             : []),
           ...(disableDnsCheckpoints ? ["--disable-dns-checkpoints"] : []),
           ...(seedNode ? [`--seed-node=${seedNode}`] : []),
-          ...(addPeer ? [`--add-peer=${addPeer}`] : []),
-          ...(addPriorityNode ? [`--add-priority-node=${addPriorityNode}`] : []),
-          ...(addExclusiveNode ? [`--add-exclusive-node=${addExclusiveNode}`] : []),
+          ...splitHostsIntoList(addPeer).map((host) => `--add-peer=${host}`),
+          ...splitHostsIntoList(addPriorityNode).map((host) => `--add-priority-node=${host}`),
+          ...splitHostsIntoList(addExclusiveNode).map((host) => `--add-exclusive-node=${host}`),
           ...(startMining ? [`--start-mining=${startMining}`] : []),
           ...(startMining && miningThreads !== "1" ? [`--mining-threads=${miningThreads}`] : []),
           ...(bgMiningEnable ? ["--bg-mining-enable"] : []),
