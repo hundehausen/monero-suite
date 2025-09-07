@@ -66,8 +66,3 @@ no particular order
 - add [nerostr](https://github.com/pluja/nerostr) (a nostr monero-paid relay)
 - full monerod.conf generator with explanations
 - support installation script for more linux based operating systems
-
-## Donations
-If you find this project useful, please consider donating to the following address:
-
-87cQNxrM3oWVkZ8TRWUHi9LmvruKgQSA7AxqoqJDr7n1PgGcZkXhAToVz3rEWxjAMj7caKCcqjYfDSFeLey1Sf4hUF3gmNn
