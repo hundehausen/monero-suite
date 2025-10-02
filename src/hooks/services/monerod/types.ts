@@ -1,4 +1,4 @@
-import { NetworkMode } from "../types";
+import { NetworkMode, P2PoolMode, TorProxyMode } from "../types";
 
 export interface MonerodState {
   // Basic configuration
@@ -16,7 +16,7 @@ export interface MonerodState {
   setIsMoneroMainnetVolume: (value: boolean) => void;
   moneroMainnetBlockchainLocation: string;
   setMoneroMainnetBlockchainLocation: (value: string) => void;
-  
+
   // Logging configuration
   logLevel: string;
   setLogLevel: (value: string) => void;
@@ -24,7 +24,7 @@ export interface MonerodState {
   setMaxLogFileSize: (value: string) => void;
   maxLogFiles: string;
   setMaxLogFiles: (value: string) => void;
-  
+
   // P2P Network configuration
   p2pBindPort: string;
   setP2pBindPort: (value: string) => void;
@@ -48,13 +48,13 @@ export interface MonerodState {
   setP2pExternalPort: (value: string) => void;
   offlineMode: boolean;
   setOfflineMode: (value: boolean) => void;
-  
+
   // Tor/I2P configuration
   padTransactions: boolean;
   setPadTransactions: (value: boolean) => void;
   anonymousInbound: string;
   setAnonymousInbound: (value: string) => void;
-  
+
   // Network Security configuration
   banList: string;
   setBanList: (value: string) => void;
@@ -62,7 +62,7 @@ export interface MonerodState {
   setEnableDnsBlocklist: (value: boolean) => void;
   disableDnsCheckpoints: boolean;
   setDisableDnsCheckpoints: (value: boolean) => void;
-  
+
   // Network Peers configuration
   seedNode: string;
   setSeedNode: (value: string) => void;
@@ -72,7 +72,7 @@ export interface MonerodState {
   setAddPriorityNode: (value: string) => void;
   addExclusiveNode: string;
   setAddExclusiveNode: (value: string) => void;
-  
+
   // Performance configuration
   dbSyncMode: string;
   setDbSyncMode: (value: string) => void;
@@ -90,7 +90,7 @@ export interface MonerodState {
   setBootstrapDaemonAddress: (value: string) => void;
   bootstrapDaemonLogin: string;
   setBootstrapDaemonLogin: (value: string) => void;
-  
+
   // ZMQ and RPC configuration
   zmqPubEnabled: boolean;
   setZmqPubEnabled: (value: boolean) => void;
@@ -102,11 +102,11 @@ export interface MonerodState {
   setRpcLogin: (value: string) => void;
   disableRpcBan: boolean;
   setDisableRpcBan: (value: boolean) => void;
-  
+
   // Transaction Pool configuration
   maxTxpoolWeight: string;
   setMaxTxpoolWeight: (value: string) => void;
-  
+
   // Mining configuration
   startMining: string;
   setStartMining: (value: string) => void;
@@ -116,7 +116,7 @@ export interface MonerodState {
   setBgMiningEnable: (value: boolean) => void;
   bgMiningIgnoreBattery: boolean;
   setBgMiningIgnoreBattery: (value: boolean) => void;
-  
+
   // Notifications configuration
   blockNotify: string;
   setBlockNotify: (value: string) => void;
@@ -129,8 +129,8 @@ export interface MonerodState {
 export interface MonerodServiceHook {
   getMonerodService: (
     networkMode: NetworkMode,
-    p2PoolMode: string,
-    torProxyMode: string,
+    p2PoolMode: P2PoolMode,
+    torProxyMode: TorProxyMode,
     isMonitoring: boolean,
     isHiddenServices: boolean,
     isTraefik: boolean,

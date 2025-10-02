@@ -42,40 +42,44 @@ export const useOnionMoneroBlockchainExplorerService = () => {
         // Add network configuration if Tor proxy is enabled
         ...(torProxyMode !== torProxyModes.none
           ? {
-              networks: {
-                monero_suite_net: {
-                  ipv4_address: EXPLORER_IP
-                }
+            networks: {
+              monero_suite_net: {
+                ipv4_address: EXPLORER_IP
+              }
+            },
+            depends_on: {
+              tor: {
+                condition: "service_started",
               },
-              depends_on: {
-                tor: {
-                  condition: "service_started",
-                },
-                monerod: {
-                  condition: "service_started",
-                },
+              monerod: {
+                condition: "service_started",
               },
-              command: [
-                `./xmrblocks --enable-json-api --enable-autorefresh-option --enable-emission-monitor --daemon-url=${MONEROD_IP}:18089 --enable-pusher`,
-              ],
-            }
+            },
+            command: [
+              `./xmrblocks --enable-json-api --enable-autorefresh-option --enable-emission-monitor --daemon-url=${MONEROD_IP}:18089 --enable-pusher`,
+            ],
+          }
           : {
-              depends_on: ["monerod"],
-              command: [
-                "./xmrblocks --enable-json-api --enable-autorefresh-option --enable-emission-monitor --daemon-url=monerod:18089 --enable-pusher",
-              ],
-            }),
+            depends_on: {
+              monerod: {
+                condition: "service_started",
+              },
+            },
+            command: [
+              "./xmrblocks --enable-json-api --enable-autorefresh-option --enable-emission-monitor --daemon-url=monerod:18089 --enable-pusher",
+            ],
+          }),
         labels: isTraefik
           ? {
-              "traefik.enable": "true",
-              "traefik.http.routers.onion-monero-blockchain-explorer.rule": `Host(\`${onionMoneroBlockchainExplorerDomain}\`)`,
-              "traefik.http.routers.onion-monero-blockchain-explorer.entrypoints":
-                "websecure",
-              "traefik.http.routers.onion-monero-blockchain-explorer.tls.certresolver":
-                certResolverName,
-              "traefik.http.services.onion-monero-blockchain-explorer.loadbalancer.server.port":
-                "8081",
-            }
+            "traefik.enable": "true",
+            "traefik.http.routers.onion-monero-blockchain-explorer.rule": `Host(\`${onionMoneroBlockchainExplorerDomain}\`)`,
+            "traefik.http.routers.onion-monero-blockchain-explorer.entrypoints":
+              "websecure",
+            "traefik.http.routers.onion-monero-blockchain-explorer.tls.certresolver":
+              certResolverName,
+            "traefik.http.services.onion-monero-blockchain-explorer.loadbalancer.server.port":
+              "8081",
+          }
           : undefined,
       },
     },

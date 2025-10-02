@@ -10,7 +10,7 @@ export const useWatchtowerService = () => {
   const getWatchtowerService = (): Service => ({
     name: "Watchtower",
     description:
-      "Watchtower is a service that monitors running Docker and watches for newer images. If there is a new version available, watchtower will automatically restart the container with the newest image.",
+      "Watchtower is a service that monitors running Docker containers and watches for newer images. If there is a new version available, watchtower will automatically restart the container with the newest image.",
     checked: isWatchtower,
     required: false,
     architecture: [architectures.linuxAmd, architectures.linuxArm],

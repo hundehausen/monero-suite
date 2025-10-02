@@ -124,6 +124,11 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
           GF_SECURITY_ADMIN_PASSWORD: "${GF_SECURITY_ADMIN_PASSWORD:-admin}",
           GF_SECURITY_ADMIN_USER: "${GF_SECURITY_ADMIN_USER:-admin}",
         },
+        depends_on: {
+          monerod: {
+            condition: "service_started",
+          },
+        },
         // Add network configuration if Tor proxy is enabled
         ...(torProxyMode !== torProxyModes.none
           ? {
@@ -131,11 +136,6 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
               monero_suite_net: {
                 aliases: ["grafana"]
               }
-            },
-            depends_on: {
-              tor: {
-                condition: "service_started",
-              },
             }
           }
           : {}),

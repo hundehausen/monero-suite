@@ -1,4 +1,4 @@
-import { Service, architectures, networkModes, p2poolModes, torProxyModes, NetworkMode } from "../types";
+import { Service, architectures, networkModes, p2poolModes, torProxyModes, NetworkMode, TorProxyMode, P2PoolMode } from "../types";
 import { TOR_IP, MONEROD_IP } from "../tor";
 import { MonerodState } from "./types";
 
@@ -8,8 +8,8 @@ import { MonerodState } from "./types";
 export const createMonerodService = (
   state: MonerodState,
   networkMode: NetworkMode,
-  p2PoolMode: string,
-  torProxyMode: string,
+  p2PoolMode: P2PoolMode,
+  torProxyMode: TorProxyMode,
   isMonitoring: boolean,
   isHiddenServices: boolean,
   isTraefik: boolean,
@@ -89,8 +89,8 @@ export const createMonerodService = (
         : undefined,
     volumes: isMoneroMainnetVolume
       ? {
-          bitmonero: {},
-        }
+        bitmonero: {},
+      }
       : undefined,
     code: {
       monerod: {
@@ -116,12 +116,12 @@ export const createMonerodService = (
             : ["127.0.0.1:18089:18089"]),
         ],
         depends_on:
-          torProxyMode !== "none"
+          torProxyMode !== torProxyModes.none
             ? {
-                tor: {
-                  condition: "service_started",
-                },
-              }
+              tor: {
+                condition: "service_started",
+              },
+            }
             : undefined,
         healthcheck: {
           test: "curl --fail http://localhost:18081/get_height || exit 1",
@@ -133,12 +133,12 @@ export const createMonerodService = (
         // Add network configuration if Tor proxy is enabled
         ...(torProxyMode !== torProxyModes.none
           ? {
-              networks: {
-                monero_suite_net: {
-                  ipv4_address: MONEROD_IP
-                }
+            networks: {
+              monero_suite_net: {
+                ipv4_address: MONEROD_IP
               }
             }
+          }
           : {}),
         command: [
           "--rpc-restricted-bind-ip=0.0.0.0",
@@ -152,10 +152,10 @@ export const createMonerodService = (
           ...(moneroNodeNoLogs
             ? ["--log-file=/dev/null", "--max-log-file-size=0"]
             : [
-                `--log-level=${logLevel}`,
-                `--max-log-file-size=${maxLogFileSize}`,
-                `--max-log-files=${maxLogFiles}`
-              ]),
+              `--log-level=${logLevel}`,
+              `--max-log-file-size=${maxLogFileSize}`,
+              `--max-log-files=${maxLogFiles}`
+            ]),
           ...(noIgd ? ["--no-igd"] : []),
           ...(hidePort ? ["--hide-my-port"] : []),
           `--p2p-bind-port=${p2pBindPort}`,
@@ -181,11 +181,11 @@ export const createMonerodService = (
           ...(maxConcurrency !== "0" ? [`--max-concurrency=${maxConcurrency}`] : []),
           ...(bootstrapDaemonAddress ? [`--bootstrap-daemon-address=${bootstrapDaemonAddress}`] : []),
           ...(bootstrapDaemonLogin ? [`--bootstrap-daemon-login=${bootstrapDaemonLogin}`] : []),
-          ...(zmqPubEnabled 
-              ? [`--zmq-pub=tcp://0.0.0.0:${zmqPubBindPort}`] 
-              : ((p2PoolMode !== p2poolModes.none || isMonitoring)
-                 ? ["--zmq-pub=tcp://0.0.0.0:18084"]
-                 : ["--no-zmq"])),
+          ...(zmqPubEnabled
+            ? [`--zmq-pub=tcp://0.0.0.0:${zmqPubBindPort}`]
+            : ((p2PoolMode !== p2poolModes.none || isMonitoring)
+              ? ["--zmq-pub=tcp://0.0.0.0:18084"]
+              : ["--no-zmq"])),
           ...(rpcSsl !== "autodetect" ? [`--rpc-ssl=${rpcSsl}`] : []),
           ...(rpcLogin ? [`--rpc-login=${rpcLogin}`] : []),
           ...(disableRpcBan || isHiddenServices ? ["--disable-rpc-ban"] : []),
@@ -197,20 +197,20 @@ export const createMonerodService = (
             : []),
           ...(torProxyMode !== torProxyModes.none
             ? [
-                `--tx-proxy=tor,${TOR_IP}:9050,32`,
-                "--add-priority-node=xwvz3ekocr3dkyxfkmgm2hvbpzx2ysqmaxgter7znnqrhoicygkfswid.onion:18083",
-                "--add-priority-node=4pixvbejrvihnkxmduo2agsnmc3rrulrqc7s3cbwwrep6h6hrzsibeqd.onion:18083",
-                "--add-priority-node=zbjkbsxc5munw3qusl7j2hpcmikhqocdf4pqhnhtpzw5nt5jrmofptid.onion:18083",
-                "--add-priority-node=plowsof3t5hogddwabaeiyrno25efmzfxyro2vligremt7sxpsclfaid.onion:18083",
-                "--add-priority-node=plowsoffjexmxalw73tkjmf422gq6575fc7vicuu4javzn2ynnte6tyd.onion:18083",
-                "--add-priority-node=qz43zul2x56jexzoqgkx2trzwcfnr6l3hbtfcfx54g4r3eahy3bssjyd.onion:18083",
-                "--add-peer=xwvz3ekocr3dkyxfkmgm2hvbpzx2ysqmaxgter7znnqrhoicygkfswid.onion:18083",
-                "--add-peer=4pixvbejrvihnkxmduo2agsnmc3rrulrqc7s3cbwwrep6h6hrzsibeqd.onion:18083",
-                "--add-peer=zbjkbsxc5munw3qusl7j2hpcmikhqocdf4pqhnhtpzw5nt5jrmofptid.onion:18083",
-                "--add-peer=plowsof3t5hogddwabaeiyrno25efmzfxyro2vligremt7sxpsclfaid.onion:18083",
-                "--add-peer=plowsoffjexmxalw73tkjmf422gq6575fc7vicuu4javzn2ynnte6tyd.onion:18083",
-                "--add-peer=qz43zul2x56jexzoqgkx2trzwcfnr6l3hbtfcfx54g4r3eahy3bssjyd.onion:18083",
-              ]
+              `--tx-proxy=tor,${TOR_IP}:9050,32`,
+              "--add-priority-node=xwvz3ekocr3dkyxfkmgm2hvbpzx2ysqmaxgter7znnqrhoicygkfswid.onion:18083",
+              "--add-priority-node=4pixvbejrvihnkxmduo2agsnmc3rrulrqc7s3cbwwrep6h6hrzsibeqd.onion:18083",
+              "--add-priority-node=zbjkbsxc5munw3qusl7j2hpcmikhqocdf4pqhnhtpzw5nt5jrmofptid.onion:18083",
+              "--add-priority-node=plowsof3t5hogddwabaeiyrno25efmzfxyro2vligremt7sxpsclfaid.onion:18083",
+              "--add-priority-node=plowsoffjexmxalw73tkjmf422gq6575fc7vicuu4javzn2ynnte6tyd.onion:18083",
+              "--add-priority-node=qz43zul2x56jexzoqgkx2trzwcfnr6l3hbtfcfx54g4r3eahy3bssjyd.onion:18083",
+              "--add-peer=xwvz3ekocr3dkyxfkmgm2hvbpzx2ysqmaxgter7znnqrhoicygkfswid.onion:18083",
+              "--add-peer=4pixvbejrvihnkxmduo2agsnmc3rrulrqc7s3cbwwrep6h6hrzsibeqd.onion:18083",
+              "--add-peer=zbjkbsxc5munw3qusl7j2hpcmikhqocdf4pqhnhtpzw5nt5jrmofptid.onion:18083",
+              "--add-peer=plowsof3t5hogddwabaeiyrno25efmzfxyro2vligremt7sxpsclfaid.onion:18083",
+              "--add-peer=plowsoffjexmxalw73tkjmf422gq6575fc7vicuu4javzn2ynnte6tyd.onion:18083",
+              "--add-peer=qz43zul2x56jexzoqgkx2trzwcfnr6l3hbtfcfx54g4r3eahy3bssjyd.onion:18083",
+            ]
             : []),
           ...(disableDnsCheckpoints ? ["--disable-dns-checkpoints"] : []),
           ...(seedNode ? [`--seed-node=${seedNode}`] : []),
@@ -225,12 +225,12 @@ export const createMonerodService = (
         logging: moneroNodeNoLogs ? { driver: "none" } : undefined,
         labels: isTraefik
           ? {
-              "traefik.enable": "true",
-              "traefik.http.routers.monerod.rule": `Host(\`${moneroNodeDomain}\`)`,
-              "traefik.http.routers.monerod.entrypoints": "websecure",
-              "traefik.http.routers.monerod.tls.certresolver": certResolverName,
-              "traefik.http.services.monerod.loadbalancer.server.port": "18089",
-            }
+            "traefik.enable": "true",
+            "traefik.http.routers.monerod.rule": `Host(\`${moneroNodeDomain}\`)`,
+            "traefik.http.routers.monerod.entrypoints": "websecure",
+            "traefik.http.routers.monerod.tls.certresolver": certResolverName,
+            "traefik.http.services.monerod.loadbalancer.server.port": "18089",
+          }
           : undefined,
       },
     },

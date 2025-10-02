@@ -54,8 +54,8 @@ export const useP2PoolService = () => {
         ? ["37888/tcp", "3333/tcp"]
         : p2PoolMode === p2poolModes.full &&
           networkMode === networkModes.exposed
-        ? ["37889/tcp", "3333/tcp"]
-        : undefined,
+          ? ["37889/tcp", "3333/tcp"]
+          : undefined,
     code: {
       [p2PoolContainerName]: {
         image: "ghcr.io/sethforprivacy/p2pool:latest",
@@ -76,24 +76,23 @@ export const useP2PoolService = () => {
         // Add network configuration if Tor proxy is enabled
         ...(torProxyMode !== torProxyModes.none
           ? {
-              networks: {
-                monero_suite_net: {
-                  ipv4_address: P2POOL_IP,
-                  aliases: [p2PoolContainerName]
-                }
-              },
-              depends_on: {
-                monerod: {
-                  condition: "service_healthy",
-                },
+            networks: {
+              monero_suite_net: {
+                ipv4_address: P2POOL_IP,
+                aliases: [p2PoolContainerName]
               }
             }
+          }
           : {}),
+        depends_on: {
+          monerod: {
+            condition: "service_started",
+          },
+        },
         command: [
           `--wallet ${p2PoolPayoutAddress}`,
           "--stratum 0.0.0.0:3333",
-          `--p2p 0.0.0.0:${
-            p2PoolMode === p2poolModes.mini ? "37888" : "37889"
+          `--p2p 0.0.0.0:${p2PoolMode === p2poolModes.mini ? "37888" : "37889"
           }`,
           "--rpc-port 18089",
           "--zmq-port 18084",
@@ -103,7 +102,7 @@ export const useP2PoolService = () => {
           ...(miningMode === minigModes.p2pool
             ? [`--start-mining ${p2PoolMiningThreads}`]
             : []),
-         // ...(torProxyMode === torProxyModes.full ? ["--socks5 tor:9050"] : []),
+          // ...(torProxyMode === torProxyModes.full ? ["--socks5 tor:9050"] : []),
           ...(p2PoolMode === p2poolModes.mini ? ["--mini"] : [])
         ].join(" "),
       },

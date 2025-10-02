@@ -1,4 +1,4 @@
-import { NetworkMode } from "./types";
+import { NetworkMode, P2PoolMode, TorProxyMode } from "./types";
 import {
   useBasicConfig,
   useLoggingConfig,
@@ -53,8 +53,8 @@ export const useMonerodService = (): MonerodServiceHook => {
    */
   const getMonerodService = (
     networkMode: NetworkMode,
-    p2PoolMode: string,
-    torProxyMode: string,
+    p2PoolMode: P2PoolMode,
+    torProxyMode: TorProxyMode,
     isMonitoring: boolean,
     isHiddenServices: boolean,
     isTraefik: boolean,

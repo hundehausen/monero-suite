@@ -40,36 +40,36 @@ export const useMoneroblockService = () => {
         // Add network configuration if Tor proxy is enabled
         ...(torProxyMode !== torProxyModes.none
           ? {
-              networks: {
-                monero_suite_net: {
-                  ipv4_address: MONEROBLOCK_IP
-                }
-              },
-              depends_on: {
-                tor: {
-                  condition: "service_started",
-                },
-              },
-              command: [`--daemon ${MONEROD_IP}:18089`]
-            }
+            networks: {
+              monero_suite_net: {
+                ipv4_address: MONEROBLOCK_IP
+              }
+            },
+            command: [`--daemon ${MONEROD_IP}:18089`]
+          }
           : {
-              command: ["--daemon", "monerod:18089"]
-            }),
+            command: ["--daemon", "monerod:18089"],
+          }),
+        depends_on: {
+          monerod: {
+            condition: "service_started",
+          },
+        },
         labels: isTraefik
           ? {
-              "traefik.enable": "true",
-              "traefik.http.routers.moneroblock.rule": `Host(\`${moneroBlockDomain}\`)`,
-              "traefik.http.routers.moneroblock.entrypoints": "websecure",
-              "traefik.http.routers.moneroblock.tls.certresolver":
-                certResolverName,
-              "traefik.http.services.moneroblock.loadbalancer.server.port":
-                "31312",
-            }
+            "traefik.enable": "true",
+            "traefik.http.routers.moneroblock.rule": `Host(\`${moneroBlockDomain}\`)`,
+            "traefik.http.routers.moneroblock.entrypoints": "websecure",
+            "traefik.http.routers.moneroblock.tls.certresolver":
+              certResolverName,
+            "traefik.http.services.moneroblock.loadbalancer.server.port":
+              "31312",
+          }
           : undefined,
         logging: !isMoneroblockLogging
           ? {
-              driver: "none",
-            }
+            driver: "none",
+          }
           : undefined,
       },
     },
