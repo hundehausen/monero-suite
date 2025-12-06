@@ -6,3 +6,5 @@ minimumReleaseAge: 4320
 minimumReleaseAgeExclude:
   - next
   - "@next/*"
+  - react
+  - react-dom
