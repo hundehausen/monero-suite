@@ -16,7 +16,7 @@ This project lets you run a Monero node and multiple services that relate to Mon
 - [Monitoring](https://github.com/lalanza808/docker-monero-node) (a monitoring stack with Prometheus, Grafana, and monerod-exporter. It serves a beautiful dashboard with all stats of your node. And it even has a map with all nodes that are connected to your node.)
 - [Tor Proxy and Tor Hidden Services](https://github.com/hundehausen/tor-hidden-service-docker) (anonymity network for monerod, P2Pool and other services)
 - [Docker Autoheal](https://github.com/willfarrell/docker-autoheal) (auto-restart unhealthy containers)
-- [Watchtower](https://github.com/containrrr/watchtower) (auto-update containers)
+- [Watchtower](https://github.com/nickfedor/watchtower) (auto-update containers)
 - [Portainer](https://github.com/portainer/portainer) (manage your docker services with a GUI in your browser)
 - [Cuprate](https://github.com/cuprate/cuprate) (an alternative Monero node implementation written in Rust) EXPERIMENTAL
 

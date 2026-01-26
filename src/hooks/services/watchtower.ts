@@ -16,7 +16,7 @@ export const useWatchtowerService = () => {
     architecture: [architectures.linuxAmd, architectures.linuxArm],
     code: {
       watchtower: {
-        image: "containrrr/watchtower:latest",
+        image: "nickfedor/watchtower:latest",
         container_name: "watchtower",
         restart: "unless-stopped",
         environment: {
