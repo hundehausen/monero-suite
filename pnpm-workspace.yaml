@@ -8,3 +8,6 @@ minimumReleaseAgeExclude:
   - "@next/*"
   - react
   - react-dom
+  - "@vercel/*"
+  - "@types/react"
+  - "@types/node"
