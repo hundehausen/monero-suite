@@ -11,7 +11,7 @@ export const useZmqRpcConfig = () => {
   
   const [zmqPubBindPort, setZmqPubBindPort] = useQueryState(
     "zmqPubBindPort", 
-    parseAsString.withDefault("18084")
+    parseAsString.withDefault("18083")
   );
 
   const [rpcSsl, setRpcSsl] = useQueryState(

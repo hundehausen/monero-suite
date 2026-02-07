@@ -34,7 +34,7 @@ export const useMonitoringService = () => {
     env: {
       P2P_PORT: 18080,
       RESTRICTED_PORT: 18089,
-      ZMQ_PORT: 18084,
+      ZMQ_PORT: 18083,
       UNRESTRICTED_PORT: 18081,
       GF_USERS_ALLOW_SIGN_UP: false,
       GF_USERS_ALLOW_ORG_CREATE: false,

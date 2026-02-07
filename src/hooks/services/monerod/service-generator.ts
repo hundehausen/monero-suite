@@ -108,7 +108,7 @@ export const createMonerodService = (
   const sLimitRateDown = safeParse(numericStringSchema, limitRateDown, "2048");
   const sP2pExternalPort = safeParse(numericStringSchema, p2pExternalPort, "0");
   const sMaxConnectionsPerIp = safeParse(numericStringSchema, maxConnectionsPerIp, "1");
-  const sZmqPubBindPort = safeParse(numericStringSchema, zmqPubBindPort, "18084");
+  const sZmqPubBindPort = safeParse(numericStringSchema, zmqPubBindPort, "18083");
   const sBlockSyncSize = safeParse(numericStringSchema, blockSyncSize, "0");
   const sMaxTxpoolWeight = safeParse(numericStringSchema, maxTxpoolWeight, "0");
   const sPreparationThreads = safeParse(numericStringSchema, preparationThreads, "4");
@@ -145,7 +145,7 @@ export const createMonerodService = (
           // When node is public, bind to all interfaces regardless of network mode
           getPortBinding(isMoneroPublicNode ? networkModes.local : networkMode, 18080),
           ...(p2PoolMode !== p2poolModes.none
-            ? [getPortBinding(isMoneroPublicNode ? networkModes.local : networkMode, 18084)]
+            ? [getPortBinding(isMoneroPublicNode ? networkModes.local : networkMode, 18083)]
             : []),
           getPortBinding(isMoneroPublicNode ? networkModes.local : networkMode, 18089),
         ],
@@ -209,7 +209,7 @@ export const createMonerodService = (
           ...(zmqPubEnabled
             ? [`--zmq-pub=tcp://0.0.0.0:${sZmqPubBindPort}`]
             : ((p2PoolMode !== p2poolModes.none || isMonitoring)
-              ? ["--zmq-pub=tcp://0.0.0.0:18084"]
+              ? ["--zmq-pub=tcp://0.0.0.0:18083"]
               : ["--no-zmq"])),
           ...(rpcSsl !== "autodetect" ? [`--rpc-ssl=${rpcSsl}`] : []),
           ...(sRpcLogin ? [`--rpc-login=${sRpcLogin}`] : []),
@@ -222,19 +222,19 @@ export const createMonerodService = (
             : []),
           ...(torProxyMode !== torProxyModes.none
             ? [
-              `--tx-proxy=tor,${TOR_IP}:9050,32`,
-              "--add-priority-node=xwvz3ekocr3dkyxfkmgm2hvbpzx2ysqmaxgter7znnqrhoicygkfswid.onion:18083",
-              "--add-priority-node=4pixvbejrvihnkxmduo2agsnmc3rrulrqc7s3cbwwrep6h6hrzsibeqd.onion:18083",
-              "--add-priority-node=zbjkbsxc5munw3qusl7j2hpcmikhqocdf4pqhnhtpzw5nt5jrmofptid.onion:18083",
+              `--tx-proxy=tor,${TOR_IP}:9050,16`,
+              "--add-priority-node=monsterxzzefbr6jq3n2tu4xvlumnunlhbrhqny6naxpn6le3upke2yd.onion:18084",
+              "--add-priority-node=doggettffpqokvkukhwquchg6bxwwtgj4pckygqylc7qkhim3ruxncid.onion:18084",
+              "--add-priority-node=doggettavnnnctrwm5dv6k42zmtl5f7j2n7sadfmibmnel4cantlf2id.onion:18084",
+              "--add-priority-node=5tymba6faziy36md5ffy42vatbjzlye4vyr3gyz6lcvdfximnvwpmwqd.onion:18084",
               "--add-priority-node=plowsof3t5hogddwabaeiyrno25efmzfxyro2vligremt7sxpsclfaid.onion:18083",
-              "--add-priority-node=plowsoffjexmxalw73tkjmf422gq6575fc7vicuu4javzn2ynnte6tyd.onion:18083",
-              "--add-priority-node=qz43zul2x56jexzoqgkx2trzwcfnr6l3hbtfcfx54g4r3eahy3bssjyd.onion:18083",
-              "--add-peer=xwvz3ekocr3dkyxfkmgm2hvbpzx2ysqmaxgter7znnqrhoicygkfswid.onion:18083",
-              "--add-peer=4pixvbejrvihnkxmduo2agsnmc3rrulrqc7s3cbwwrep6h6hrzsibeqd.onion:18083",
-              "--add-peer=zbjkbsxc5munw3qusl7j2hpcmikhqocdf4pqhnhtpzw5nt5jrmofptid.onion:18083",
+              "--add-priority-node=plowsofe6cleftfmk2raiw5h2x66atrik3nja4bfd3zrfa2hdlgworad.onion:18083",
+              "--add-peer=monsterxzzefbr6jq3n2tu4xvlumnunlhbrhqny6naxpn6le3upke2yd.onion:18084",
+              "--add-peer=doggettffpqokvkukhwquchg6bxwwtgj4pckygqylc7qkhim3ruxncid.onion:18084",
+              "--add-peer=doggettavnnnctrwm5dv6k42zmtl5f7j2n7sadfmibmnel4cantlf2id.onion:18084",
+              "--add-peer=5tymba6faziy36md5ffy42vatbjzlye4vyr3gyz6lcvdfximnvwpmwqd.onion:18084",
+              "--add-peer=plowsofe6cleftfmk2raiw5h2x66atrik3nja4bfd3zrfa2hdlgworad.onion:18083",
               "--add-peer=plowsof3t5hogddwabaeiyrno25efmzfxyro2vligremt7sxpsclfaid.onion:18083",
-              "--add-peer=plowsoffjexmxalw73tkjmf422gq6575fc7vicuu4javzn2ynnte6tyd.onion:18083",
-              "--add-peer=qz43zul2x56jexzoqgkx2trzwcfnr6l3hbtfcfx54g4r3eahy3bssjyd.onion:18083",
             ]
             : []),
           ...(disableDnsCheckpoints ? ["--disable-dns-checkpoints"] : []),

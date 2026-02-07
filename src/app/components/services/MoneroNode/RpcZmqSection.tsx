@@ -74,7 +74,7 @@ const RpcZmqSection = () => {
             label={
               <ExplainingLabel
                 label="ZMQ Publisher Port"
-                explanation="Port for the ZMQ publisher. Default is 18084."
+                explanation="Port for the ZMQ publisher. Default is 18083."
               />
             }
             value={parseInt(zmqPubBindPort)}

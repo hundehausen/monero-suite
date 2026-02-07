@@ -24,7 +24,7 @@ export const SERVICE_IPS = {
 export const MONEROD_PORTS = {
   p2p: 18080,
   rpcUnrestricted: 18081,
-  zmqPub: 18084,
+  zmqPub: 18083,
   rpcRestricted: 18089,
 } as const;
 
@@ -48,7 +48,7 @@ export const SERVICE_PORTS = {
   grafana: 3000,
   moneroblock: 31312,
   explorerOnion: 8081,
-  moneroWalletRpc: 18083,
+  moneroWalletRpc: 18082,
   portainer: 8000,
   portainerSsl: 9443,
   traefikHttp: 80,
