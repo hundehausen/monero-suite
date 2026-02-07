@@ -21,7 +21,7 @@ import { FaDocker, FaLinux } from "react-icons/fa";
 import { SiDotenv, SiGnubash } from "react-icons/si";
 import { useServicesContext } from "@/hooks/services-context";
 import { networkModes } from "@/hooks/use-services";
-import { useState, useEffect, CSSProperties, useRef } from "react";
+import { useState, useEffect, useMemo, CSSProperties, useRef } from "react";
 import { uploadInstallScript } from "../actions";
 import {
   generateDockerComposeFile,
@@ -93,41 +93,39 @@ export default function Main() {
 
   // Store the last uploaded configuration for comparison
   const lastUploadedConfig = useRef<{
-    services: string | null;
+    config: string | null;
     networkMode: string | null;
   }>({
-    services: null,
+    config: null,
     networkMode: null,
   });
 
-  const checkedServices = Object.values(services).filter(
-    (service) => service.checked !== false && service.checked !== "none"
+  const checkedServices = useMemo(
+    () => Object.values(services).filter(
+      (service) => service.checked !== false && service.checked !== "none"
+    ),
+    [services]
   );
 
   const hasDefaultDomain =
     stateFunctions.isTraefik && stateFunctions.mainDomain === "example.com";
 
-  const dockerCompose = generateDockerComposeFile(checkedServices);
-  const bashCommands = generateBashScriptFile(checkedServices);
-  const envString = generateEnvFile(checkedServices);
+  const dockerCompose = useMemo(() => generateDockerComposeFile(checkedServices), [checkedServices]);
+  const bashCommands = useMemo(() => generateBashScriptFile(checkedServices), [checkedServices]);
+  const envString = useMemo(() => generateEnvFile(checkedServices), [checkedServices]);
 
   const isExposed = stateFunctions.networkMode === networkModes.exposed;
-  const firewallPorts = getFirewallPorts(checkedServices);
-  const dockerComposeYaml = stringify(dockerCompose);
+  const firewallPorts = useMemo(() => getFirewallPorts(checkedServices), [checkedServices]);
+  const dockerComposeYaml = useMemo(() => stringify(dockerCompose), [dockerCompose]);
 
-  const fullScript = generateInstallationScript(
-    dockerComposeYaml,
-    bashCommands,
-    envString || undefined,
-    isExposed,
-    firewallPorts
+  const fullScript = useMemo(
+    () => generateInstallationScript(dockerComposeYaml, bashCommands, envString || undefined, isExposed, firewallPorts),
+    [dockerComposeYaml, bashCommands, envString, isExposed, firewallPorts]
   );
 
-  const scriptSummary = generateScriptSummary(
-    checkedServices,
-    envString,
-    isExposed,
-    firewallPorts
+  const scriptSummary = useMemo(
+    () => generateScriptSummary(checkedServices, envString, isExposed, firewallPorts),
+    [checkedServices, envString, isExposed, firewallPorts]
   );
 
   const handleScriptGeneration = async () => {
@@ -145,7 +143,7 @@ export default function Main() {
 
       // Store the current configuration that was uploaded
       lastUploadedConfig.current = {
-        services: JSON.stringify(checkedServices),
+        config: dockerComposeYaml + bashCommands + envString,
         networkMode: stateFunctions.networkMode,
       };
 
@@ -158,20 +156,20 @@ export default function Main() {
     }
   };
 
-  // Reset currentConfigIsUploaded if services or network mode changes
+  // Reset currentConfigIsUploaded if config or network mode changes
   useEffect(() => {
     if (!currentConfigIsUploaded) return;
 
-    const currentServicesString = JSON.stringify(checkedServices);
+    const currentConfig = dockerComposeYaml + bashCommands + envString;
     const currentNetworkMode = stateFunctions.networkMode;
 
     if (
-      lastUploadedConfig.current.services !== currentServicesString ||
+      lastUploadedConfig.current.config !== currentConfig ||
       lastUploadedConfig.current.networkMode !== currentNetworkMode
     ) {
       setCurrentConfigIsUploaded(false);
     }
-  }, [checkedServices, stateFunctions.networkMode, currentConfigIsUploaded]);
+  }, [dockerComposeYaml, bashCommands, envString, stateFunctions.networkMode, currentConfigIsUploaded]);
 
   useEffect(() => {
     if (!scriptUrl) return;
