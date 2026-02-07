@@ -4,6 +4,7 @@ export type ConfigFiles = {
   dockerComposeUrl: string;
   bashCommandsUrl: string;
   envFileUrl?: string;
+  settingsUrl?: string;
 };
 
 export async function getConfigFiles(configId: string): Promise<ConfigFiles> {
@@ -21,6 +22,10 @@ export async function getConfigFiles(configId: string): Promise<ConfigFiles> {
     blob.pathname.startsWith(`${configId}/.env`)
   )?.downloadUrl;
 
+  const settingsUrl = blobs.find((blob) =>
+    blob.pathname.startsWith(`${configId}/settings.conf`)
+  )?.downloadUrl;
+
   if (!dockerComposeUrl || !bashCommandsUrl) {
     throw new Error("Required configuration files not found");
   }
@@ -29,5 +34,6 @@ export async function getConfigFiles(configId: string): Promise<ConfigFiles> {
     dockerComposeUrl,
     bashCommandsUrl,
     envFileUrl,
+    settingsUrl,
   };
 }

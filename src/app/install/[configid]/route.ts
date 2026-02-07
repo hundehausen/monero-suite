@@ -10,7 +10,7 @@ export async function GET(
 ) {
   try {
     const params = await props.params;
-    const { dockerComposeUrl, bashCommandsUrl, envFileUrl } =
+    const { dockerComposeUrl, bashCommandsUrl, envFileUrl, settingsUrl } =
       await getConfigFiles(params.configid);
 
     const controller = new AbortController();
@@ -32,10 +32,39 @@ export async function GET(
       clearTimeout(timeout);
     }
 
+    let isExposed = false;
+    let firewallPorts = "";
+
+    if (settingsUrl) {
+      const settingsController = new AbortController();
+      const settingsTimeout = setTimeout(
+        () => settingsController.abort(),
+        FETCH_TIMEOUT_MS
+      );
+
+      try {
+        const settingsResponse = await fetch(settingsUrl, {
+          signal: settingsController.signal,
+        });
+        const settingsText = await settingsResponse.text();
+        const settings: Record<string, string> = {};
+        for (const line of settingsText.split("\n")) {
+          const [key, ...rest] = line.split("=");
+          if (key) settings[key.trim()] = rest.join("=").trim();
+        }
+        isExposed = settings.NETWORK_MODE === "exposed";
+        firewallPorts = settings.FIREWALL_PORTS || "";
+      } finally {
+        clearTimeout(settingsTimeout);
+      }
+    }
+
     const installationScript = generateInstallationScript(
       dockerComposeUrl,
       customBashCommands,
-      envFileUrl
+      envFileUrl,
+      isExposed,
+      firewallPorts
     );
 
     return new Response(installationScript);

@@ -13,11 +13,13 @@ export default function InstallScriptInfoCard() {
       </Group>
 
       <Text size="sm" c="dimmed">
-        Copy this command into your Debian or Ubuntu terminal. This will install
-        the services you selected. This script will install docker and docker
-        compose. You might have to enter your password. You can always copy the
-        files and commands manually. You need to do it manually, when you are
-        not using a Debian based distro like Ubuntu.
+        Copy this command into your Linux terminal. This will install the
+        services you selected. This script will install Docker and Docker
+        Compose. You might have to enter your password. Supported distros:
+        Ubuntu, Debian, Fedora, CentOS Stream, Rocky Linux, AlmaLinux, and
+        RHEL. You can always copy the files and commands manually. Add{" "}
+        <strong>bash -s -- -v</strong> instead of <strong>bash</strong> for
+        verbose output.
       </Text>
     </Card>
   );

@@ -18,7 +18,7 @@ import {
 } from "@mantine/core";
 import BashPreview from "./BashPreview";
 import EnvPreview from "./EnvPreview";
-import { FaDocker, FaUbuntu } from "react-icons/fa";
+import { FaDocker, FaLinux } from "react-icons/fa";
 import { SiDotenv, SiGnubash } from "react-icons/si";
 import InstallScriptInfoCard from "./InstallScriptInfoCard";
 import { useServicesContext } from "@/hooks/services-context";
@@ -65,17 +65,17 @@ export default function Main() {
     (service) => service.checked !== false && service.checked !== "none"
   );
 
+  const hasDefaultDomain =
+    stateFunctions.isTraefik && stateFunctions.mainDomain === "example.com";
+
   const dockerCompose = generateDockerComposeFile(checkedServices);
 
-  const bashCommands = generateBashScriptFile(
-    checkedServices,
-    stateFunctions.networkMode === networkModes.exposed
-  );
+  const bashCommands = generateBashScriptFile(checkedServices);
 
   const envString = generateEnvFile(checkedServices);
 
   const handleScriptGeneration = async () => {
-    if (!agreeOwnRisk || !agreePreview) {
+    if (!agreeOwnRisk || !agreePreview || hasDefaultDomain) {
       return;
     }
     setIsUploading(true);
@@ -160,9 +160,9 @@ export default function Main() {
           }}
         >
           <Accordion.Item value="install-script">
-            <Accordion.Control icon={<FaUbuntu />}>
+            <Accordion.Control icon={<FaLinux />}>
               <Flex direction={"row"} gap={16} align={"center"}>
-                <Text size="lg">Installation Script for Debian / Ubuntu</Text>
+                <Text size="lg">Installation Script for Linux</Text>
                 <Badge>New!</Badge>
               </Flex>
             </Accordion.Control>
@@ -183,10 +183,19 @@ export default function Main() {
                 }
                 label="I will preview the script before executing it"
               />
+              {hasDefaultDomain && (
+                <Text c="red" size="sm">
+                  Please change the Traefik domain from the default
+                  &quot;example.com&quot; before generating the script.
+                </Text>
+              )}
               <Button
                 onClick={handleScriptGeneration}
                 disabled={
-                  currentConfigIsUploaded || !agreeOwnRisk || !agreePreview
+                  currentConfigIsUploaded ||
+                  !agreeOwnRisk ||
+                  !agreePreview ||
+                  hasDefaultDomain
                 }
                 loading={isUploading}
               >

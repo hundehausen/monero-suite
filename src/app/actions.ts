@@ -3,7 +3,7 @@
 import { ComposeSpecification } from "compose-spec-schema/lib/type";
 import { stringify } from "yaml";
 import { put } from "@vercel/blob";
-import { generateBashScriptFile } from "./utils";
+import { generateBashScriptFile, getFirewallPorts } from "./utils";
 import { Service } from "@/hooks/use-services";
 import { nanoid } from "nanoid";
 
@@ -24,13 +24,17 @@ export async function generateInstallationScript(
   try {
     const configId = nanoid();
 
+    const firewallPorts = getFirewallPorts(services);
+
     await uploadDockerComposeFile(dockerCompose, configId);
 
     if (envString) {
       await uploadEnvFile(envString, configId);
     }
 
-    await uploadBashCommandsFile(services, configId, isExposed);
+    await uploadBashCommandsFile(services, configId);
+
+    await uploadSettingsFile(isExposed, firewallPorts, configId);
 
     return configId;
   } catch (error) {
@@ -84,12 +88,8 @@ async function uploadEnvFile(envString: string, configId: string) {
   });
 }
 
-async function uploadBashCommandsFile(
-  services: Service[],
-  configId: string,
-  isExposed = false
-) {
-  const bashCommands = generateBashScriptFile(services, isExposed);
+async function uploadBashCommandsFile(services: Service[], configId: string) {
+  const bashCommands = generateBashScriptFile(services);
   const envBlob = new Blob([bashCommands], { type: "text/plain" });
 
   if (envBlob.size > MAX_FILE_SIZE) {
@@ -103,6 +103,27 @@ async function uploadBashCommandsFile(
   });
 
   return put(filePathName, envFile, {
+    access: "public",
+    addRandomSuffix: false,
+  });
+}
+
+async function uploadSettingsFile(
+  isExposed: boolean,
+  firewallPorts: string,
+  configId: string
+) {
+  const lines = [
+    `NETWORK_MODE=${isExposed ? "exposed" : "local"}`,
+    `FIREWALL_PORTS=${firewallPorts}`,
+  ];
+  const content = lines.join("\n");
+  const blob = new Blob([content], { type: "text/plain" });
+  const fileName = "settings.conf";
+  const filePathName = `${configId}/${fileName}`;
+  const file = new File([blob], fileName, { type: "text/plain" });
+
+  return put(filePathName, file, {
     access: "public",
     addRandomSuffix: false,
   });

@@ -42,18 +42,20 @@ export const useMonitoringService = () => {
       GF_AUTH_ANONYMOUS_ENABLED: true,
       GF_AUTH_BASIC_ENABLED: false,
       GF_AUTH_DISABLE_LOGIN_FORM: true,
-      GF_SECURITY_ADMIN_PASSWORD: "CHANGE_ME_TO_A_SECURE_PASSWORD",
+      GF_SECURITY_ADMIN_PASSWORD: "admin",
       GF_SECURITY_ADMIN_USER: "admin",
     },
     bash: `
-# Download default Prometheus and Grafana configs/dashboards
-# Execute line by line
-mkdir -p monitoring/grafana/dashboards monitoring/grafana/provisioning/{dashboards,datasources} monitoring/prometheus 
-wget -O monitoring/prometheus/config.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/prometheus/config.yaml
-wget -O monitoring/grafana/grafana.ini https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/grafana.ini
-wget -O monitoring/grafana/dashboards/node_stats.json https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/dashboards/node_stats.json
-wget -O monitoring/grafana/provisioning/dashboards/all.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/provisioning/dashboards/all.yaml
-wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/provisioning/datasources/all.yaml
+# Set up monitoring configuration
+cd ~/monero-suite
+mkdir -p monitoring/grafana/dashboards monitoring/grafana/provisioning/{dashboards,datasources} monitoring/prometheus
+# Download Prometheus and Grafana configs
+curl -fsSL -o monitoring/prometheus/config.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/prometheus/config.yaml
+curl -fsSL -o monitoring/grafana/grafana.ini https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/grafana.ini
+# Download Grafana dashboards and provisioning
+curl -fsSL -o monitoring/grafana/dashboards/node_stats.json https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/dashboards/node_stats.json
+curl -fsSL -o monitoring/grafana/provisioning/dashboards/all.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/provisioning/dashboards/all.yaml
+curl -fsSL -o monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/provisioning/datasources/all.yaml
 `,
     code: {
       prometheus: {
@@ -69,12 +71,22 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
           "prometheus:/prometheus",
           "./monitoring/prometheus/config.yaml:/etc/prometheus/config.yaml:ro",
         ],
+        depends_on: {
+          exporter: {
+            condition: "service_started"
+          }
+        }
       },
       exporter: {
         image: DOCKER_IMAGES.monerodExporter,
         container_name: "monerod_exporter",
         restart: "unless-stopped",
         command: "--monero-addr=http://monerod:18081",
+        depends_on: {
+          monerod: {
+            condition: "service_healthy"
+          }
+        }
       },
       nodemapper: {
         image: DOCKER_IMAGES.nodemapper,
@@ -83,7 +95,12 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
         environment: {
           NODE_HOST: "monerod",
           NODE_PORT: "18081",
-        },
+        }, 
+        depends_on: {
+          monerod: {
+            condition: "service_healthy"
+          }
+        }
       },
       grafana: {
         image: DOCKER_IMAGES.grafana,
