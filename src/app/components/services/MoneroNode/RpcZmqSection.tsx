@@ -1,9 +1,9 @@
 import { NumberInput, Select, SimpleGrid, Switch, TextInput, Title } from "@mantine/core";
-import { RpcZmqSectionProps } from "./types";
+import { useMonerodState } from "@/hooks/services-context";
 import ExplainingLabel from "../../ExplainingLabel";
 import AccordionItemComponent from "../AccordionItemComponent";
 
-const RpcZmqSection = ({ stateFunctions, zmqPubEnabled }: RpcZmqSectionProps) => {
+const RpcZmqSection = () => {
   const {
     rpcLogin,
     setRpcLogin,
@@ -11,15 +11,11 @@ const RpcZmqSection = ({ stateFunctions, zmqPubEnabled }: RpcZmqSectionProps) =>
     setDisableRpcBan,
     rpcSsl,
     setRpcSsl,
-    zmqPubEnabled: pubEnabled,
+    zmqPubEnabled,
     setZmqPubEnabled,
     zmqPubBindPort,
     setZmqPubBindPort,
-    zmqPubTxEnabled,
-    setZmqPubTxEnabled,
-    zmqPubBlockEnabled,
-    setZmqPubBlockEnabled,
-  } = stateFunctions;
+  } = useMonerodState();
 
   return (
     <AccordionItemComponent
@@ -31,7 +27,7 @@ const RpcZmqSection = ({ stateFunctions, zmqPubEnabled }: RpcZmqSectionProps) =>
           label={
             <ExplainingLabel
               label="RPC Login"
-              explanation="Specify username[:password] for RPC server authentication. Format: username:password"
+              explanation="Require username:password authentication for the RPC server. All RPC clients must provide these credentials."
             />
           }
           value={rpcLogin}
@@ -52,7 +48,7 @@ const RpcZmqSection = ({ stateFunctions, zmqPubEnabled }: RpcZmqSectionProps) =>
           label={
             <ExplainingLabel
               label="RPC SSL Mode"
-              explanation="Controls whether SSL encryption is used for RPC connections. 'autodetect' chooses based on the connection port."
+              explanation="TLS encryption for RPC connections. Autodetect (default) enables TLS on HTTPS ports. Disable if using a reverse proxy for TLS termination."
             />
           }
           value={rpcSsl}
@@ -70,10 +66,10 @@ const RpcZmqSection = ({ stateFunctions, zmqPubEnabled }: RpcZmqSectionProps) =>
               explanation="ZMQ interface enables applications to subscribe to node events like new blocks or transactions."
             />
           }
-          checked={pubEnabled}
+          checked={zmqPubEnabled}
           onChange={(event) => setZmqPubEnabled(event.currentTarget.checked)}
         />
-        {pubEnabled && (
+        {zmqPubEnabled && (
           <NumberInput
             label={
               <ExplainingLabel
@@ -87,28 +83,6 @@ const RpcZmqSection = ({ stateFunctions, zmqPubEnabled }: RpcZmqSectionProps) =>
             max={65535}
           />
         )}
-        <Switch
-          label={
-            <ExplainingLabel
-              label="ZMQ Publish Transactions"
-              explanation="Enable publishing transaction hashes via ZMQ."
-            />
-          }
-          checked={zmqPubTxEnabled}
-          onChange={(event) => setZmqPubTxEnabled(event.currentTarget.checked)}
-          disabled={!pubEnabled}
-        />
-        <Switch
-          label={
-            <ExplainingLabel
-              label="ZMQ Publish Blocks"
-              explanation="Enable publishing block hashes via ZMQ."
-            />
-          }
-          checked={zmqPubBlockEnabled}
-          onChange={(event) => setZmqPubBlockEnabled(event.currentTarget.checked)}
-          disabled={!pubEnabled}
-        />
       </SimpleGrid>
     </AccordionItemComponent>
   );

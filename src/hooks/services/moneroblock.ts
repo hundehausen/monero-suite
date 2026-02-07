@@ -1,6 +1,9 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
-import { Service, architectures, networkModes, NetworkMode, torProxyModes } from "./types";
+import { Service, architectures, networkModes, NetworkMode, torProxyModes, TorProxyMode } from "./types";
 import { MONEROD_IP, MONEROBLOCK_IP } from "./tor";
+import { safeParse, domainSchema } from "@/lib/schemas";
+import { DOCKER_IMAGES } from "@/lib/constants";
+import { getTraefikLabels, getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
 
 export const useMoneroblockService = () => {
   const [isMoneroblock, setIsMoneroblock] = useQueryState(
@@ -13,15 +16,17 @@ export const useMoneroblockService = () => {
   );
   const [moneroBlockDomain, setMoneroBlockDomain] = useQueryState(
     "moneroBlockDomain",
-    parseAsString.withDefault("explorer.monerosuite.org")
+    parseAsString.withDefault("explorer.example.com")
   );
 
   const getMoneroblockService = (
     networkMode: NetworkMode,
     isTraefik: boolean,
     certResolverName: string = "monerosuite",
-    torProxyMode: string = torProxyModes.none
-  ): Service => ({
+    torProxyMode: TorProxyMode = torProxyModes.none
+  ): Service => {
+    const sDomain = safeParse(domainSchema, moneroBlockDomain, "");
+    return ({
     name: "Moneroblock",
     description: "Moneroblock is a self-hostable block explorer for monero",
     checked: isMoneroblock,
@@ -29,43 +34,20 @@ export const useMoneroblockService = () => {
     architecture: [architectures.linuxAmd, architectures.linuxArm],
     code: {
       moneroblock: {
-        image: "sethsimmons/moneroblock:latest",
+        image: DOCKER_IMAGES.moneroblock,
         restart: "unless-stopped",
         container_name: "moneroblock",
-        ports: [
-          ...(networkMode === networkModes.local
-            ? ["31312:31312"]
-            : ["127.0.0.1:31312:31312"]),
-        ],
-        // Add network configuration if Tor proxy is enabled
-        ...(torProxyMode !== torProxyModes.none
-          ? {
-            networks: {
-              monero_suite_net: {
-                ipv4_address: MONEROBLOCK_IP
-              }
-            },
-            command: [`--daemon ${MONEROD_IP}:18089`]
-          }
-          : {
-            command: ["--daemon", "monerod:18089"],
-          }),
+        ports: [getPortBinding(networkMode, 31312)],
+        ...getTorNetworkConfig(torProxyMode, MONEROBLOCK_IP),
+        command: torProxyMode !== torProxyModes.none
+          ? [`--daemon ${MONEROD_IP}:18089`]
+          : ["--daemon", "monerod:18089"],
         depends_on: {
           monerod: {
             condition: "service_started",
           },
         },
-        labels: isTraefik
-          ? {
-            "traefik.enable": "true",
-            "traefik.http.routers.moneroblock.rule": `Host(\`${moneroBlockDomain}\`)`,
-            "traefik.http.routers.moneroblock.entrypoints": "websecure",
-            "traefik.http.routers.moneroblock.tls.certresolver":
-              certResolverName,
-            "traefik.http.services.moneroblock.loadbalancer.server.port":
-              "31312",
-          }
-          : undefined,
+        labels: getTraefikLabels(isTraefik, "moneroblock", sDomain, "31312", certResolverName),
         logging: !isMoneroblockLogging
           ? {
             driver: "none",
@@ -74,6 +56,7 @@ export const useMoneroblockService = () => {
       },
     },
   });
+  };
 
   return {
     getMoneroblockService,

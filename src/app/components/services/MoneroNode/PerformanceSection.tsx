@@ -1,9 +1,9 @@
 import { NumberInput, Select, SimpleGrid, Switch, Title } from "@mantine/core";
-import { PerformanceSectionProps } from "./types";
+import { useMonerodState } from "@/hooks/services-context";
 import ExplainingLabel from "../../ExplainingLabel";
 import AccordionItemComponent from "../AccordionItemComponent";
 
-const PerformanceSection = ({ stateFunctions }: PerformanceSectionProps) => {
+const PerformanceSection = () => {
   const {
     dbSyncMode,
     setDbSyncMode,
@@ -17,11 +17,9 @@ const PerformanceSection = ({ stateFunctions }: PerformanceSectionProps) => {
     setPreparationThreads,
     maxConcurrency,
     setMaxConcurrency,
-    prepareForStaging,
-    setPrepareForStaging,
     maxTxpoolWeight,
     setMaxTxpoolWeight,
-  } = stateFunctions;
+  } = useMonerodState();
 
   return (
     <AccordionItemComponent
@@ -33,14 +31,14 @@ const PerformanceSection = ({ stateFunctions }: PerformanceSectionProps) => {
           label={
             <ExplainingLabel
               label="DB Sync Mode"
-              explanation="Set synchronization mode for the blockchain database. Fast is faster but uses more RAM. Safe is slower but more reliable."
+              explanation="Blockchain database sync mode. Safe writes synchronously (slower, reliable). Fast uses asynchronous writes (faster, uses more RAM). Fastest has no batch size limit."
             />
           }
           value={dbSyncMode}
           onChange={(value) => value && setDbSyncMode(value)}
           data={[
-            { value: "safe", label: "Safe (Default)" },
-            { value: "fast", label: "Fast" },
+            { value: "safe", label: "Safe" },
+            { value: "fast", label: "Fast (Default)" },
             { value: "fastest", label: "Fastest" },
           ]}
         />
@@ -70,7 +68,7 @@ const PerformanceSection = ({ stateFunctions }: PerformanceSectionProps) => {
           label={
             <ExplainingLabel
               label="Enforce DNS Checkpointing"
-              explanation="If enabled, the node verifies its blockchain against the DNS checkpoints. Will roll back if the local copy doesn't match the checkpoint."
+              explanation="Enforce MoneroPulse DNS checkpoints. The node will roll back the chain if the local copy doesn't match the checkpoint hash."
             />
           }
           checked={enforceCheckpointing}
@@ -80,7 +78,7 @@ const PerformanceSection = ({ stateFunctions }: PerformanceSectionProps) => {
           label={
             <ExplainingLabel
               label="Block Preparation Threads"
-              explanation="Number of threads to use for block preparation. Default is 4."
+              explanation="Number of threads for block hash computation during sync. Default is 4."
             />
           }
           value={parseInt(preparationThreads)}
@@ -99,16 +97,6 @@ const PerformanceSection = ({ stateFunctions }: PerformanceSectionProps) => {
           onChange={(value) => setMaxConcurrency(String(value))}
           min={0}
           max={128}
-        />
-        <Switch
-          label={
-            <ExplainingLabel
-              label="Prepare For Staging"
-              explanation="Prepare the daemon for use with network wide staging."
-            />
-          }
-          checked={prepareForStaging}
-          onChange={(event) => setPrepareForStaging(event.currentTarget.checked)}
         />
         <NumberInput
           label={

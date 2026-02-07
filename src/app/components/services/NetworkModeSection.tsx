@@ -1,15 +1,13 @@
 import { NetworkMode } from "@/hooks/use-services";
 import { SegmentedControl, Text } from "@mantine/core";
-import { ServiceComponentProps } from "./types";
+import { useNetworkModeState } from "@/hooks/services-context";
 import AccordionItemComponent from "./AccordionItemComponent";
 
-const NetworkModeSection = ({
-  stateFunctions
-}: ServiceComponentProps) => {
-  const { networkMode, setNetworkMode } = stateFunctions;
+const NetworkModeSection = () => {
+  const { networkMode, setNetworkMode } = useNetworkModeState();
 
   return (
-    <AccordionItemComponent 
+    <AccordionItemComponent
       value="exposed"
       title="Where is your Docker host located?"
     >

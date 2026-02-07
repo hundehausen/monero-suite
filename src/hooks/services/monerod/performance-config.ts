@@ -6,7 +6,7 @@ import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
 export const usePerformanceConfig = () => {
   const [dbSyncMode, setDbSyncMode] = useQueryState(
     "dbSyncMode", 
-    parseAsString.withDefault("fast:async:250000000bytes")
+    parseAsString.withDefault("fast")
   );
   
   const [blockSyncSize, setBlockSyncSize] = useQueryState(

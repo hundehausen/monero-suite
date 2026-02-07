@@ -4,6 +4,7 @@ import { AppShell } from "@mantine/core";
 import Header from "./components/Header";
 import Main from "./components/Main";
 import { Suspense } from "react";
+import { ServicesProvider } from "@/hooks/services-context";
 
 export default function Home() {
   return (
@@ -30,7 +31,9 @@ export default function Home() {
       </AppShell.Header>
       <AppShell.Main>
         <Suspense fallback={<div>Loading Monero Suite...</div>}>
-          <Main />
+          <ServicesProvider>
+            <Main />
+          </ServicesProvider>
         </Suspense>
       </AppShell.Main>
     </AppShell>

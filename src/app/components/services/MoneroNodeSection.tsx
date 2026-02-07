@@ -1,4 +1,3 @@
-import { ServiceComponentProps } from "./types";
 import {
   Anchor,
   Button,
@@ -8,14 +7,13 @@ import {
   Text,
 } from "@mantine/core";
 import { useDisclosure } from '@mantine/hooks';
+import { useServicesContext, useMonerodState, useTraefikState } from "@/hooks/services-context";
 import ExplainingLabel from "../ExplainingLabel";
 import AdvancedConfigModal from "./MoneroNode/AdvancedConfigModal";
 import AccordionItemComponent from "./AccordionItemComponent";
 
-const MoneroNodeSection = ({
-  services,
-  stateFunctions,
-}: ServiceComponentProps) => {
+const MoneroNodeSection = () => {
+  const { services } = useServicesContext();
   const {
     isMoneroPublicNode,
     setIsMoneroPublicNode,
@@ -23,8 +21,8 @@ const MoneroNodeSection = ({
     setMoneroNodeDomain,
     isPrunedNode,
     setIsPrunedNode,
-    isTraefik
-  } = stateFunctions;
+  } = useMonerodState();
+  const { isTraefik } = useTraefikState();
 
   // State for modal
   const [opened, { open, close }] = useDisclosure(false);
@@ -95,17 +93,16 @@ const MoneroNodeSection = ({
           )}
         </>
       )}
-      
+
       {/* Advanced Configuration Button */}
       <Group mt="md">
         <Button onClick={open} variant="outline">Advanced Configuration</Button>
       </Group>
-      
+
       {/* Advanced Configuration Modal */}
-      <AdvancedConfigModal 
-        opened={opened} 
-        onClose={close} 
-        stateFunctions={stateFunctions}
+      <AdvancedConfigModal
+        opened={opened}
+        onClose={close}
       />
     </AccordionItemComponent>
   );

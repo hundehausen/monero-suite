@@ -1,6 +1,6 @@
-import { ServiceMap, useServices } from "@/hooks/use-services";
 import { Accordion } from "@mantine/core";
 import { useEffect, useState } from "react";
+import { useServicesContext } from "@/hooks/services-context";
 import {
   ArchitectureSection,
   NetworkModeSection,
@@ -18,12 +18,8 @@ import {
   CuprateSection,
 } from "./services";
 
-interface SelectionProps {
-  services: ServiceMap;
-  stateFunctions: ReturnType<typeof useServices>["stateFunctions"];
-}
-
-const Selection = ({ services, stateFunctions }: SelectionProps) => {
+const Selection = () => {
+  const { stateFunctions } = useServicesContext();
   const {
     isMoneroPublicNode,
     isStagenetNode,
@@ -81,45 +77,20 @@ const Selection = ({ services, stateFunctions }: SelectionProps) => {
         },
       }}
     >
-      <ArchitectureSection
-        services={services}
-        stateFunctions={stateFunctions}
-      />
-
-      <NetworkModeSection
-        services={services}
-        stateFunctions={stateFunctions}
-      />
-
-      <MoneroNodeSection services={services} stateFunctions={stateFunctions} />
-
-      <StagenetNodeSection
-        services={services}
-        stateFunctions={stateFunctions}
-      />
-
-      <MoneroWalletRpcSection
-        services={services}
-        stateFunctions={stateFunctions}
-      />
-
-      <TraefikSection services={services} stateFunctions={stateFunctions} />
-
-      <P2PoolSection services={services} stateFunctions={stateFunctions} />
-
-      <MoneroblockSection services={services} stateFunctions={stateFunctions} />
-
-      <TorSection services={services} stateFunctions={stateFunctions} />
-
-      <MonitoringSection services={services} stateFunctions={stateFunctions} />
-
-      <PortainerSection services={services} stateFunctions={stateFunctions} />
-
-      <WatchtowerSection services={services} stateFunctions={stateFunctions} />
-
-      <AutohealSection services={services} stateFunctions={stateFunctions} />
-
-      <CuprateSection services={services} stateFunctions={stateFunctions} />
+      <ArchitectureSection />
+      <NetworkModeSection />
+      <MoneroNodeSection />
+      <StagenetNodeSection />
+      <MoneroWalletRpcSection />
+      <TraefikSection />
+      <P2PoolSection />
+      <MoneroblockSection />
+      <TorSection />
+      <MonitoringSection />
+      <PortainerSection />
+      <WatchtowerSection />
+      <AutohealSection />
+      <CuprateSection />
     </Accordion>
   );
 };

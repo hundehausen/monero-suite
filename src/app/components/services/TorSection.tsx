@@ -1,22 +1,20 @@
 import { TorProxyMode } from "@/hooks/use-services";
-import { Checkbox, Code, SegmentedControl, Text, Stack, Divider } from "@mantine/core";
-import { ServiceComponentProps } from "./types";
+import { Alert, Checkbox, Code, SegmentedControl, Text, Stack, Divider } from "@mantine/core";
+import { useServicesContext, useTorState, useNetworkModeState } from "@/hooks/services-context";
 import ExplainingLabel from "../ExplainingLabel";
 import AccordionItemComponent from "./AccordionItemComponent";
 
-const TorSection = ({
-  services,
-  stateFunctions,
-}: ServiceComponentProps) => {
-  const { 
-    torProxyMode, 
-    setTorProxyMode, 
-    isHiddenServices, 
+const TorSection = () => {
+  const { services } = useServicesContext();
+  const {
+    torProxyMode,
+    setTorProxyMode,
+    isHiddenServices,
     setIsHiddenServices,
     isGlobalTorProxy,
     setIsGlobalTorProxy,
-    networkMode
-  } = stateFunctions;
+  } = useTorState();
+  const { networkMode } = useNetworkModeState();
 
   // Only show global tor proxy option when in local network mode
   const isLocalNetworkMode = networkMode === "local";
@@ -27,7 +25,7 @@ const TorSection = ({
       title="Tor Proxy & Tor Hidden Services"
     >
       <Text size="sm">{services["tor"].description}</Text>
-      
+
       <Stack>
         {/* Tor Proxy Section */}
         <div>
@@ -67,7 +65,13 @@ const TorSection = ({
               },
             ]}
           />
-          
+
+          {torProxyMode !== "none" && (
+            <Alert variant="light" color="blue" title="Docker Network">
+              Enabling Tor proxy creates a dedicated Docker network with static IP addresses for inter-service communication through the Tor SOCKS proxy. This is a workaround because dns resolving is not working correctly.
+            </Alert>
+          )}
+
           {/* Global Tor Proxy Option - only visible when in local network mode and proxy is enabled */}
           {isLocalNetworkMode && torProxyMode !== "none" && (
             <Checkbox

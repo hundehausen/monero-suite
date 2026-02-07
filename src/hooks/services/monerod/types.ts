@@ -1,4 +1,4 @@
-import { NetworkMode, P2PoolMode, TorProxyMode } from "../types";
+import { Service, NetworkMode, P2PoolMode, TorProxyMode } from "../types";
 
 export interface MonerodState {
   // Basic configuration
@@ -135,6 +135,6 @@ export interface MonerodServiceHook {
     isHiddenServices: boolean,
     isTraefik: boolean,
     certResolverName?: string
-  ) => any;
+  ) => Service;
   stateFunctions: MonerodState;
 }

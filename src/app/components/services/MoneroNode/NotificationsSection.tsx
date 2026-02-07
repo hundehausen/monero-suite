@@ -1,9 +1,9 @@
 import { SimpleGrid, TextInput, Title } from "@mantine/core";
-import { NotificationsSectionProps } from "./types";
+import { useMonerodState } from "@/hooks/services-context";
 import ExplainingLabel from "../../ExplainingLabel";
 import AccordionItemComponent from "../AccordionItemComponent";
 
-const NotificationsSection = ({ stateFunctions }: NotificationsSectionProps) => {
+const NotificationsSection = () => {
   const {
     blockNotify,
     setBlockNotify,
@@ -11,7 +11,7 @@ const NotificationsSection = ({ stateFunctions }: NotificationsSectionProps) => 
     setReorgNotify,
     blockRateNotify,
     setBlockRateNotify,
-  } = stateFunctions;
+  } = useMonerodState();
 
   return (
     <AccordionItemComponent
@@ -45,7 +45,7 @@ const NotificationsSection = ({ stateFunctions }: NotificationsSectionProps) => 
           label={
             <ExplainingLabel
               label="Block Rate Notify Command"
-              explanation="Command to execute when the block rate changes significantly. Use placeholders: %t (blocks per second), %b (blocks per minute), %e (time to sync estimate in sec)."
+              explanation="Command to execute when an abnormal block rate is detected (possible attack or network issue). Placeholders: %t (seconds since last block), %b (number of blocks in last interval), %e (estimated seconds to next block)."
             />
           }
           value={blockRateNotify}

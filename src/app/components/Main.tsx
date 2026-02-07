@@ -21,7 +21,8 @@ import EnvPreview from "./EnvPreview";
 import { FaDocker, FaUbuntu } from "react-icons/fa";
 import { SiDotenv, SiGnubash } from "react-icons/si";
 import InstallScriptInfoCard from "./InstallScriptInfoCard";
-import { useServices, networkModes } from "@/hooks/use-services";
+import { useServicesContext } from "@/hooks/services-context";
+import { networkModes } from "@/hooks/use-services";
 import { useState, useEffect, CSSProperties, useRef } from "react";
 import { generateInstallationScript } from "../actions";
 import {
@@ -39,7 +40,7 @@ const panelStyles = {
 } as Partial<Record<AccordionStylesNames, CSSProperties>>;
 
 export default function Main() {
-  const { services, stateFunctions } = useServices();
+  const { services, stateFunctions } = useServicesContext();
   const [scriptUrl, setScriptUrl] = useState<string>();
   const [installationCommand, setInstallationCommand] = useState<string>();
   const [accordionItems, setAccordionItems] = useState([
@@ -138,7 +139,7 @@ export default function Main() {
           md: 5,
         }}
       >
-        <Selection services={services} stateFunctions={stateFunctions} />
+        <Selection />
       </Grid.Col>
       <Grid.Col
         span={{

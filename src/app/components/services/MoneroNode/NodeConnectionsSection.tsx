@@ -1,9 +1,9 @@
 import { SimpleGrid, TextInput, Title } from "@mantine/core";
-import { NodeConnectionsSectionProps } from "./types";
+import { useMonerodState } from "@/hooks/services-context";
 import ExplainingLabel from "../../ExplainingLabel";
 import AccordionItemComponent from "../AccordionItemComponent";
 
-const NodeConnectionsSection = ({ stateFunctions }: NodeConnectionsSectionProps) => {
+const NodeConnectionsSection = () => {
   const {
     seedNode,
     setSeedNode,
@@ -13,7 +13,7 @@ const NodeConnectionsSection = ({ stateFunctions }: NodeConnectionsSectionProps)
     setAddPriorityNode,
     addExclusiveNode,
     setAddExclusiveNode,
-  } = stateFunctions;
+  } = useMonerodState();
 
   return (
     <AccordionItemComponent

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 
 import {
@@ -94,98 +94,75 @@ export const useServices = () => {
         monerodService.stateFunctions.setIsSyncPrunedBlocks(false);
   }, [isPrunedNode, isSyncPrunedBlocks, monerodService.stateFunctions]);
 
-  const services = useMemo<ServiceMap>(
-    () => ({
-      monerod: monerodService.getMonerodService(
-        networkMode,
-        p2PoolService.stateFunctions.p2PoolMode,
-        torService.stateFunctions.torProxyMode,
-        isMonitoring,
-        torService.stateFunctions.isHiddenServices,
-        isTraefik,
-        certResolverName
-      ),
-      "monerod-stagenet": monerodStagenetService.getMonerodStagenetService(
-        networkMode,
-        isTraefik,
-        certResolverName,
-        torService.stateFunctions.torProxyMode
-      ),
-      p2pool: p2PoolService.getP2PoolService(
-        networkMode,
-        xmrigService.stateFunctions.miningMode,
-        torService.stateFunctions.torProxyMode
-      ),
-      "monero-wallet-rpc":
-        moneroWalletRpcService.getMoneroWalletRpcService(networkMode),
-      moneroblock: moneroblockService.getMoneroblockService(
-        networkMode,
-        isTraefik,
-        certResolverName,
-        torService.stateFunctions.torProxyMode
-      ),
-      "onion-monero-blockchain-explorer":
-        onionMoneroBlockchainExplorerService.getOnionMoneroBlockchainExplorerService(
-          networkMode,
-          isTraefik,
-          certResolverName,
-          torService.stateFunctions.torProxyMode
-        ),
-      tor: torService.getTorService(
-        networkMode,
-        monerodStagenetService.stateFunctions.isStagenetNode,
-        p2PoolService.stateFunctions.p2PoolMode,
-        moneroblockService.stateFunctions.isMoneroblock,
-        onionMoneroBlockchainExplorerService.stateFunctions
-          .isOnionMoneroBlockchainExplorer,
-        isMonitoring
-      ),
-      watchtower: watchtowerService.getWatchtowerService(),
-      monitoring: monitoringService.getMonitoringService(
-        networkMode,
-        isTraefik,
-        certResolverName,
-        torService.stateFunctions.torProxyMode
-      ),
-      autoheal: autohealService.getAutohealService(),
-      xmrig: xmrigService.getXmrigService(),
-      traefik: traefikService.getTraefikService(),
-      portainer: portainerService.getPortainerService(
-        networkMode,
-        isTraefik,
-        certResolverName
-      ),
-      cuprate: cuprateService.getCuprateService(
-        networkMode
-      ),
-    }),
-    [
+  const services: ServiceMap = {
+    monerod: monerodService.getMonerodService(
       networkMode,
-      monerodService,
-      monerodStagenetService,
-      p2PoolService,
-      moneroWalletRpcService,
-      moneroblockService,
-      onionMoneroBlockchainExplorerService,
-      torService,
-      watchtowerService,
-      monitoringService,
-      autohealService,
-      xmrigService,
-      traefikService,
-      portainerService,
-      cuprateService,
-    ]
-  );
-
-  const filteredServices = useMemo<ServiceMap>(
-    () =>
-      Object.fromEntries(
-        Object.entries(services).filter(([, service]) =>
-          service.architecture?.includes(architecture)
-        )
+      p2PoolService.stateFunctions.p2PoolMode,
+      torService.stateFunctions.torProxyMode,
+      isMonitoring,
+      torService.stateFunctions.isHiddenServices,
+      isTraefik,
+      certResolverName
+    ),
+    "monerod-stagenet": monerodStagenetService.getMonerodStagenetService(
+      networkMode,
+      isTraefik,
+      certResolverName,
+      torService.stateFunctions.torProxyMode
+    ),
+    p2pool: p2PoolService.getP2PoolService(
+      networkMode,
+      xmrigService.stateFunctions.miningMode,
+      torService.stateFunctions.torProxyMode
+    ),
+    "monero-wallet-rpc":
+      moneroWalletRpcService.getMoneroWalletRpcService(networkMode),
+    moneroblock: moneroblockService.getMoneroblockService(
+      networkMode,
+      isTraefik,
+      certResolverName,
+      torService.stateFunctions.torProxyMode
+    ),
+    "onion-monero-blockchain-explorer":
+      onionMoneroBlockchainExplorerService.getOnionMoneroBlockchainExplorerService(
+        networkMode,
+        isTraefik,
+        certResolverName,
+        torService.stateFunctions.torProxyMode
       ),
-    [architecture, services]
+    tor: torService.getTorService(
+      networkMode,
+      monerodStagenetService.stateFunctions.isStagenetNode,
+      p2PoolService.stateFunctions.p2PoolMode,
+      moneroblockService.stateFunctions.isMoneroblock,
+      onionMoneroBlockchainExplorerService.stateFunctions
+        .isOnionMoneroBlockchainExplorer,
+      isMonitoring
+    ),
+    watchtower: watchtowerService.getWatchtowerService(),
+    monitoring: monitoringService.getMonitoringService(
+      networkMode,
+      isTraefik,
+      certResolverName,
+      torService.stateFunctions.torProxyMode
+    ),
+    autoheal: autohealService.getAutohealService(),
+    xmrig: xmrigService.getXmrigService(),
+    traefik: traefikService.getTraefikService(),
+    portainer: portainerService.getPortainerService(
+      networkMode,
+      isTraefik,
+      certResolverName
+    ),
+    cuprate: cuprateService.getCuprateService(
+      networkMode
+    ),
+  };
+
+  const filteredServices: ServiceMap = Object.fromEntries(
+    Object.entries(services).filter(([, service]) =>
+      service.architecture?.includes(architecture)
+    )
   );
 
   // Combine all state functions from all services

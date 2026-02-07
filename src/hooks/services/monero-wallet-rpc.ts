@@ -1,5 +1,7 @@
 import { useQueryState, parseAsBoolean } from "nuqs";
 import { Service, architectures, networkModes, NetworkMode } from "./types";
+import { DOCKER_IMAGES } from "@/lib/constants";
+import { getPortBinding } from "@/lib/docker-helpers";
 
 export const useMoneroWalletRpcService = () => {
   const [isMoneroWalletRpc, setIsMoneroWalletRpc] = useQueryState(
@@ -16,14 +18,10 @@ export const useMoneroWalletRpcService = () => {
     architecture: [architectures.linuxAmd, architectures.linuxArm],
     code: {
       "monero-wallet-rpc": {
-        image: "sethsimmons/simple-monero-wallet-rpc:latest",
+        image: DOCKER_IMAGES.moneroWalletRpc,
         restart: "unless-stopped",
         container_name: "monero-wallet-rpc",
-        ports: [
-          ...(networkMode === networkModes.local
-            ? ["18083:18083"]
-            : ["127.0.0.1:18083:18083"]),
-        ],
+        ports: [getPortBinding(networkMode, 18083)],
         volumes: ["monero-wallet-rpc-data:/home/monero"],
         command: [
           "--daemon-address=monerod:18089",

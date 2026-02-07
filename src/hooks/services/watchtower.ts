@@ -1,5 +1,6 @@
 import { useQueryState, parseAsBoolean } from "nuqs";
 import { Service, architectures } from "./types";
+import { DOCKER_IMAGES } from "@/lib/constants";
 
 export const useWatchtowerService = () => {
   const [isWatchtower, setIsWatchtower] = useQueryState(
@@ -16,7 +17,7 @@ export const useWatchtowerService = () => {
     architecture: [architectures.linuxAmd, architectures.linuxArm],
     code: {
       watchtower: {
-        image: "nickfedor/watchtower:latest",
+        image: DOCKER_IMAGES.watchtower,
         container_name: "watchtower",
         restart: "unless-stopped",
         environment: {

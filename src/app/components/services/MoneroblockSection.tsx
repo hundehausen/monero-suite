@@ -1,11 +1,9 @@
 import { Checkbox, Input, Text } from "@mantine/core";
-import { ServiceComponentProps } from "./types";
+import { useServicesContext, useMoneroblockState, useTraefikState } from "@/hooks/services-context";
 import AccordionItemComponent from "./AccordionItemComponent";
 
-const MoneroblockSection = ({
-  services,
-  stateFunctions,
-}: ServiceComponentProps) => {
+const MoneroblockSection = () => {
+  const { services } = useServicesContext();
   const {
     isMoneroblock,
     setIsMoneroblock,
@@ -13,8 +11,8 @@ const MoneroblockSection = ({
     setIsMoneroblockLogging,
     moneroBlockDomain,
     setMoneroBlockDomain,
-    isTraefik,
-  } = stateFunctions;
+  } = useMoneroblockState();
+  const { isTraefik } = useTraefikState();
 
   return (
     <AccordionItemComponent

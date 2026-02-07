@@ -1,16 +1,18 @@
 import { MiningMode, P2PoolMode } from "@/hooks/use-services";
 import {
+  Alert,
   Box,
   Input,
   SegmentedControl,
   Slider,
   Text,
 } from "@mantine/core";
-import { ServiceComponentProps } from "./types";
+import { useServicesContext, useP2PoolState, useXmrigState, useArchitectureState } from "@/hooks/services-context";
 import ExplainingLabel from "../ExplainingLabel";
 import AccordionItemComponent from "./AccordionItemComponent";
 
-const P2PoolSection = ({ services, stateFunctions }: ServiceComponentProps) => {
+const P2PoolSection = () => {
+  const { services } = useServicesContext();
   const {
     p2PoolMode,
     setP2PoolMode,
@@ -18,10 +20,9 @@ const P2PoolSection = ({ services, stateFunctions }: ServiceComponentProps) => {
     setP2PoolPayoutAddress,
     p2PoolMiningThreads,
     setP2PoolMiningThreads,
-    miningMode,
-    setMiningMode,
-    architecture,
-  } = stateFunctions;
+  } = useP2PoolState();
+  const { miningMode, setMiningMode } = useXmrigState();
+  const { architecture } = useArchitectureState();
 
   const p2poolPayoutAddressError = () => {
     if (p2PoolPayoutAddress.length === 0) return null;
@@ -54,6 +55,15 @@ const P2PoolSection = ({ services, stateFunctions }: ServiceComponentProps) => {
           {
             label: (
               <ExplainingLabel
+                label="P2Pool nano"
+                explanation="Use this if you have the lowest hashrate."
+              />
+            ),
+            value: "nano",
+          },
+          {
+            label: (
+              <ExplainingLabel
                 label="P2Pool mini"
                 explanation="Use this if you have a low hashrate."
               />
@@ -73,6 +83,11 @@ const P2PoolSection = ({ services, stateFunctions }: ServiceComponentProps) => {
       />
       {p2PoolMode !== "none" && (
         <>
+          {p2PoolPayoutAddress.length === 0 && (
+            <Alert variant="light" color="yellow" title="Payout Address Required">
+              P2Pool requires a primary Monero address to receive mining payouts. Please enter your address below.
+            </Alert>
+          )}
           <Input.Wrapper
             styles={{
               root: {

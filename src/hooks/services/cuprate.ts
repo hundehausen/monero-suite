@@ -1,6 +1,7 @@
 import { useQueryState, parseAsBoolean } from "nuqs";
 import { NetworkMode, networkModes, Service } from "./types";
 import { architectures } from "./types";
+import { DOCKER_IMAGES } from "@/lib/constants";
 
 /**
  * Hook for Cuprate service configuration
@@ -26,7 +27,7 @@ export const useCuprateService = () => {
       },
       code: {
         cuprate: {
-          image: "ghcr.io/hundehausen/cuprate-docker:latest",
+          image: DOCKER_IMAGES.cuprate,
           container_name: "cuprate",
           restart: "unless-stopped",
           volumes: [

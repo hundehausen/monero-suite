@@ -1,19 +1,17 @@
 import { Checkbox, Input, Text } from "@mantine/core";
-import { ServiceComponentProps } from "./types";
+import { useServicesContext, usePortainerState, useTraefikState, useMonerodState } from "@/hooks/services-context";
 import AccordionItemComponent from "./AccordionItemComponent";
 
-const PortainerSection = ({
-  services,
-  stateFunctions,
-}: ServiceComponentProps) => {
+const PortainerSection = () => {
+  const { services } = useServicesContext();
   const {
     isPortainer,
     setIsPortainer,
     portainerDomain,
     setPortainerDomain,
-    isTraefik,
-    moneroNodeDomain,
-  } = stateFunctions;
+  } = usePortainerState();
+  const { isTraefik } = useTraefikState();
+  const { moneroNodeDomain } = useMonerodState();
 
   return (
     <AccordionItemComponent

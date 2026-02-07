@@ -1,5 +1,6 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
 import { Service, architectures } from "./types";
+import { DOCKER_IMAGES } from "@/lib/constants";
 
 // Utility function to get a sanitized domain name for the certificate resolver
 export const getSanitizedDomainName = (domain: string): string => {
@@ -14,7 +15,7 @@ export const useTraefikService = () => {
 
   const [mainDomain, setMainDomain] = useQueryState(
     "mainDomain",
-    parseAsString.withDefault("monerosuite.org")
+    parseAsString.withDefault("example.com")
   );
 
   const getTraefikService = (): Service => {
@@ -33,7 +34,7 @@ export const useTraefikService = () => {
       },
       code: {
         traefik: {
-          image: "traefik:latest",
+          image: DOCKER_IMAGES.traefik,
           container_name: "traefik",
           restart: "unless-stopped",
           command: [

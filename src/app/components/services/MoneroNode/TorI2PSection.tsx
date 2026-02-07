@@ -1,15 +1,15 @@
 import { SimpleGrid, Switch, TextInput, Title } from "@mantine/core";
-import { TorI2PSectionProps } from "./types";
+import { useMonerodState } from "@/hooks/services-context";
 import ExplainingLabel from "../../ExplainingLabel";
 import AccordionItemComponent from "../AccordionItemComponent";
 
-const TorI2PSection = ({ stateFunctions }: TorI2PSectionProps) => {
+const TorI2PSection = () => {
   const {
     padTransactions,
     setPadTransactions,
     anonymousInbound,
     setAnonymousInbound,
-  } = stateFunctions;
+  } = useMonerodState();
 
   return (
     <AccordionItemComponent
@@ -21,7 +21,7 @@ const TorI2PSection = ({ stateFunctions }: TorI2PSectionProps) => {
           label={
             <ExplainingLabel
               label="Pad Transactions"
-              explanation="Add random padding to transaction data for improved privacy. This makes transactions less identifiable but slightly larger."
+              explanation="Pad relayed transactions to the next 1024 bytes to hinder traffic analysis. Slightly increases bandwidth usage."
             />
           }
           checked={padTransactions}
@@ -31,12 +31,12 @@ const TorI2PSection = ({ stateFunctions }: TorI2PSectionProps) => {
           label={
             <ExplainingLabel
               label="Anonymous Inbound"
-              explanation="Specify Tor/I2P inbound addresses in format: [tor|i2p],address,port[,max_connections]. Example: tor,abcdefgh.onion,18083,100"
+              explanation="Allow anonymous inbound connections over Tor/I2P. Format: onion_address:port,bind_ip:port[,max_connections]. Requires a Tor hidden service forwarding to the bind address. Must be used with --tx-proxy."
             />
           }
           value={anonymousInbound}
           onChange={(e) => setAnonymousInbound(e.currentTarget.value)}
-          placeholder="tor,abcdefghijklmnop.onion,18083"
+          placeholder="your_onion_address.onion:18084,127.0.0.1:18084,25"
         />
       </SimpleGrid>
     </AccordionItemComponent>

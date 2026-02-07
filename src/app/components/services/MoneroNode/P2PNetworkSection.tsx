@@ -1,9 +1,9 @@
 import { NumberInput, SimpleGrid, Switch, Title } from "@mantine/core";
-import { P2PNetworkSectionProps } from "./types";
+import { useMonerodState } from "@/hooks/services-context";
 import ExplainingLabel from "../../ExplainingLabel";
 import AccordionItemComponent from "../AccordionItemComponent";
 
-const P2PNetworkSection = ({ stateFunctions }: P2PNetworkSectionProps) => {
+const P2PNetworkSection = () => {
   const {
     p2pBindPort,
     setP2pBindPort,
@@ -27,7 +27,7 @@ const P2PNetworkSection = ({ stateFunctions }: P2PNetworkSectionProps) => {
     setOfflineMode,
     maxConnectionsPerIp,
     setMaxConnectionsPerIp,
-  } = stateFunctions;
+  } = useMonerodState();
 
   return (
     <AccordionItemComponent
@@ -63,7 +63,7 @@ const P2PNetworkSection = ({ stateFunctions }: P2PNetworkSectionProps) => {
           label={
             <ExplainingLabel
               label="Out Peers"
-              explanation="Maximum number of outgoing connections. Default is 8, but 32 is recommended for faster sync and better transaction awareness."
+              explanation="Maximum number of outgoing connections. Monerod default is 12. A higher value like 32 is recommended for faster sync and better transaction propagation."
             />
           }
           value={parseInt(outPeers)}
@@ -75,7 +75,7 @@ const P2PNetworkSection = ({ stateFunctions }: P2PNetworkSectionProps) => {
           label={
             <ExplainingLabel
               label="In Peers"
-              explanation="Maximum number of incoming connections. Default is unlimited, but setting a cap of around 48 is recommended for better resource management."
+              explanation="Maximum number of incoming connections. Monerod default is unlimited (-1). Setting a cap of around 48 is recommended for better resource management."
             />
           }
           value={parseInt(inPeers)}
@@ -87,7 +87,7 @@ const P2PNetworkSection = ({ stateFunctions }: P2PNetworkSectionProps) => {
           label={
             <ExplainingLabel
               label="Upload Limit (kB/s)"
-              explanation="Maximum upload bandwidth in kB/s. Default is 2048 kB/s. For better network contribution, consider higher values like 1048576 kB/s (1GB/s) if your connection allows."
+              explanation="Maximum upload bandwidth in kB/s. Monerod default is 8192 kB/s. Set to -1 to use monerod default."
             />
           }
           value={parseInt(limitRateUp)}
@@ -99,7 +99,7 @@ const P2PNetworkSection = ({ stateFunctions }: P2PNetworkSectionProps) => {
           label={
             <ExplainingLabel
               label="Download Limit (kB/s)"
-              explanation="Maximum download bandwidth in kB/s. Default is 8192 kB/s. For faster initial sync, consider higher values like 1048576 kB/s (1GB/s) if your connection allows."
+              explanation="Maximum download bandwidth in kB/s. Monerod default is 32768 kB/s. Higher values speed up initial sync."
             />
           }
           value={parseInt(limitRateDown)}
@@ -121,7 +121,7 @@ const P2PNetworkSection = ({ stateFunctions }: P2PNetworkSectionProps) => {
           label={
             <ExplainingLabel
               label="Hide My Port"
-              explanation="Prevents your node from announcing its P2P port to other peers, making your node act as a 'leech' (receiving connections but not initiating them)."
+              explanation="Don't advertise your node as a public peer candidate. Your node can still connect to others but won't be discoverable."
             />
           }
           checked={hidePort}

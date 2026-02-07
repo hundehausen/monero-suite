@@ -1,5 +1,6 @@
 import { useQueryState, parseAsBoolean } from "nuqs";
 import { Service, architectures } from "./types";
+import { DOCKER_IMAGES } from "@/lib/constants";
 
 export const useAutohealService = () => {
   const [isAutoheal, setIsAutoheal] = useQueryState(
@@ -16,7 +17,7 @@ export const useAutohealService = () => {
     architecture: [architectures.linuxAmd, architectures.linuxArm],
     code: {
       autoheal: {
-        image: "willfarrell/autoheal:latest",
+        image: DOCKER_IMAGES.autoheal,
         container_name: "autoheal",
         restart: "unless-stopped",
         environment: {

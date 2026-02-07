@@ -16,7 +16,7 @@ export const useBasicConfig = () => {
   
   const [moneroNodeDomain, setMoneroNodeDomain] = useQueryState(
     "moneroNodeDomain",
-    parseAsString.withDefault("node.monerosuite.org")
+    parseAsString.withDefault("node.example.com")
   );
   
   const [isPrunedNode, setIsPrunedNode] = useQueryState(

@@ -1,12 +1,10 @@
 import { Checkbox, Text } from "@mantine/core";
-import { ServiceComponentProps } from "./types";
+import { useServicesContext, useAutohealState } from "@/hooks/services-context";
 import AccordionItemComponent from "./AccordionItemComponent";
 
-const AutohealSection = ({
-  services,
-  stateFunctions,
-}: ServiceComponentProps) => {
-  const { isAutoheal, setIsAutoheal } = stateFunctions;
+const AutohealSection = () => {
+  const { services } = useServicesContext();
+  const { isAutoheal, setIsAutoheal } = useAutohealState();
 
   return (
     <AccordionItemComponent

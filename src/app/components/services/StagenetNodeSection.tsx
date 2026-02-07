@@ -5,13 +5,11 @@ import {
   Text,
   TextInput,
 } from "@mantine/core";
-import { ServiceComponentProps } from "./types";
+import { useServicesContext, useStagenetState, useMonerodState, useTraefikState } from "@/hooks/services-context";
 import AccordionItemComponent from "./AccordionItemComponent";
 
-const StagenetNodeSection = ({
-  services,
-  stateFunctions,
-}: ServiceComponentProps) => {
+const StagenetNodeSection = () => {
+  const { services } = useServicesContext();
   const {
     isStagenetNode,
     setIsStagenetNode,
@@ -23,10 +21,9 @@ const StagenetNodeSection = ({
     setIsMoneroStagenetVolume,
     moneroStagenetBlockchainLocation,
     setMoneroStagenetBlockchainLocation,
-    moneroNodeNoLogs,
-    setMoneroNodeNoLogs,
-    isTraefik,
-  } = stateFunctions;
+  } = useStagenetState();
+  const { moneroNodeNoLogs, setMoneroNodeNoLogs } = useMonerodState();
+  const { isTraefik } = useTraefikState();
 
   return (
     <AccordionItemComponent

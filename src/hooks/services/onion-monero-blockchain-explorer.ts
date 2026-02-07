@@ -1,6 +1,9 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
 import { Service, architectures, networkModes, NetworkMode, torProxyModes } from "./types";
 import { MONEROD_IP, EXPLORER_IP } from "./tor";
+import { safeParse, domainSchema } from "@/lib/schemas";
+import { DOCKER_IMAGES } from "@/lib/constants";
+import { getTraefikLabels, getPortBinding } from "@/lib/docker-helpers";
 
 export const useOnionMoneroBlockchainExplorerService = () => {
   const [isOnionMoneroBlockchainExplorer, setIsOnionMoneroBlockchainExplorer] =
@@ -21,7 +24,9 @@ export const useOnionMoneroBlockchainExplorerService = () => {
     isTraefik: boolean,
     certResolverName: string = "monerosuite",
     torProxyMode: string = torProxyModes.none
-  ): Service => ({
+  ): Service => {
+    const sDomain = safeParse(domainSchema, onionMoneroBlockchainExplorerDomain, "");
+    return ({
     name: "Onion Monero Blockchain Explorer",
     description:
       "Onion Monero Blockchain Explorer allows you to browse Monero blockchain. It uses no JavaScript, no cookies and no trackers.",
@@ -30,14 +35,10 @@ export const useOnionMoneroBlockchainExplorerService = () => {
     architecture: [architectures.linuxAmd],
     code: {
       "onion-monero-blockchain-explorer": {
-        image: "vdo1138/xmrblocks:latest",
+        image: DOCKER_IMAGES.explorerOnion,
         restart: "unless-stopped",
         container_name: "onion-monero-blockchain-explorer",
-        ports: [
-          ...(networkMode === networkModes.local
-            ? ["8081:8081"]
-            : ["127.0.0.1:8081:8081"]),
-        ],
+        ports: [getPortBinding(networkMode, 8081)],
         volumes: ["monero-data:/home/monero/.bitmonero"],
         // Add network configuration if Tor proxy is enabled
         ...(torProxyMode !== torProxyModes.none
@@ -69,21 +70,11 @@ export const useOnionMoneroBlockchainExplorerService = () => {
               "./xmrblocks --enable-json-api --enable-autorefresh-option --enable-emission-monitor --daemon-url=monerod:18089 --enable-pusher",
             ],
           }),
-        labels: isTraefik
-          ? {
-            "traefik.enable": "true",
-            "traefik.http.routers.onion-monero-blockchain-explorer.rule": `Host(\`${onionMoneroBlockchainExplorerDomain}\`)`,
-            "traefik.http.routers.onion-monero-blockchain-explorer.entrypoints":
-              "websecure",
-            "traefik.http.routers.onion-monero-blockchain-explorer.tls.certresolver":
-              certResolverName,
-            "traefik.http.services.onion-monero-blockchain-explorer.loadbalancer.server.port":
-              "8081",
-          }
-          : undefined,
+        labels: getTraefikLabels(isTraefik, "onion-monero-blockchain-explorer", sDomain, "8081", certResolverName),
       },
     },
   });
+  };
 
   return {
     getOnionMoneroBlockchainExplorerService,

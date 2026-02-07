@@ -1,15 +1,15 @@
 import { SimpleGrid, TextInput, Title } from "@mantine/core";
-import { BootstrapNodeSectionProps } from "./types";
+import { useMonerodState } from "@/hooks/services-context";
 import ExplainingLabel from "../../ExplainingLabel";
 import AccordionItemComponent from "../AccordionItemComponent";
 
-const BootstrapNodeSection = ({ stateFunctions, bootstrapDaemonAddress }: BootstrapNodeSectionProps) => {
+const BootstrapNodeSection = () => {
   const {
-    bootstrapDaemonAddress: address,
+    bootstrapDaemonAddress,
     setBootstrapDaemonAddress,
     bootstrapDaemonLogin,
     setBootstrapDaemonLogin,
-  } = stateFunctions;
+  } = useMonerodState();
 
   return (
     <AccordionItemComponent
@@ -21,14 +21,14 @@ const BootstrapNodeSection = ({ stateFunctions, bootstrapDaemonAddress }: Bootst
           label={
             <ExplainingLabel
               label="Bootstrap Daemon Address"
-              explanation="Use a remote daemon while syncing your local blockchain. Useful for quick wallet access during initial sync. Format: host:port"
+              explanation="Proxy RPC requests to a remote node while your blockchain is syncing. Allows wallets to connect and operate before sync completes. Format: host:port"
             />
           }
-          value={address}
+          value={bootstrapDaemonAddress}
           onChange={(e) => setBootstrapDaemonAddress(e.currentTarget.value)}
           placeholder="node.example.org:18089"
         />
-        {address && (
+        {bootstrapDaemonAddress && (
           <TextInput
             label={
               <ExplainingLabel

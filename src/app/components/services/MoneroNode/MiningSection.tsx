@@ -1,19 +1,19 @@
 import { NumberInput, SimpleGrid, Switch, TextInput, Title } from "@mantine/core";
-import { MiningSectionProps } from "./types";
+import { useMonerodState } from "@/hooks/services-context";
 import ExplainingLabel from "../../ExplainingLabel";
 import AccordionItemComponent from "../AccordionItemComponent";
 
-const MiningSection = ({ stateFunctions, startMining, bgMiningEnable }: MiningSectionProps) => {
+const MiningSection = () => {
   const {
-    startMining: mining,
+    startMining,
     setStartMining,
     miningThreads,
     setMiningThreads,
-    bgMiningEnable: bgMining,
+    bgMiningEnable,
     setBgMiningEnable,
     bgMiningIgnoreBattery,
     setBgMiningIgnoreBattery,
-  } = stateFunctions;
+  } = useMonerodState();
 
   return (
     <AccordionItemComponent
@@ -28,11 +28,11 @@ const MiningSection = ({ stateFunctions, startMining, bgMiningEnable }: MiningSe
               explanation="Start mining to the specified Monero address. If provided, the node will begin mining upon startup. Alternatively you can choose P2Pool Mining as another service."
             />
           }
-          value={mining}
+          value={startMining}
           onChange={(e) => setStartMining(e.currentTarget.value)}
           placeholder="44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A"
         />
-        {mining && (
+        {startMining && (
           <NumberInput
             label={
               <ExplainingLabel
@@ -53,15 +53,15 @@ const MiningSection = ({ stateFunctions, startMining, bgMiningEnable }: MiningSe
               explanation="Mine when the system is idle and stop when the system is being used."
             />
           }
-          checked={bgMining}
+          checked={bgMiningEnable}
           onChange={(event) => setBgMiningEnable(event.currentTarget.checked)}
         />
-        {bgMining && (
+        {bgMiningEnable && (
           <Switch
             label={
               <ExplainingLabel
                 label="Background Mining Ignore Battery"
-                explanation="If enabled, background mining will continue even when running on battery power."
+                explanation="Assume plugged in when battery status is unknown. Background mining will not pause on systems where power status cannot be detected."
               />
             }
             checked={bgMiningIgnoreBattery}

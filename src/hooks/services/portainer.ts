@@ -1,5 +1,8 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
 import { Service, architectures, networkModes, NetworkMode } from "./types";
+import { safeParse, domainSchema } from "@/lib/schemas";
+import { DOCKER_IMAGES } from "@/lib/constants";
+import { getTraefikLabels, getPortBinding } from "@/lib/docker-helpers";
 
 export const usePortainerService = () => {
   const [isPortainer, setIsPortainer] = useQueryState(
@@ -8,14 +11,16 @@ export const usePortainerService = () => {
   );
   const [portainerDomain, setPortainerDomain] = useQueryState(
     "portainerDomain",
-    parseAsString.withDefault("portainer.monerosuite.org")
+    parseAsString.withDefault("portainer.example.com")
   );
 
   const getPortainerService = (
     networkMode: NetworkMode,
     isTraefik: boolean,
     certResolverName: string = "monerosuite"
-  ): Service => ({
+  ): Service => {
+    const sDomain = safeParse(domainSchema, portainerDomain, "");
+    return ({
     architecture: [architectures.linuxAmd, architectures.linuxArm],
     checked: isPortainer,
     name: "Portainer",
@@ -27,32 +32,19 @@ export const usePortainerService = () => {
     },
     code: {
       portainer: {
-        image: "portainer/portainer-ce:latest",
+        image: DOCKER_IMAGES.portainer,
         restart: "unless-stopped",
         container_name: "portainer",
-        ports: [
-          ...(networkMode === networkModes.local
-            ? ["8000:8000", "9443:9443"]
-            : ["127.0.0.1:8000:8000", "127.0.0.1:9443:9443"]),
-        ],
+        ports: [getPortBinding(networkMode, 9443)],
         volumes: [
           "portainer_data:/data",
           "/var/run/docker.sock:/var/run/docker.sock",
         ],
-        labels: isTraefik
-          ? {
-              "traefik.enable": "true",
-              "traefik.http.routers.monitoring.rule": `Host(\`${portainerDomain}\`)`,
-              "traefik.http.routers.monitoring.entrypoints": "websecure",
-              "traefik.http.routers.monitoring.tls.certresolver":
-                certResolverName,
-              "traefik.http.services.monitoring.loadbalancer.server.port":
-                "8000",
-            }
-          : undefined,
+        labels: getTraefikLabels(isTraefik, "portainer", sDomain, "8000", certResolverName),
       },
     },
   });
+  };
 
   return {
     getPortainerService,

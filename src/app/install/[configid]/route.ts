@@ -1,6 +1,9 @@
 import { getConfigFiles } from "@/app/lib/config-files";
 import { generateInstallationScript } from "@/app/lib/script-generator";
 
+const MAX_BASH_COMMANDS_SIZE = 512 * 1024; // 512KB
+const FETCH_TIMEOUT_MS = 10_000; // 10 seconds
+
 export async function GET(
   request: Request,
   props: { params: Promise<{ configid: string }> }
@@ -10,9 +13,24 @@ export async function GET(
     const { dockerComposeUrl, bashCommandsUrl, envFileUrl } =
       await getConfigFiles(params.configid);
 
-    const customBashCommands = await fetch(bashCommandsUrl).then((res) =>
-      res.text()
-    );
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+    let customBashCommands: string;
+    try {
+      const response = await fetch(bashCommandsUrl, {
+        signal: controller.signal,
+      });
+
+      const contentLength = response.headers.get("content-length");
+      if (contentLength && parseInt(contentLength) > MAX_BASH_COMMANDS_SIZE) {
+        return new Response("Bash commands file too large", { status: 413 });
+      }
+
+      customBashCommands = await response.text();
+    } finally {
+      clearTimeout(timeout);
+    }
 
     const installationScript = generateInstallationScript(
       dockerComposeUrl,

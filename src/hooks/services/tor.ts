@@ -11,14 +11,15 @@ import {
 } from "./types";
 import { useEffect } from "react";
 
-// Define fixed IP addresses for the tor network
-export const TOR_IP = "172.28.1.2";
-export const MONEROD_IP = "172.28.1.3";
-export const MONEROD_STAGENET_IP = "172.28.1.4";
-export const P2POOL_IP = "172.28.1.5";
-export const MONEROBLOCK_IP = "172.28.1.6";
-export const EXPLORER_IP = "172.28.1.7";
-export const GRAFANA_IP = "172.28.1.8";
+import { SERVICE_IPS, DOCKER_NETWORK, DOCKER_IMAGES, SERVICE_PORTS, P2POOL_PORTS, MONEROD_PORTS, MONEROD_STAGENET_PORTS } from "@/lib/constants";
+
+export const TOR_IP = SERVICE_IPS.tor;
+export const MONEROD_IP = SERVICE_IPS.monerod;
+export const MONEROD_STAGENET_IP = SERVICE_IPS.monerodStagenet;
+export const P2POOL_IP = SERVICE_IPS.p2pool;
+export const MONEROBLOCK_IP = SERVICE_IPS.moneroblock;
+export const EXPLORER_IP = SERVICE_IPS.explorer;
+export const GRAFANA_IP = SERVICE_IPS.grafana;
 
 export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => {
   // State for Tor Proxy functionality
@@ -69,7 +70,7 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
       architecture: [architectures.linuxAmd, architectures.linuxArm],
       code: {
         tor: {
-          image: "ghcr.io/hundehausen/tor-hidden-service:latest",
+          image: DOCKER_IMAGES.tor,
           container_name: "tor",
           restart: "unless-stopped",
         },
@@ -87,12 +88,12 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
 
       // Add network definition to the service
       service.networks = {
-        monero_suite_net: {
-          driver: "bridge",
+        [DOCKER_NETWORK.name]: {
+          driver: DOCKER_NETWORK.driver,
           ipam: {
             config: [
               {
-                subnet: "172.28.1.0/24"
+                subnet: DOCKER_NETWORK.subnet,
               }
             ]
           }
@@ -104,7 +105,9 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
     if (isProxyEnabled && isGlobalTorProxy) {
       // Determine port binding based on network mode and global proxy setting
       // Only allow host binding proxy (0.0.0.0) if in local network mode
-      const portBinding = networkMode === networkModes.local ? "9050:9050" : "127.0.0.1:9050:9050";
+      const portBinding = networkMode === networkModes.local
+        ? `${SERVICE_PORTS.torSocks}:${SERVICE_PORTS.torSocks}`
+        : `127.0.0.1:${SERVICE_PORTS.torSocks}:${SERVICE_PORTS.torSocks}`;
 
       service.code.tor.ports = [portBinding];
     }
@@ -119,35 +122,40 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
 
       // Add environment variables for hidden services
       service.code.tor.environment = {
-        HS_MONEROD_MAINNET: `monerod:18089:18089`,
+        HS_MONEROD_MAINNET: `monerod:${MONEROD_PORTS.rpcRestricted}:${MONEROD_PORTS.rpcRestricted}`,
         ...(isStagenetNode
           ? {
-            HS_MONEROD_MAINNET_STAGENET: `monerod-stagenet:38089:38089`,
+            HS_MONEROD_MAINNET_STAGENET: `monerod-stagenet:${MONEROD_STAGENET_PORTS.rpcRestricted}:${MONEROD_STAGENET_PORTS.rpcRestricted}`,
           }
           : {}),
         ...(p2PoolMode === p2poolModes.full
           ? {
-            HS_P2POOL: "p2pool:3333:3333",
+            HS_P2POOL: `p2pool:${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}`,
           }
           : {}),
         ...(p2PoolMode === p2poolModes.mini
           ? {
-            HS_P2POOL_MINI: "p2pool-mini:3333:3333",
+            HS_P2POOL_MINI: `p2pool-mini:${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}`,
+          }
+          : {}),
+        ...(p2PoolMode === p2poolModes.nano
+          ? {
+            HS_P2POOL_NANO: `p2pool-nano:${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}`,
           }
           : {}),
         ...(isMoneroblock
           ? {
-            HS_MONEROBLOCK: "moneroblock:31312:80",
+            HS_MONEROBLOCK: `moneroblock:${SERVICE_PORTS.moneroblock}:80`,
           }
           : {}),
         ...(isOnionMoneroBlockchainExplorer
           ? {
             HS_MONERO_ONION_BLOCKCHAIN_EXPLORER:
-              "onion-monero-blockchain-explorer:8081:80",
+              `onion-monero-blockchain-explorer:${SERVICE_PORTS.explorerOnion}:80`,
           }
           : {}),
         ...(isMonitoring
-          ? { HS_GRAFANA: "grafana:3000:80" }
+          ? { HS_GRAFANA: `grafana:${SERVICE_PORTS.grafana}:80` }
           : {}),
       };
     }

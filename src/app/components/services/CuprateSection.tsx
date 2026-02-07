@@ -1,20 +1,18 @@
-import { ServiceComponentProps } from "./types";
 import {
   Anchor,
   Text,
   Badge,
   Checkbox,
 } from "@mantine/core";
+import { useServicesContext, useCuprateState } from "@/hooks/services-context";
 import AccordionItemComponent from "./AccordionItemComponent";
 
-const CuprateSection = ({
-  services,
-  stateFunctions,
-}: ServiceComponentProps) => {
+const CuprateSection = () => {
+  const { services } = useServicesContext();
   const {
     isCuprateEnabled,
     setIsCuprateEnabled,
-  } = stateFunctions;
+  } = useCuprateState();
 
   return (
     <AccordionItemComponent

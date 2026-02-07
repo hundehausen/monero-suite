@@ -1,6 +1,9 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
-import { Service, architectures, networkModes, NetworkMode, torProxyModes } from "./types";
+import { Service, architectures, networkModes, NetworkMode, torProxyModes, TorProxyMode } from "./types";
 import { TOR_IP, MONEROD_STAGENET_IP } from "./tor";
+import { safeParse, domainSchema, pathSchema } from "@/lib/schemas";
+import { DOCKER_IMAGES } from "@/lib/constants";
+import { getTraefikLabels, getTorNetworkConfig } from "@/lib/docker-helpers";
 
 export const useMonerodStagenetService = () => {
   const [isStagenetNode, setIsStagenetNode] = useQueryState(
@@ -24,7 +27,7 @@ export const useMonerodStagenetService = () => {
   );
   const [stagenetNodeDomain, setStagenetNodeDomain] = useQueryState(
     "stagenetNodeDomain",
-    parseAsString.withDefault("stagenet.monerosuite.org")
+    parseAsString.withDefault("stagenet.example.com")
   );
   const [moneroNodeNoLogs, setMoneroNodeNoLogs] = useQueryState(
     "moneroNodeNoLogs",
@@ -35,8 +38,11 @@ export const useMonerodStagenetService = () => {
     networkMode: NetworkMode,
     isTraefik: boolean,
     certResolverName: string = "monerosuite",
-    torProxyMode: string = torProxyModes.none
-  ): Service => ({
+    torProxyMode: TorProxyMode = torProxyModes.none
+  ): Service => {
+    const sDomain = safeParse(domainSchema, stagenetNodeDomain, "");
+    const sPath = safeParse(pathSchema, moneroStagenetBlockchainLocation, "~/.bitmonero");
+    return ({
     name: "Monero Stagenet Node",
     description:
       "Run a monerod stagenet node. Stagenet is a testing network for developers. It is a separate blockchain with separate coins from the main Monero network.",
@@ -54,14 +60,14 @@ export const useMonerodStagenetService = () => {
       : undefined,
     code: {
       "monerod-stagenet": {
-        image: "ghcr.io/sethforprivacy/simple-monerod:latest",
+        image: DOCKER_IMAGES.monerod,
         restart: "unless-stopped",
         container_name: "monerod-stagenet",
         volumes: [
           ...(isMoneroStagenetVolume
             ? ["bitmonero-stagenet:/home/monero/.bitmonero"]
             : [
-                `${moneroStagenetBlockchainLocation}:/home/monero/.bitmonero`,
+                `${sPath}:/home/monero/.bitmonero`,
               ]),
         ],
         ports: [
@@ -83,16 +89,7 @@ export const useMonerodStagenetService = () => {
                 },
               }
             : undefined,
-        // Add network configuration if Tor proxy is enabled
-        ...(torProxyMode !== torProxyModes.none
-          ? {
-              networks: {
-                monero_suite_net: {
-                  ipv4_address: MONEROD_STAGENET_IP
-                }
-              }
-            }
-          : {}),
+        ...getTorNetworkConfig(torProxyMode, MONEROD_STAGENET_IP),
         command: [
           "--stagenet",
           "--rpc-restricted-bind-ip=0.0.0.0",
@@ -111,25 +108,17 @@ export const useMonerodStagenetService = () => {
           ...(isStagenetNodePublic ? ["--public-node"] : []),
           ...(torProxyMode === torProxyModes.full
             ? [`--proxy=${TOR_IP}:9050`]
-            : torProxyMode === torProxyModes.txonly
+            : []),
+          ...(torProxyMode !== torProxyModes.none
             ? [`--tx-proxy=tor,${TOR_IP}:9050,32`]
             : []),
         ],
         logging: moneroNodeNoLogs ? { driver: "none" } : undefined,
-        labels: isTraefik
-          ? {
-              "traefik.enable": "true",
-              "traefik.http.routers.monerod-stagenet.rule": `Host(\`${stagenetNodeDomain}\`)`,
-              "traefik.http.routers.monerod-stagenet.entrypoints": "websecure",
-              "traefik.http.routers.monerod-stagenet.tls.certresolver":
-                certResolverName,
-              "traefik.http.services.monerod-stagenet.loadbalancer.server.port":
-                "18089",
-            }
-          : undefined,
+        labels: getTraefikLabels(isTraefik, "monerod-stagenet", sDomain, "18089", certResolverName),
       },
     },
   });
+  };
 
   return {
     getMonerodStagenetService,

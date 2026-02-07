@@ -1,19 +1,19 @@
 import { SimpleGrid, Switch, TextInput, Title } from "@mantine/core";
-import { StorageSectionProps } from "./types";
+import { useMonerodState } from "@/hooks/services-context";
 import ExplainingLabel from "../../ExplainingLabel";
 import AccordionItemComponent from "../AccordionItemComponent";
 
-const StorageSection = ({ stateFunctions, isPrunedNode }: StorageSectionProps) => {
+const StorageSection = () => {
   const {
     isMoneroMainnetVolume,
     setIsMoneroMainnetVolume,
     moneroMainnetBlockchainLocation,
     setMoneroMainnetBlockchainLocation,
-    isPrunedNode: pruned,
+    isPrunedNode,
     setIsPrunedNode,
     isSyncPrunedBlocks,
     setIsSyncPrunedBlocks,
-  } = stateFunctions;
+  } = useMonerodState();
 
   return (
     <AccordionItemComponent
@@ -51,15 +51,15 @@ const StorageSection = ({ stateFunctions, isPrunedNode }: StorageSectionProps) =
               explanation="Pruning allows saving 2/3 of storage space while keeping the full transaction history. There are no privacy or security downsides."
             />
           }
-          checked={pruned}
+          checked={isPrunedNode}
           onChange={(event) => setIsPrunedNode(event.currentTarget.checked)}
         />
-        {pruned && (
+        {isPrunedNode && (
           <Switch
             label={
               <ExplainingLabel
                 label="Sync Pruned Blocks"
-                explanation="Download only pruned blocks instead of full blocks. Saves network bandwidth during synchronization."
+                explanation="Accept pruned blocks from peers during sync. Reduces network bandwidth but requires --prune-blockchain to be enabled."
               />
             }
             checked={isSyncPrunedBlocks}

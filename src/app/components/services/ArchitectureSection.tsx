@@ -1,10 +1,10 @@
 import { Architecture } from "@/hooks/use-services";
 import { SegmentedControl } from "@mantine/core";
-import { ServiceComponentProps } from "./types";
+import { useArchitectureState } from "@/hooks/services-context";
 import AccordionItemComponent from "./AccordionItemComponent";
 
-const ArchitectureSection = ({ stateFunctions }: ServiceComponentProps) => {
-  const { architecture, setArchitecture } = stateFunctions;
+const ArchitectureSection = () => {
+  const { architecture, setArchitecture } = useArchitectureState();
 
   return (
     <AccordionItemComponent

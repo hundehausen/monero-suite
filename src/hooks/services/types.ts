@@ -28,6 +28,7 @@ export const p2poolModes = {
   none: "none",
   mini: "mini",
   full: "full",
+  nano: "nano",
 } as const;
 
 export type P2PoolMode = (typeof p2poolModes)[keyof typeof p2poolModes];

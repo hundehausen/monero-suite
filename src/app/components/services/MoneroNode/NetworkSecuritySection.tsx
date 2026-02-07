@@ -1,9 +1,9 @@
 import { SimpleGrid, Switch, TextInput, Title } from "@mantine/core";
-import { NetworkSecuritySectionProps } from "./types";
+import { useMonerodState } from "@/hooks/services-context";
 import ExplainingLabel from "../../ExplainingLabel";
 import AccordionItemComponent from "../AccordionItemComponent";
 
-const NetworkSecuritySection = ({ stateFunctions }: NetworkSecuritySectionProps) => {
+const NetworkSecuritySection = () => {
   const {
     enableDnsBlocklist,
     setEnableDnsBlocklist,
@@ -11,7 +11,7 @@ const NetworkSecuritySection = ({ stateFunctions }: NetworkSecuritySectionProps)
     setBanList,
     disableDnsCheckpoints,
     setDisableDnsCheckpoints,
-  } = stateFunctions;
+  } = useMonerodState();
 
   return (
     <AccordionItemComponent
@@ -44,7 +44,7 @@ const NetworkSecuritySection = ({ stateFunctions }: NetworkSecuritySectionProps)
           label={
             <ExplainingLabel
               label="Disable DNS Checkpoints"
-              explanation="Disable DNS-based checkpointing. Not recommended unless you have a specific reason to do so."
+              explanation="Disable MoneroPulse DNS checkpoints. Not recommended unless you have a specific reason to do so."
             />
           }
           checked={disableDnsCheckpoints}

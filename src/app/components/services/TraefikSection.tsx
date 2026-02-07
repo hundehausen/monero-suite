@@ -1,12 +1,10 @@
-import { Checkbox, Text, TextInput, Stack } from "@mantine/core";
-import { ServiceComponentProps } from "./types";
+import { Alert, Checkbox, Text, TextInput, Stack } from "@mantine/core";
+import { useServicesContext, useTraefikState } from "@/hooks/services-context";
 import AccordionItemComponent from "./AccordionItemComponent";
 
-const TraefikSection = ({
-  services,
-  stateFunctions,
-}: ServiceComponentProps) => {
-  const { isTraefik, setIsTraefik, mainDomain, setMainDomain } = stateFunctions;
+const TraefikSection = () => {
+  const { services } = useServicesContext();
+  const { isTraefik, setIsTraefik, mainDomain, setMainDomain } = useTraefikState();
 
   return (
     <AccordionItemComponent
@@ -24,13 +22,18 @@ const TraefikSection = ({
         />
 
         {isTraefik && (
-          <TextInput
-            label="Main Domain"
-            description="Enter your main domain. This will be used for all services (please change this to your own domain)"
-            placeholder="monerosuite.org"
-            value={mainDomain}
-            onChange={(e) => setMainDomain(e.currentTarget.value)}
-          />
+          <>
+            <Alert variant="light" color="blue" title="DNS Setup Required">
+              Make sure your domain&apos;s DNS A/AAAA records point to your server&apos;s IP address. Traefik will automatically obtain Let&apos;s Encrypt TLS certificates once DNS is configured.
+            </Alert>
+            <TextInput
+              label="Main Domain"
+              description="Enter your main domain. This will be used for all services (please change this to your own domain)"
+              placeholder="example.com"
+              value={mainDomain}
+              onChange={(e) => setMainDomain(e.currentTarget.value)}
+            />
+          </>
         )}
       </Stack>
     </AccordionItemComponent>

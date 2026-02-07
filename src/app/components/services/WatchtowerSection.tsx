@@ -1,12 +1,10 @@
 import { Checkbox, Text } from "@mantine/core";
-import { ServiceComponentProps } from "./types";
+import { useServicesContext, useWatchtowerState } from "@/hooks/services-context";
 import AccordionItemComponent from "./AccordionItemComponent";
 
-const WatchtowerSection = ({
-  services,
-  stateFunctions,
-}: ServiceComponentProps) => {
-  const { isWatchtower, setIsWatchtower } = stateFunctions;
+const WatchtowerSection = () => {
+  const { services } = useServicesContext();
+  const { isWatchtower, setIsWatchtower } = useWatchtowerState();
 
   return (
     <AccordionItemComponent

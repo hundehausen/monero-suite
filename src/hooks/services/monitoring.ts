@@ -1,5 +1,8 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
 import { Service, architectures, networkModes, NetworkMode, torProxyModes } from "./types";
+import { safeParse, domainSchema } from "@/lib/schemas";
+import { DOCKER_IMAGES } from "@/lib/constants";
+import { getTraefikLabels, getPortBinding } from "@/lib/docker-helpers";
 
 export const useMonitoringService = () => {
   const [isMonitoring, setIsMonitoring] = useQueryState(
@@ -16,7 +19,9 @@ export const useMonitoringService = () => {
     isTraefik: boolean,
     certResolverName: string = "monerosuite",
     torProxyMode: string = torProxyModes.none
-  ): Service => ({
+  ): Service => {
+    const sDomain = safeParse(domainSchema, grafanaDomain, "localhost:3000");
+    return ({
     name: "Monitoring",
     description:
       "Monitoring with Prometheus and Grafana: see your node stats visualized in graphs. See on a map where your peers are located.",
@@ -37,7 +42,7 @@ export const useMonitoringService = () => {
       GF_AUTH_ANONYMOUS_ENABLED: true,
       GF_AUTH_BASIC_ENABLED: false,
       GF_AUTH_DISABLE_LOGIN_FORM: true,
-      GF_SECURITY_ADMIN_PASSWORD: "admin",
+      GF_SECURITY_ADMIN_PASSWORD: "CHANGE_ME_TO_A_SECURE_PASSWORD",
       GF_SECURITY_ADMIN_USER: "admin",
     },
     bash: `
@@ -52,7 +57,7 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
 `,
     code: {
       prometheus: {
-        image: "prom/prometheus:latest",
+        image: DOCKER_IMAGES.prometheus,
         container_name: "prometheus",
         restart: "unless-stopped",
         command: [
@@ -66,13 +71,13 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
         ],
       },
       exporter: {
-        image: "lalanza808/monerod_exporter:latest",
+        image: DOCKER_IMAGES.monerodExporter,
         container_name: "monerod_exporter",
         restart: "unless-stopped",
         command: "--monero-addr=http://monerod:18081",
       },
       nodemapper: {
-        image: "lalanza808/nodemapper:latest",
+        image: DOCKER_IMAGES.nodemapper,
         container_name: "nodemapper",
         restart: "unless-stopped",
         environment: {
@@ -81,38 +86,24 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
         },
       },
       grafana: {
-        image: "grafana/grafana:latest",
+        image: DOCKER_IMAGES.grafana,
         container_name: "grafana",
         user: "${UID:-1000}:${GID:-1000}",
         command: "-config=/etc/grafana/grafana.ini",
         restart: "unless-stopped",
-        ports: [
-          ...(networkMode === networkModes.local
-            ? ["3000:3000"]
-            : ["127.0.0.1:3000:3000"]),
-        ],
+        ports: [getPortBinding(networkMode, 3000)],
         volumes: [
           "grafana:/var/lib/grafana",
           "./monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini:ro",
           "./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro",
           "./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro",
         ],
-        labels: isTraefik
-          ? {
-            "traefik.enable": "true",
-            "traefik.http.routers.monitoring.rule": `Host(\`${grafanaDomain}\`)`,
-            "traefik.http.routers.monitoring.entrypoints": "websecure",
-            "traefik.http.routers.monitoring.tls.certresolver":
-              certResolverName,
-            "traefik.http.services.monitoring.loadbalancer.server.port":
-              "3000",
-          }
-          : undefined,
+        labels: getTraefikLabels(isTraefik, "monitoring", sDomain, "3000", certResolverName),
         environment: {
           HOSTNAME: "grafana",
           GF_SERVER_ROOT_URL: isTraefik
-            ? `https://${grafanaDomain}`
-            : `http://${grafanaDomain}`,
+            ? `https://${sDomain}`
+            : `http://${sDomain}`,
           GF_ANALYTICS_REPORTING_ENABLED: "false",
           GF_ANALYTICS_CHECK_FOR_UPDATES: "false",
           GF_LOG_LEVEL: "${GF_LOG_LEVEL:-error}",
@@ -142,6 +133,7 @@ wget -O monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubu
       },
     },
   });
+  };
 
   return {
     getMonitoringService,

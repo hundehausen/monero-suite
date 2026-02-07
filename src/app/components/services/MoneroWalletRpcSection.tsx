@@ -1,12 +1,10 @@
 import { Checkbox, Text } from "@mantine/core";
-import { ServiceComponentProps } from "./types";
+import { useServicesContext, useMoneroWalletRpcState } from "@/hooks/services-context";
 import AccordionItemComponent from "./AccordionItemComponent";
 
-const MoneroWalletRpcSection = ({
-  services,
-  stateFunctions,
-}: ServiceComponentProps) => {
-  const { isMoneroWalletRpc, setIsMoneroWalletRpc } = stateFunctions;
+const MoneroWalletRpcSection = () => {
+  const { services } = useServicesContext();
+  const { isMoneroWalletRpc, setIsMoneroWalletRpc } = useMoneroWalletRpcState();
 
   return (
     <AccordionItemComponent

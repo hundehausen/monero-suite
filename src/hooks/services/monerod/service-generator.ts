@@ -1,6 +1,19 @@
 import { Service, architectures, networkModes, p2poolModes, torProxyModes, NetworkMode, TorProxyMode, P2PoolMode } from "../types";
 import { TOR_IP, MONEROD_IP } from "../tor";
 import { MonerodState } from "./types";
+import {
+  safeParse,
+  domainSchema,
+  hostListSchema,
+  hostPortSchema,
+  commandValueSchema,
+  pathSchema,
+  numericStringSchema,
+  rpcLoginSchema,
+  moneroAddressSchema,
+} from "@/lib/schemas";
+import { DOCKER_IMAGES } from "@/lib/constants";
+import { getTraefikLabels, getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
 
 /**
  * Generates the Monero daemon service configuration
@@ -15,13 +28,6 @@ export const createMonerodService = (
   isTraefik: boolean,
   certResolverName: string = "monerosuite"
 ): Service => {
-  const splitHostsIntoList = (hosts: string | undefined): string[] => {
-    if (!hosts) return [];
-    return hosts
-      .split(/[\s,]+/)
-      .map((entry) => entry.trim())
-      .filter((entry) => entry.length > 0);
-  };
   const {
     isMoneroPublicNode,
     moneroNodeNoLogs,
@@ -76,6 +82,40 @@ export const createMonerodService = (
     blockRateNotify,
   } = state;
 
+  // Sanitize user-provided strings before interpolating into Docker commands
+  const sDomain = safeParse(domainSchema, moneroNodeDomain, "");
+  const sPath = safeParse(pathSchema, moneroMainnetBlockchainLocation, "/home/monero/.bitmonero");
+  const sBanList = safeParse(commandValueSchema, banList, "");
+  const sAnonymousInbound = safeParse(commandValueSchema, anonymousInbound, "");
+  const sDbSyncMode = safeParse(commandValueSchema, dbSyncMode, "");
+  const sSeedNode = safeParse(hostPortSchema, seedNode, "");
+  const sBootstrapAddr = safeParse(hostPortSchema, bootstrapDaemonAddress, "");
+  const sBootstrapLogin = safeParse(rpcLoginSchema, bootstrapDaemonLogin, "");
+  const sRpcLogin = safeParse(rpcLoginSchema, rpcLogin, "");
+  const sBlockNotify = safeParse(commandValueSchema, blockNotify, "");
+  const sReorgNotify = safeParse(commandValueSchema, reorgNotify, "");
+  const sBlockRateNotify = safeParse(commandValueSchema, blockRateNotify, "");
+  const sStartMining = safeParse(moneroAddressSchema, startMining, "");
+  const sAddPeer = safeParse(hostListSchema, addPeer ?? "", []);
+  const sAddPriorityNode = safeParse(hostListSchema, addPriorityNode ?? "", []);
+  const sAddExclusiveNode = safeParse(hostListSchema, addExclusiveNode ?? "", []);
+  const sLogLevel = safeParse(numericStringSchema, logLevel, "0");
+  const sMaxLogFileSize = safeParse(numericStringSchema, maxLogFileSize, "104850000");
+  const sMaxLogFiles = safeParse(numericStringSchema, maxLogFiles, "50");
+  const sP2pBindPort = safeParse(numericStringSchema, p2pBindPort, "18080");
+  const sOutPeers = safeParse(numericStringSchema, outPeers, "64");
+  const sInPeers = safeParse(numericStringSchema, inPeers, "32");
+  const sLimitRateUp = safeParse(numericStringSchema, limitRateUp, "1048576");
+  const sLimitRateDown = safeParse(numericStringSchema, limitRateDown, "2048");
+  const sP2pExternalPort = safeParse(numericStringSchema, p2pExternalPort, "0");
+  const sMaxConnectionsPerIp = safeParse(numericStringSchema, maxConnectionsPerIp, "1");
+  const sZmqPubBindPort = safeParse(numericStringSchema, zmqPubBindPort, "18084");
+  const sBlockSyncSize = safeParse(numericStringSchema, blockSyncSize, "0");
+  const sMaxTxpoolWeight = safeParse(numericStringSchema, maxTxpoolWeight, "0");
+  const sPreparationThreads = safeParse(numericStringSchema, preparationThreads, "4");
+  const sMaxConcurrency = safeParse(numericStringSchema, maxConcurrency, "0");
+  const sMiningThreads = safeParse(numericStringSchema, miningThreads, "1");
+
   return {
     name: "Monero Node",
     description:
@@ -94,26 +134,21 @@ export const createMonerodService = (
       : undefined,
     code: {
       monerod: {
-        image: "ghcr.io/sethforprivacy/simple-monerod:latest",
+        image: DOCKER_IMAGES.monerod,
         restart: "unless-stopped",
         container_name: "monerod",
         volumes: [
           ...(isMoneroMainnetVolume
             ? ["bitmonero:/home/monero/.bitmonero"]
-            : [`${moneroMainnetBlockchainLocation}:/home/monero/.bitmonero`]),
+            : [`${sPath}:/home/monero/.bitmonero`]),
         ],
         ports: [
-          ...(isMoneroPublicNode || networkMode === networkModes.local
-            ? ["18080:18080"]
-            : ["127.0.0.1:18080:18080"]),
+          // When node is public, bind to all interfaces regardless of network mode
+          getPortBinding(isMoneroPublicNode ? networkModes.local : networkMode, 18080),
           ...(p2PoolMode !== p2poolModes.none
-            ? isMoneroPublicNode || networkMode === networkModes.local
-              ? ["18084:18084"]
-              : ["127.0.0.1:18084:18084"]
+            ? [getPortBinding(isMoneroPublicNode ? networkModes.local : networkMode, 18084)]
             : []),
-          ...(isMoneroPublicNode || networkMode === networkModes.local
-            ? ["18089:18089"]
-            : ["127.0.0.1:18089:18089"]),
+          getPortBinding(isMoneroPublicNode ? networkModes.local : networkMode, 18089),
         ],
         depends_on:
           torProxyMode !== torProxyModes.none
@@ -130,16 +165,7 @@ export const createMonerodService = (
           retries: 10,
           start_period: "40s",
         },
-        // Add network configuration if Tor proxy is enabled
-        ...(torProxyMode !== torProxyModes.none
-          ? {
-            networks: {
-              monero_suite_net: {
-                ipv4_address: MONEROD_IP
-              }
-            }
-          }
-          : {}),
+        ...getTorNetworkConfig(torProxyMode, MONEROD_IP),
         command: [
           "--rpc-restricted-bind-ip=0.0.0.0",
           "--rpc-restricted-bind-port=18089",
@@ -148,50 +174,50 @@ export const createMonerodService = (
           "--confirm-external-bind",
           "--check-updates=disabled",
           ...(enableDnsBlocklist ? ["--enable-dns-blocklist"] : []),
-          ...(banList ? [`--ban-list=${banList}`] : []),
+          ...(sBanList ? [`--ban-list=${sBanList}`] : []),
           ...(moneroNodeNoLogs
             ? ["--log-file=/dev/null", "--max-log-file-size=0"]
             : [
-              `--log-level=${logLevel}`,
-              `--max-log-file-size=${maxLogFileSize}`,
-              `--max-log-files=${maxLogFiles}`
+              `--log-level=${sLogLevel}`,
+              `--max-log-file-size=${sMaxLogFileSize}`,
+              `--max-log-files=${sMaxLogFiles}`
             ]),
-          ...(noIgd ? ["--no-igd"] : []),
+          ...(noIgd || torProxyMode === torProxyModes.full ? ["--no-igd"] : []),
           ...(hidePort ? ["--hide-my-port"] : []),
-          `--p2p-bind-port=${p2pBindPort}`,
-          ...(p2pExternalPort !== "0" ? [`--p2p-external-port=${p2pExternalPort}`] : []),
-          `--out-peers=${outPeers}`,
-          `--in-peers=${inPeers}`,
-          ...(limitRateUp !== "-1" ? [`--limit-rate-up=${limitRateUp}`] : []),
-          `--limit-rate-down=${limitRateDown}`,
+          `--p2p-bind-port=${sP2pBindPort}`,
+          ...(sP2pExternalPort !== "0" ? [`--p2p-external-port=${sP2pExternalPort}`] : []),
+          `--out-peers=${sOutPeers}`,
+          `--in-peers=${sInPeers}`,
+          ...(sLimitRateUp !== "-1" ? [`--limit-rate-up=${sLimitRateUp}`] : []),
+          `--limit-rate-down=${sLimitRateDown}`,
           ...(allowLocalIp ? ["--allow-local-ip"] : []),
-          ...(maxConnectionsPerIp !== "1" ? [`--max-connections-per-ip=${maxConnectionsPerIp}`] : []),
+          ...(sMaxConnectionsPerIp !== "1" ? [`--max-connections-per-ip=${sMaxConnectionsPerIp}`] : []),
           ...(isPrunedNode ? ["--prune-blockchain"] : []),
           ...(isSyncPrunedBlocks ? ["--sync-pruned-blocks"] : []),
           ...(offlineMode ? ["--offline"] : []),
           ...(padTransactions ? ["--pad-transactions"] : []),
-          ...(anonymousInbound ? [`--anonymous-inbound=${anonymousInbound}`] : []),
+          ...(sAnonymousInbound ? [`--anonymous-inbound=${sAnonymousInbound}`] : []),
           ...(isMoneroPublicNode ? ["--public-node"] : []),
-          ...(dbSyncMode ? [`--db-sync-mode=${dbSyncMode}`] : []),
-          ...(blockSyncSize !== "0" ? [`--block-sync-size=${blockSyncSize}`] : []),
-          ...(maxTxpoolWeight !== "0" ? [`--max-txpool-weight=${maxTxpoolWeight}`] : []),
+          ...(sDbSyncMode ? [`--db-sync-mode=${sDbSyncMode}`] : []),
+          ...(sBlockSyncSize !== "0" ? [`--block-sync-size=${sBlockSyncSize}`] : []),
+          ...(sMaxTxpoolWeight !== "0" ? [`--max-txpool-weight=${sMaxTxpoolWeight}`] : []),
           ...(enforceCheckpointing ? ["--enforce-dns-checkpointing"] : []),
           ...(fastBlockSync ? ["--fast-block-sync=1"] : ["--fast-block-sync=0"]),
-          ...(preparationThreads !== "4" ? [`--prep-blocks-threads=${preparationThreads}`] : []),
-          ...(maxConcurrency !== "0" ? [`--max-concurrency=${maxConcurrency}`] : []),
-          ...(bootstrapDaemonAddress ? [`--bootstrap-daemon-address=${bootstrapDaemonAddress}`] : []),
-          ...(bootstrapDaemonLogin ? [`--bootstrap-daemon-login=${bootstrapDaemonLogin}`] : []),
+          ...(sPreparationThreads !== "4" ? [`--prep-blocks-threads=${sPreparationThreads}`] : []),
+          ...(sMaxConcurrency !== "0" ? [`--max-concurrency=${sMaxConcurrency}`] : []),
+          ...(sBootstrapAddr ? [`--bootstrap-daemon-address=${sBootstrapAddr}`] : []),
+          ...(sBootstrapLogin ? [`--bootstrap-daemon-login=${sBootstrapLogin}`] : []),
           ...(zmqPubEnabled
-            ? [`--zmq-pub=tcp://0.0.0.0:${zmqPubBindPort}`]
+            ? [`--zmq-pub=tcp://0.0.0.0:${sZmqPubBindPort}`]
             : ((p2PoolMode !== p2poolModes.none || isMonitoring)
               ? ["--zmq-pub=tcp://0.0.0.0:18084"]
               : ["--no-zmq"])),
           ...(rpcSsl !== "autodetect" ? [`--rpc-ssl=${rpcSsl}`] : []),
-          ...(rpcLogin ? [`--rpc-login=${rpcLogin}`] : []),
+          ...(sRpcLogin ? [`--rpc-login=${sRpcLogin}`] : []),
           ...(disableRpcBan || isHiddenServices ? ["--disable-rpc-ban"] : []),
-          ...(blockNotify ? [`--block-notify=${blockNotify}`] : []),
-          ...(reorgNotify ? [`--reorg-notify=${reorgNotify}`] : []),
-          ...(blockRateNotify ? [`--block-rate-notify=${blockRateNotify}`] : []),
+          ...(sBlockNotify ? [`--block-notify=${sBlockNotify}`] : []),
+          ...(sReorgNotify ? [`--reorg-notify=${sReorgNotify}`] : []),
+          ...(sBlockRateNotify ? [`--block-rate-notify=${sBlockRateNotify}`] : []),
           ...(torProxyMode === torProxyModes.full
             ? [`--proxy=${TOR_IP}:9050`]
             : []),
@@ -213,25 +239,17 @@ export const createMonerodService = (
             ]
             : []),
           ...(disableDnsCheckpoints ? ["--disable-dns-checkpoints"] : []),
-          ...(seedNode ? [`--seed-node=${seedNode}`] : []),
-          ...splitHostsIntoList(addPeer).map((host) => `--add-peer=${host}`),
-          ...splitHostsIntoList(addPriorityNode).map((host) => `--add-priority-node=${host}`),
-          ...splitHostsIntoList(addExclusiveNode).map((host) => `--add-exclusive-node=${host}`),
-          ...(startMining ? [`--start-mining=${startMining}`] : []),
-          ...(startMining && miningThreads !== "1" ? [`--mining-threads=${miningThreads}`] : []),
+          ...(sSeedNode ? [`--seed-node=${sSeedNode}`] : []),
+          ...sAddPeer.map((host) => `--add-peer=${host}`),
+          ...sAddPriorityNode.map((host) => `--add-priority-node=${host}`),
+          ...sAddExclusiveNode.map((host) => `--add-exclusive-node=${host}`),
+          ...(sStartMining ? [`--start-mining=${sStartMining}`] : []),
+          ...(sStartMining && sMiningThreads !== "1" ? [`--mining-threads=${sMiningThreads}`] : []),
           ...(bgMiningEnable ? ["--bg-mining-enable"] : []),
           ...(bgMiningIgnoreBattery ? ["--bg-mining-ignore-battery"] : []),
         ],
         logging: moneroNodeNoLogs ? { driver: "none" } : undefined,
-        labels: isTraefik
-          ? {
-            "traefik.enable": "true",
-            "traefik.http.routers.monerod.rule": `Host(\`${moneroNodeDomain}\`)`,
-            "traefik.http.routers.monerod.entrypoints": "websecure",
-            "traefik.http.routers.monerod.tls.certresolver": certResolverName,
-            "traefik.http.services.monerod.loadbalancer.server.port": "18089",
-          }
-          : undefined,
+        labels: getTraefikLabels(isTraefik, "monerod", sDomain, "18089", certResolverName),
       },
     },
   };

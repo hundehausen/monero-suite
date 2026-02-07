@@ -1,11 +1,11 @@
 import { NumberInput, Select, SimpleGrid, Switch, Title } from "@mantine/core";
-import { LoggingSectionProps } from "./types";
+import { useMonerodState } from "@/hooks/services-context";
 import ExplainingLabel from "../../ExplainingLabel";
 import AccordionItemComponent from "../AccordionItemComponent";
 
-const LoggingSection = ({ stateFunctions, moneroNodeNoLogs }: LoggingSectionProps) => {
+const LoggingSection = () => {
   const {
-    moneroNodeNoLogs: nodeNoLogs,
+    moneroNodeNoLogs,
     setMoneroNodeNoLogs,
     logLevel,
     setLogLevel,
@@ -13,7 +13,7 @@ const LoggingSection = ({ stateFunctions, moneroNodeNoLogs }: LoggingSectionProp
     setMaxLogFileSize,
     maxLogFiles,
     setMaxLogFiles,
-  } = stateFunctions;
+  } = useMonerodState();
 
   return (
     <AccordionItemComponent
@@ -28,7 +28,7 @@ const LoggingSection = ({ stateFunctions, moneroNodeNoLogs }: LoggingSectionProp
               explanation="When enabled, logging is completely disabled. This saves disk space but makes troubleshooting more difficult."
             />
           }
-          checked={nodeNoLogs}
+          checked={moneroNodeNoLogs}
           onChange={(event) => setMoneroNodeNoLogs(event.currentTarget.checked)}
         />
         <Select
@@ -47,7 +47,7 @@ const LoggingSection = ({ stateFunctions, moneroNodeNoLogs }: LoggingSectionProp
             { value: "3", label: "3 - TRACE" },
             { value: "4", label: "4 - Everything" },
           ]}
-          disabled={nodeNoLogs}
+          disabled={moneroNodeNoLogs}
         />
         <NumberInput
           label={
@@ -60,7 +60,7 @@ const LoggingSection = ({ stateFunctions, moneroNodeNoLogs }: LoggingSectionProp
           onChange={(value) => setMaxLogFileSize(String(value))}
           min={0}
           step={102400}
-          disabled={nodeNoLogs}
+          disabled={moneroNodeNoLogs}
         />
         <NumberInput
           label={
@@ -73,7 +73,7 @@ const LoggingSection = ({ stateFunctions, moneroNodeNoLogs }: LoggingSectionProp
           onChange={(value) => setMaxLogFiles(String(value))}
           min={1}
           max={100}
-          disabled={nodeNoLogs}
+          disabled={moneroNodeNoLogs}
         />
       </SimpleGrid>
     </AccordionItemComponent>
