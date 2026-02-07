@@ -10,6 +10,7 @@ const TraefikSection = () => {
     <AccordionItemComponent
       value="traefik"
       title="Traefik Reverse Proxy"
+      checked={isTraefik}
     >
       <Text size="sm">{services["traefik"].description}</Text>
       <Stack gap="md">

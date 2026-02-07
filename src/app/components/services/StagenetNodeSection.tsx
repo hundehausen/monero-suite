@@ -29,6 +29,7 @@ const StagenetNodeSection = () => {
     <AccordionItemComponent
       value="stagenet-node"
       title="Monero Stagenet Node"
+      checked={isStagenetNode}
     >
       <Text size="sm">{services["monerod-stagenet"].description}</Text>
       <Checkbox

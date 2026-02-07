@@ -1,39 +1,15 @@
 import { list } from "@vercel/blob";
 
-export type ConfigFiles = {
-  dockerComposeUrl: string;
-  bashCommandsUrl: string;
-  envFileUrl?: string;
-  settingsUrl?: string;
-};
-
-export async function getConfigFiles(configId: string): Promise<ConfigFiles> {
+export async function getInstallScript(configId: string): Promise<string> {
   const { blobs } = await list({ prefix: configId });
 
-  const dockerComposeUrl = blobs.find((blob) =>
-    blob.pathname.startsWith(`${configId}/docker-compose.yml`)
+  const scriptUrl = blobs.find((blob) =>
+    blob.pathname.startsWith(`${configId}/install.sh`)
   )?.downloadUrl;
 
-  const bashCommandsUrl = blobs.find((blob) =>
-    blob.pathname.startsWith(`${configId}/bash-commands.txt`)
-  )?.downloadUrl;
-
-  const envFileUrl = blobs.find((blob) =>
-    blob.pathname.startsWith(`${configId}/.env`)
-  )?.downloadUrl;
-
-  const settingsUrl = blobs.find((blob) =>
-    blob.pathname.startsWith(`${configId}/settings.conf`)
-  )?.downloadUrl;
-
-  if (!dockerComposeUrl || !bashCommandsUrl) {
-    throw new Error("Required configuration files not found");
+  if (!scriptUrl) {
+    throw new Error("Installation script not found");
   }
 
-  return {
-    dockerComposeUrl,
-    bashCommandsUrl,
-    envFileUrl,
-    settingsUrl,
-  };
+  return scriptUrl;
 }

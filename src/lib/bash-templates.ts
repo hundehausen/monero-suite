@@ -319,15 +319,19 @@ setup_monero_suite() {
     mkdir -p ${installationPath} > /dev/null 2>&1 &
     show_spinner $! "Creating directory ${installationPath}"
 
-    # Download Docker Compose file
-    curl -fsSL -o ${installationPath}/docker-compose.yml \${DOCKER_COMPOSE_URL} > /dev/null 2>&1 &
-    show_spinner $! "Downloading docker-compose.yml"
+    # Write Docker Compose file
+    cat > ${installationPath}/docker-compose.yml << 'MONERO_COMPOSE_EOF'
+\${DOCKER_COMPOSE_CONTENT}
+MONERO_COMPOSE_EOF
+    echo -e "\${GREEN}[✓]\${NC} Writing docker-compose.yml"
 `;
 
 export const ENV_FILE_TEMPLATE = `
-    # Download environment file
-    curl -fsSL -o ${installationPath}/.env \${ENV_FILE_URL} > /dev/null 2>&1 &
-    show_spinner $! "Downloading .env configuration"
+    # Write environment file
+    cat > ${installationPath}/.env << 'MONERO_ENV_EOF'
+\${ENV_CONTENT}
+MONERO_ENV_EOF
+    echo -e "\${GREEN}[✓]\${NC} Writing .env configuration"
 `;
 
 export const COMPLETION_TEMPLATE = `

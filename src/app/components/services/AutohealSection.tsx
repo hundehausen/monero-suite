@@ -10,6 +10,7 @@ const AutohealSection = () => {
     <AccordionItemComponent
       value="autoheal"
       title="Autoheal"
+      checked={isAutoheal}
     >
       <Text size="sm">{services["autoheal"].description}</Text>
       <Checkbox

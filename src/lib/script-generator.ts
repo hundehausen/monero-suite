@@ -62,9 +62,9 @@ function processCustomCommands(commands: string): string {
 }
 
 export function generateInstallationScript(
-  dockerComposeUrl: string,
+  dockerComposeYaml: string,
   customBashCommands: string,
-  envFileUrl?: string,
+  envContent?: string,
   isExposed = false,
   firewallPorts = ""
 ): string {
@@ -73,10 +73,13 @@ export function generateInstallationScript(
     isExposed ? "exposed" : "local"
   ).replace("${FIREWALL_PORTS_PLACEHOLDER}", firewallPorts);
 
-  script += SETUP_TEMPLATE.replace("${DOCKER_COMPOSE_URL}", dockerComposeUrl);
+  script += SETUP_TEMPLATE.replace(
+    "${DOCKER_COMPOSE_CONTENT}",
+    dockerComposeYaml
+  );
 
-  if (envFileUrl) {
-    script += ENV_FILE_TEMPLATE.replace("${ENV_FILE_URL}", envFileUrl);
+  if (envContent) {
+    script += ENV_FILE_TEMPLATE.replace("${ENV_CONTENT}", envContent);
   }
 
   script += processCustomCommands(customBashCommands);

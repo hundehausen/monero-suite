@@ -1,16 +1,15 @@
 import ComposePreview from "./ComposePreview";
 import Selection from "./Selection";
-import { TbCheck, TbCopy } from "react-icons/tb";
+import { TbCheck, TbCopy, TbDownload } from "react-icons/tb";
 import {
   Accordion,
   AccordionStylesNames,
   ActionIcon,
-  Badge,
   Button,
-  Checkbox,
+  Card,
   CopyButton,
-  Flex,
   Grid,
+  List,
   Text,
   TextInput,
   Tooltip,
@@ -20,16 +19,21 @@ import BashPreview from "./BashPreview";
 import EnvPreview from "./EnvPreview";
 import { FaDocker, FaLinux } from "react-icons/fa";
 import { SiDotenv, SiGnubash } from "react-icons/si";
-import InstallScriptInfoCard from "./InstallScriptInfoCard";
 import { useServicesContext } from "@/hooks/services-context";
 import { networkModes } from "@/hooks/use-services";
 import { useState, useEffect, CSSProperties, useRef } from "react";
-import { generateInstallationScript } from "../actions";
+import { uploadInstallScript } from "../actions";
 import {
   generateDockerComposeFile,
   generateBashScriptFile,
   generateEnvFile,
+  getFirewallPorts,
 } from "../utils";
+import { generateInstallationScript } from "@/lib/script-generator";
+import { stringify } from "yaml";
+import { CodeHighlightTabs } from "@mantine/code-highlight";
+import "@mantine/code-highlight/styles.css";
+import type { Service } from "@/hooks/services/types";
 
 const panelStyles = {
   content: {
@@ -38,6 +42,43 @@ const panelStyles = {
     gap: "16px",
   },
 } as Partial<Record<AccordionStylesNames, CSSProperties>>;
+
+function generateScriptSummary(
+  checkedServices: Service[],
+  envString: string,
+  isExposed: boolean,
+  firewallPorts: string
+): string[] {
+  const steps: string[] = [];
+
+  steps.push("Check for root/sudo privileges");
+  steps.push("Detect OS and package manager");
+  steps.push("Validate network environment");
+  steps.push("Install Docker (skipped if already installed)");
+
+  const serviceNames = checkedServices.map((s) => s.name);
+  steps.push(
+    `Write docker-compose.yml with ${serviceNames.length} service${serviceNames.length !== 1 ? "s" : ""}: ${serviceNames.join(", ")}`
+  );
+
+  if (envString) {
+    steps.push("Write .env configuration file");
+  }
+
+  const hasBash = checkedServices.some((s) => s.bash);
+  if (hasBash) {
+    steps.push("Update system packages and install dependencies");
+    steps.push("Run service-specific setup commands");
+  }
+
+  if (isExposed && firewallPorts) {
+    steps.push(`Configure firewall (ports: ${firewallPorts})`);
+  }
+
+  steps.push("Pull container images and start services");
+
+  return steps;
+}
 
 export default function Main() {
   const { services, stateFunctions } = useServicesContext();
@@ -49,8 +90,6 @@ export default function Main() {
   ]);
   const [isUploading, setIsUploading] = useState(false);
   const [currentConfigIsUploaded, setCurrentConfigIsUploaded] = useState(false);
-  const [agreeOwnRisk, setAgreeOwnRisk] = useState(false);
-  const [agreePreview, setAgreePreview] = useState(false);
 
   // Store the last uploaded configuration for comparison
   const lastUploadedConfig = useRef<{
@@ -69,36 +108,54 @@ export default function Main() {
     stateFunctions.isTraefik && stateFunctions.mainDomain === "example.com";
 
   const dockerCompose = generateDockerComposeFile(checkedServices);
-
   const bashCommands = generateBashScriptFile(checkedServices);
-
   const envString = generateEnvFile(checkedServices);
 
+  const isExposed = stateFunctions.networkMode === networkModes.exposed;
+  const firewallPorts = getFirewallPorts(checkedServices);
+  const dockerComposeYaml = stringify(dockerCompose);
+
+  const fullScript = generateInstallationScript(
+    dockerComposeYaml,
+    bashCommands,
+    envString || undefined,
+    isExposed,
+    firewallPorts
+  );
+
+  const scriptSummary = generateScriptSummary(
+    checkedServices,
+    envString,
+    isExposed,
+    firewallPorts
+  );
+
   const handleScriptGeneration = async () => {
-    if (!agreeOwnRisk || !agreePreview || hasDefaultDomain) {
-      return;
-    }
+    if (hasDefaultDomain) return;
     setIsUploading(true);
-    const configId = await generateInstallationScript(
-      checkedServices,
-      dockerCompose,
-      envString,
-      stateFunctions.networkMode === networkModes.exposed
-    );
-    setIsUploading(false);
 
-    if (!configId) {
-      return;
+    try {
+      const configId = await uploadInstallScript({
+        dockerComposeYaml,
+        bashCommands,
+        envContent: envString || undefined,
+        isExposed,
+        firewallPorts,
+      });
+
+      // Store the current configuration that was uploaded
+      lastUploadedConfig.current = {
+        services: JSON.stringify(checkedServices),
+        networkMode: stateFunctions.networkMode,
+      };
+
+      setCurrentConfigIsUploaded(true);
+      setScriptUrl(`${window.location.origin}/install/${configId}`);
+    } catch (error) {
+      console.error("Failed to upload script:", error);
+    } finally {
+      setIsUploading(false);
     }
-
-    // Store the current configuration that was uploaded
-    lastUploadedConfig.current = {
-      services: JSON.stringify(checkedServices),
-      networkMode: stateFunctions.networkMode,
-    };
-
-    setCurrentConfigIsUploaded(true);
-    setScriptUrl(`${window.location.origin}/install/${configId}`);
   };
 
   // Reset currentConfigIsUploaded if services or network mode changes
@@ -117,9 +174,7 @@ export default function Main() {
   }, [checkedServices, stateFunctions.networkMode, currentConfigIsUploaded]);
 
   useEffect(() => {
-    if (!scriptUrl) {
-      return;
-    }
+    if (!scriptUrl) return;
     setInstallationCommand(`curl -sSL ${scriptUrl} | bash`);
   }, [scriptUrl]);
 
@@ -161,48 +216,62 @@ export default function Main() {
         >
           <Accordion.Item value="install-script">
             <Accordion.Control icon={<FaLinux />}>
-              <Flex direction={"row"} gap={16} align={"center"}>
-                <Text size="lg">Installation Script for Linux</Text>
-                <Badge>New!</Badge>
-              </Flex>
+              <Text size="lg">Installation Script for Linux</Text>
             </Accordion.Control>
             <Accordion.Panel styles={panelStyles}>
-              <InstallScriptInfoCard />
-              <Text fw={500}>Please accept to continue:</Text>
-              <Checkbox
-                checked={agreeOwnRisk}
-                onChange={(event) =>
-                  setAgreeOwnRisk(event.currentTarget.checked)
-                }
-                label="I use this beta feature at my own risk"
+              <Text size="sm" c="dimmed">
+                Every command is visible below — review it before running.
+                Supported distros: Ubuntu, Debian, Fedora, CentOS Stream, Rocky
+                Linux, AlmaLinux, and RHEL. Pass{" "}
+                <strong>--verbose</strong> for full command output.
+              </Text>
+
+              <Card shadow="sm" padding="md" radius="md" withBorder>
+                <Text fw={500} mb="xs">
+                  What this script does:
+                </Text>
+                <List size="sm" spacing="xs">
+                  {scriptSummary.map((step, i) => (
+                    <List.Item key={i}>{step}</List.Item>
+                  ))}
+                </List>
+              </Card>
+
+              <CodeHighlightTabs
+                code={[
+                  {
+                    code: fullScript,
+                    language: "bash",
+                    fileName: "install.sh",
+                    icon: <SiGnubash />,
+                  },
+                ]}
+                styles={{
+                  root: {
+                    overflow: "auto",
+                    borderRadius: "4px",
+                    maxHeight: "500px",
+                  },
+                }}
               />
-              <Checkbox
-                checked={agreePreview}
-                onChange={(event) =>
-                  setAgreePreview(event.currentTarget.checked)
-                }
-                label="I will preview the script before executing it"
-              />
+
               {hasDefaultDomain && (
                 <Text c="red" size="sm">
                   Please change the Traefik domain from the default
                   &quot;example.com&quot; before generating the script.
                 </Text>
               )}
+
               <Button
                 onClick={handleScriptGeneration}
-                disabled={
-                  currentConfigIsUploaded ||
-                  !agreeOwnRisk ||
-                  !agreePreview ||
-                  hasDefaultDomain
-                }
+                disabled={currentConfigIsUploaded || hasDefaultDomain}
                 loading={isUploading}
               >
-                Generate Installation Script
+                Generate Install Command
               </Button>
+
               <TextInput
-                placeholder="Press Generate Installation Script Button"
+                placeholder="Press Generate Install Command"
                 label="Paste this into your terminal:"
                 value={installationCommand ?? ""}
                 disabled={!installationCommand}
@@ -230,19 +299,24 @@ export default function Main() {
                   </CopyButton>
                 }
               />
-              {installationCommand && (
-                <Text c="red" size="sm">
-                  {`Always preview the script, especially if you haven't
-              generated it by yourself!`}
-                </Text>
-              )}
+
+              <Text size="sm">
+                Or download and run manually:
+              </Text>
               <Button
-                disabled={!installationCommand || !currentConfigIsUploaded}
+                variant="light"
+                leftSection={<TbDownload />}
                 onClick={() => {
-                  window.open(scriptUrl, "_blank");
+                  const blob = new Blob([fullScript], { type: "text/plain" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = "install.sh";
+                  a.click();
+                  URL.revokeObjectURL(url);
                 }}
               >
-                Preview script in new tab
+                Download install.sh
               </Button>
             </Accordion.Panel>
           </Accordion.Item>
@@ -268,7 +342,7 @@ export default function Main() {
           {envString && (
             <Accordion.Item value="env">
               <Accordion.Control icon={<SiDotenv />}>
-                <Text size="lg">Environement Variables</Text>
+                <Text size="lg">Environment Variables</Text>
               </Accordion.Control>
               <Accordion.Panel styles={panelStyles}>
                 <EnvPreview env={envString} />

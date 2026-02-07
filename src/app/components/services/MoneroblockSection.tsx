@@ -18,6 +18,7 @@ const MoneroblockSection = () => {
     <AccordionItemComponent
       value="moneroblock"
       title="Moneroblock - block explorer"
+      checked={isMoneroblock}
     >
       <Text size="sm">{services["moneroblock"].description}</Text>
       <Checkbox

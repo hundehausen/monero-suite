@@ -17,6 +17,7 @@ const CuprateSection = () => {
   return (
     <AccordionItemComponent
       value="cuprate-node"
+      checked={isCuprateEnabled}
       title={
         <>
           Cuprate Node

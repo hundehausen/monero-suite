@@ -48,7 +48,7 @@ export const useMonitoringService = () => {
     bash: `
 # Set up monitoring configuration
 cd ~/monero-suite
-mkdir -p monitoring/grafana/dashboards monitoring/grafana/provisioning/{dashboards,datasources} monitoring/prometheus
+mkdir -p monitoring/grafana/dashboards monitoring/grafana/provisioning/{dashboards,datasources,plugins,alerting} monitoring/prometheus
 # Download Prometheus and Grafana configs
 curl -fsSL -o monitoring/prometheus/config.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/prometheus/config.yaml
 curl -fsSL -o monitoring/grafana/grafana.ini https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/grafana.ini

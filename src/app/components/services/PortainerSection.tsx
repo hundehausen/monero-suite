@@ -17,6 +17,7 @@ const PortainerSection = () => {
     <AccordionItemComponent
       value="portainer"
       title="Portainer"
+      checked={isPortainer}
     >
       <Text size="sm">{services["portainer"].description}</Text>
       <Checkbox

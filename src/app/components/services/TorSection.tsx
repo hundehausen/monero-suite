@@ -23,6 +23,7 @@ const TorSection = () => {
     <AccordionItemComponent
       value="tor"
       title="Tor Proxy & Tor Hidden Services"
+      checked={torProxyMode !== "none" || isHiddenServices}
     >
       <Text size="sm">{services["tor"].description}</Text>
 

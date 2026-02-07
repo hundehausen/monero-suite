@@ -31,6 +31,7 @@ const MoneroNodeSection = () => {
     <AccordionItemComponent
       value="mainnet-node"
       title="Monero Node"
+      checked
     >
       <Text size="sm">{services["monerod"].description}</Text>
       <Switch

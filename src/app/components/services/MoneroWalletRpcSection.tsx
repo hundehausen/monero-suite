@@ -10,6 +10,7 @@ const MoneroWalletRpcSection = () => {
     <AccordionItemComponent
       value="monero-wallet-rpc"
       title="Monero Wallet RPC"
+      checked={isMoneroWalletRpc}
     >
       <Text size="sm">{services["monero-wallet-rpc"].description}</Text>
       <Checkbox

@@ -20,6 +20,7 @@ const MonitoringSection = () => {
     <AccordionItemComponent
       value="monitoring"
       title="Monitoring"
+      checked={isMonitoring}
     >
       <Text size="sm">{services["monitoring"].description}</Text>
       <Checkbox

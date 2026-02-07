@@ -37,6 +37,7 @@ const P2PoolSection = () => {
     <AccordionItemComponent
       value="p2pool"
       title="P2Pool"
+      checked={p2PoolMode !== "none"}
     >
       <Text size="sm">{services["p2pool"].description}</Text>
       <SegmentedControl

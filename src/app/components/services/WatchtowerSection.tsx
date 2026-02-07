@@ -10,6 +10,7 @@ const WatchtowerSection = () => {
     <AccordionItemComponent
       value="watchtower"
       title="Watchtower"
+      checked={isWatchtower}
     >
       <Text size="sm">{services["watchtower"].description}</Text>
       <Checkbox
