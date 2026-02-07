@@ -26,7 +26,7 @@ export const usePortainerService = () => {
     name: "Portainer",
     required: false,
     description:
-      "Manage your Monero Suite Docker services in the browser with Portainer. You can view logs, start, stop and restart containers easly. Visit http://localhost:8000 or https://localhost:9443 if Portainer is running.",
+      `Manage your Monero Suite Docker services in the browser with Portainer. You can view logs, start, stop and restart containers easly. Visit ${isTraefik ? sDomain : `https://localhost:9443`} if Portainer is running.`,
     volumes: {
       portainer_data: {},
     },
