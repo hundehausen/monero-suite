@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.0](https://github.com/hundehausen/monero-suite/compare/v0.7.0...v1.0.0) (2026-02-07)
+
+
+### Features
+
+* major refactoring with Claude Code
+* support for all linux distros that support docker and docker compose
+* fully preview of the generated script
+* selected services highlighted accoridion item
+* input validation
+* docker compose and .env file are now embedded in the generated script with heredoc syntax
+* manually download docker-compose.yml file
+
+### Chore
+* update dependencies to latest versions
+* security hardening
+* bug fixes and improvements, espeacially on the UX side
+
 ## [0.7.0](https://github.com/hundehausen/monero-suite/compare/v0.5.0...v0.7.0) (2025-03-25)
 
 
