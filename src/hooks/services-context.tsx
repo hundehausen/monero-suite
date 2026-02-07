@@ -75,66 +75,99 @@ export function useMonerodState(): MonerodState {
 }
 
 export function useStagenetState(): StagenetState {
-  const { stateFunctions } = useServicesContext();
-  return stateFunctions;
+  const { stateFunctions: s } = useServicesContext();
+  return {
+    isStagenetNode: s.isStagenetNode, setIsStagenetNode: s.setIsStagenetNode,
+    isStagenetNodePublic: s.isStagenetNodePublic, setIsStagenetNodePublic: s.setIsStagenetNodePublic,
+    isMoneroStagenetVolume: s.isMoneroStagenetVolume, setIsMoneroStagenetVolume: s.setIsMoneroStagenetVolume,
+    moneroStagenetBlockchainLocation: s.moneroStagenetBlockchainLocation, setMoneroStagenetBlockchainLocation: s.setMoneroStagenetBlockchainLocation,
+    stagenetNodeDomain: s.stagenetNodeDomain, setStagenetNodeDomain: s.setStagenetNodeDomain,
+  };
 }
 
 export function useP2PoolState(): P2PoolState {
-  const { stateFunctions } = useServicesContext();
-  return stateFunctions;
+  const { stateFunctions: s } = useServicesContext();
+  return {
+    p2PoolMode: s.p2PoolMode, setP2PoolMode: s.setP2PoolMode,
+    p2PoolPayoutAddress: s.p2PoolPayoutAddress, setP2PoolPayoutAddress: s.setP2PoolPayoutAddress,
+    p2PoolMiningThreads: s.p2PoolMiningThreads, setP2PoolMiningThreads: s.setP2PoolMiningThreads,
+  };
 }
 
 export function useMoneroWalletRpcState(): MoneroWalletRpcState {
-  const { stateFunctions } = useServicesContext();
-  return stateFunctions;
+  const { stateFunctions: s } = useServicesContext();
+  return { isMoneroWalletRpc: s.isMoneroWalletRpc, setIsMoneroWalletRpc: s.setIsMoneroWalletRpc };
 }
 
 export function useMoneroblockState(): MoneroblockState {
-  const { stateFunctions } = useServicesContext();
-  return stateFunctions;
+  const { stateFunctions: s } = useServicesContext();
+  return {
+    isMoneroblock: s.isMoneroblock, setIsMoneroblock: s.setIsMoneroblock,
+    isMoneroblockLogging: s.isMoneroblockLogging, setIsMoneroblockLogging: s.setIsMoneroblockLogging,
+    moneroBlockDomain: s.moneroBlockDomain, setMoneroBlockDomain: s.setMoneroBlockDomain,
+  };
 }
 
 export function useOnionExplorerState(): OnionExplorerState {
-  const { stateFunctions } = useServicesContext();
-  return stateFunctions;
+  const { stateFunctions: s } = useServicesContext();
+  return {
+    isOnionMoneroBlockchainExplorer: s.isOnionMoneroBlockchainExplorer, setIsOnionMoneroBlockchainExplorer: s.setIsOnionMoneroBlockchainExplorer,
+    onionMoneroBlockchainExplorerDomain: s.onionMoneroBlockchainExplorerDomain, setOnionMoneroBlockchainExplorerDomain: s.setOnionMoneroBlockchainExplorerDomain,
+  };
 }
 
 export function useTorState(): TorState {
-  const { stateFunctions } = useServicesContext();
-  return stateFunctions;
+  const { stateFunctions: s } = useServicesContext();
+  return {
+    torProxyMode: s.torProxyMode, setTorProxyMode: s.setTorProxyMode,
+    isHiddenServices: s.isHiddenServices, setIsHiddenServices: s.setIsHiddenServices,
+    isGlobalTorProxy: s.isGlobalTorProxy, setIsGlobalTorProxy: s.setIsGlobalTorProxy,
+  };
 }
 
 export function useWatchtowerState(): WatchtowerState {
-  const { stateFunctions } = useServicesContext();
-  return stateFunctions;
+  const { stateFunctions: s } = useServicesContext();
+  return { isWatchtower: s.isWatchtower, setIsWatchtower: s.setIsWatchtower };
 }
 
 export function useMonitoringState(): MonitoringState {
-  const { stateFunctions } = useServicesContext();
-  return stateFunctions;
+  const { stateFunctions: s } = useServicesContext();
+  return {
+    isMonitoring: s.isMonitoring, setIsMonitoring: s.setIsMonitoring,
+    grafanaDomain: s.grafanaDomain, setGrafanaDomain: s.setGrafanaDomain,
+  };
 }
 
 export function useAutohealState(): AutohealState {
-  const { stateFunctions } = useServicesContext();
-  return stateFunctions;
+  const { stateFunctions: s } = useServicesContext();
+  return { isAutoheal: s.isAutoheal, setIsAutoheal: s.setIsAutoheal };
 }
 
 export function useXmrigState(): XmrigState {
-  const { stateFunctions } = useServicesContext();
-  return stateFunctions;
+  const { stateFunctions: s } = useServicesContext();
+  return {
+    miningMode: s.miningMode, setMiningMode: s.setMiningMode,
+    xmrigDonateLevel: s.xmrigDonateLevel, setXmrigDonateLevel: s.setXmrigDonateLevel,
+  };
 }
 
 export function useTraefikState(): TraefikState {
-  const { stateFunctions } = useServicesContext();
-  return stateFunctions;
+  const { stateFunctions: s } = useServicesContext();
+  return {
+    isTraefik: s.isTraefik, setIsTraefik: s.setIsTraefik,
+    mainDomain: s.mainDomain, setMainDomain: s.setMainDomain,
+  };
 }
 
 export function usePortainerState(): PortainerState {
-  const { stateFunctions } = useServicesContext();
-  return stateFunctions;
+  const { stateFunctions: s } = useServicesContext();
+  return {
+    isPortainer: s.isPortainer, setIsPortainer: s.setIsPortainer,
+    portainerDomain: s.portainerDomain, setPortainerDomain: s.setPortainerDomain,
+  };
 }
 
 export function useCuprateState(): CuprateState {
-  const { stateFunctions } = useServicesContext();
-  return stateFunctions;
+  const { stateFunctions: s } = useServicesContext();
+  return { isCuprateEnabled: s.isCuprateEnabled, setIsCuprateEnabled: s.setIsCuprateEnabled };
 }
