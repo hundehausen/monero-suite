@@ -71,7 +71,7 @@ export const DOCKER_IMAGES = {
   monerodExporter: "lalanza808/monerod_exporter:latest",
   nodemapper: "lalanza808/nodemapper:latest",
   autoheal: "willfarrell/autoheal:latest",
-  watchtower: "nickfedor/watchtower:latest",
+  watchtower: "ghcr.io/nicholas-fedor/watchtower:latest-dev",
   xmrig: "metal3d/xmrig:latest",
   moneroblock: "sethsimmons/moneroblock:latest",
   portainer: "portainer/portainer-ce:latest",
