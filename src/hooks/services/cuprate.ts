@@ -1,7 +1,8 @@
 import { useQueryState, parseAsBoolean } from "nuqs";
-import { NetworkMode, networkModes, Service } from "./types";
+import { NetworkMode, Service } from "./types";
 import { architectures } from "./types";
 import { DOCKER_IMAGES } from "@/lib/constants";
+import { getPortBinding } from "@/lib/docker-helpers";
 
 /**
  * Hook for Cuprate service configuration
@@ -33,7 +34,7 @@ export const useCuprateService = () => {
           volumes: [
             "cuprate-data:/home/cuprate/.local/share/cuprate"
           ],
-          ports: networkMode === networkModes.exposed ? ["18082:18080"] : ["127.0.0.1:18082:18080"],
+          ports: [getPortBinding(networkMode, 18082, 18080)],
           networks: ["monero-network"],
         },
       },

@@ -12,6 +12,7 @@ import {
 import { useEffect } from "react";
 
 import { SERVICE_IPS, DOCKER_NETWORK, DOCKER_IMAGES, SERVICE_PORTS, P2POOL_PORTS, MONEROD_PORTS, MONEROD_STAGENET_PORTS } from "@/lib/constants";
+import { getPortBinding } from "@/lib/docker-helpers";
 
 export const TOR_IP = SERVICE_IPS.tor;
 export const MONEROD_IP = SERVICE_IPS.monerod;
@@ -105,11 +106,7 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
     if (isProxyEnabled && isGlobalTorProxy) {
       // Determine port binding based on network mode and global proxy setting
       // Only allow host binding proxy (0.0.0.0) if in local network mode
-      const portBinding = networkMode === networkModes.local
-        ? `${SERVICE_PORTS.torSocks}:${SERVICE_PORTS.torSocks}`
-        : `127.0.0.1:${SERVICE_PORTS.torSocks}:${SERVICE_PORTS.torSocks}`;
-
-      service.code.tor.ports = [portBinding];
+      service.code.tor.ports = [getPortBinding(networkMode, SERVICE_PORTS.torSocks)];
     }
 
     // Add hidden service-specific configuration if hidden services are enabled

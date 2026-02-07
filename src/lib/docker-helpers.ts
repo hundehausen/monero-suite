@@ -1,4 +1,5 @@
 import { networkModes, NetworkMode, torProxyModes, TorProxyMode } from "@/hooks/services/types";
+import { safeParse, domainSchema } from "@/lib/schemas";
 
 /**
  * Generate Traefik router labels for a service.
@@ -18,6 +19,25 @@ export function getTraefikLabels(
     [`traefik.http.routers.${serviceName}.entrypoints`]: "websecure",
     [`traefik.http.routers.${serviceName}.tls.certresolver`]: certResolverName,
     [`traefik.http.services.${serviceName}.loadbalancer.server.port`]: port,
+  };
+}
+
+/**
+ * Sanitize a raw domain and generate Traefik labels in one step.
+ * Returns the sanitized domain (for use in URLs/descriptions) and the labels.
+ */
+export function getTraefikConfig(
+  isTraefik: boolean,
+  serviceName: string,
+  rawDomain: string,
+  port: string,
+  certResolverName: string,
+  fallbackDomain: string = ""
+) {
+  const domain = safeParse(domainSchema, rawDomain, fallbackDomain);
+  return {
+    domain,
+    labels: getTraefikLabels(isTraefik, serviceName, domain, port, certResolverName),
   };
 }
 

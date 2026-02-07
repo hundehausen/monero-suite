@@ -1,8 +1,7 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
 import { Service, architectures, networkModes, NetworkMode, torProxyModes } from "./types";
-import { safeParse, domainSchema } from "@/lib/schemas";
 import { DOCKER_IMAGES } from "@/lib/constants";
-import { getTraefikLabels, getPortBinding } from "@/lib/docker-helpers";
+import { getTraefikConfig, getPortBinding } from "@/lib/docker-helpers";
 
 export const useMonitoringService = () => {
   const [isMonitoring, setIsMonitoring] = useQueryState(
@@ -20,7 +19,7 @@ export const useMonitoringService = () => {
     certResolverName: string = "monerosuite",
     torProxyMode: string = torProxyModes.none
   ): Service => {
-    const sDomain = safeParse(domainSchema, grafanaDomain, "localhost:3000");
+    const { domain, labels } = getTraefikConfig(isTraefik, "monitoring", grafanaDomain, "3000", certResolverName, "localhost:3000");
     return ({
     name: "Monitoring",
     description:
@@ -115,12 +114,12 @@ curl -fsSL -o monitoring/grafana/provisioning/datasources/all.yaml https://raw.g
           "./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro",
           "./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro",
         ],
-        labels: getTraefikLabels(isTraefik, "monitoring", sDomain, "3000", certResolverName),
+        labels,
         environment: {
           HOSTNAME: "grafana",
           GF_SERVER_ROOT_URL: isTraefik
-            ? `https://${sDomain}`
-            : `http://${sDomain}`,
+            ? `https://${domain}`
+            : `http://${domain}`,
           GF_ANALYTICS_REPORTING_ENABLED: "false",
           GF_ANALYTICS_CHECK_FOR_UPDATES: "false",
           GF_LOG_LEVEL: "${GF_LOG_LEVEL:-error}",

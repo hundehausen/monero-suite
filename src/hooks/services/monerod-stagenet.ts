@@ -1,9 +1,9 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
 import { Service, architectures, networkModes, NetworkMode, torProxyModes, TorProxyMode } from "./types";
 import { TOR_IP, MONEROD_STAGENET_IP } from "./tor";
-import { safeParse, domainSchema, pathSchema } from "@/lib/schemas";
+import { safeParse, pathSchema } from "@/lib/schemas";
 import { DOCKER_IMAGES } from "@/lib/constants";
-import { getTraefikLabels, getTorNetworkConfig } from "@/lib/docker-helpers";
+import { getTraefikConfig, getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
 
 export const useMonerodStagenetService = () => {
   const [isStagenetNode, setIsStagenetNode] = useQueryState(
@@ -40,7 +40,7 @@ export const useMonerodStagenetService = () => {
     certResolverName: string = "monerosuite",
     torProxyMode: TorProxyMode = torProxyModes.none
   ): Service => {
-    const sDomain = safeParse(domainSchema, stagenetNodeDomain, "");
+    const { labels } = getTraefikConfig(isTraefik, "monerod-stagenet", stagenetNodeDomain, "18089", certResolverName);
     const sPath = safeParse(pathSchema, moneroStagenetBlockchainLocation, "~/.bitmonero");
     return ({
     name: "Monero Stagenet Node",
@@ -71,15 +71,9 @@ export const useMonerodStagenetService = () => {
               ]),
         ],
         ports: [
-          ...(isStagenetNodePublic || networkMode === networkModes.local
-            ? ["38080:38080"]
-            : ["127.0.0.1:38080:38080"]),
-          ...(isStagenetNodePublic || networkMode === networkModes.local
-            ? ["38081:38081"]
-            : ["127.0.0.1:38081:38081"]),
-          ...(isStagenetNodePublic || networkMode === networkModes.local
-            ? ["38089:38089"]
-            : ["127.0.0.1:38089:38089"]),
+          getPortBinding(isStagenetNodePublic ? networkModes.local : networkMode, 38080),
+          getPortBinding(isStagenetNodePublic ? networkModes.local : networkMode, 38081),
+          getPortBinding(isStagenetNodePublic ? networkModes.local : networkMode, 38089),
         ],
         depends_on:
           torProxyMode !== torProxyModes.none
@@ -114,7 +108,7 @@ export const useMonerodStagenetService = () => {
             : []),
         ],
         logging: moneroNodeNoLogs ? { driver: "none" } : undefined,
-        labels: getTraefikLabels(isTraefik, "monerod-stagenet", sDomain, "18089", certResolverName),
+        labels,
       },
     },
   });

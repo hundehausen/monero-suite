@@ -3,7 +3,6 @@ import { TOR_IP, MONEROD_IP } from "../tor";
 import { MonerodState } from "./types";
 import {
   safeParse,
-  domainSchema,
   hostListSchema,
   hostPortSchema,
   commandValueSchema,
@@ -13,7 +12,7 @@ import {
   moneroAddressSchema,
 } from "@/lib/schemas";
 import { DOCKER_IMAGES } from "@/lib/constants";
-import { getTraefikLabels, getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
+import { getTraefikConfig, getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
 
 /**
  * Generates the Monero daemon service configuration
@@ -83,7 +82,7 @@ export const createMonerodService = (
   } = state;
 
   // Sanitize user-provided strings before interpolating into Docker commands
-  const sDomain = safeParse(domainSchema, moneroNodeDomain, "");
+  const { labels } = getTraefikConfig(isTraefik, "monerod", moneroNodeDomain, "18089", certResolverName);
   const sPath = safeParse(pathSchema, moneroMainnetBlockchainLocation, "/home/monero/.bitmonero");
   const sBanList = safeParse(commandValueSchema, banList, "");
   const sAnonymousInbound = safeParse(commandValueSchema, anonymousInbound, "");
@@ -249,7 +248,7 @@ export const createMonerodService = (
           ...(bgMiningIgnoreBattery ? ["--bg-mining-ignore-battery"] : []),
         ],
         logging: moneroNodeNoLogs ? { driver: "none" } : undefined,
-        labels: getTraefikLabels(isTraefik, "monerod", sDomain, "18089", certResolverName),
+        labels,
       },
     },
   };

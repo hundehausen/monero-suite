@@ -1,9 +1,8 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
 import { Service, architectures, networkModes, NetworkMode, torProxyModes, TorProxyMode } from "./types";
 import { MONEROD_IP, MONEROBLOCK_IP } from "./tor";
-import { safeParse, domainSchema } from "@/lib/schemas";
 import { DOCKER_IMAGES } from "@/lib/constants";
-import { getTraefikLabels, getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
+import { getTraefikConfig, getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
 
 export const useMoneroblockService = () => {
   const [isMoneroblock, setIsMoneroblock] = useQueryState(
@@ -25,7 +24,7 @@ export const useMoneroblockService = () => {
     certResolverName: string = "monerosuite",
     torProxyMode: TorProxyMode = torProxyModes.none
   ): Service => {
-    const sDomain = safeParse(domainSchema, moneroBlockDomain, "");
+    const { labels } = getTraefikConfig(isTraefik, "moneroblock", moneroBlockDomain, "31312", certResolverName);
     return ({
     name: "Moneroblock",
     description: "Moneroblock is a self-hostable block explorer for monero",
@@ -47,7 +46,7 @@ export const useMoneroblockService = () => {
             condition: "service_started",
           },
         },
-        labels: getTraefikLabels(isTraefik, "moneroblock", sDomain, "31312", certResolverName),
+        labels,
         logging: !isMoneroblockLogging
           ? {
             driver: "none",

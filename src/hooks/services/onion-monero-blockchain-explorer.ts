@@ -1,9 +1,8 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
 import { Service, architectures, networkModes, NetworkMode, torProxyModes } from "./types";
 import { MONEROD_IP, EXPLORER_IP } from "./tor";
-import { safeParse, domainSchema } from "@/lib/schemas";
 import { DOCKER_IMAGES } from "@/lib/constants";
-import { getTraefikLabels, getPortBinding } from "@/lib/docker-helpers";
+import { getTraefikConfig, getPortBinding } from "@/lib/docker-helpers";
 
 export const useOnionMoneroBlockchainExplorerService = () => {
   const [isOnionMoneroBlockchainExplorer, setIsOnionMoneroBlockchainExplorer] =
@@ -25,7 +24,7 @@ export const useOnionMoneroBlockchainExplorerService = () => {
     certResolverName: string = "monerosuite",
     torProxyMode: string = torProxyModes.none
   ): Service => {
-    const sDomain = safeParse(domainSchema, onionMoneroBlockchainExplorerDomain, "");
+    const { labels } = getTraefikConfig(isTraefik, "onion-monero-blockchain-explorer", onionMoneroBlockchainExplorerDomain, "8081", certResolverName);
     return ({
     name: "Onion Monero Blockchain Explorer",
     description:
@@ -70,7 +69,7 @@ export const useOnionMoneroBlockchainExplorerService = () => {
               "./xmrblocks --enable-json-api --enable-autorefresh-option --enable-emission-monitor --daemon-url=monerod:18089 --enable-pusher",
             ],
           }),
-        labels: getTraefikLabels(isTraefik, "onion-monero-blockchain-explorer", sDomain, "8081", certResolverName),
+        labels,
       },
     },
   });
