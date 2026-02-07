@@ -56,7 +56,7 @@ const MoneroNodeSection = () => {
           <ExplainingLabel
             label="Pruned Node"
             explanation="Pruning allows node operators to save 2/3 of storage space while
-    keeping the full transaction hisHiddenServicesy. Pruning works by removing 7/8
+    keeping the full transaction history. Pruning works by removing 7/8
     of unnecessary ring signature data. There are no privacy or security
     downsides when using a pruned node."
           />
