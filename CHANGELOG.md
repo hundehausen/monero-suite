@@ -2,6 +2,66 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.0](https://github.com/hundehausen/monero-suite/compare/v0.7.0...v1.0.0) (2026-02-07)
+
+
+### Features
+
+* add TOML language support for code highlighting in EnvPreview ([db750f4](https://github.com/hundehausen/monero-suite/commits/db750f4c96eb1c8d61ef1a48cb00a8cc1c80aada))
+* set MRL ban list per default in config ([d5b33e1](https://github.com/hundehausen/monero-suite/commits/d5b33e126ced72088c1ce509c4202c40676c9fd5))
+* support more linux distros ([acfa44b](https://github.com/hundehausen/monero-suite/commits/acfa44b7163e2bff01d3ad2ca97c2534afb7498e))
+* switch to nickfedor/watchtower ([622acf6](https://github.com/hundehausen/monero-suite/commits/622acf691b74bc73129023e720c937bc47388aa3))
+
+
+### Bug Fixes
+
+* correct typo in explanation for Pruned Node ([dd5673e](https://github.com/hundehausen/monero-suite/commits/dd5673e13319bd2881a0496920aadbdc74a82afa))
+* remove redundant restricted-rpc ([bb6d9c1](https://github.com/hundehausen/monero-suite/commits/bb6d9c1c62ea239b982e22b4841b8a0ff576805d))
+* support multiple custom addPeers, addPriorityNode, addExclusiveNode ([6b99367](https://github.com/hundehausen/monero-suite/commits/6b99367871cf8641dfded0104d2edc036c22964a))
+* use new path of tor volume mapping ([a7666b6](https://github.com/hundehausen/monero-suite/commits/a7666b64ac4831736cff76cdd84a8fdc1960ea0a))
+
+
+### Chore
+
+* improve configuration ([de48001](https://github.com/hundehausen/monero-suite/commits/de480016dbe2473ea4a034570be22a667712835e))
+* improved README ([b22754e](https://github.com/hundehausen/monero-suite/commits/b22754e79c3139dfccd9eaa6f6edf847a3eedc50))
+* refactor installation script generation and UI components ([3978f3a](https://github.com/hundehausen/monero-suite/commits/3978f3ab933c62c8e1edb02796495ceb1ae1ab87))
+* refactor service hooks to centralize constants and improve code organization ([8a18a77](https://github.com/hundehausen/monero-suite/commits/8a18a7749b7f8773a0a8f15a62d6ccc0a4f8486c))
+* remove terminal file ([991d28a](https://github.com/hundehausen/monero-suite/commits/991d28ab011520eb3582334e4248aef17c890345))
+* security improvements ([6db7c84](https://github.com/hundehausen/monero-suite/commits/6db7c84b6fc309471207d6d3646283cc27019041))
+* update Content Security Policy to enhance security settings ([ee158b8](https://github.com/hundehausen/monero-suite/commits/ee158b8acac299a25c43c550d93b02a97cc61bcd))
+* update dependencies ([8557855](https://github.com/hundehausen/monero-suite/commits/85578554f3f598475fefb1a87283f520b32ea17c))
+* update deps ([2be5e2d](https://github.com/hundehausen/monero-suite/commits/2be5e2d806a2031c62502babc408091a716cfb8d))
+* update deps ([d5d8f8b](https://github.com/hundehausen/monero-suite/commits/d5d8f8b5fa3662ed2e76f8443a07db0aae366101))
+* update deps ([3bc6620](https://github.com/hundehausen/monero-suite/commits/3bc66208254bf0b57a1926ef5ed44f72c00b94ee))
+* update deps ([adc1486](https://github.com/hundehausen/monero-suite/commits/adc1486cf2235f7878ae87c1ee9b22d23361d7b9))
+* update deps ([cb2ef2e](https://github.com/hundehausen/monero-suite/commits/cb2ef2ecc6358ec5852cd5b8fa180930baf70759))
+* update deps ([8bd1eb2](https://github.com/hundehausen/monero-suite/commits/8bd1eb220c52c80ca920b43cfa7ae735453183b7))
+* update deps ([3d19eb3](https://github.com/hundehausen/monero-suite/commits/3d19eb368e95cf7153d0b0b2a53972084509064e))
+* update deps ([54aef3f](https://github.com/hundehausen/monero-suite/commits/54aef3f6fe6914485d5142c7c674466b809e6dc4))
+* update deps ([c251023](https://github.com/hundehausen/monero-suite/commits/c25102337d9382cc942acf45db9d437f33833b5d))
+* update deps ([301afa6](https://github.com/hundehausen/monero-suite/commits/301afa6bfd94690f98e8ce1a1807f542bb519177))
+* update deps ([6d0ea5f](https://github.com/hundehausen/monero-suite/commits/6d0ea5ffd72bfa157171277440250b5de28095c5))
+* update deps ([0d21a3d](https://github.com/hundehausen/monero-suite/commits/0d21a3d125635018a4ba410393b0b7ad328585f9))
+* update deps ([37cf99b](https://github.com/hundehausen/monero-suite/commits/37cf99bd0e9e1587d3797d71f15032f15777cdb3))
+* update deps ([8277aec](https://github.com/hundehausen/monero-suite/commits/8277aecf3ca9cdbd26458d201266fc6ee517e7b8))
+* update deps ([aa98da6](https://github.com/hundehausen/monero-suite/commits/aa98da6042c8c34de6bfab6f512d3adf9b6db59d))
+* update deps ([86832f8](https://github.com/hundehausen/monero-suite/commits/86832f809af7ace6f96cbbfe95c6a59f457790a6))
+* update deps and add pnpm workspace config ([9e2e7cd](https://github.com/hundehausen/monero-suite/commits/9e2e7cd6df8a678295ae51c64dd3320f1a46f2f4))
+* update deps and improve README description ([4b6e426](https://github.com/hundehausen/monero-suite/commits/4b6e426e8d1bf391d8e17be8f843d91930fb6e1f))
+* update Portainer service description to include dynamic domain handling ([f62311b](https://github.com/hundehausen/monero-suite/commits/f62311b2ac25019758ce46be530f575681c67982))
+* update watchtower image ([c85cf98](https://github.com/hundehausen/monero-suite/commits/c85cf9851f05a140b4a5ccf6618604495254e7eb))
+* upgrade action-gh-release to version 2 in release workflow ([a4b1ec9](https://github.com/hundehausen/monero-suite/commits/a4b1ec9a55b1e962fd4eb726c3a013ab3b62543a))
+
+
+### Code Refactoring
+
+* enhance blob cleanup logic with detailed response and error handling ([a66d663](https://github.com/hundehausen/monero-suite/commits/a66d663c0ed19f9ccd8c11b81fd10272dd9f3df2))
+* optimize service checks and memoize script generation logic ([bc83d83](https://github.com/hundehausen/monero-suite/commits/bc83d831985c0fdc8f96fdd58a49de6722d1b5b2))
+* simplify state return structure in service hooks ([6c1075a](https://github.com/hundehausen/monero-suite/commits/6c1075adfcf7df281a837be2e1c89347c702117c))
+* streamline Traefik configuration handling across services ([3de74c1](https://github.com/hundehausen/monero-suite/commits/3de74c112fdcd040d9a51c1e3a9c3761762c3e4b))
+* update README ([0843946](https://github.com/hundehausen/monero-suite/commits/0843946c74d0a3e6121cb6120d6e7bd32e9442a5))
+
 ## [0.7.0](https://github.com/hundehausen/monero-suite/compare/v0.5.0...v0.7.0) (2025-03-25)
 
 
