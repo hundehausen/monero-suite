@@ -9,6 +9,12 @@ import { nanoid } from "nanoid";
 
 const MAX_FILE_SIZE = 1024 * 512;
 
+// Security note: Blobs are stored with `access: "public"` for simplicity.
+// This is acceptable because:
+// 1. Config IDs are nanoid (21 chars, ~126 bits entropy) — infeasible to guess
+// 2. Blobs are auto-deleted after 24 hours via the /clean cron job
+// 3. No real secrets are stored — the .env contains placeholder passwords (not real ones)
+
 export async function generateInstallationScript(
   services: Service[],
   dockerCompose: ComposeSpecification,
