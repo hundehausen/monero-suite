@@ -1,6 +1,6 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
 import { Service, architectures, networkModes, NetworkMode, torProxyModes } from "./types";
-import { DOCKER_IMAGES } from "@/lib/constants";
+import { DOCKER_IMAGES, SERVICE_PORTS, MONEROD_PORTS } from "@/lib/constants";
 import { getTraefikConfig, getPortBinding } from "@/lib/docker-helpers";
 import { MONITORING_BASH_COMMANDS } from "@/lib/script-generator";
 
@@ -11,7 +11,7 @@ export const useMonitoringService = () => {
   );
   const [grafanaDomain, setGrafanaDomain] = useQueryState(
     "grafanaDomain",
-    parseAsString.withDefault("localhost:3000")
+    parseAsString.withDefault(`localhost:${SERVICE_PORTS.grafana}`)
   );
 
   const getMonitoringService = (
@@ -20,7 +20,7 @@ export const useMonitoringService = () => {
     certResolverName: string = "monerosuite",
     torProxyMode: string = torProxyModes.none
   ): Service => {
-    const { domain, labels } = getTraefikConfig(isTraefik, "monitoring", grafanaDomain, "3000", certResolverName, "localhost:3000");
+    const { domain, labels } = getTraefikConfig(isTraefik, "monitoring", grafanaDomain, SERVICE_PORTS.grafana.toString(), certResolverName, `localhost:${SERVICE_PORTS.grafana}`);
     return ({
     name: "Monitoring",
     description:
@@ -33,10 +33,10 @@ export const useMonitoringService = () => {
       prometheus: {},
     },
     env: {
-      P2P_PORT: 18080,
-      RESTRICTED_PORT: 18089,
-      ZMQ_PORT: 18083,
-      UNRESTRICTED_PORT: 18081,
+      P2P_PORT: MONEROD_PORTS.p2p,
+      RESTRICTED_PORT: MONEROD_PORTS.rpcRestricted,
+      ZMQ_PORT: MONEROD_PORTS.zmqPub,
+      UNRESTRICTED_PORT: MONEROD_PORTS.rpcUnrestricted,
       GF_USERS_ALLOW_SIGN_UP: false,
       GF_USERS_ALLOW_ORG_CREATE: false,
       GF_AUTH_ANONYMOUS_ENABLED: true,
@@ -70,7 +70,7 @@ export const useMonitoringService = () => {
         image: DOCKER_IMAGES.monerodExporter,
         container_name: "monerod_exporter",
         restart: "unless-stopped",
-        command: "--monero-addr=http://monerod:18081",
+        command: `--monero-addr=http://monerod:${MONEROD_PORTS.rpcUnrestricted}`,
         depends_on: {
           monerod: {
             condition: "service_healthy"
@@ -83,7 +83,7 @@ export const useMonitoringService = () => {
         restart: "unless-stopped",
         environment: {
           NODE_HOST: "monerod",
-          NODE_PORT: "18081",
+          NODE_PORT: MONEROD_PORTS.rpcUnrestricted.toString(),
         }, 
         depends_on: {
           monerod: {

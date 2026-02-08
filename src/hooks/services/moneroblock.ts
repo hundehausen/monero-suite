@@ -1,7 +1,7 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
 import { Service, architectures, networkModes, NetworkMode, torProxyModes, TorProxyMode } from "./types";
 import { MONEROD_IP, MONEROBLOCK_IP } from "./tor";
-import { DOCKER_IMAGES } from "@/lib/constants";
+import { DOCKER_IMAGES, SERVICE_PORTS, MONEROD_PORTS } from "@/lib/constants";
 import { getTraefikConfig, getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
 
 export const useMoneroblockService = () => {
@@ -24,7 +24,7 @@ export const useMoneroblockService = () => {
     certResolverName: string = "monerosuite",
     torProxyMode: TorProxyMode = torProxyModes.none
   ): Service => {
-    const { labels } = getTraefikConfig(isTraefik, "moneroblock", moneroBlockDomain, "31312", certResolverName);
+    const { labels } = getTraefikConfig(isTraefik, "moneroblock", moneroBlockDomain, SERVICE_PORTS.moneroblock.toString(), certResolverName);
     return ({
     name: "Moneroblock",
     description: "Explore the Monero blockchain with your own private block explorer. View transactions, blocks, and network stats without relying on third-party services.",
@@ -36,11 +36,11 @@ export const useMoneroblockService = () => {
         image: DOCKER_IMAGES.moneroblock,
         restart: "unless-stopped",
         container_name: "moneroblock",
-        ports: [getPortBinding(networkMode, 31312)],
+        ports: [getPortBinding(networkMode, SERVICE_PORTS.moneroblock)],
         ...getTorNetworkConfig(torProxyMode, MONEROBLOCK_IP),
         command: torProxyMode !== torProxyModes.none
-          ? [`--daemon ${MONEROD_IP}:18089`]
-          : ["--daemon", "monerod:18089"],
+          ? [`--daemon ${MONEROD_IP}:${MONEROD_PORTS.rpcRestricted}`]
+          : ["--daemon", `monerod:${MONEROD_PORTS.rpcRestricted}`],
         depends_on: {
           monerod: {
             condition: "service_started",
