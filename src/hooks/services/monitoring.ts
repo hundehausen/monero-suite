@@ -2,6 +2,7 @@ import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
 import { Service, architectures, networkModes, NetworkMode, torProxyModes } from "./types";
 import { DOCKER_IMAGES } from "@/lib/constants";
 import { getTraefikConfig, getPortBinding } from "@/lib/docker-helpers";
+import { MONITORING_BASH_COMMANDS } from "@/lib/script-generator";
 
 export const useMonitoringService = () => {
   const [isMonitoring, setIsMonitoring] = useQueryState(
@@ -44,18 +45,7 @@ export const useMonitoringService = () => {
       GF_SECURITY_ADMIN_PASSWORD: "admin",
       GF_SECURITY_ADMIN_USER: "admin",
     },
-    bash: `
-# Set up monitoring configuration
-cd ~/monero-suite
-mkdir -p monitoring/grafana/dashboards monitoring/grafana/provisioning/{dashboards,datasources,plugins,alerting} monitoring/prometheus
-# Download Prometheus and Grafana configs
-curl -fsSL -o monitoring/prometheus/config.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/prometheus/config.yaml
-curl -fsSL -o monitoring/grafana/grafana.ini https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/grafana.ini
-# Download Grafana dashboards and provisioning
-curl -fsSL -o monitoring/grafana/dashboards/node_stats.json https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/dashboards/node_stats.json
-curl -fsSL -o monitoring/grafana/provisioning/dashboards/all.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/provisioning/dashboards/all.yaml
-curl -fsSL -o monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/provisioning/datasources/all.yaml
-`,
+    bash: MONITORING_BASH_COMMANDS,
     code: {
       prometheus: {
         image: DOCKER_IMAGES.prometheus,

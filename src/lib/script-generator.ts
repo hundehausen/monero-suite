@@ -5,6 +5,37 @@ import {
   COMPLETION_TEMPLATE,
 } from "./bash-templates";
 
+export const BASE_BASH_COMMANDS = `
+
+# Update system packages
+pkg_update
+# Install required packages
+pkg_install curl`;
+
+export const MONITORING_BASH_COMMANDS = `
+# Set up monitoring configuration
+cd ~/monero-suite
+mkdir -p monitoring/grafana/dashboards monitoring/grafana/provisioning/{dashboards,datasources,plugins,alerting} monitoring/prometheus
+# Download Prometheus and Grafana configs
+curl -fsSL -o monitoring/prometheus/config.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/prometheus/config.yaml
+curl -fsSL -o monitoring/grafana/grafana.ini https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/grafana.ini
+# Download Grafana dashboards and provisioning
+curl -fsSL -o monitoring/grafana/dashboards/node_stats.json https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/dashboards/node_stats.json
+curl -fsSL -o monitoring/grafana/provisioning/dashboards/all.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/provisioning/dashboards/all.yaml
+curl -fsSL -o monitoring/grafana/provisioning/datasources/all.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/grafana/provisioning/datasources/all.yaml`;
+
+export interface EnabledBashServices {
+  monitoring: boolean;
+}
+
+export function generateBashCommands(services: EnabledBashServices): string {
+  let commands = BASE_BASH_COMMANDS;
+  if (services.monitoring) {
+    commands += "\n" + MONITORING_BASH_COMMANDS;
+  }
+  return commands;
+}
+
 function getSpinnerMessage(cmd: string, fallback: string): string {
   // Extract filepath from curl -o <path> for a meaningful message
   const curlMatch = cmd.match(/curl\s.*-o\s+(\S+)/);

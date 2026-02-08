@@ -1,5 +1,6 @@
 import type { Service } from "@/hooks/use-services";
 import { Compose } from "compose-spec-schema";
+import { BASE_BASH_COMMANDS } from "@/lib/script-generator";
 
 const globalLogSettings = `x-log-config:
   &log-config
@@ -51,14 +52,6 @@ export const generateDockerComposeFile = (services: Service[]) => {
   } as Compose;
 };
 
-const baseBashCommands = () => [
-  "",
-  "\n\n# Update system packages",
-  "pkg_update",
-  "# Install required packages",
-  "pkg_install curl",
-  "",
-];
 
 export const getFirewallPorts = (services: Service[]): string => {
   return services
@@ -77,9 +70,7 @@ export const generateBashScriptFile = (services: Service[]) => {
     .join("\n")
     .replace(/\n{2,}/g, "\n\n");
 
-  const bashCommands = [...baseBashCommands(), serviceBashCommands].join("\n");
-
-  return bashCommands;
+  return BASE_BASH_COMMANDS + "\n" + serviceBashCommands;
 };
 
 function convertToEnvString(obj: {

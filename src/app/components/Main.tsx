@@ -133,9 +133,13 @@ export default function Main() {
     setIsUploading(true);
 
     try {
+      const enabledBashServices = {
+        monitoring: checkedServices.some((s) => s.name === "Monitoring"),
+      };
+
       const configId = await uploadInstallScript({
         dockerComposeYaml,
-        bashCommands,
+        enabledBashServices,
         envContent: envString || undefined,
         isExposed,
         firewallPorts,
@@ -143,7 +147,7 @@ export default function Main() {
 
       // Store the current configuration that was uploaded
       lastUploadedConfig.current = {
-        config: dockerComposeYaml + bashCommands + envString,
+        config: dockerComposeYaml + JSON.stringify(enabledBashServices) + envString,
         networkMode: stateFunctions.networkMode,
       };
 
@@ -157,10 +161,15 @@ export default function Main() {
   };
 
   // Reset currentConfigIsUploaded if config or network mode changes
+  const enabledBashServicesKey = useMemo(
+    () => JSON.stringify({ monitoring: checkedServices.some((s) => s.name === "Monitoring") }),
+    [checkedServices]
+  );
+
   useEffect(() => {
     if (!currentConfigIsUploaded) return;
 
-    const currentConfig = dockerComposeYaml + bashCommands + envString;
+    const currentConfig = dockerComposeYaml + enabledBashServicesKey + envString;
     const currentNetworkMode = stateFunctions.networkMode;
 
     if (
@@ -169,7 +178,7 @@ export default function Main() {
     ) {
       setCurrentConfigIsUploaded(false);
     }
-  }, [dockerComposeYaml, bashCommands, envString, stateFunctions.networkMode, currentConfigIsUploaded]);
+  }, [dockerComposeYaml, enabledBashServicesKey, envString, stateFunctions.networkMode, currentConfigIsUploaded]);
 
   useEffect(() => {
     if (!scriptUrl) return;

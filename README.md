@@ -90,8 +90,8 @@ Monero Suite is designed with the assumption that you should never blindly trust
 
 All user-generated content is validated server-side before upload:
 
-- **Input size limits** — Docker Compose YAML (64 KB), bash commands (32 KB), env content (8 KB), firewall ports (512 bytes)
-- **Bash command allowlist** — Only `cd`, `mkdir`, `curl -fsSL -o`, `pkg_install`, and `pkg_update` are permitted. Arbitrary shell commands are rejected at the server level.
+- **Input size limits** — Docker Compose YAML (64 KB), env content (8 KB), firewall ports (512 bytes)
+- **Server-side bash generation** — Bash setup commands (package installs, config file downloads) are never accepted from the client. The frontend sends only boolean flags indicating which services are enabled, and all bash content is generated server-side from hardcoded constants. This eliminates command injection as an attack vector.
 - **Heredoc injection prevention** — Inputs containing heredoc delimiters are rejected, preventing shell escape attacks in the generated script.
 - **Firewall port validation** — Strict regex enforcement (`port/protocol` format only)
 - **Fetch safety** — Script retrieval enforces a 10-second timeout and 1 MB size limit with proper abort handling.
@@ -118,7 +118,7 @@ The generated bash script includes several runtime protections:
 
 - **You are responsible for your own infrastructure.** Monero Suite generates configuration files — it does not manage, monitor, or maintain your deployment after installation.
 - **Running a Monero node may have legal implications** depending on your jurisdiction. Research your local regulations.
-- **The `curl | bash` install method executes remote code as root.** While we implement safeguards (script preview, command allowlisting, temporary storage), this inherently requires trust. If this concerns you, use the manual installation method instead.
+- **The `curl | bash` install method executes remote code as root.** While we implement safeguards (script preview, server-side bash generation, temporary storage), this inherently requires trust. If this concerns you, use the manual installation method instead.
 - **Docker images are pulled from third-party registries** (Docker Hub, GitHub Container Registry). Monero Suite does not build or host these images. You are trusting the upstream maintainers of each service.
 - **This project is in active development.** Bugs may exist. Configurations may change between versions.
 

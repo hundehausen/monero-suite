@@ -3,15 +3,7 @@
 import { put } from "@vercel/blob";
 import { nanoid } from "nanoid";
 import { z } from "zod/v4";
-import { generateInstallationScript } from "@/lib/script-generator";
-
-const ALLOWED_BASH_PREFIXES = [
-  "cd ",
-  "mkdir ",
-  "curl -fsSL -o ",
-  "pkg_install ",
-  "pkg_update",
-];
+import { generateInstallationScript, generateBashCommands } from "@/lib/script-generator";
 
 const installScriptInputSchema = z.object({
   dockerComposeYaml: z
@@ -23,22 +15,9 @@ const installScriptInputSchema = z.object({
         "Contains forbidden heredoc delimiter"
       )
     ),
-  bashCommands: z
-    .string()
-    .max(32768)
-    .check(
-      z.refine(
-        (val) => !/^MONERO_COMPOSE_EOF$/m.test(val) && !/^MONERO_ENV_EOF$/m.test(val),
-        "Contains forbidden heredoc delimiter"
-      ),
-      z.refine((val) => {
-        const lines = val.split("\n").filter((line) => line.trim());
-        return lines.every((line) => {
-          if (line.startsWith("#")) return true;
-          return ALLOWED_BASH_PREFIXES.some((prefix) => line.startsWith(prefix));
-        });
-      }, "Contains disallowed bash command")
-    ),
+  enabledBashServices: z.object({
+    monitoring: z.boolean(),
+  }),
   envContent: z
     .string()
     .max(8192)
@@ -63,9 +42,11 @@ export async function uploadInstallScript(
 ): Promise<string> {
   const parsed = installScriptInputSchema.parse(input);
 
+  const bashCommands = generateBashCommands(parsed.enabledBashServices);
+
   const script = generateInstallationScript(
     parsed.dockerComposeYaml,
-    parsed.bashCommands,
+    bashCommands,
     parsed.envContent,
     parsed.isExposed,
     parsed.firewallPorts
