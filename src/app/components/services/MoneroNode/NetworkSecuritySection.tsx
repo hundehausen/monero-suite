@@ -22,8 +22,8 @@ const NetworkSecuritySection = () => {
         <Switch
           label={
             <ExplainingLabel
-              label="Enable DNS Blocklist"
-              explanation="Use DNS-based blocklist to automatically ban known malicious nodes. Recommended for security."
+              label="Block Malicious Nodes"
+              explanation="Automatically ban known bad actors from the network using a community-maintained blocklist. Highly recommended for security."
             />
           }
           checked={enableDnsBlocklist}
@@ -32,19 +32,19 @@ const NetworkSecuritySection = () => {
         <TextInput
           label={
             <ExplainingLabel
-              label="Ban List File"
-              explanation="Path to a file containing a list of IP addresses to ban. Each IP should be on a separate line. The monerod image that is used in Monero Suite has the ban list set to 'Boog900/monero-ban-list' automatically. You don't need to specify this one."
+              label="Custom Ban List"
+              explanation="Path to a text file with IP addresses to ban (one per line). The default Monero image already includes a community ban list, so you typically don't need to set this."
             />
           }
           value={banList}
           onChange={(e) => setBanList(e.currentTarget.value)}
-          placeholder="/path/to/ban-list.txt"
+          placeholder="/path/to/custom-ban-list.txt"
         />
         <Switch
           label={
             <ExplainingLabel
-              label="Disable DNS Checkpoints"
-              explanation="Disable MoneroPulse DNS checkpoints. Not recommended unless you have a specific reason to do so."
+              label="Skip DNS Checkpoints"
+              explanation="Don't use MoneroPulse DNS checkpoints for extra verification. Only disable if you know what you're doing - this reduces protection against deep reorgs."
             />
           }
           checked={disableDnsCheckpoints}

@@ -12,7 +12,7 @@ export const useMoneroWalletRpcService = () => {
   const getMoneroWalletRpcService = (networkMode: NetworkMode): Service => ({
     name: "Monero Wallet RPC",
     description:
-      "Monero Wallet RPC is a remote procedure call interface for Monero wallet.",
+      "Connect external wallets and applications to your node via the Wallet RPC interface. Required for some wallet apps and payment processors.",
     checked: isMoneroWalletRpc,
     required: false,
     architecture: [architectures.linuxAmd, architectures.linuxArm],

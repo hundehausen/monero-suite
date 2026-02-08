@@ -31,7 +31,7 @@ const MoneroNodeSection = () => {
       <Text size="sm">{services["monerod"].description}</Text>
       <Switch
         checked={isMoneroPublicNode}
-        label="Monero Node"
+        label="Node Visibility"
         labelPosition="left"
         onChange={(event) =>
           setIsMoneroPublicNode(event.currentTarget.checked)
@@ -49,11 +49,8 @@ const MoneroNodeSection = () => {
         checked={isPrunedNode}
         label={
           <ExplainingLabel
-            label="Pruned Node"
-            explanation="Pruning allows node operators to save 2/3 of storage space while
-    keeping the full transaction history. Pruning works by removing 7/8
-    of unnecessary ring signature data. There are no privacy or security
-    downsides when using a pruned node."
+            label="Storage Mode"
+            explanation="Pruning reduces blockchain storage by 2/3 while keeping the full transaction history. Your node stays fully functional with no privacy or security trade-offs."
           />
         }
         labelPosition="left"

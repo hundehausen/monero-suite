@@ -11,7 +11,7 @@ export const useWatchtowerService = () => {
   const getWatchtowerService = (): Service => ({
     name: "Watchtower",
     description:
-      "Watchtower is a service that monitors running Docker containers and watches for newer images. If there is a new version available, watchtower will automatically restart the container with the newest image.",
+      "Automatically updates your Docker containers when new image versions are available. Keeps your Monero software up-to-date without manual intervention.",
     checked: isWatchtower,
     required: false,
     architecture: [architectures.linuxAmd, architectures.linuxArm],

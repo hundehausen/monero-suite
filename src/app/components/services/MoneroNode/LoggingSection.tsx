@@ -24,7 +24,7 @@ const LoggingSection = () => {
         <Switch
           label={
             <ExplainingLabel
-              label="Disable Monero Node Logging"
+              label="Disable Logging"
               explanation="When enabled, logging is completely disabled. This saves disk space but makes troubleshooting more difficult."
             />
           }

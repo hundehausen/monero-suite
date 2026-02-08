@@ -28,7 +28,7 @@ export const useOnionMoneroBlockchainExplorerService = () => {
     return ({
     name: "Onion Monero Blockchain Explorer",
     description:
-      "Onion Monero Blockchain Explorer allows you to browse Monero blockchain. It uses no JavaScript, no cookies and no trackers.",
+      "A lightweight, privacy-focused block explorer with no JavaScript, cookies, or trackers. Browse the Monero blockchain without sacrificing your privacy.",
     checked: isOnionMoneroBlockchainExplorer,
     required: false,
     architecture: [architectures.linuxAmd],

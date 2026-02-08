@@ -119,7 +119,7 @@ export const createMonerodService = (
   return {
     name: "Monero Node",
     description:
-      "The Monero daemon is the core of the Monero network. It verifies transactions and blocks, and helps other nodes to synchronize.",
+      "The Monero node (monerod) is the backbone of the network. It validates transactions and blocks, keeps a copy of the blockchain, and helps other nodes stay in sync.",
     checked: true,
     required: true,
     architecture: [architectures.linuxAmd, architectures.linuxArm],

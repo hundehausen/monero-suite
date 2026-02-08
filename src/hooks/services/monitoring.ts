@@ -24,7 +24,7 @@ export const useMonitoringService = () => {
     return ({
     name: "Monitoring",
     description:
-      "Monitoring with Prometheus and Grafana: see your node stats visualized in graphs. See on a map where your peers are located.",
+      "Visualize your node's performance with Grafana dashboards. View blockchain stats, network peers on a world map, and system metrics in real-time.",
     checked: isMonitoring,
     required: false,
     architecture: [architectures.linuxAmd],

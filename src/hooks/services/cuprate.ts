@@ -19,7 +19,7 @@ export const useCuprateService = () => {
   ): Service => {
     const service: Service = {
       name: "Cuprate (Experimental)",
-      description: "Cuprate is an alternative Monero node implementation written in Rust. This project is experimental and not ready for production use.",
+      description: "An alternative Monero node written in Rust. Currently experimental - use for testing only, not for production or storing real funds.",
       checked: isCuprateEnabled,
       required: false,
       architecture: [architectures.linuxAmd, architectures.linuxArm],

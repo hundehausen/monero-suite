@@ -69,9 +69,9 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
 
     // Base service configuration
     const service: Service = {
-      name: "Tor Service",
-      description:
-        "Tor services for Monero: proxy for anonymous transactions and hidden services for private network access.",
+    name: "Tor Service",
+    description:
+      "Route your Monero traffic through the Tor network for enhanced privacy. Includes both a proxy for anonymous transactions and hidden services for private access to your node.",
       checked: isTorEnabled,
       required: false,
       architecture: [architectures.linuxAmd, architectures.linuxArm],

@@ -11,7 +11,7 @@ export const useAutohealService = () => {
   const getAutohealService = (): Service => ({
     name: "Autoheal",
     description:
-      "Autoheal is a simple Docker container that will monitor and restart unhealthy docker containers.",
+      "Monitors your containers and automatically restarts any that become unresponsive or unhealthy. Helps keep your node running 24/7.",
     checked: isAutoheal,
     required: false,
     architecture: [architectures.linuxAmd, architectures.linuxArm],

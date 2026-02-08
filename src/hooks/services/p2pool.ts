@@ -52,7 +52,7 @@ export const useP2PoolService = () => {
     return ({
     name: "P2Pool",
     description:
-      "P2Pool is a decentralized mining pool that works by creating a peer-to-peer network of miner nodes. For Monero's decentralization, it is better to use P2Pool instead of a centralized mining pool.",
+      "Mine Monero without trusting a centralized pool. P2Pool connects miners directly to each other, keeping the network decentralized. You keep full control of your mining rewards.",
     checked: p2PoolMode,
     required: false,
     architecture: [architectures.linuxAmd, architectures.linuxArm],

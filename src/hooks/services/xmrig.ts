@@ -15,7 +15,7 @@ export const useXmrigService = () => {
   const getXmrigService = (): Service => ({
     name: "XMRig",
     description:
-      "XMRig is a high performance miner for Monero / RandomX. It supports both CPU and GPU mining, but this service is only meant to run on CPU.",
+      "A high-performance CPU miner for Monero. More efficient than P2Pool's built-in miner, but requires running P2Pool alongside it.",
     checked: miningMode === minigModes.xmrig,
     required: false,
     architecture: [architectures.linuxAmd],

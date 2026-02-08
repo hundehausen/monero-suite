@@ -12,9 +12,9 @@ export const useTraefikService = () => {
 
   const getTraefikService = (): Service => {
     return {
-      name: "Traefik",
-      description:
-        "Traefik is a modern HTTP reverse proxy and load balancer that makes deploying microservices easy.",
+    name: "Traefik",
+    description:
+      "A reverse proxy that automatically handles HTTPS certificates and routes traffic to your services. Required for exposing services on custom domains.",
       checked: isTraefik,
       required: false,
       architecture: [architectures.linuxAmd, architectures.linuxArm],

@@ -27,7 +27,7 @@ export const useMoneroblockService = () => {
     const { labels } = getTraefikConfig(isTraefik, "moneroblock", moneroBlockDomain, "31312", certResolverName);
     return ({
     name: "Moneroblock",
-    description: "Moneroblock is a self-hostable block explorer for monero",
+    description: "Explore the Monero blockchain with your own private block explorer. View transactions, blocks, and network stats without relying on third-party services.",
     checked: isMoneroblock,
     required: false,
     architecture: [architectures.linuxAmd, architectures.linuxArm],

@@ -45,7 +45,7 @@ export const useMonerodStagenetService = () => {
     return ({
     name: "Monero Stagenet Node",
     description:
-      "Run a monerod stagenet node. Stagenet is a testing network for developers. It is a separate blockchain with separate coins from the main Monero network.",
+      "Run a node on Monero's test network (stagenet). Perfect for developers testing integrations or users learning how Monero works without using real funds.",
     checked: isStagenetNode,
     required: false,
     architecture: [architectures.linuxAmd, architectures.linuxArm],
