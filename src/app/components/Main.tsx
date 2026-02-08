@@ -331,6 +331,7 @@ export default function Main() {
               <Button
                 variant="light"
                 leftSection={<TbDownload />}
+                disabled={hasDefaultDomain}
                 onClick={() => {
                   const blob = new Blob([fullScript], { type: "text/plain" });
                   const url = URL.createObjectURL(blob);
