@@ -14,9 +14,11 @@ const ExplainingLabel = ({
   <HoverCard width={280} shadow="md" openDelay={300}>
     <HoverCard.Target>
       <Text
+        span
         size={size}
         style={{
           cursor: "pointer",
+          position: "relative",
         }}
       >
         {label}
