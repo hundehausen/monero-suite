@@ -1,11 +1,8 @@
-import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
+import { useQueryState, parseAsBoolean } from "nuqs";
 import { Service, architectures } from "./types";
 import { DOCKER_IMAGES } from "@/lib/constants";
 
-// Utility function to get a sanitized domain name for the certificate resolver
-export const getSanitizedDomainName = (domain: string): string => {
-  return domain.replace(/\./g, "").toLowerCase();
-};
+export const CERT_RESOLVER_NAME = "monerosuite";
 
 export const useTraefikService = () => {
   const [isTraefik, setIsTraefik] = useQueryState(
@@ -13,15 +10,7 @@ export const useTraefikService = () => {
     parseAsBoolean.withDefault(false)
   );
 
-  const [mainDomain, setMainDomain] = useQueryState(
-    "mainDomain",
-    parseAsString.withDefault("example.com")
-  );
-
   const getTraefikService = (): Service => {
-    // Create a sanitized domain name for the certificate resolver
-    const certResolverName = getSanitizedDomainName(mainDomain);
-
     return {
       name: "Traefik",
       description:
@@ -44,8 +33,8 @@ export const useTraefikService = () => {
             "--entrypoints.websecure.address=:443",
             "--entrypoints.web.http.redirections.entrypoint.to=websecure",
             "--entrypoints.web.http.redirections.entrypoint.scheme=https",
-            `--certificatesresolvers.${certResolverName}.acme.tlschallenge=true`,
-            `--certificatesresolvers.${certResolverName}.acme.storage=/letsencrypt/acme.json`,
+            `--certificatesresolvers.${CERT_RESOLVER_NAME}.acme.tlschallenge=true`,
+            `--certificatesresolvers.${CERT_RESOLVER_NAME}.acme.storage=/letsencrypt/acme.json`,
           ],
           ports: ["80:80", "443:443"],
           volumes: [
@@ -60,12 +49,9 @@ export const useTraefikService = () => {
 
   return {
     getTraefikService,
-    getCertResolverName: () => getSanitizedDomainName(mainDomain),
     stateFunctions: {
       isTraefik,
       setIsTraefik,
-      mainDomain,
-      setMainDomain,
     },
   };
 };

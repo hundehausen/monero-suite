@@ -1,5 +1,5 @@
 import { Accordion } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useServicesContext } from "@/hooks/services-context";
 import {
   ArchitectureSection,
@@ -21,13 +21,7 @@ import {
 const Selection = () => {
   const { stateFunctions } = useServicesContext();
   const {
-    isMoneroPublicNode,
-    isStagenetNode,
-    isStagenetNodePublic,
     p2PoolPayoutAddress,
-    isMoneroblock,
-    isMonitoring,
-    isTraefik
   } = stateFunctions;
 
   const [accordionItems, setAccordionItems] = useState([
@@ -44,25 +38,6 @@ const Selection = () => {
       return "Address must start with 4. Subaddresses are not supported by P2Pool.";
     return null;
   };
-
-  useEffect(() => {
-    if (isTraefik) {
-      setAccordionItems((items) => [
-        ...items,
-        ...(isMoneroPublicNode ? ["monero-node"] : []),
-        ...(isStagenetNode && isStagenetNodePublic ? ["stagenet-node"] : []),
-        ...(isMoneroblock ? ["moneroblock"] : []),
-        ...(isMonitoring ? ["monitoring"] : []),
-      ]);
-    }
-  }, [
-    isMoneroPublicNode,
-    isMoneroblock,
-    isMonitoring,
-    isStagenetNode,
-    isStagenetNodePublic,
-    isTraefik
-  ]);
 
   return (
     <Accordion

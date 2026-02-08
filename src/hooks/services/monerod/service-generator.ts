@@ -50,6 +50,7 @@ export const createMonerodService = (
     p2pExternalPort,
     offlineMode,
     padTransactions,
+    txProxyDisableNoise,
     anonymousInbound,
     banList,
     enableDnsBlocklist,
@@ -222,7 +223,7 @@ export const createMonerodService = (
             : []),
           ...(torProxyMode !== torProxyModes.none
             ? [
-              `--tx-proxy=tor,${TOR_IP}:9050,16`,
+              `--tx-proxy=tor,${TOR_IP}:9050,16${txProxyDisableNoise ? ",disable_noise" : ""}`,
               "--add-priority-node=monsterxzzefbr6jq3n2tu4xvlumnunlhbrhqny6naxpn6le3upke2yd.onion:18084",
               "--add-priority-node=doggettffpqokvkukhwquchg6bxwwtgj4pckygqylc7qkhim3ruxncid.onion:18084",
               "--add-priority-node=doggettavnnnctrwm5dv6k42zmtl5f7j2n7sadfmibmnel4cantlf2id.onion:18084",

@@ -15,7 +15,7 @@ export const useOnionMoneroBlockchainExplorerService = () => {
     setOnionMoneroBlockchainExplorerDomain,
   ] = useQueryState(
     "onionMoneroBlockchainExplorerDomain",
-    parseAsString.withDefault("")
+    parseAsString.withDefault("onion-explorer.example.com")
   );
 
   const getOnionMoneroBlockchainExplorerService = (

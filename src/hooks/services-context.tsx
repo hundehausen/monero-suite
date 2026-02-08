@@ -120,7 +120,14 @@ export function useTorState(): TorState {
   const { stateFunctions: s } = useServicesContext();
   return {
     torProxyMode: s.torProxyMode, setTorProxyMode: s.setTorProxyMode,
-    isHiddenServices: s.isHiddenServices, setIsHiddenServices: s.setIsHiddenServices,
+    isHiddenServices: s.isHiddenServices,
+    hsMonerod: s.hsMonerod, setHsMonerod: s.setHsMonerod,
+    hsMonerodP2P: s.hsMonerodP2P, setHsMonerodP2P: s.setHsMonerodP2P,
+    hsStagenet: s.hsStagenet, setHsStagenet: s.setHsStagenet,
+    hsP2Pool: s.hsP2Pool, setHsP2Pool: s.setHsP2Pool,
+    hsMoneroblock: s.hsMoneroblock, setHsMoneroblock: s.setHsMoneroblock,
+    hsOnionExplorer: s.hsOnionExplorer, setHsOnionExplorer: s.setHsOnionExplorer,
+    hsGrafana: s.hsGrafana, setHsGrafana: s.setHsGrafana,
     isGlobalTorProxy: s.isGlobalTorProxy, setIsGlobalTorProxy: s.setIsGlobalTorProxy,
   };
 }
@@ -155,7 +162,6 @@ export function useTraefikState(): TraefikState {
   const { stateFunctions: s } = useServicesContext();
   return {
     isTraefik: s.isTraefik, setIsTraefik: s.setIsTraefik,
-    mainDomain: s.mainDomain, setMainDomain: s.setMainDomain,
   };
 }
 

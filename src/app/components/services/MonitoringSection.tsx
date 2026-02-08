@@ -1,4 +1,4 @@
-import { Alert, Checkbox, Input, Text } from "@mantine/core";
+import { Alert, Checkbox, Text } from "@mantine/core";
 import { useServicesContext, useMonitoringState, useArchitectureState } from "@/hooks/services-context";
 import AccordionItemComponent from "./AccordionItemComponent";
 
@@ -7,8 +7,6 @@ const MonitoringSection = () => {
   const {
     isMonitoring,
     setIsMonitoring,
-    grafanaDomain,
-    setGrafanaDomain,
   } = useMonitoringState();
   const { architecture } = useArchitectureState();
 
@@ -31,20 +29,9 @@ const MonitoringSection = () => {
         onChange={(event) => setIsMonitoring(event.currentTarget.checked)}
       />
       {isMonitoring === true && (
-        <>
-          <Alert variant="light" color="yellow" title="Security Notice">
-            Remember to change the default Grafana admin password in the generated .env file before deploying.
-          </Alert>
-          <Input.Wrapper
-            label="Grafana Hostname"
-            description="The domain where your grafana dashboard will be available."
-          >
-            <Input
-              value={grafanaDomain}
-              onChange={(e) => setGrafanaDomain(e.currentTarget.value)}
-            />
-          </Input.Wrapper>
-        </>
+        <Alert variant="light" color="yellow" title="Security Notice">
+          Remember to change the default Grafana admin password in the generated .env file before deploying.
+        </Alert>
       )}
     </AccordionItemComponent>
   );

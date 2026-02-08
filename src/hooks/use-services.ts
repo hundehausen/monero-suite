@@ -21,6 +21,7 @@ import {
   useTraefikService,
   usePortainerService,
   useCuprateService,
+  CERT_RESOLVER_NAME,
 } from "./services";
 
 export * from "./services";
@@ -57,36 +58,17 @@ export const useServices = () => {
   const cuprateService = useCuprateService();
 
   // Extract state functions from each service
-  const { isTraefik, mainDomain } = traefikService.stateFunctions;
+  const { isTraefik } = traefikService.stateFunctions;
   const { isMonitoring, setGrafanaDomain } = monitoringService.stateFunctions;
   const { isPrunedNode, isSyncPrunedBlocks } = monerodService.stateFunctions;
-  const { setMoneroBlockDomain } = moneroblockService.stateFunctions;
-  const { setStagenetNodeDomain } = monerodStagenetService.stateFunctions;
-  const { setMoneroNodeDomain } = monerodService.stateFunctions;
-  const { setPortainerDomain } = portainerService.stateFunctions;
 
-  // Get the certificate resolver name
-  const certResolverName = traefikService.getCertResolverName();
-
+  // Reset Grafana domain to localhost when Traefik is disabled
+  // (Grafana uses this for GF_SERVER_ROOT_URL regardless of Traefik)
   useEffect(() => {
-    if (isTraefik) {
-      setGrafanaDomain(`grafana.${mainDomain}`);
-      setMoneroBlockDomain(`explorer.${mainDomain}`);
-      setStagenetNodeDomain(`stagenet.${mainDomain}`);
-      setMoneroNodeDomain(`node.${mainDomain}`);
-      setPortainerDomain(`portainer.${mainDomain}`);
-    } else {
+    if (!isTraefik) {
       setGrafanaDomain("localhost:3000");
     }
-  }, [
-    isTraefik,
-    mainDomain,
-    setGrafanaDomain,
-    setMoneroBlockDomain,
-    setStagenetNodeDomain,
-    setMoneroNodeDomain,
-    setPortainerDomain,
-  ]);
+  }, [isTraefik, setGrafanaDomain]);
 
   useEffect(() => {
     if (!isPrunedNode)
@@ -102,12 +84,12 @@ export const useServices = () => {
       isMonitoring,
       torService.stateFunctions.isHiddenServices,
       isTraefik,
-      certResolverName
+      CERT_RESOLVER_NAME
     ),
     "monerod-stagenet": monerodStagenetService.getMonerodStagenetService(
       networkMode,
       isTraefik,
-      certResolverName,
+      CERT_RESOLVER_NAME,
       torService.stateFunctions.torProxyMode
     ),
     p2pool: p2PoolService.getP2PoolService(
@@ -120,14 +102,14 @@ export const useServices = () => {
     moneroblock: moneroblockService.getMoneroblockService(
       networkMode,
       isTraefik,
-      certResolverName,
+      CERT_RESOLVER_NAME,
       torService.stateFunctions.torProxyMode
     ),
     "onion-monero-blockchain-explorer":
       onionMoneroBlockchainExplorerService.getOnionMoneroBlockchainExplorerService(
         networkMode,
         isTraefik,
-        certResolverName,
+        CERT_RESOLVER_NAME,
         torService.stateFunctions.torProxyMode
       ),
     tor: torService.getTorService(
@@ -143,7 +125,7 @@ export const useServices = () => {
     monitoring: monitoringService.getMonitoringService(
       networkMode,
       isTraefik,
-      certResolverName,
+      CERT_RESOLVER_NAME,
       torService.stateFunctions.torProxyMode
     ),
     autoheal: autohealService.getAutohealService(),
@@ -152,7 +134,7 @@ export const useServices = () => {
     portainer: portainerService.getPortainerService(
       networkMode,
       isTraefik,
-      certResolverName
+      CERT_RESOLVER_NAME
     ),
     cuprate: cuprateService.getCuprateService(
       networkMode

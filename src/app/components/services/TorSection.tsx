@@ -10,7 +10,20 @@ const TorSection = () => {
     torProxyMode,
     setTorProxyMode,
     isHiddenServices,
-    setIsHiddenServices,
+    hsMonerod,
+    setHsMonerod,
+    hsMonerodP2P,
+    setHsMonerodP2P,
+    hsStagenet,
+    setHsStagenet,
+    hsP2Pool,
+    setHsP2Pool,
+    hsMoneroblock,
+    setHsMoneroblock,
+    hsOnionExplorer,
+    setHsOnionExplorer,
+    hsGrafana,
+    setHsGrafana,
     isGlobalTorProxy,
     setIsGlobalTorProxy,
   } = useTorState();
@@ -91,20 +104,75 @@ const TorSection = () => {
 
         <Divider />
 
-        {/* Tor Hidden Service Section */}
+        {/* Tor Hidden Services Section */}
         <div>
-          <Text size="md"  mb="xs">Tor Hidden Service</Text>
-          <Checkbox
-            checked={isHiddenServices}
-            label="Enable Tor Hidden Services"
-            labelPosition="left"
-            size="lg"
-            onChange={(event) => setIsHiddenServices(event.currentTarget.checked)}
-          />
-          <Text size="sm" mt="xs">
-            Use <Code>docker logs tor</Code> to get generated onion
-            addresses, after the container has started.
+          <Text size="md" mb="xs">Tor Hidden Services</Text>
+          <Text size="sm" mb="sm">
+            Select which services to expose as Tor hidden services. Each selected service gets its own .onion address.
           </Text>
+          <Stack gap="xs">
+            <Checkbox
+              checked={hsMonerod}
+              label="Monerod (Restricted RPC)"
+              onChange={(event) => setHsMonerod(event.currentTarget.checked)}
+            />
+            <Checkbox
+              checked={hsMonerodP2P}
+              label={
+                <ExplainingLabel
+                  label="Monerod (P2P Anonymous Inbound)"
+                  explanation={
+                    "Creates a hidden service for monerod P2P traffic on port 18084, allowing other Tor nodes to peer with your node anonymously. "
+                    + "This requires a manual step after first deployment: run `docker logs tor` to find the generated .onion address, "
+                    + "then set the monerod flag --anonymous-inbound=<your_onion_address>.onion:18084,127.0.0.1:18084 "
+                    + "in the Anonymous Inbound field under Monerod Advanced Settings > Tor/I2P, and redeploy with `docker compose up -d`."
+                  }
+                />
+              }
+              onChange={(event) => setHsMonerodP2P(event.currentTarget.checked)}
+            />
+            {services["monerod-stagenet"]?.checked && (
+              <Checkbox
+                checked={hsStagenet}
+                label="Monerod Stagenet (Restricted RPC)"
+                onChange={(event) => setHsStagenet(event.currentTarget.checked)}
+              />
+            )}
+            {services["p2pool"]?.checked && (
+              <Checkbox
+                checked={hsP2Pool}
+                label="P2Pool (Stratum)"
+                onChange={(event) => setHsP2Pool(event.currentTarget.checked)}
+              />
+            )}
+            {services["moneroblock"]?.checked && (
+              <Checkbox
+                checked={hsMoneroblock}
+                label="Moneroblock (Block Explorer)"
+                onChange={(event) => setHsMoneroblock(event.currentTarget.checked)}
+              />
+            )}
+            {services["onion-monero-blockchain-explorer"]?.checked && (
+              <Checkbox
+                checked={hsOnionExplorer}
+                label="Onion Monero Blockchain Explorer"
+                onChange={(event) => setHsOnionExplorer(event.currentTarget.checked)}
+              />
+            )}
+            {services["monitoring"]?.checked && (
+              <Checkbox
+                checked={hsGrafana}
+                label="Grafana (Monitoring Dashboard)"
+                onChange={(event) => setHsGrafana(event.currentTarget.checked)}
+              />
+            )}
+          </Stack>
+          {isHiddenServices && (
+            <Text size="sm" mt="xs">
+              Use <Code>docker logs tor</Code> to get generated onion
+              addresses, after the container has started.
+            </Text>
+          )}
         </div>
       </Stack>
     </AccordionItemComponent>

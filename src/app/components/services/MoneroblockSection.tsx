@@ -1,5 +1,5 @@
-import { Checkbox, Input, Text } from "@mantine/core";
-import { useServicesContext, useMoneroblockState, useTraefikState } from "@/hooks/services-context";
+import { Checkbox, Text } from "@mantine/core";
+import { useServicesContext, useMoneroblockState } from "@/hooks/services-context";
 import AccordionItemComponent from "./AccordionItemComponent";
 
 const MoneroblockSection = () => {
@@ -9,10 +9,7 @@ const MoneroblockSection = () => {
     setIsMoneroblock,
     isMoneroblockLogging,
     setIsMoneroblockLogging,
-    moneroBlockDomain,
-    setMoneroBlockDomain,
   } = useMoneroblockState();
-  const { isTraefik } = useTraefikState();
 
   return (
     <AccordionItemComponent
@@ -43,22 +40,6 @@ const MoneroblockSection = () => {
             },
           }}
         />
-      )}
-      {isMoneroblock && isTraefik && (
-        <Input.Wrapper
-          styles={{
-            root: {
-              width: "100%",
-            },
-          }}
-          label="Moneroblock Domain"
-          description="The domain where your moneroblock will be available."
-        >
-          <Input
-            value={moneroBlockDomain}
-            onChange={(e) => setMoneroBlockDomain(e.currentTarget.value)}
-          />
-        </Input.Wrapper>
       )}
     </AccordionItemComponent>
   );

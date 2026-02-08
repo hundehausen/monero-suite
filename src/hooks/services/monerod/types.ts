@@ -54,6 +54,8 @@ export interface MonerodState {
   setPadTransactions: (value: boolean) => void;
   anonymousInbound: string;
   setAnonymousInbound: (value: string) => void;
+  txProxyDisableNoise: boolean;
+  setTxProxyDisableNoise: (value: boolean) => void;
 
   // Network Security configuration
   banList: string;

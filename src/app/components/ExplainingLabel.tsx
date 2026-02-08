@@ -11,7 +11,7 @@ const ExplainingLabel = ({
   explanation,
   size,
 }: ExplainingLabelProps) => (
-  <HoverCard width={280} shadow="md" openDelay={500}>
+  <HoverCard width={280} shadow="md" openDelay={300}>
     <HoverCard.Target>
       <Text
         size={size}

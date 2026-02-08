@@ -25,6 +25,7 @@ export const MONEROD_PORTS = {
   p2p: 18080,
   rpcUnrestricted: 18081,
   zmqPub: 18083,
+  torP2p: 18084,
   rpcRestricted: 18089,
 } as const;
 

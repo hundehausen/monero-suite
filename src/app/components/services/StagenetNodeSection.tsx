@@ -5,7 +5,7 @@ import {
   Text,
   TextInput,
 } from "@mantine/core";
-import { useServicesContext, useStagenetState, useMonerodState, useTraefikState } from "@/hooks/services-context";
+import { useServicesContext, useStagenetState, useMonerodState } from "@/hooks/services-context";
 import AccordionItemComponent from "./AccordionItemComponent";
 
 const StagenetNodeSection = () => {
@@ -15,15 +15,12 @@ const StagenetNodeSection = () => {
     setIsStagenetNode,
     isStagenetNodePublic,
     setIsStagenetNodePublic,
-    stagenetNodeDomain,
-    setStagenetNodeDomain,
     isMoneroStagenetVolume,
     setIsMoneroStagenetVolume,
     moneroStagenetBlockchainLocation,
     setMoneroStagenetBlockchainLocation,
   } = useStagenetState();
   const { moneroNodeNoLogs, setMoneroNodeNoLogs } = useMonerodState();
-  const { isTraefik } = useTraefikState();
 
   return (
     <AccordionItemComponent
@@ -92,22 +89,6 @@ const StagenetNodeSection = () => {
               setMoneroNodeNoLogs(event.currentTarget.checked)
             }
           />
-          {isStagenetNodePublic && isTraefik && (
-            <Input.Wrapper
-              styles={{
-                root: {
-                  width: "100%",
-                },
-              }}
-              label="Stagenet Node Domain"
-              description="The domain where your stagenet node will be available."
-            >
-              <Input
-                value={stagenetNodeDomain}
-                onChange={(e) => setStagenetNodeDomain(e.currentTarget.value)}
-              />
-            </Input.Wrapper>
-          )}
         </>
       )}
     </AccordionItemComponent>

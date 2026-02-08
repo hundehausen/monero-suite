@@ -31,11 +31,17 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
     )
   );
 
-  // State for Tor Hidden Service functionality
-  const [isHiddenServices, setIsHiddenServices] = useQueryState(
-    "isHiddenServices",
-    parseAsBoolean.withDefault(false)
-  );
+  // Per-service hidden service toggles
+  const [hsMonerod, setHsMonerod] = useQueryState("hsMonerod", parseAsBoolean.withDefault(false));
+  const [hsMonerodP2P, setHsMonerodP2P] = useQueryState("hsMonerodP2P", parseAsBoolean.withDefault(false));
+  const [hsStagenet, setHsStagenet] = useQueryState("hsStagenet", parseAsBoolean.withDefault(false));
+  const [hsP2Pool, setHsP2Pool] = useQueryState("hsP2Pool", parseAsBoolean.withDefault(false));
+  const [hsMoneroblock, setHsMoneroblock] = useQueryState("hsMoneroblock", parseAsBoolean.withDefault(false));
+  const [hsOnionExplorer, setHsOnionExplorer] = useQueryState("hsOnionExplorer", parseAsBoolean.withDefault(false));
+  const [hsGrafana, setHsGrafana] = useQueryState("hsGrafana", parseAsBoolean.withDefault(false));
+
+  // Derived: true if any hidden service is enabled
+  const isHiddenServices = hsMonerod || hsMonerodP2P || hsStagenet || hsP2Pool || hsMoneroblock || hsOnionExplorer || hsGrafana;
 
   // State for global Tor proxy (binding to 0.0.0.0)
   const [isGlobalTorProxy, setIsGlobalTorProxy] = useQueryState(
@@ -109,7 +115,7 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
       service.code.tor.ports = [getPortBinding(networkMode, SERVICE_PORTS.torSocks)];
     }
 
-    // Add hidden service-specific configuration if hidden services are enabled
+    // Add hidden service-specific configuration if any hidden service is enabled
     if (isHiddenServices) {
       service.volumes = {
         "tor-data": {},
@@ -117,41 +123,33 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
 
       service.code.tor.volumes = ["tor-data:/var/lib/tor/"];
 
-      // Add environment variables for hidden services
+      // Add environment variables for individually selected hidden services
       service.code.tor.environment = {
-        HS_MONEROD_MAINNET: `monerod:${MONEROD_PORTS.rpcRestricted}:${MONEROD_PORTS.rpcRestricted}`,
-        ...(isStagenetNode
-          ? {
-            HS_MONEROD_MAINNET_STAGENET: `monerod-stagenet:${MONEROD_STAGENET_PORTS.rpcRestricted}:${MONEROD_STAGENET_PORTS.rpcRestricted}`,
-          }
+        ...(hsMonerod
+          ? { HS_MONEROD_MAINNET: `monerod:${MONEROD_PORTS.rpcRestricted}:${MONEROD_PORTS.rpcRestricted}` }
           : {}),
-        ...(p2PoolMode === p2poolModes.full
-          ? {
-            HS_P2POOL: `p2pool:${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}`,
-          }
+        ...(hsMonerodP2P
+          ? { HS_MONEROD_P2P: `monerod:${MONEROD_PORTS.torP2p}:${MONEROD_PORTS.torP2p}` }
           : {}),
-        ...(p2PoolMode === p2poolModes.mini
-          ? {
-            HS_P2POOL_MINI: `p2pool-mini:${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}`,
-          }
+        ...(hsStagenet && isStagenetNode
+          ? { HS_MONEROD_MAINNET_STAGENET: `monerod-stagenet:${MONEROD_STAGENET_PORTS.rpcRestricted}:${MONEROD_STAGENET_PORTS.rpcRestricted}` }
           : {}),
-        ...(p2PoolMode === p2poolModes.nano
-          ? {
-            HS_P2POOL_NANO: `p2pool-nano:${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}`,
-          }
+        ...(hsP2Pool && p2PoolMode === p2poolModes.full
+          ? { HS_P2POOL: `p2pool:${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}` }
           : {}),
-        ...(isMoneroblock
-          ? {
-            HS_MONEROBLOCK: `moneroblock:${SERVICE_PORTS.moneroblock}:80`,
-          }
+        ...(hsP2Pool && p2PoolMode === p2poolModes.mini
+          ? { HS_P2POOL_MINI: `p2pool-mini:${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}` }
           : {}),
-        ...(isOnionMoneroBlockchainExplorer
-          ? {
-            HS_MONERO_ONION_BLOCKCHAIN_EXPLORER:
-              `onion-monero-blockchain-explorer:${SERVICE_PORTS.explorerOnion}:80`,
-          }
+        ...(hsP2Pool && p2PoolMode === p2poolModes.nano
+          ? { HS_P2POOL_NANO: `p2pool-nano:${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}` }
           : {}),
-        ...(isMonitoring
+        ...(hsMoneroblock && isMoneroblock
+          ? { HS_MONEROBLOCK: `moneroblock:${SERVICE_PORTS.moneroblock}:80` }
+          : {}),
+        ...(hsOnionExplorer && isOnionMoneroBlockchainExplorer
+          ? { HS_MONERO_ONION_BLOCKCHAIN_EXPLORER: `onion-monero-blockchain-explorer:${SERVICE_PORTS.explorerOnion}:80` }
+          : {}),
+        ...(hsGrafana && isMonitoring
           ? { HS_GRAFANA: `grafana:${SERVICE_PORTS.grafana}:80` }
           : {}),
       };
@@ -167,9 +165,22 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
       torProxyMode,
       setTorProxyMode,
 
-      // Hidden service state functions
+      // Hidden service state functions (per-service toggles)
       isHiddenServices,
-      setIsHiddenServices,
+      hsMonerod,
+      setHsMonerod,
+      hsMonerodP2P,
+      setHsMonerodP2P,
+      hsStagenet,
+      setHsStagenet,
+      hsP2Pool,
+      setHsP2Pool,
+      hsMoneroblock,
+      setHsMoneroblock,
+      hsOnionExplorer,
+      setHsOnionExplorer,
+      hsGrafana,
+      setHsGrafana,
 
       // Global proxy state functions
       isGlobalTorProxy,

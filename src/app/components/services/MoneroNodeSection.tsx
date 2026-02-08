@@ -1,12 +1,11 @@
 import {
   Button,
   Group,
-  Input,
   Switch,
   Text,
 } from "@mantine/core";
 import { useDisclosure } from '@mantine/hooks';
-import { useServicesContext, useMonerodState, useTraefikState } from "@/hooks/services-context";
+import { useServicesContext, useMonerodState } from "@/hooks/services-context";
 import ExplainingLabel from "../ExplainingLabel";
 import AdvancedConfigModal from "./MoneroNode/AdvancedConfigModal";
 import AccordionItemComponent from "./AccordionItemComponent";
@@ -16,12 +15,9 @@ const MoneroNodeSection = () => {
   const {
     isMoneroPublicNode,
     setIsMoneroPublicNode,
-    moneroNodeDomain,
-    setMoneroNodeDomain,
     isPrunedNode,
     setIsPrunedNode,
   } = useMonerodState();
-  const { isTraefik } = useTraefikState();
 
   // State for modal
   const [opened, { open, close }] = useDisclosure(false);
@@ -71,28 +67,6 @@ const MoneroNodeSection = () => {
           },
         }}
       />
-
-      {isMoneroPublicNode && isTraefik && (
-        <>
-          <Input.Wrapper
-            styles={{
-              root: {
-                width: "100%",
-              },
-            }}
-            label="Monero Node Domain"
-            description="The domain where your monero node will be available."
-          >
-            <Input
-              value={moneroNodeDomain}
-              onChange={(e) => setMoneroNodeDomain(e.currentTarget.value)}
-            />
-          </Input.Wrapper>
-          {moneroNodeDomain && (
-            <Text size="sm">{`Connect to your remote node from any wallet. Enter ${moneroNodeDomain}:443`}</Text>
-          )}
-        </>
-      )}
 
       {/* Advanced Configuration Button */}
       <Group mt="md">

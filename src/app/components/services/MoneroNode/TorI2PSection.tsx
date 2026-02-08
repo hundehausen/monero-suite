@@ -9,6 +9,8 @@ const TorI2PSection = () => {
     setPadTransactions,
     anonymousInbound,
     setAnonymousInbound,
+    txProxyDisableNoise,
+    setTxProxyDisableNoise,
   } = useMonerodState();
 
   return (
@@ -26,6 +28,25 @@ const TorI2PSection = () => {
           }
           checked={padTransactions}
           onChange={(event) => setPadTransactions(event.currentTarget.checked)}
+        />
+        <Switch
+          label={
+            <ExplainingLabel
+              label="Disable Noise (tx-proxy)"
+              explanation={
+                "Only applies when Tor is enabled. By default, transactions sent over Tor/I2P use the Dandelion++ stem phase — "
+                + "the Tor/I2P network replaces the p2p stem, and the receiving hidden service forwards over clearnet using Dandelion++ stem after a randomized delay. "
+                + "This delay helps mitigate ISP packet and timing analysis.\n\n"
+                + "Enabling this option adds disable_noise to --tx-proxy, which skips the stem phase and immediately \"fluffs\" (broadcasts) "
+                + "the transaction over outbound Tor connections. The receiving hidden service will also immediately fluff it over clearnet. "
+                + "This gives lower latency when sending transactions while still routing through Tor/I2P to break p2p sybil attacks that Dandelion++ was designed to mitigate."
+              }
+            />
+          }
+          checked={txProxyDisableNoise}
+          onChange={(event) =>
+            setTxProxyDisableNoise(event.currentTarget.checked)
+          }
         />
         <TextInput
           label={

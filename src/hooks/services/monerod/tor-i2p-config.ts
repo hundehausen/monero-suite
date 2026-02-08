@@ -8,10 +8,15 @@ export const useTorI2PConfig = () => {
     "padTransactions",
     parseAsBoolean.withDefault(false)
   );
-  
+
   const [anonymousInbound, setAnonymousInbound] = useQueryState(
     "anonymousInbound",
     parseAsString.withDefault("")
+  );
+
+  const [txProxyDisableNoise, setTxProxyDisableNoise] = useQueryState(
+    "txProxyDisableNoise",
+    parseAsBoolean.withDefault(false)
   );
 
   return {
@@ -19,5 +24,7 @@ export const useTorI2PConfig = () => {
     setPadTransactions,
     anonymousInbound,
     setAnonymousInbound,
+    txProxyDisableNoise,
+    setTxProxyDisableNoise,
   };
 };

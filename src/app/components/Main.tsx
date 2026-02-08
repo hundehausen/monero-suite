@@ -107,8 +107,26 @@ export default function Main() {
     [services]
   );
 
-  const hasDefaultDomain =
-    stateFunctions.isTraefik && stateFunctions.mainDomain === "example.com";
+  const hasDefaultDomain = useMemo(() => {
+    if (!stateFunctions.isTraefik) return false;
+    const domains = [
+      stateFunctions.isMoneroPublicNode && stateFunctions.moneroNodeDomain,
+      stateFunctions.isStagenetNode && stateFunctions.isStagenetNodePublic && stateFunctions.stagenetNodeDomain,
+      stateFunctions.isMoneroblock && stateFunctions.moneroBlockDomain,
+      stateFunctions.isOnionMoneroBlockchainExplorer && stateFunctions.onionMoneroBlockchainExplorerDomain,
+      stateFunctions.isMonitoring && stateFunctions.grafanaDomain,
+      stateFunctions.isPortainer && stateFunctions.portainerDomain,
+    ].filter(Boolean) as string[];
+    return domains.some((d) => d.includes("example.com"));
+  }, [
+    stateFunctions.isTraefik,
+    stateFunctions.isMoneroPublicNode, stateFunctions.moneroNodeDomain,
+    stateFunctions.isStagenetNode, stateFunctions.isStagenetNodePublic, stateFunctions.stagenetNodeDomain,
+    stateFunctions.isMoneroblock, stateFunctions.moneroBlockDomain,
+    stateFunctions.isOnionMoneroBlockchainExplorer, stateFunctions.onionMoneroBlockchainExplorerDomain,
+    stateFunctions.isMonitoring, stateFunctions.grafanaDomain,
+    stateFunctions.isPortainer, stateFunctions.portainerDomain,
+  ]);
 
   const dockerCompose = useMemo(() => generateDockerComposeFile(checkedServices), [checkedServices]);
   const bashCommands = useMemo(() => generateBashScriptFile(checkedServices), [checkedServices]);
@@ -264,8 +282,8 @@ export default function Main() {
 
               {hasDefaultDomain && (
                 <Text c="red" size="sm">
-                  Please change the Traefik domain from the default
-                  &quot;example.com&quot; before generating the script.
+                  Please change all service domains from the default
+                  &quot;example.com&quot; in the Traefik section before generating the script.
                 </Text>
               )}
 
