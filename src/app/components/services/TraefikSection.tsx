@@ -13,7 +13,15 @@ import AccordionItemComponent from "./AccordionItemComponent";
 
 const TraefikSection = () => {
   const { services } = useServicesContext();
-  const { isTraefik, setIsTraefik } = useTraefikState();
+  const {
+    isTraefik, setIsTraefik,
+    isTraefikMonerod, setIsTraefikMonerod,
+    isTraefikStagenet, setIsTraefikStagenet,
+    isTraefikMoneroblock, setIsTraefikMoneroblock,
+    isTraefikOnionExplorer, setIsTraefikOnionExplorer,
+    isTraefikGrafana, setIsTraefikGrafana,
+    isTraefikPortainer, setIsTraefikPortainer,
+  } = useTraefikState();
   const { isMoneroPublicNode, moneroNodeDomain, setMoneroNodeDomain } = useMonerodState();
   const { isStagenetNode, isStagenetNodePublic, stagenetNodeDomain, setStagenetNodeDomain } = useStagenetState();
   const { isMoneroblock, moneroBlockDomain, setMoneroBlockDomain } = useMoneroblockState();
@@ -22,16 +30,70 @@ const TraefikSection = () => {
   const { isPortainer, portainerDomain, setPortainerDomain } = usePortainerState();
 
   const domainInputs = [
-    { show: isMoneroPublicNode, label: "Monero Node Domain", description: "The domain where your Monero node will be available. Connect from any wallet using this domain on port 443. This maps to the restricted RPC port 18089.", value: moneroNodeDomain, onChange: setMoneroNodeDomain },
-    { show: isStagenetNode && isStagenetNodePublic, label: "Stagenet Node Domain", description: "The domain where your stagenet node will be available.", value: stagenetNodeDomain, onChange: setStagenetNodeDomain },
-    { show: isMoneroblock, label: "Moneroblock Domain", description: "The domain where your Moneroblock explorer will be available.", value: moneroBlockDomain, onChange: setMoneroBlockDomain },
-    { show: isOnionMoneroBlockchainExplorer, label: "Onion Explorer Domain", description: "The domain where your Onion Monero Blockchain Explorer will be available.", value: onionMoneroBlockchainExplorerDomain, onChange: setOnionMoneroBlockchainExplorerDomain },
-    { show: isMonitoring, label: "Grafana Domain", description: "The domain where your Grafana dashboard will be available.", value: grafanaDomain, onChange: setGrafanaDomain },
-    { show: isPortainer, label: "Portainer Domain", description: "The domain where your Portainer instance will be available.", value: portainerDomain, onChange: setPortainerDomain },
+    {
+      show: isMoneroPublicNode,
+      checkboxLabel: "Monero Node",
+      inputLabel: "Monero Node Domain",
+      description: "The domain where your Monero node will be available. Connect from any wallet using this domain on port 443. This maps to the restricted RPC port 18089.",
+      value: moneroNodeDomain,
+      onChange: setMoneroNodeDomain,
+      isEnabled: isTraefikMonerod,
+      setIsEnabled: setIsTraefikMonerod,
+    },
+    {
+      show: isStagenetNode && isStagenetNodePublic,
+      checkboxLabel: "Stagenet Node",
+      inputLabel: "Stagenet Node Domain",
+      description: "The domain where your stagenet node will be available.",
+      value: stagenetNodeDomain,
+      onChange: setStagenetNodeDomain,
+      isEnabled: isTraefikStagenet,
+      setIsEnabled: setIsTraefikStagenet,
+    },
+    {
+      show: isMoneroblock,
+      checkboxLabel: "Moneroblock Explorer",
+      inputLabel: "Moneroblock Domain",
+      description: "The domain where your Moneroblock explorer will be available.",
+      value: moneroBlockDomain,
+      onChange: setMoneroBlockDomain,
+      isEnabled: isTraefikMoneroblock,
+      setIsEnabled: setIsTraefikMoneroblock,
+    },
+    {
+      show: isOnionMoneroBlockchainExplorer,
+      checkboxLabel: "Onion Monero Explorer",
+      inputLabel: "Onion Explorer Domain",
+      description: "The domain where your Onion Monero Blockchain Explorer will be available.",
+      value: onionMoneroBlockchainExplorerDomain,
+      onChange: setOnionMoneroBlockchainExplorerDomain,
+      isEnabled: isTraefikOnionExplorer,
+      setIsEnabled: setIsTraefikOnionExplorer,
+    },
+    {
+      show: isMonitoring,
+      checkboxLabel: "Grafana",
+      inputLabel: "Grafana Domain",
+      description: "The domain where your Grafana dashboard will be available.",
+      value: grafanaDomain,
+      onChange: setGrafanaDomain,
+      isEnabled: isTraefikGrafana,
+      setIsEnabled: setIsTraefikGrafana,
+    },
+    {
+      show: isPortainer,
+      checkboxLabel: "Portainer",
+      inputLabel: "Portainer Domain",
+      description: "The domain where your Portainer instance will be available.",
+      value: portainerDomain,
+      onChange: setPortainerDomain,
+      isEnabled: isTraefikPortainer,
+      setIsEnabled: setIsTraefikPortainer,
+    },
   ];
 
   const visibleDomainInputs = domainInputs.filter((d) => d.show);
-  const hasDefaultDomain = visibleDomainInputs.some((d) => d.value.includes("example.com"));
+  const hasDefaultDomain = visibleDomainInputs.some((d) => d.isEnabled && d.value.includes("example.com"));
 
   return (
     <AccordionItemComponent
@@ -61,14 +123,23 @@ const TraefikSection = () => {
             )}
             {visibleDomainInputs.length > 0 ? (
               visibleDomainInputs.map((input) => (
-                <TextInput
-                  key={input.label}
-                  label={input.label}
-                  description={input.description}
-                  value={input.value}
-                  onChange={(e) => input.onChange(e.currentTarget.value)}
-                  error={input.value.includes("example.com") ? "Replace with your actual domain" : undefined}
-                />
+                <Stack key={input.checkboxLabel} gap="xs">
+                  <Checkbox
+                    checked={input.isEnabled}
+                    label={input.checkboxLabel}
+                    onChange={(event) => input.setIsEnabled(event.currentTarget.checked)}
+                  />
+                  {input.isEnabled && (
+                    <TextInput
+                      pl="xl"
+                      label={input.inputLabel}
+                      description={input.description}
+                      value={input.value}
+                      onChange={(e) => input.onChange(e.currentTarget.value)}
+                      error={input.value.includes("example.com") ? "Replace with your actual domain" : undefined}
+                    />
+                  )}
+                </Stack>
               ))
             ) : (
               <Text size="sm" c="dimmed">

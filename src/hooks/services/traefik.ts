@@ -9,6 +9,30 @@ export const useTraefikService = () => {
     "isTraefik",
     parseAsBoolean.withDefault(false)
   );
+  const [isTraefikMonerod, setIsTraefikMonerod] = useQueryState(
+    "isTraefikMonerod",
+    parseAsBoolean.withDefault(true)
+  );
+  const [isTraefikStagenet, setIsTraefikStagenet] = useQueryState(
+    "isTraefikStagenet",
+    parseAsBoolean.withDefault(true)
+  );
+  const [isTraefikMoneroblock, setIsTraefikMoneroblock] = useQueryState(
+    "isTraefikMoneroblock",
+    parseAsBoolean.withDefault(true)
+  );
+  const [isTraefikOnionExplorer, setIsTraefikOnionExplorer] = useQueryState(
+    "isTraefikOnionExplorer",
+    parseAsBoolean.withDefault(true)
+  );
+  const [isTraefikGrafana, setIsTraefikGrafana] = useQueryState(
+    "isTraefikGrafana",
+    parseAsBoolean.withDefault(true)
+  );
+  const [isTraefikPortainer, setIsTraefikPortainer] = useQueryState(
+    "isTraefikPortainer",
+    parseAsBoolean.withDefault(true)
+  );
 
   const getTraefikService = (): Service => {
     return {
@@ -52,6 +76,18 @@ export const useTraefikService = () => {
     stateFunctions: {
       isTraefik,
       setIsTraefik,
+      isTraefikMonerod,
+      setIsTraefikMonerod,
+      isTraefikStagenet,
+      setIsTraefikStagenet,
+      isTraefikMoneroblock,
+      setIsTraefikMoneroblock,
+      isTraefikOnionExplorer,
+      setIsTraefikOnionExplorer,
+      isTraefikGrafana,
+      setIsTraefikGrafana,
+      isTraefikPortainer,
+      setIsTraefikPortainer,
     },
   };
 };

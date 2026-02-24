@@ -58,17 +58,25 @@ export const useServices = () => {
   const cuprateService = useCuprateService();
 
   // Extract state functions from each service
-  const { isTraefik } = traefikService.stateFunctions;
+  const {
+    isTraefik,
+    isTraefikMonerod,
+    isTraefikStagenet,
+    isTraefikMoneroblock,
+    isTraefikOnionExplorer,
+    isTraefikGrafana,
+    isTraefikPortainer,
+  } = traefikService.stateFunctions;
   const { isMonitoring, setGrafanaDomain } = monitoringService.stateFunctions;
   const { isPrunedNode, isSyncPrunedBlocks } = monerodService.stateFunctions;
 
-  // Reset Grafana domain to localhost when Traefik is disabled
+  // Reset Grafana domain to localhost when Traefik is disabled for Grafana
   // (Grafana uses this for GF_SERVER_ROOT_URL regardless of Traefik)
   useEffect(() => {
-    if (!isTraefik) {
+    if (!isTraefik || !isTraefikGrafana) {
       setGrafanaDomain("localhost:3000");
     }
-  }, [isTraefik, setGrafanaDomain]);
+  }, [isTraefik, isTraefikGrafana, setGrafanaDomain]);
 
   useEffect(() => {
     if (!isPrunedNode)
@@ -83,12 +91,12 @@ export const useServices = () => {
       torService.stateFunctions.torProxyMode,
       isMonitoring,
       torService.stateFunctions.isHiddenServices,
-      isTraefik,
+      isTraefik && isTraefikMonerod,
       CERT_RESOLVER_NAME
     ),
     "monerod-stagenet": monerodStagenetService.getMonerodStagenetService(
       networkMode,
-      isTraefik,
+      isTraefik && isTraefikStagenet,
       CERT_RESOLVER_NAME,
       torService.stateFunctions.torProxyMode
     ),
@@ -101,14 +109,14 @@ export const useServices = () => {
       moneroWalletRpcService.getMoneroWalletRpcService(networkMode),
     moneroblock: moneroblockService.getMoneroblockService(
       networkMode,
-      isTraefik,
+      isTraefik && isTraefikMoneroblock,
       CERT_RESOLVER_NAME,
       torService.stateFunctions.torProxyMode
     ),
     "onion-monero-blockchain-explorer":
       onionMoneroBlockchainExplorerService.getOnionMoneroBlockchainExplorerService(
         networkMode,
-        isTraefik,
+        isTraefik && isTraefikOnionExplorer,
         CERT_RESOLVER_NAME,
         torService.stateFunctions.torProxyMode
       ),
@@ -124,7 +132,7 @@ export const useServices = () => {
     watchtower: watchtowerService.getWatchtowerService(),
     monitoring: monitoringService.getMonitoringService(
       networkMode,
-      isTraefik,
+      isTraefik && isTraefikGrafana,
       CERT_RESOLVER_NAME,
       torService.stateFunctions.torProxyMode
     ),
@@ -133,7 +141,7 @@ export const useServices = () => {
     traefik: traefikService.getTraefikService(),
     portainer: portainerService.getPortainerService(
       networkMode,
-      isTraefik,
+      isTraefik && isTraefikPortainer,
       CERT_RESOLVER_NAME
     ),
     cuprate: cuprateService.getCuprateService(

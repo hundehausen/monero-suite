@@ -162,6 +162,12 @@ export function useTraefikState(): TraefikState {
   const { stateFunctions: s } = useServicesContext();
   return {
     isTraefik: s.isTraefik, setIsTraefik: s.setIsTraefik,
+    isTraefikMonerod: s.isTraefikMonerod, setIsTraefikMonerod: s.setIsTraefikMonerod,
+    isTraefikStagenet: s.isTraefikStagenet, setIsTraefikStagenet: s.setIsTraefikStagenet,
+    isTraefikMoneroblock: s.isTraefikMoneroblock, setIsTraefikMoneroblock: s.setIsTraefikMoneroblock,
+    isTraefikOnionExplorer: s.isTraefikOnionExplorer, setIsTraefikOnionExplorer: s.setIsTraefikOnionExplorer,
+    isTraefikGrafana: s.isTraefikGrafana, setIsTraefikGrafana: s.setIsTraefikGrafana,
+    isTraefikPortainer: s.isTraefikPortainer, setIsTraefikPortainer: s.setIsTraefikPortainer,
   };
 }
 

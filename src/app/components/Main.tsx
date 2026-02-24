@@ -117,22 +117,22 @@ export default function Main() {
   const hasDefaultDomain = useMemo(() => {
     if (!stateFunctions.isTraefik) return false;
     const domains = [
-      stateFunctions.isMoneroPublicNode && stateFunctions.moneroNodeDomain,
-      stateFunctions.isStagenetNode && stateFunctions.isStagenetNodePublic && stateFunctions.stagenetNodeDomain,
-      stateFunctions.isMoneroblock && stateFunctions.moneroBlockDomain,
-      stateFunctions.isOnionMoneroBlockchainExplorer && stateFunctions.onionMoneroBlockchainExplorerDomain,
-      stateFunctions.isMonitoring && stateFunctions.grafanaDomain,
-      stateFunctions.isPortainer && stateFunctions.portainerDomain,
+      stateFunctions.isMoneroPublicNode && stateFunctions.isTraefikMonerod && stateFunctions.moneroNodeDomain,
+      stateFunctions.isStagenetNode && stateFunctions.isStagenetNodePublic && stateFunctions.isTraefikStagenet && stateFunctions.stagenetNodeDomain,
+      stateFunctions.isMoneroblock && stateFunctions.isTraefikMoneroblock && stateFunctions.moneroBlockDomain,
+      stateFunctions.isOnionMoneroBlockchainExplorer && stateFunctions.isTraefikOnionExplorer && stateFunctions.onionMoneroBlockchainExplorerDomain,
+      stateFunctions.isMonitoring && stateFunctions.isTraefikGrafana && stateFunctions.grafanaDomain,
+      stateFunctions.isPortainer && stateFunctions.isTraefikPortainer && stateFunctions.portainerDomain,
     ].filter(Boolean) as string[];
     return domains.some((d) => d.includes("example.com"));
   }, [
     stateFunctions.isTraefik,
-    stateFunctions.isMoneroPublicNode, stateFunctions.moneroNodeDomain,
-    stateFunctions.isStagenetNode, stateFunctions.isStagenetNodePublic, stateFunctions.stagenetNodeDomain,
-    stateFunctions.isMoneroblock, stateFunctions.moneroBlockDomain,
-    stateFunctions.isOnionMoneroBlockchainExplorer, stateFunctions.onionMoneroBlockchainExplorerDomain,
-    stateFunctions.isMonitoring, stateFunctions.grafanaDomain,
-    stateFunctions.isPortainer, stateFunctions.portainerDomain,
+    stateFunctions.isMoneroPublicNode, stateFunctions.isTraefikMonerod, stateFunctions.moneroNodeDomain,
+    stateFunctions.isStagenetNode, stateFunctions.isStagenetNodePublic, stateFunctions.isTraefikStagenet, stateFunctions.stagenetNodeDomain,
+    stateFunctions.isMoneroblock, stateFunctions.isTraefikMoneroblock, stateFunctions.moneroBlockDomain,
+    stateFunctions.isOnionMoneroBlockchainExplorer, stateFunctions.isTraefikOnionExplorer, stateFunctions.onionMoneroBlockchainExplorerDomain,
+    stateFunctions.isMonitoring, stateFunctions.isTraefikGrafana, stateFunctions.grafanaDomain,
+    stateFunctions.isPortainer, stateFunctions.isTraefikPortainer, stateFunctions.portainerDomain,
   ]);
 
   const dockerCompose = useMemo(() => generateDockerComposeFile(checkedServices), [checkedServices]);
