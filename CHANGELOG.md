@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/hundehausen/monero-suite/compare/v1.0.0...v1.1.0) (2026-02-24)
+
+
+### Features
+
+* add TOML language support for code highlighting in EnvPreview ([db750f4](https://github.com/hundehausen/monero-suite/commits/db750f4c96eb1c8d61ef1a48cb00a8cc1c80aada))
+* disable download button when placeholder domain is set ([bc5492c](https://github.com/hundehausen/monero-suite/commits/bc5492cc90d52010ce9c15b1d478552d37097a25))
+* enable reverse proxy per service ([957df9d](https://github.com/hundehausen/monero-suite/commits/957df9d29607b02eaaadc6a97feda4478901d9c5))
+* ux improvements ([38c6fa1](https://github.com/hundehausen/monero-suite/commits/38c6fa11c69dfa13fb74bf5e84de6188c6025f94))
+
+### Chore
+
+* fix security vulnerabilities ([c2bd2ce](https://github.com/hundehausen/monero-suite/commits/c2bd2ce95c59507c604e4c682e8a9edbcf25f71b))
+
+
 ## [1.0.0](https://github.com/hundehausen/monero-suite/compare/v0.7.0...v1.0.0) (2026-02-07)
 
 
