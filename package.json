@@ -15,10 +15,10 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@mantine/code-highlight": "8.3.14",
-    "@mantine/core": "8.3.14",
-    "@mantine/hooks": "8.3.14",
-    "@vercel/blob": "2.2.0",
+    "@mantine/code-highlight": "8.3.15",
+    "@mantine/core": "8.3.15",
+    "@mantine/hooks": "8.3.15",
+    "@vercel/blob": "2.3.0",
     "compose-spec-schema": "1.0.0",
     "date-fns": "4.1.0",
     "highlight.js": "11.11.1",
@@ -28,17 +28,17 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-icons": "5.5.0",
-    "react-toggle-dark-mode": "1.1.1",
+    "react-toggle-dark-mode": "2.0.0",
     "sharp": "0.34.5",
     "typescript": "5.9.3",
     "yaml": "2.8.2",
     "zod": "4.3.6"
   },
   "devDependencies": {
-    "@commitlint/cli": "20.4.1",
-    "@commitlint/config-conventional": "20.4.1",
-    "@types/node": "25.2.1",
-    "@types/react": "19.2.13",
+    "@commitlint/cli": "20.4.2",
+    "@commitlint/config-conventional": "20.4.2",
+    "@types/node": "25.3.0",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "autoprefixer": "10.4.24",
     "eslint": "9.39.2",
@@ -49,5 +49,5 @@
     "postcss-simple-vars": "7.0.1",
     "standard-version": "9.5.0"
   },
-  "packageManager": "pnpm@10.28.2"
+  "packageManager": "pnpm@10.30.2"
 }
