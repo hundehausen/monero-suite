@@ -30,10 +30,15 @@ jobs:
       - name: Build
         run: pnpm build
         
+      - name: Extract release notes
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          awk "/^## \[${TAG_VERSION}\]/{found=1; next} found && /^## /{exit} found{print}" CHANGELOG.md > release_notes.md
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          body_path: CHANGELOG.md
+          body_path: release_notes.md
           draft: false
           prerelease: false
         env:
