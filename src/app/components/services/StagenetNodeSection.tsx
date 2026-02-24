@@ -5,7 +5,7 @@ import {
   Text,
   TextInput,
 } from "@mantine/core";
-import { useServicesContext, useStagenetState, useMonerodState } from "@/hooks/services-context";
+import { useServicesContext, useStagenetState } from "@/hooks/services-context";
 import AccordionItemComponent from "./AccordionItemComponent";
 
 const StagenetNodeSection = () => {
@@ -15,12 +15,18 @@ const StagenetNodeSection = () => {
     setIsStagenetNode,
     isStagenetNodePublic,
     setIsStagenetNodePublic,
-    isMoneroStagenetVolume,
-    setIsMoneroStagenetVolume,
+    isMoneroStagenetCustomLocation,
+    setIsMoneroStagenetCustomLocation,
     moneroStagenetBlockchainLocation,
     setMoneroStagenetBlockchainLocation,
   } = useStagenetState();
-  const { moneroNodeNoLogs, setMoneroNodeNoLogs } = useMonerodState();
+
+  const stagenetBlockchainLocationError = (): string | null => {
+    if (!moneroStagenetBlockchainLocation) return null;
+    if (!moneroStagenetBlockchainLocation.startsWith("/") && !moneroStagenetBlockchainLocation.startsWith("~"))
+      return "Path must be absolute (e.g. /mnt/data/stagenet)";
+    return null;
+  };
 
   return (
     <AccordionItemComponent
@@ -40,7 +46,7 @@ const StagenetNodeSection = () => {
         <>
           <Switch
             checked={isStagenetNodePublic}
-            label="Stagenet Node"
+            label="Node Visibility"
             labelPosition="left"
             onChange={(event) =>
               setIsStagenetNodePublic(event.currentTarget.checked)
@@ -55,15 +61,15 @@ const StagenetNodeSection = () => {
             }}
           />
           <Checkbox
-            checked={!isMoneroStagenetVolume}
+            checked={isMoneroStagenetCustomLocation}
             label="Custom location for Monero stagenet blockchain"
             labelPosition="left"
             size="md"
             onChange={(event) =>
-              setIsMoneroStagenetVolume(!event.currentTarget.checked)
+              setIsMoneroStagenetCustomLocation(event.currentTarget.checked)
             }
           ></Checkbox>
-          {!isMoneroStagenetVolume && (
+          {isMoneroStagenetCustomLocation && (
             <Input.Wrapper
               styles={{
                 root: {
@@ -71,24 +77,17 @@ const StagenetNodeSection = () => {
                 },
               }}
               description="The location where the monero blockchain will be stored."
+              error={stagenetBlockchainLocationError()}
             >
               <TextInput
                 value={moneroStagenetBlockchainLocation}
                 onChange={(e) =>
                   setMoneroStagenetBlockchainLocation(e.currentTarget.value)
                 }
+                error={!!stagenetBlockchainLocationError()}
               />
             </Input.Wrapper>
           )}
-          <Checkbox
-            checked={moneroNodeNoLogs}
-            label="Disable Monero Node logging"
-            labelPosition="left"
-            size="md"
-            onChange={(event) =>
-              setMoneroNodeNoLogs(event.currentTarget.checked)
-            }
-          />
         </>
       )}
     </AccordionItemComponent>

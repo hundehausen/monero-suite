@@ -9,9 +9,9 @@ export const useMoneroblockService = () => {
     "isMoneroblock",
     parseAsBoolean.withDefault(false)
   );
-  const [isMoneroblockLogging, setIsMoneroblockLogging] = useQueryState(
-    "isMoneroblockLogging",
-    parseAsBoolean.withDefault(true)
+  const [isMoneroblockLoggingDisabled, setIsMoneroblockLoggingDisabled] = useQueryState(
+    "isMoneroblockLoggingDisabled",
+    parseAsBoolean.withDefault(false)
   );
   const [moneroBlockDomain, setMoneroBlockDomain] = useQueryState(
     "moneroBlockDomain",
@@ -47,7 +47,7 @@ export const useMoneroblockService = () => {
           },
         },
         labels,
-        logging: !isMoneroblockLogging
+        logging: isMoneroblockLoggingDisabled
           ? {
             driver: "none",
           }
@@ -62,8 +62,8 @@ export const useMoneroblockService = () => {
     stateFunctions: {
       isMoneroblock,
       setIsMoneroblock,
-      isMoneroblockLogging,
-      setIsMoneroblockLogging,
+      isMoneroblockLoggingDisabled,
+      setIsMoneroblockLoggingDisabled,
       moneroBlockDomain,
       setMoneroBlockDomain,
     },

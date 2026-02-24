@@ -31,6 +31,7 @@ const TraefikSection = () => {
   ];
 
   const visibleDomainInputs = domainInputs.filter((d) => d.show);
+  const hasDefaultDomain = visibleDomainInputs.some((d) => d.value.includes("example.com"));
 
   return (
     <AccordionItemComponent
@@ -53,6 +54,11 @@ const TraefikSection = () => {
             <Alert variant="light" color="blue" title="DNS Setup Required">
               Make sure your domain&apos;s DNS A/AAAA records point to your server&apos;s IP address. Traefik will automatically obtain Let&apos;s Encrypt TLS certificates once DNS is configured.
             </Alert>
+            {hasDefaultDomain && (
+              <Alert variant="light" color="red" title="Domain not configured">
+                Replace all <strong>example.com</strong> domains below before generating the install command.
+              </Alert>
+            )}
             {visibleDomainInputs.length > 0 ? (
               visibleDomainInputs.map((input) => (
                 <TextInput
@@ -61,6 +67,7 @@ const TraefikSection = () => {
                   description={input.description}
                   value={input.value}
                   onChange={(e) => input.onChange(e.currentTarget.value)}
+                  error={input.value.includes("example.com") ? "Replace with your actual domain" : undefined}
                 />
               ))
             ) : (

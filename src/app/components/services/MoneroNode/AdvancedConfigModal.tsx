@@ -1,4 +1,4 @@
-import { Button, Group, Modal, ScrollArea, Text, Anchor, Accordion } from "@mantine/core";
+import { Button, Group, Modal, ScrollArea, Text, Anchor, Accordion, Badge } from "@mantine/core";
 import LoggingSection from "./LoggingSection";
 import StorageSection from "./StorageSection";
 import NetworkSecuritySection from "./NetworkSecuritySection";
@@ -43,12 +43,15 @@ const AdvancedConfigModal = ({ opened, onClose }: AdvancedConfigModalProps) => {
         }
       }}
     >
-      <Text mb="md">
-        {`Configure advanced options for your Monero node. These settings provide fine-grained control
-        over the node's behavior, performance, and resource usage.`}
-      </Text>
+      <Group mb="md" justify="space-between">
+        <Text>
+          {`Configure advanced options for your Monero node. These settings provide fine-grained control
+          over the node's behavior, performance, and resource usage.`}
+        </Text>
+        <Badge variant="light" color="green" size="sm">Changes saved automatically</Badge>
+      </Group>
 
-      <Accordion multiple defaultValue={['logging']}>
+      <Accordion multiple defaultValue={['logging', 'rpc_zmq', 'mining', 'tor_i2p']}>
         <LoggingSection />
         <StorageSection />
         <NetworkSecuritySection />

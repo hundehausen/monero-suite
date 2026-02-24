@@ -11,6 +11,15 @@ const BootstrapNodeSection = () => {
     setBootstrapDaemonLogin,
   } = useMonerodState();
 
+  const bootstrapAddressError = (): string | null => {
+    if (!bootstrapDaemonAddress) return null;
+    const portMatch = bootstrapDaemonAddress.match(/:(\d+)$/);
+    if (!portMatch) return "Format: host:port (e.g. node.example.org:18089)";
+    const port = parseInt(portMatch[1]);
+    if (port < 1 || port > 65535) return "Port must be between 1 and 65535";
+    return null;
+  };
+
   return (
     <AccordionItemComponent
       value="bootstrap"
@@ -27,6 +36,7 @@ const BootstrapNodeSection = () => {
           value={bootstrapDaemonAddress}
           onChange={(e) => setBootstrapDaemonAddress(e.currentTarget.value)}
           placeholder="node.example.org:18089"
+          error={bootstrapAddressError()}
         />
         {bootstrapDaemonAddress && (
           <TextInput

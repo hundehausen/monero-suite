@@ -13,6 +13,17 @@ const TorI2PSection = () => {
     setTxProxyDisableNoise,
   } = useMonerodState();
 
+  const anonymousInboundError = (): string | null => {
+    if (!anonymousInbound) return null;
+    const parts = anonymousInbound.split(",");
+    if (parts.length < 2) return "Format: onion_address:port,bind_ip:port[,max_connections]";
+    if (!parts[0].includes(":") || !parts[1].includes(":"))
+      return "Format: onion_address:port,bind_ip:port[,max_connections]";
+    if (parts.length > 2 && !/^\d+$/.test(parts[2].trim()))
+      return "Max connections must be a number";
+    return null;
+  };
+
   return (
     <AccordionItemComponent
       value="tor_i2p"
@@ -58,6 +69,7 @@ const TorI2PSection = () => {
           value={anonymousInbound}
           onChange={(e) => setAnonymousInbound(e.currentTarget.value)}
           placeholder="your_onion_address.onion:18084,127.0.0.1:18084,25"
+          error={anonymousInboundError()}
         />
       </SimpleGrid>
     </AccordionItemComponent>

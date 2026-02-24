@@ -1,6 +1,5 @@
 import { Accordion } from "@mantine/core";
 import { useState } from "react";
-import { useServicesContext } from "@/hooks/services-context";
 import {
   ArchitectureSection,
   NetworkModeSection,
@@ -19,25 +18,11 @@ import {
 } from "./services";
 
 const Selection = () => {
-  const { stateFunctions } = useServicesContext();
-  const {
-    p2PoolPayoutAddress,
-  } = stateFunctions;
-
   const [accordionItems, setAccordionItems] = useState([
     "architecture",
     "exposed",
     "mainnet-node",
   ]);
-
-  const p2poolPayoutAddressError = () => {
-    if (p2PoolPayoutAddress.length === 0) return null;
-    if (p2PoolPayoutAddress.length < 95) return "Address too short";
-    if (p2PoolPayoutAddress.length > 95) return "Address too long";
-    if (!p2PoolPayoutAddress.startsWith("4"))
-      return "Address must start with 4. Subaddresses are not supported by P2Pool.";
-    return null;
-  };
 
   return (
     <Accordion

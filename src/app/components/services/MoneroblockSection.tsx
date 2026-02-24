@@ -7,8 +7,8 @@ const MoneroblockSection = () => {
   const {
     isMoneroblock,
     setIsMoneroblock,
-    isMoneroblockLogging,
-    setIsMoneroblockLogging,
+    isMoneroblockLoggingDisabled,
+    setIsMoneroblockLoggingDisabled,
   } = useMoneroblockState();
 
   return (
@@ -27,12 +27,12 @@ const MoneroblockSection = () => {
       />
       {isMoneroblock && (
         <Checkbox
-          checked={!isMoneroblockLogging}
+          checked={isMoneroblockLoggingDisabled}
           label="Disable Moneroblock logging"
           labelPosition="left"
           size="md"
           onChange={(event) =>
-            setIsMoneroblockLogging(!event.currentTarget.checked)
+            setIsMoneroblockLoggingDisabled(event.currentTarget.checked)
           }
           styles={{
             label: {

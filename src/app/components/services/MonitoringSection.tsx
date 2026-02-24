@@ -1,4 +1,4 @@
-import { Alert, Checkbox, Text } from "@mantine/core";
+import { Alert, Checkbox, Text, Badge } from "@mantine/core";
 import { useServicesContext, useMonitoringState, useArchitectureState } from "@/hooks/services-context";
 import AccordionItemComponent from "./AccordionItemComponent";
 
@@ -11,7 +11,13 @@ const MonitoringSection = () => {
   const { architecture } = useArchitectureState();
 
   if (architecture !== "linux/amd64") {
-    return null;
+    return (
+      <AccordionItemComponent value="monitoring" title="Monitoring" checked={false}>
+        <Text size="sm" c="dimmed" component="div">
+          Monitoring (Grafana + Prometheus + node-exporter) is only available on <Badge variant="light" color="gray" size="sm">linux/amd64</Badge>. Switch the architecture above to enable it.
+        </Text>
+      </AccordionItemComponent>
+    );
   }
 
   return (

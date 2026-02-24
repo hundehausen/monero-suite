@@ -14,9 +14,9 @@ export const useMonerodStagenetService = () => {
     "isStagenetNodePublic",
     parseAsBoolean.withDefault(true)
   );
-  const [isMoneroStagenetVolume, setIsMoneroStagenetVolume] = useQueryState(
-    "isMoneroStagenetVolume",
-    parseAsBoolean.withDefault(true)
+  const [isMoneroStagenetCustomLocation, setIsMoneroStagenetCustomLocation] = useQueryState(
+    "isMoneroStagenetCustomLocation",
+    parseAsBoolean.withDefault(false)
   );
   const [
     moneroStagenetBlockchainLocation,
@@ -53,7 +53,7 @@ export const useMonerodStagenetService = () => {
       isStagenetNodePublic && networkMode === networkModes.exposed
         ? ["38080/tcp", "38089/tcp"]
         : undefined,
-    volumes: isMoneroStagenetVolume
+    volumes: !isMoneroStagenetCustomLocation
       ? {
           "bitmonero-stagenet": {},
         }
@@ -64,7 +64,7 @@ export const useMonerodStagenetService = () => {
         restart: "unless-stopped",
         container_name: "monerod-stagenet",
         volumes: [
-          ...(isMoneroStagenetVolume
+          ...(!isMoneroStagenetCustomLocation
             ? ["bitmonero-stagenet:/home/monero/.bitmonero"]
             : [
                 `${sPath}:/home/monero/.bitmonero`,
@@ -121,8 +121,8 @@ export const useMonerodStagenetService = () => {
       setIsStagenetNode,
       isStagenetNodePublic,
       setIsStagenetNodePublic,
-      isMoneroStagenetVolume,
-      setIsMoneroStagenetVolume,
+      isMoneroStagenetCustomLocation,
+      setIsMoneroStagenetCustomLocation,
       moneroStagenetBlockchainLocation,
       setMoneroStagenetBlockchainLocation,
       stagenetNodeDomain,

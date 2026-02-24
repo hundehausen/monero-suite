@@ -18,6 +18,7 @@
     "@mantine/code-highlight": "8.3.15",
     "@mantine/core": "8.3.15",
     "@mantine/hooks": "8.3.15",
+    "@mantine/notifications": "8.3.15",
     "@vercel/blob": "2.3.0",
     "compose-spec-schema": "1.0.0",
     "date-fns": "4.1.0",

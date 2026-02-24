@@ -13,6 +13,13 @@ const NetworkSecuritySection = () => {
     setDisableDnsCheckpoints,
   } = useMonerodState();
 
+  const banListError = (): string | null => {
+    if (!banList) return null;
+    if (!banList.startsWith("/"))
+      return "Path must be absolute (e.g. /path/to/ban-list.txt)";
+    return null;
+  };
+
   return (
     <AccordionItemComponent
       value="network_security"
@@ -39,6 +46,7 @@ const NetworkSecuritySection = () => {
           value={banList}
           onChange={(e) => setBanList(e.currentTarget.value)}
           placeholder="/path/to/custom-ban-list.txt"
+          error={banListError()}
         />
         <Switch
           label={

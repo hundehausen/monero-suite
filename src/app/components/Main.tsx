@@ -22,6 +22,7 @@ import { SiDotenv, SiGnubash } from "react-icons/si";
 import { useServicesContext } from "@/hooks/services-context";
 import { networkModes } from "@/hooks/use-services";
 import { useState, useEffect, useMemo, CSSProperties, useRef } from "react";
+import { notifications } from "@mantine/notifications";
 import { uploadInstallScript } from "../actions";
 import {
   generateDockerComposeFile,
@@ -107,6 +108,12 @@ export default function Main() {
     [services]
   );
 
+  const hasP2PoolInvalidAddress = useMemo(() => {
+    if (stateFunctions.p2PoolMode === "none") return false;
+    const addr = stateFunctions.p2PoolPayoutAddress;
+    return !addr || addr.length !== 95 || !addr.startsWith("4");
+  }, [stateFunctions.p2PoolMode, stateFunctions.p2PoolPayoutAddress]);
+
   const hasDefaultDomain = useMemo(() => {
     if (!stateFunctions.isTraefik) return false;
     const domains = [
@@ -147,7 +154,7 @@ export default function Main() {
   );
 
   const handleScriptGeneration = async () => {
-    if (hasDefaultDomain) return;
+    if (hasDefaultDomain || hasP2PoolInvalidAddress) return;
     setIsUploading(true);
 
     try {
@@ -171,8 +178,19 @@ export default function Main() {
 
       setCurrentConfigIsUploaded(true);
       setScriptUrl(`${window.location.origin}/install/${configId}`);
+      notifications.show({
+        title: "Install command ready",
+        message: "Copy the command below and paste it into your terminal.",
+        color: "green",
+      });
     } catch (error) {
       console.error("Failed to upload script:", error);
+      notifications.show({
+        title: "Upload failed",
+        message: "Could not generate install command. Check your connection and try again.",
+        color: "red",
+        autoClose: false,
+      });
     } finally {
       setIsUploading(false);
     }
@@ -287,13 +305,32 @@ export default function Main() {
                 </Text>
               )}
 
-              <Button
-                onClick={handleScriptGeneration}
-                disabled={currentConfigIsUploaded || hasDefaultDomain}
-                loading={isUploading}
+              {hasP2PoolInvalidAddress && (
+                <Text c="red" size="sm">
+                  P2Pool requires a valid primary Monero address (95 characters, starting with 4) in the P2Pool section.
+                </Text>
+              )}
+
+              <Tooltip
+                label={
+                  hasDefaultDomain
+                    ? "Replace all example.com domains in the Traefik section first"
+                    : hasP2PoolInvalidAddress
+                    ? "Enter a valid Monero payout address in the P2Pool section first"
+                    : currentConfigIsUploaded
+                    ? "Command is up to date — change settings to regenerate"
+                    : ""
+                }
+                disabled={!hasDefaultDomain && !hasP2PoolInvalidAddress && !currentConfigIsUploaded}
               >
-                Generate Install Command
-              </Button>
+                <Button
+                  onClick={handleScriptGeneration}
+                  disabled={currentConfigIsUploaded || hasDefaultDomain || hasP2PoolInvalidAddress}
+                  loading={isUploading}
+                >
+                  Generate Install Command
+                </Button>
+              </Tooltip>
 
               <TextInput
                 placeholder="Press Generate Install Command"
@@ -328,22 +365,31 @@ export default function Main() {
               <Text size="sm">
                 Or download and run manually:
               </Text>
-              <Button
-                variant="light"
-                leftSection={<TbDownload />}
-                disabled={hasDefaultDomain}
-                onClick={() => {
-                  const blob = new Blob([fullScript], { type: "text/plain" });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = "install.sh";
-                  a.click();
-                  URL.revokeObjectURL(url);
-                }}
+              <Tooltip
+                label={
+                  hasDefaultDomain
+                    ? "Replace all example.com domains in the Traefik section first"
+                    : "Enter a valid Monero payout address in the P2Pool section first"
+                }
+                disabled={!hasDefaultDomain && !hasP2PoolInvalidAddress}
               >
-                Download install.sh
-              </Button>
+                <Button
+                  variant="light"
+                  leftSection={<TbDownload />}
+                  disabled={hasDefaultDomain || hasP2PoolInvalidAddress}
+                  onClick={() => {
+                    const blob = new Blob([fullScript], { type: "text/plain" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "install.sh";
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                >
+                  Download install.sh
+                </Button>
+              </Tooltip>
             </Accordion.Panel>
           </Accordion.Item>
 
@@ -371,7 +417,7 @@ export default function Main() {
                 <Text size="lg">Environment Variables</Text>
               </Accordion.Control>
               <Accordion.Panel styles={panelStyles}>
-                <EnvPreview env={envString} />
+                <EnvPreview env={envString} hasDefaultDomain={hasDefaultDomain} />
               </Accordion.Panel>
             </Accordion.Item>
           )}

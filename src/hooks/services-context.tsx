@@ -79,7 +79,7 @@ export function useStagenetState(): StagenetState {
   return {
     isStagenetNode: s.isStagenetNode, setIsStagenetNode: s.setIsStagenetNode,
     isStagenetNodePublic: s.isStagenetNodePublic, setIsStagenetNodePublic: s.setIsStagenetNodePublic,
-    isMoneroStagenetVolume: s.isMoneroStagenetVolume, setIsMoneroStagenetVolume: s.setIsMoneroStagenetVolume,
+    isMoneroStagenetCustomLocation: s.isMoneroStagenetCustomLocation, setIsMoneroStagenetCustomLocation: s.setIsMoneroStagenetCustomLocation,
     moneroStagenetBlockchainLocation: s.moneroStagenetBlockchainLocation, setMoneroStagenetBlockchainLocation: s.setMoneroStagenetBlockchainLocation,
     stagenetNodeDomain: s.stagenetNodeDomain, setStagenetNodeDomain: s.setStagenetNodeDomain,
   };
@@ -103,7 +103,7 @@ export function useMoneroblockState(): MoneroblockState {
   const { stateFunctions: s } = useServicesContext();
   return {
     isMoneroblock: s.isMoneroblock, setIsMoneroblock: s.setIsMoneroblock,
-    isMoneroblockLogging: s.isMoneroblockLogging, setIsMoneroblockLogging: s.setIsMoneroblockLogging,
+    isMoneroblockLoggingDisabled: s.isMoneroblockLoggingDisabled, setIsMoneroblockLoggingDisabled: s.setIsMoneroblockLoggingDisabled,
     moneroBlockDomain: s.moneroBlockDomain, setMoneroBlockDomain: s.setMoneroBlockDomain,
   };
 }

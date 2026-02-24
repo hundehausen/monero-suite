@@ -15,6 +15,13 @@ const StorageSection = () => {
     setIsSyncPrunedBlocks,
   } = useMonerodState();
 
+  const blockchainLocationError = (): string | null => {
+    if (!moneroMainnetBlockchainLocation) return null;
+    if (!moneroMainnetBlockchainLocation.startsWith("/") && !moneroMainnetBlockchainLocation.startsWith("~"))
+      return "Path must be absolute (e.g. /mnt/data/monero or ~/.bitmonero)";
+    return null;
+  };
+
   return (
     <AccordionItemComponent
       value="storage"
@@ -42,6 +49,7 @@ const StorageSection = () => {
             value={moneroMainnetBlockchainLocation}
             onChange={(e) => setMoneroMainnetBlockchainLocation(e.currentTarget.value)}
             placeholder="~/.bitmonero"
+            error={blockchainLocationError()}
           />
         )}
         <Switch

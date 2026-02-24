@@ -1,6 +1,7 @@
 "use client";
 
 import { MantineProvider, createTheme } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
 import { CodeHighlightAdapterProvider, createHighlightJsAdapter } from '@mantine/code-highlight';
 import hljs from 'highlight.js/lib/core';
 import bashLang from 'highlight.js/lib/languages/bash';
@@ -33,6 +34,7 @@ const customTheme = createTheme({
 
 const Provider = ({ children }: { children: React.ReactNode }) => (
   <MantineProvider defaultColorScheme="dark" theme={customTheme}>
+    <Notifications />
     <CodeHighlightAdapterProvider adapter={highlightJsAdapter}>
     {children}
     </CodeHighlightAdapterProvider>

@@ -1,13 +1,14 @@
 import { CodeHighlightTabs } from "@mantine/code-highlight";
 import { SiGnubash } from "react-icons/si";
-import { Button } from "@mantine/core";
+import { Button, Tooltip } from "@mantine/core";
 import { TbDownload } from "react-icons/tb";
 
 interface EnvPreviewProps {
   env: string;
+  hasDefaultDomain?: boolean;
 }
 
-const EnvPreview = ({ env }: EnvPreviewProps) => {
+const EnvPreview = ({ env, hasDefaultDomain = false }: EnvPreviewProps) => {
   const handleDownload = () => {
     const blob = new Blob([env], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -23,7 +24,7 @@ const EnvPreview = ({ env }: EnvPreviewProps) => {
       <CodeHighlightTabs
         code={[{
           code: env,
-          language: "TOML",
+          language: "ini",
           fileName: ".env",
           icon: <SiGnubash />,
         }]}
@@ -34,14 +35,20 @@ const EnvPreview = ({ env }: EnvPreviewProps) => {
           },
         }}
       />
-      <Button
-        variant="light"
-        leftSection={<TbDownload />}
-        onClick={handleDownload}
-        mt="sm"
+      <Tooltip
+        label="Replace all example.com domains in the Traefik section first"
+        disabled={!hasDefaultDomain}
       >
-        Download .env
-      </Button>
+        <Button
+          variant="light"
+          leftSection={<TbDownload />}
+          onClick={handleDownload}
+          mt="sm"
+          disabled={hasDefaultDomain}
+        >
+          Download .env
+        </Button>
+      </Tooltip>
     </>
   );
 };

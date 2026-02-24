@@ -6,6 +6,7 @@ import {
   SegmentedControl,
   Slider,
   Text,
+  Tooltip,
 } from "@mantine/core";
 import { useServicesContext, useP2PoolState, useXmrigState, useArchitectureState } from "@/hooks/services-context";
 import ExplainingLabel from "../ExplainingLabel";
@@ -26,10 +27,10 @@ const P2PoolSection = () => {
 
   const p2poolPayoutAddressError = () => {
     if (p2PoolPayoutAddress.length === 0) return null;
-    if (p2PoolPayoutAddress.length < 95) return "Address too short";
-    if (p2PoolPayoutAddress.length > 95) return "Address too long";
+    if (p2PoolPayoutAddress.length !== 95)
+      return `Monero address must be exactly 95 characters (currently ${p2PoolPayoutAddress.length})`;
     if (!p2PoolPayoutAddress.startsWith("4"))
-      return "Address must start with 4. Subaddresses are not supported by P2Pool.";
+      return "Must be a primary address starting with 4 — subaddresses are not supported by P2Pool";
     return null;
   };
 
@@ -98,6 +99,7 @@ const P2PoolSection = () => {
             label="Monero Payout Address"
             description="It has to be a primary address. Subaddresses don't work."
             error={p2poolPayoutAddressError()}
+            withAsterisk
           >
             <Input
               value={p2PoolPayoutAddress}
@@ -119,7 +121,14 @@ const P2PoolSection = () => {
                 value: "none",
               },
               {
-                label: "XMRig",
+                label: (
+                  <Tooltip
+                    label="XMRig does not have ARM64 builds. Use P2Pool's built-in miner instead."
+                    disabled={architecture !== "linux/arm64"}
+                  >
+                    <span>XMRig</span>
+                  </Tooltip>
+                ),
                 value: "xmrig",
                 disabled: architecture === "linux/arm64",
               },
