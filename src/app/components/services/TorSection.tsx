@@ -111,26 +111,30 @@ const TorSection = () => {
             Select which services to expose as Tor hidden services. Each selected service gets its own .onion address.
           </Text>
           <Stack gap="xs">
-            <Checkbox
-              checked={hsMonerod}
-              label="Monerod (Restricted RPC)"
-              onChange={(event) => setHsMonerod(event.currentTarget.checked)}
-            />
-            <Checkbox
-              checked={hsMonerodP2P}
-              label={
-                <ExplainingLabel
-                  label="Monerod (P2P Anonymous Inbound)"
-                  explanation={
-                    "Creates a hidden service for monerod P2P traffic on port 18084, allowing other Tor nodes to peer with your node anonymously. "
-                    + "This requires a manual step after first deployment: run `docker logs tor` to find the generated .onion address, "
-                    + "then set the monerod flag --anonymous-inbound=<your_onion_address>.onion:18084,127.0.0.1:18084 "
-                    + "in the Anonymous Inbound field under Monerod Advanced Settings > Tor/I2P, and redeploy with `docker compose up -d`."
-                  }
-                />
-              }
-              onChange={(event) => setHsMonerodP2P(event.currentTarget.checked)}
-            />
+            {services["monerod"]?.checked && (
+              <Checkbox
+                checked={hsMonerod}
+                label="Monerod (Restricted RPC)"
+                onChange={(event) => setHsMonerod(event.currentTarget.checked)}
+              />
+            )}
+            {services["monerod"]?.checked && (
+              <Checkbox
+                checked={hsMonerodP2P}
+                label={
+                  <ExplainingLabel
+                    label="Monerod (P2P Anonymous Inbound)"
+                    explanation={
+                      "Creates a hidden service for monerod P2P traffic on port 18084, allowing other Tor nodes to peer with your node anonymously. "
+                      + "This requires a manual step after first deployment: run `docker logs tor` to find the generated .onion address, "
+                      + "then set the monerod flag --anonymous-inbound=<your_onion_address>.onion:18084,127.0.0.1:18084 "
+                      + "in the Anonymous Inbound field under Monerod Advanced Settings > Tor/I2P, and redeploy with `docker compose up -d`."
+                    }
+                  />
+                }
+                onChange={(event) => setHsMonerodP2P(event.currentTarget.checked)}
+              />
+            )}
             {services["monerod-stagenet"]?.checked && (
               <Checkbox
                 checked={hsStagenet}
