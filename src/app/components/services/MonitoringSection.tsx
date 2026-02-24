@@ -29,7 +29,7 @@ const MonitoringSection = () => {
       <Text size="sm">{services["monitoring"].description}</Text>
       <Checkbox
         checked={isMonitoring}
-        label="Monitoring"
+        label="Enable Monitoring"
         labelPosition="left"
         size="lg"
         onChange={(event) => setIsMonitoring(event.currentTarget.checked)}

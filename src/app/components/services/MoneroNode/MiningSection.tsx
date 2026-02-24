@@ -25,7 +25,7 @@ const MiningSection = () => {
           label={
             <ExplainingLabel
               label="Start Mining to Address"
-              explanation="Start mining to the specified Monero address. If provided, the node will begin mining upon startup. Alternatively you can choose P2Pool Mining as another service."
+              explanation="Start solo mining to the specified Monero address on node startup. For better odds with low hashrate, consider using P2Pool instead."
             />
           }
           value={startMining}

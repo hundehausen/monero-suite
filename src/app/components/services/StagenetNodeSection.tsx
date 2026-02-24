@@ -37,7 +37,7 @@ const StagenetNodeSection = () => {
       <Text size="sm">{services["monerod-stagenet"].description}</Text>
       <Checkbox
         checked={isStagenetNode}
-        label="Monero Stagenet Node"
+        label="Enable Stagenet Node"
         labelPosition="left"
         size="lg"
         onChange={(event) => setIsStagenetNode(event.currentTarget.checked)}
@@ -62,7 +62,7 @@ const StagenetNodeSection = () => {
           />
           <Checkbox
             checked={isMoneroStagenetCustomLocation}
-            label="Custom location for Monero stagenet blockchain"
+            label="Custom blockchain storage location"
             labelPosition="left"
             size="md"
             onChange={(event) =>
@@ -76,7 +76,7 @@ const StagenetNodeSection = () => {
                   width: "100%",
                 },
               }}
-              description="The location where the monero blockchain will be stored."
+              description="The directory where stagenet blockchain data will be stored."
               error={stagenetBlockchainLocationError()}
             >
               <TextInput

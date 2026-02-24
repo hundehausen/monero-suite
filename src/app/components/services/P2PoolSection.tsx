@@ -58,7 +58,7 @@ const P2PoolSection = () => {
             label: (
               <ExplainingLabel
                 label="P2Pool nano"
-                explanation="Use this if you have the lowest hashrate."
+                explanation="Smallest P2Pool network — best for low-power devices and very low hashrate miners."
               />
             ),
             value: "nano",
@@ -67,7 +67,7 @@ const P2PoolSection = () => {
             label: (
               <ExplainingLabel
                 label="P2Pool mini"
-                explanation="Use this if you have a low hashrate."
+                explanation="Smaller pool with lower variance — a good starting point for most home miners."
               />
             ),
             value: "mini",
@@ -76,7 +76,7 @@ const P2PoolSection = () => {
             label: (
               <ExplainingLabel
                 label="P2Pool full"
-                explanation="Use this if you have a lot of hashrate."
+                explanation="Main P2Pool network — best suited for miners with higher hashrate."
               />
             ),
             value: "full",
@@ -136,7 +136,7 @@ const P2PoolSection = () => {
                 label: (
                   <ExplainingLabel
                     label="P2Pool"
-                    explanation="The P2Pool software has a integrated CPU miner. XMRig might be more efficient."
+                    explanation="P2Pool includes a built-in CPU miner. XMRig may perform better on some hardware."
                   />
                 ),
                 value: "p2pool",

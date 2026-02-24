@@ -38,7 +38,7 @@ const RpcZmqSection = () => {
           label={
             <ExplainingLabel
               label="Disable RPC Ban"
-              explanation="Do not ban hosts that cause RPC errors. Particularly useful when using Tor to be more forgiving to connecting wallets."
+              explanation="Don't automatically ban hosts that trigger RPC errors. Recommended when using Tor, since Tor exit nodes may share IPs and an unfair ban could block legitimate wallets."
             />
           }
           checked={disableRpcBan}

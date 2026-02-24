@@ -14,8 +14,7 @@ const Header = () => {
         <Title order={1}>Monero Suite</Title>
       </Flex>
       <Text lineClamp={1} display={{ base: "none", md: "initial" }}>
-        Monero Suite brings Monero related services to your machine using
-        Docker.
+        Configure and deploy Monero services on your machine using Docker.
       </Text>
       <Flex
         align="center"

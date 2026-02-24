@@ -12,12 +12,11 @@ const NetworkModeSection = () => {
       title="Where is your Docker host located?"
     >
       <Text size="sm">
-        If you specify a docker port mapping like this: &quot;3000:3000&quot;
-        it will expose that port on all network interfaces, even if you block
-        it with a firewall rule. If you select the option &apos;directly
-        exposed to the internet&apos;, some of the services will bind their
-        ports on localhost, so they won&apos;t be reachable from the internet,
-        but the other services can still communicate with each other.
+        Select where your server is running. If it&apos;s a home machine behind
+        a router, choose Local Network. If it&apos;s a VPS or cloud server
+        connected directly to the internet, choose VPS — this restricts
+        certain ports to localhost so they aren&apos;t accidentally exposed
+        publicly.
       </Text>
       <SegmentedControl
         value={networkMode}

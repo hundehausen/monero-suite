@@ -45,12 +45,9 @@ const TorI2PSection = () => {
             <ExplainingLabel
               label="Disable Noise (tx-proxy)"
               explanation={
-                "Only applies when Tor is enabled. By default, transactions sent over Tor/I2P use the Dandelion++ stem phase — "
-                + "the Tor/I2P network replaces the p2p stem, and the receiving hidden service forwards over clearnet using Dandelion++ stem after a randomized delay. "
-                + "This delay helps mitigate ISP packet and timing analysis.\n\n"
-                + "Enabling this option adds disable_noise to --tx-proxy, which skips the stem phase and immediately \"fluffs\" (broadcasts) "
-                + "the transaction over outbound Tor connections. The receiving hidden service will also immediately fluff it over clearnet. "
-                + "This gives lower latency when sending transactions while still routing through Tor/I2P to break p2p sybil attacks that Dandelion++ was designed to mitigate."
+                "Only applies when a Tor proxy is enabled. By default, transactions are relayed through Tor with random timing delays (Dandelion++ stem phase) to resist traffic analysis. "
+                + "Enabling this skips the delay and broadcasts transactions immediately — slightly faster, but with slightly less traffic analysis resistance. "
+                + "Leave disabled unless you have a specific reason to change it."
               }
             />
           }
@@ -63,7 +60,7 @@ const TorI2PSection = () => {
           label={
             <ExplainingLabel
               label="Anonymous Inbound"
-              explanation="Allow anonymous inbound connections over Tor/I2P. Format: onion_address:port,bind_ip:port[,max_connections]. Requires a Tor hidden service forwarding to the bind address. Must be used with --tx-proxy."
+              explanation="Allow other Tor nodes to initiate connections to your node anonymously. Requires a Tor hidden service for your node's P2P port (see Tor Hidden Services section). Format: onion_address:port,bind_ip:port[,max_connections]"
             />
           }
           value={anonymousInbound}

@@ -30,7 +30,7 @@ const BootstrapNodeSection = () => {
           label={
             <ExplainingLabel
               label="Bootstrap Daemon Address"
-              explanation="Proxy RPC requests to a remote node while your blockchain is syncing. Allows wallets to connect and operate before sync completes. Format: host:port"
+              explanation="Forward wallet RPC requests to a trusted remote node while your blockchain is still syncing. Wallets can connect and work immediately — even before sync completes. Format: host:port"
             />
           }
           value={bootstrapDaemonAddress}

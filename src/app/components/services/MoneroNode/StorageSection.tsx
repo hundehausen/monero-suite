@@ -32,7 +32,7 @@ const StorageSection = () => {
           label={
             <ExplainingLabel
               label="Use Default Blockchain Location"
-              explanation="When enabled, the blockchain data will be stored in the default location (~/.bitmonero). Disable to specify a custom location."
+              explanation="Store blockchain data in the default location (~/.bitmonero). Disable to specify a different path — useful for external drives or dedicated storage."
             />
           }
           checked={isMoneroMainnetVolume}
@@ -67,7 +67,7 @@ const StorageSection = () => {
             label={
               <ExplainingLabel
                 label="Sync Pruned Blocks"
-                explanation="Accept pruned blocks from peers during sync. Reduces network bandwidth but requires --prune-blockchain to be enabled."
+                explanation="Download pruned blocks from peers instead of full blocks during initial sync. Reduces the amount of data transferred. Only works when pruning is also enabled."
               />
             }
             checked={isSyncPrunedBlocks}

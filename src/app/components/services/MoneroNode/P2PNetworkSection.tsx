@@ -87,7 +87,7 @@ const P2PNetworkSection = () => {
           label={
             <ExplainingLabel
               label="Upload Limit (kB/s)"
-              explanation="Maximum upload bandwidth in kB/s. Monerod default is 8192 kB/s. Set to -1 to use monerod default."
+              explanation="Maximum upload bandwidth in kB/s. Monerod default is 8192 kB/s (~8 MB/s). Set to -1 to use the monerod default."
             />
           }
           value={parseInt(limitRateUp)}
@@ -99,7 +99,7 @@ const P2PNetworkSection = () => {
           label={
             <ExplainingLabel
               label="Download Limit (kB/s)"
-              explanation="Maximum download bandwidth in kB/s. Monerod default is 32768 kB/s. Higher values speed up initial sync."
+              explanation="Maximum download bandwidth in kB/s. Monerod default is 32768 kB/s (~32 MB/s). Higher values speed up initial sync. Set to -1 to use the monerod default."
             />
           }
           value={parseInt(limitRateDown)}
@@ -111,7 +111,7 @@ const P2PNetworkSection = () => {
           label={
             <ExplainingLabel
               label="Disable IGD (UPnP Port Mapping)"
-              explanation="Disables Internet Gateway Device support for automatic port mapping on routers that support UPnP."
+              explanation="Disables automatic port forwarding via UPnP. Enable this if you prefer to configure port forwarding manually on your router. Recommended to disable for privacy."
             />
           }
           checked={noIgd}

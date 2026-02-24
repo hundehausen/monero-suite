@@ -62,7 +62,7 @@ const TorSection = () => {
                 label: (
                   <ExplainingLabel
                     label="Tx only"
-                    explanation="Use this to send transactions of directly connected wallets via the Tor network. Other traffic will not be routed through Tor."
+                    explanation="Route transaction broadcasts from connected wallets through Tor. All other node traffic remains on the clearnet."
                   />
                 ),
                 value: "tx-only",
@@ -71,7 +71,7 @@ const TorSection = () => {
                 label: (
                   <ExplainingLabel
                     label="Full"
-                    explanation="Use this option to route all of monerods IPv4 traffic through Tor. It uses SOCKS4."
+                    explanation="Route all of monerod's p2p IPv4 traffic through Tor. Uses a SOCKS4 proxy."
                   />
                 ),
                 value: "full",
@@ -82,7 +82,7 @@ const TorSection = () => {
 
           {torProxyMode !== "none" && (
             <Alert variant="light" color="blue" title="Docker Network">
-              Enabling Tor proxy creates a dedicated Docker network with static IP addresses for inter-service communication through the Tor SOCKS proxy. This is a workaround because dns resolving is not working correctly.
+              Enabling the Tor proxy creates a dedicated Docker network with static IPs so services can communicate through the Tor SOCKS proxy. Fixed IPs are used because DNS resolution is not available with the proxy flag in monerod.
             </Alert>
           )}
 
