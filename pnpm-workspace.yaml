@@ -1,13 +1,19 @@
+minimumReleaseAge: 4320
+
+minimumReleaseAgeExclude:
+  - next
+  - '@next/*'
+  - react
+  - react-dom
+  - '@vercel/*'
+  - '@types/react'
+  - '@types/node'
+
 onlyBuiltDependencies:
   - sharp
   - unrs-resolver
 
-minimumReleaseAge: 4320
-minimumReleaseAgeExclude:
-  - next
-  - "@next/*"
-  - react
-  - react-dom
-  - "@vercel/*"
-  - "@types/react"
-  - "@types/node"
+overrides:
+  ajv@<6.14.0: '>=6.14.0'
+  ajv@>=7.0.0-alpha.0 <8.18.0: '>=8.18.0'
+  minimatch@<10.2.1: '>=10.2.1'
