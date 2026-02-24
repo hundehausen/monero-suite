@@ -63,7 +63,7 @@ export const SERVICE_PORTS = {
 // automatic updates, and pinned versions would require manual bumps.
 export const DOCKER_IMAGES = {
   monerod: "ghcr.io/sethforprivacy/simple-monerod:latest",
-  moneroWalletRpc: "ghcr.io/sethforprivacy/simple-monero-wallet-rpc:v0.18.4.5",
+  moneroWalletRpc: "ghcr.io/sethforprivacy/simple-monero-wallet-rpc:latest",
   p2pool: "ghcr.io/sethforprivacy/p2pool:latest",
   tor: "ghcr.io/hundehausen/tor-hidden-service:latest",
   traefik: "traefik:latest",
@@ -72,9 +72,9 @@ export const DOCKER_IMAGES = {
   monerodExporter: "lalanza808/monerod_exporter:latest",
   nodemapper: "lalanza808/nodemapper:latest",
   autoheal: "willfarrell/autoheal:latest",
-  watchtower: "ghcr.io/nicholas-fedor/watchtower:latest-dev",
+  watchtower: "ghcr.io/nicholas-fedor/watchtower:latest",
   xmrig: "ghcr.io/metal3d/xmrig:latest",
-  moneroblock: "ghcr.io/sethforprivacy/moneroblock:v0.1.2",
+  moneroblock: "ghcr.io/sethforprivacy/moneroblock:latest",
   portainer: "portainer/portainer-ce:latest",
   explorerOnion: "vdo1138/xmrblocks:latest",
   cuprate: "ghcr.io/hundehausen/cuprate-docker:latest",
