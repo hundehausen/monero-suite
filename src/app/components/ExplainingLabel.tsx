@@ -1,4 +1,5 @@
-import { HoverCard, Text, TextProps } from "@mantine/core";
+import { ActionIcon, Group, Popover, Text, TextProps } from "@mantine/core";
+import { TbInfoCircle } from "react-icons/tb";
 
 interface ExplainingLabelProps {
   label: string;
@@ -11,23 +12,28 @@ const ExplainingLabel = ({
   explanation,
   size,
 }: ExplainingLabelProps) => (
-  <HoverCard width={280} shadow="md" openDelay={300}>
-    <HoverCard.Target>
-      <Text
-        span
-        size={size}
-        style={{
-          cursor: "pointer",
-          position: "relative",
-        }}
-      >
-        {label}
-      </Text>
-    </HoverCard.Target>
-    <HoverCard.Dropdown>
-      <Text size="sm">{explanation}</Text>
-    </HoverCard.Dropdown>
-  </HoverCard>
+  <Group gap={4} wrap="nowrap" align="center" justify="center">
+    <Text span size={size}>
+      {label}
+    </Text>
+    <Popover width={360} shadow="md" withArrow>
+      <Popover.Target>
+        <ActionIcon
+          variant="transparent"
+          size="xs"
+          color="dimmed"
+          aria-label="More information"
+        >
+          <TbInfoCircle size={14} />
+        </ActionIcon>
+      </Popover.Target>
+      <Popover.Dropdown>
+        <Text size="sm" style={{ wordBreak: "break-word" }}>
+          {explanation}
+        </Text>
+      </Popover.Dropdown>
+    </Popover>
+  </Group>
 );
 
 export default ExplainingLabel;
