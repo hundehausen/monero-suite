@@ -306,6 +306,13 @@ section "System Checks"
 check_privileges
 detect_os
 validate_network
+
+run_cmd pkg_update &
+show_spinner $! "Updating system packages"
+
+run_cmd pkg_install curl &
+show_spinner $! "Installing packages: curl"
+
 install_docker
 `;
 

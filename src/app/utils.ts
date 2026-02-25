@@ -1,6 +1,5 @@
 import type { Service } from "@/hooks/use-services";
 import { Compose } from "compose-spec-schema";
-import { BASE_BASH_COMMANDS } from "@/lib/script-generator";
 
 const globalLogSettings = `x-log-config:
   &log-config
@@ -63,14 +62,11 @@ export const getFirewallPorts = (services: Service[]): string => {
 };
 
 export const generateBashScriptFile = (services: Service[]) => {
-  // replace two or more newlines with one newline
-  const serviceBashCommands = services
+  return services
     .filter((service) => service.bash)
     .map((service) => service.bash)
     .join("\n")
     .replace(/\n{2,}/g, "\n\n");
-
-  return BASE_BASH_COMMANDS + "\n" + serviceBashCommands;
 };
 
 function convertToEnvString(obj: {
@@ -89,6 +85,8 @@ export const generateEnvFile = (services: Service[]) => {
       (env): env is { [key: string]: string | number | boolean } =>
         env !== undefined
     );
+
+  if (allEnvs.length === 0) return null;
 
   return allEnvs.map((serviceEnv) => convertToEnvString(serviceEnv)).join("\n");
 };

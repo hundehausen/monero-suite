@@ -5,13 +5,6 @@ import {
   COMPLETION_TEMPLATE,
 } from "./bash-templates";
 
-export const BASE_BASH_COMMANDS = `
-
-# Update system packages
-pkg_update
-# Install required packages
-pkg_install curl`;
-
 export const MONITORING_BASH_COMMANDS = `
 # Set up monitoring configuration
 cd ~/monero-suite
@@ -29,9 +22,9 @@ export interface EnabledBashServices {
 }
 
 export function generateBashCommands(services: EnabledBashServices): string {
-  let commands = BASE_BASH_COMMANDS;
+  let commands = "";
   if (services.monitoring) {
-    commands += "\n" + MONITORING_BASH_COMMANDS;
+    commands += MONITORING_BASH_COMMANDS;
   }
   return commands;
 }

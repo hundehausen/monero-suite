@@ -39,7 +39,7 @@ import type { Service } from "@/hooks/services/types";
 
 function generateScriptSummary(
   checkedServices: Service[],
-  envString: string,
+  envString: string | null,
   isExposed: boolean,
   firewallPorts: string
 ): string[] {
@@ -127,6 +127,7 @@ export default function Main() {
 
   const dockerCompose = useMemo(() => generateDockerComposeFile(checkedServices), [checkedServices]);
   const bashCommands = useMemo(() => generateBashScriptFile(checkedServices), [checkedServices]);
+  const hasBashCommands = useMemo(() => checkedServices.some((s) => s.bash), [checkedServices]);
   const envString = useMemo(() => generateEnvFile(checkedServices), [checkedServices]);
 
   const isExposed = stateFunctions.networkMode === networkModes.exposed;
@@ -244,20 +245,20 @@ export default function Main() {
         <Card withBorder padding={0} radius="md">
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
-              <Tabs.Tab value="install-script" leftSection={<FaLinux />}>
-                Install Script
-              </Tabs.Tab>
               <Tabs.Tab value="docker-compose" leftSection={<FaDocker />}>
                 Docker Compose
               </Tabs.Tab>
-              <Tabs.Tab value="bash-script" leftSection={<SiGnubash />}>
+              {hasBashCommands && (<Tabs.Tab value="bash-script" leftSection={<SiGnubash />}>
                 Bash Commands
-              </Tabs.Tab>
+              </Tabs.Tab>)}
               {envString && (
                 <Tabs.Tab value="env" leftSection={<SiDotenv />}>
-                  Environment
+                  Environment Variables
                 </Tabs.Tab>
               )}
+              <Tabs.Tab value="install-script" leftSection={<FaLinux />}>
+                Install Script <small>(optional)</small>
+              </Tabs.Tab>
             </Tabs.List>
 
             <Tabs.Panel value="install-script" p="md">
@@ -316,10 +317,10 @@ export default function Main() {
                     hasDefaultDomain
                       ? "Replace all example.com domains in the Traefik section first"
                       : hasP2PoolInvalidAddress
-                      ? "Enter a valid Monero payout address in the P2Pool section first"
-                      : currentConfigIsUploaded
-                      ? "Command is up to date — change settings to regenerate"
-                      : ""
+                        ? "Enter a valid Monero payout address in the P2Pool section first"
+                        : currentConfigIsUploaded
+                          ? "Command is up to date — change settings to regenerate"
+                          : ""
                   }
                   disabled={!hasDefaultDomain && !hasP2PoolInvalidAddress && !currentConfigIsUploaded}
                 >
@@ -397,9 +398,10 @@ export default function Main() {
               <ComposePreview dockerCompose={dockerCompose} />
             </Tabs.Panel>
 
-            <Tabs.Panel value="bash-script" p="md">
+            {hasBashCommands && (<Tabs.Panel value="bash-script" p="md">
               <BashPreview bashCommands={bashCommands} />
-            </Tabs.Panel>
+            </Tabs.Panel>)}
+
 
             {envString && (
               <Tabs.Panel value="env" p="md">
