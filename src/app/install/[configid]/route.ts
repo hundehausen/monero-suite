@@ -33,10 +33,7 @@ export async function GET(
     return new Response(script, {
       headers: { "content-type": "text/plain; charset=utf-8" },
     });
-  } catch (error) {
-    return new Response(
-      `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
-      { status: 404 }
-    );
+  } catch {
+    return new Response("Script not found", { status: 404 });
   }
 }
