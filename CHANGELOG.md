@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/hundehausen/monero-suite/compare/v1.1.0...v1.2.0) (2026-02-25)
+
+
+### Features
+
+* conditionally show hidden services ([52155b3](https://github.com/hundehausen/monero-suite/commits/52155b364f2dc3a685060c15718c0bd3f3c91fb1))
+* more accessible info popovers ([1483d6f](https://github.com/hundehausen/monero-suite/commits/1483d6fd33a378f0c30fc7f8aa73777a950a735d))
+* tabbed layout ([6b0e3b1](https://github.com/hundehausen/monero-suite/commits/6b0e3b1f6395859553bab90dd6bf66963268b379))
+
+
+### Chore
+
+* advancedConfigModal only logging section expanded by default ([1b7ed7d](https://github.com/hundehausen/monero-suite/commits/1b7ed7d5db35a8158258f9f381791477f4e2808a))
+* improve texts ([9949cef](https://github.com/hundehausen/monero-suite/commits/9949cefceda0371ede684ba806cc9c0f8b53c62b))
+
 ## [1.1.0](https://github.com/hundehausen/monero-suite/compare/v1.0.0...v1.1.0) (2026-02-24)
 
 
