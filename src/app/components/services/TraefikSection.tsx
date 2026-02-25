@@ -136,7 +136,13 @@ const TraefikSection = () => {
                       description={input.description}
                       value={input.value}
                       onChange={(e) => input.onChange(e.currentTarget.value)}
-                      error={input.value.includes("example.com") ? "Replace with your actual domain" : undefined}
+                      error={
+                        input.value.includes("example.com")
+                          ? "Replace with your actual domain"
+                          : input.value && !/^[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]$/.test(input.value)
+                          ? "Invalid domain format"
+                          : undefined
+                      }
                     />
                   )}
                 </Stack>
