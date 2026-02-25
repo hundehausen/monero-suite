@@ -146,7 +146,7 @@ export const createMonerodService = (
           // When node is public, bind to all interfaces regardless of network mode
           getPortBinding(isMoneroPublicNode ? networkModes.local : networkMode, 18080),
           ...(p2PoolMode !== p2poolModes.none
-            ? [getPortBinding(isMoneroPublicNode ? networkModes.local : networkMode, 18083)]
+            ? [getPortBinding(networkMode, 18083)]
             : []),
           getPortBinding(isMoneroPublicNode ? networkModes.local : networkMode, 18089),
         ],
