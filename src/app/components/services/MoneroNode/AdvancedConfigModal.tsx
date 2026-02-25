@@ -51,7 +51,7 @@ const AdvancedConfigModal = ({ opened, onClose }: AdvancedConfigModalProps) => {
         <Badge variant="light" color="green" size="sm">Changes saved automatically</Badge>
       </Group>
 
-      <Accordion multiple defaultValue={['logging', 'rpc_zmq', 'mining', 'tor_i2p']}>
+      <Accordion multiple defaultValue={['logging']}>
         <LoggingSection />
         <StorageSection />
         <NetworkSecuritySection />
