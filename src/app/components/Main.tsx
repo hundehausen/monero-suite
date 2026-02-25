@@ -2,14 +2,14 @@ import ComposePreview from "./ComposePreview";
 import Selection from "./Selection";
 import { TbCheck, TbCopy, TbDownload } from "react-icons/tb";
 import {
-  Accordion,
-  AccordionStylesNames,
   ActionIcon,
   Button,
   Card,
   CopyButton,
   Grid,
   List,
+  Stack,
+  Tabs,
   Text,
   TextInput,
   Tooltip,
@@ -21,7 +21,7 @@ import { FaDocker, FaLinux } from "react-icons/fa";
 import { SiDotenv, SiGnubash } from "react-icons/si";
 import { useServicesContext } from "@/hooks/services-context";
 import { networkModes } from "@/hooks/use-services";
-import { useState, useEffect, useMemo, CSSProperties, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { notifications } from "@mantine/notifications";
 import { uploadInstallScript } from "../actions";
 import {
@@ -36,13 +36,6 @@ import { CodeHighlightTabs } from "@mantine/code-highlight";
 import "@mantine/code-highlight/styles.css";
 import type { Service } from "@/hooks/services/types";
 
-const panelStyles = {
-  content: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "16px",
-  },
-} as Partial<Record<AccordionStylesNames, CSSProperties>>;
 
 function generateScriptSummary(
   checkedServices: Service[],
@@ -85,10 +78,7 @@ export default function Main() {
   const { services, stateFunctions } = useServicesContext();
   const [scriptUrl, setScriptUrl] = useState<string>();
   const [installationCommand, setInstallationCommand] = useState<string>();
-  const [accordionItems, setAccordionItems] = useState([
-    "install-script",
-    "docker-compose",
-  ]);
+  const [activeTab, setActiveTab] = useState<string | null>("install-script");
   const [isUploading, setIsUploading] = useState(false);
   const [currentConfigIsUploaded, setCurrentConfigIsUploaded] = useState(false);
 
@@ -221,6 +211,12 @@ export default function Main() {
     setInstallationCommand(`curl -sSL ${scriptUrl} | bash`);
   }, [scriptUrl]);
 
+  useEffect(() => {
+    if (!envString && activeTab === "env") {
+      setActiveTab("install-script");
+    }
+  }, [envString, activeTab]);
+
   return (
     <Grid
       gutter="lg"
@@ -245,183 +241,173 @@ export default function Main() {
           md: 7,
         }}
       >
-        <Accordion
-          multiple
-          value={accordionItems}
-          onChange={setAccordionItems}
-          defaultValue={["mainnet-node"]}
-          variant="separated"
-          styles={{
-            panel: {
-              paddingTop: "8px",
-            },
-          }}
-        >
-          <Accordion.Item value="install-script">
-            <Accordion.Control icon={<FaLinux />}>
-              <Text size="lg">Installation Script for Linux</Text>
-            </Accordion.Control>
-            <Accordion.Panel styles={panelStyles}>
-              <Text size="sm" c="dimmed">
-                Every command is visible below — review it before running.
-                Supported distros: Ubuntu, Debian, Fedora, CentOS Stream, Rocky
-                Linux, AlmaLinux, and RHEL. Pass{" "}
-                <strong>--verbose</strong> for full command output.
-              </Text>
-
-              <Card shadow="sm" padding="md" radius="md" withBorder>
-                <Text fw={500} mb="xs">
-                  What this script does:
-                </Text>
-                <List size="sm" spacing="xs">
-                  {scriptSummary.map((step, i) => (
-                    <List.Item key={i}>{step}</List.Item>
-                  ))}
-                </List>
-              </Card>
-
-              <CodeHighlightTabs
-                code={[
-                  {
-                    code: fullScript,
-                    language: "bash",
-                    fileName: "install.sh",
-                    icon: <SiGnubash />,
-                  },
-                ]}
-                styles={{
-                  root: {
-                    overflow: "auto",
-                    borderRadius: "4px",
-                    maxHeight: "500px",
-                  },
-                }}
-              />
-
-              {hasDefaultDomain && (
-                <Text c="red" size="sm">
-                  Please change all service domains from the default
-                  &quot;example.com&quot; in the Traefik section before generating the script.
-                </Text>
+        <Card withBorder padding={0} radius="md">
+          <Tabs value={activeTab} onChange={setActiveTab}>
+            <Tabs.List>
+              <Tabs.Tab value="install-script" leftSection={<FaLinux />}>
+                Install Script
+              </Tabs.Tab>
+              <Tabs.Tab value="docker-compose" leftSection={<FaDocker />}>
+                Docker Compose
+              </Tabs.Tab>
+              <Tabs.Tab value="bash-script" leftSection={<SiGnubash />}>
+                Bash Commands
+              </Tabs.Tab>
+              {envString && (
+                <Tabs.Tab value="env" leftSection={<SiDotenv />}>
+                  Environment
+                </Tabs.Tab>
               )}
+            </Tabs.List>
 
-              {hasP2PoolInvalidAddress && (
-                <Text c="red" size="sm">
-                  P2Pool requires a valid primary Monero address (95 characters, starting with 4) in the P2Pool section.
+            <Tabs.Panel value="install-script" p="md">
+              <Stack gap="md">
+                <Text size="sm" c="dimmed">
+                  Every command is visible below — review it before running.
+                  Supported distros: Ubuntu, Debian, Fedora, CentOS Stream, Rocky
+                  Linux, AlmaLinux, and RHEL. Pass{" "}
+                  <strong>--verbose</strong> for full command output.
                 </Text>
-              )}
 
-              <Tooltip
-                label={
-                  hasDefaultDomain
-                    ? "Replace all example.com domains in the Traefik section first"
-                    : hasP2PoolInvalidAddress
-                    ? "Enter a valid Monero payout address in the P2Pool section first"
-                    : currentConfigIsUploaded
-                    ? "Command is up to date — change settings to regenerate"
-                    : ""
-                }
-                disabled={!hasDefaultDomain && !hasP2PoolInvalidAddress && !currentConfigIsUploaded}
-              >
-                <Button
-                  onClick={handleScriptGeneration}
-                  disabled={currentConfigIsUploaded || hasDefaultDomain || hasP2PoolInvalidAddress}
-                  loading={isUploading}
-                >
-                  Generate Install Command
-                </Button>
-              </Tooltip>
+                <Card shadow="sm" padding="md" radius="md" withBorder>
+                  <Text fw={500} mb="xs">
+                    What this script does:
+                  </Text>
+                  <List size="sm" spacing="xs">
+                    {scriptSummary.map((step, i) => (
+                      <List.Item key={i}>{step}</List.Item>
+                    ))}
+                  </List>
+                </Card>
 
-              <TextInput
-                placeholder="Press Generate Install Command"
-                label="Paste this into your terminal:"
-                value={installationCommand ?? ""}
-                disabled={!installationCommand}
-                rightSection={
-                  <CopyButton value={installationCommand ?? ""} timeout={2000}>
-                    {({ copied, copy }) => (
-                      <Tooltip
-                        label={copied ? "Copied" : "Copy"}
-                        withArrow
-                        position="right"
-                      >
-                        <ActionIcon
-                          color={copied ? "teal" : "gray"}
-                          variant="subtle"
-                          onClick={copy}
-                        >
-                          {copied ? (
-                            <TbCheck style={{ width: rem(16) }} />
-                          ) : (
-                            <TbCopy style={{ width: rem(16) }} />
-                          )}
-                        </ActionIcon>
-                      </Tooltip>
-                    )}
-                  </CopyButton>
-                }
-              />
-
-              <Text size="sm">
-                Or download and run manually:
-              </Text>
-              <Tooltip
-                label={
-                  hasDefaultDomain
-                    ? "Replace all example.com domains in the Traefik section first"
-                    : "Enter a valid Monero payout address in the P2Pool section first"
-                }
-                disabled={!hasDefaultDomain && !hasP2PoolInvalidAddress}
-              >
-                <Button
-                  variant="light"
-                  leftSection={<TbDownload />}
-                  disabled={hasDefaultDomain || hasP2PoolInvalidAddress}
-                  onClick={() => {
-                    const blob = new Blob([fullScript], { type: "text/plain" });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = "install.sh";
-                    a.click();
-                    URL.revokeObjectURL(url);
+                <CodeHighlightTabs
+                  code={[
+                    {
+                      code: fullScript,
+                      language: "bash",
+                      fileName: "install.sh",
+                      icon: <SiGnubash />,
+                    },
+                  ]}
+                  styles={{
+                    root: {
+                      overflow: "auto",
+                      borderRadius: "4px",
+                      maxHeight: "500px",
+                    },
                   }}
+                />
+
+                {hasDefaultDomain && (
+                  <Text c="red" size="sm">
+                    Please change all service domains from the default
+                    &quot;example.com&quot; in the Traefik section before generating the script.
+                  </Text>
+                )}
+
+                {hasP2PoolInvalidAddress && (
+                  <Text c="red" size="sm">
+                    P2Pool requires a valid primary Monero address (95 characters, starting with 4) in the P2Pool section.
+                  </Text>
+                )}
+
+                <Tooltip
+                  label={
+                    hasDefaultDomain
+                      ? "Replace all example.com domains in the Traefik section first"
+                      : hasP2PoolInvalidAddress
+                      ? "Enter a valid Monero payout address in the P2Pool section first"
+                      : currentConfigIsUploaded
+                      ? "Command is up to date — change settings to regenerate"
+                      : ""
+                  }
+                  disabled={!hasDefaultDomain && !hasP2PoolInvalidAddress && !currentConfigIsUploaded}
                 >
-                  Download install.sh
-                </Button>
-              </Tooltip>
-            </Accordion.Panel>
-          </Accordion.Item>
+                  <Button
+                    onClick={handleScriptGeneration}
+                    disabled={currentConfigIsUploaded || hasDefaultDomain || hasP2PoolInvalidAddress}
+                    loading={isUploading}
+                  >
+                    Generate Install Command
+                  </Button>
+                </Tooltip>
 
-          <Accordion.Item value="docker-compose">
-            <Accordion.Control icon={<FaDocker />}>
-              <Text size="lg">Docker Compose File</Text>
-            </Accordion.Control>
-            <Accordion.Panel styles={panelStyles}>
+                <TextInput
+                  placeholder="Press Generate Install Command"
+                  label="Paste this into your terminal:"
+                  value={installationCommand ?? ""}
+                  disabled={!installationCommand}
+                  rightSection={
+                    <CopyButton value={installationCommand ?? ""} timeout={2000}>
+                      {({ copied, copy }) => (
+                        <Tooltip
+                          label={copied ? "Copied" : "Copy"}
+                          withArrow
+                          position="right"
+                        >
+                          <ActionIcon
+                            color={copied ? "teal" : "gray"}
+                            variant="subtle"
+                            onClick={copy}
+                          >
+                            {copied ? (
+                              <TbCheck style={{ width: rem(16) }} />
+                            ) : (
+                              <TbCopy style={{ width: rem(16) }} />
+                            )}
+                          </ActionIcon>
+                        </Tooltip>
+                      )}
+                    </CopyButton>
+                  }
+                />
+
+                <Text size="sm">
+                  Or download and run manually:
+                </Text>
+                <Tooltip
+                  label={
+                    hasDefaultDomain
+                      ? "Replace all example.com domains in the Traefik section first"
+                      : "Enter a valid Monero payout address in the P2Pool section first"
+                  }
+                  disabled={!hasDefaultDomain && !hasP2PoolInvalidAddress}
+                >
+                  <Button
+                    variant="light"
+                    leftSection={<TbDownload />}
+                    disabled={hasDefaultDomain || hasP2PoolInvalidAddress}
+                    onClick={() => {
+                      const blob = new Blob([fullScript], { type: "text/plain" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = "install.sh";
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                  >
+                    Download install.sh
+                  </Button>
+                </Tooltip>
+              </Stack>
+            </Tabs.Panel>
+
+            <Tabs.Panel value="docker-compose" p="md">
               <ComposePreview dockerCompose={dockerCompose} />
-            </Accordion.Panel>
-          </Accordion.Item>
+            </Tabs.Panel>
 
-          <Accordion.Item value="bash-script">
-            <Accordion.Control icon={<SiGnubash />}>
-              <Text size="lg">Bash Commands</Text>
-            </Accordion.Control>
-            <Accordion.Panel styles={panelStyles}>
+            <Tabs.Panel value="bash-script" p="md">
               <BashPreview bashCommands={bashCommands} />
-            </Accordion.Panel>
-          </Accordion.Item>
+            </Tabs.Panel>
 
-          {envString && (
-            <Accordion.Item value="env">
-              <Accordion.Control icon={<SiDotenv />}>
-                <Text size="lg">Environment Variables</Text>
-              </Accordion.Control>
-              <Accordion.Panel styles={panelStyles}>
+            {envString && (
+              <Tabs.Panel value="env" p="md">
                 <EnvPreview env={envString} hasDefaultDomain={hasDefaultDomain} />
-              </Accordion.Panel>
-            </Accordion.Item>
-          )}
-        </Accordion>
+              </Tabs.Panel>
+            )}
+          </Tabs>
+        </Card>
       </Grid.Col>
     </Grid>
   );
