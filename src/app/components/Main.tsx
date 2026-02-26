@@ -5,7 +5,7 @@ import BashPreview from "./BashPreview";
 import EnvPreview from "./EnvPreview";
 import { FaDocker, FaLinux } from "react-icons/fa";
 import { SiDotenv, SiGnubash } from "react-icons/si";
-import { useServicesContext } from "@/hooks/services-context";
+import { useServicesContext, useHasDefaultDomain } from "@/hooks/services-context";
 import { networkModes } from "@/hooks/use-services";
 import { useState, useEffect, useMemo } from "react";
 import {
@@ -37,26 +37,7 @@ export default function Main() {
     return !addr || addr.length !== 95 || !addr.startsWith("4");
   }, [stateFunctions.p2PoolMode, stateFunctions.p2PoolPayoutAddress]);
 
-  const hasDefaultDomain = useMemo(() => {
-    if (!stateFunctions.isTraefik) return false;
-    const domains = [
-      stateFunctions.isMoneroPublicNode && stateFunctions.isTraefikMonerod && stateFunctions.moneroNodeDomain,
-      stateFunctions.isStagenetNode && stateFunctions.isStagenetNodePublic && stateFunctions.isTraefikStagenet && stateFunctions.stagenetNodeDomain,
-      stateFunctions.isMoneroblock && stateFunctions.isTraefikMoneroblock && stateFunctions.moneroBlockDomain,
-      stateFunctions.isOnionMoneroBlockchainExplorer && stateFunctions.isTraefikOnionExplorer && stateFunctions.onionMoneroBlockchainExplorerDomain,
-      stateFunctions.isMonitoring && stateFunctions.isTraefikGrafana && stateFunctions.grafanaDomain,
-      stateFunctions.isPortainer && stateFunctions.isTraefikPortainer && stateFunctions.portainerDomain,
-    ].filter(Boolean) as string[];
-    return domains.some((d) => d.includes("example.com"));
-  }, [
-    stateFunctions.isTraefik,
-    stateFunctions.isMoneroPublicNode, stateFunctions.isTraefikMonerod, stateFunctions.moneroNodeDomain,
-    stateFunctions.isStagenetNode, stateFunctions.isStagenetNodePublic, stateFunctions.isTraefikStagenet, stateFunctions.stagenetNodeDomain,
-    stateFunctions.isMoneroblock, stateFunctions.isTraefikMoneroblock, stateFunctions.moneroBlockDomain,
-    stateFunctions.isOnionMoneroBlockchainExplorer, stateFunctions.isTraefikOnionExplorer, stateFunctions.onionMoneroBlockchainExplorerDomain,
-    stateFunctions.isMonitoring, stateFunctions.isTraefikGrafana, stateFunctions.grafanaDomain,
-    stateFunctions.isPortainer, stateFunctions.isTraefikPortainer, stateFunctions.portainerDomain,
-  ]);
+  const hasDefaultDomain = useHasDefaultDomain();
 
   const dockerCompose = useMemo(() => generateDockerComposeFile(checkedServices), [checkedServices]);
   const bashCommands = useMemo(() => generateBashScriptFile(checkedServices), [checkedServices]);

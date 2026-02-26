@@ -183,3 +183,16 @@ export function useCuprateState(): CuprateState {
   const { stateFunctions: s } = useServicesContext();
   return { isCuprateEnabled: s.isCuprateEnabled, setIsCuprateEnabled: s.setIsCuprateEnabled };
 }
+
+export function useHasDefaultDomain(): boolean {
+  const { stateFunctions: s } = useServicesContext();
+  if (!s.isTraefik) return false;
+  return [
+    s.isMoneroPublicNode && s.isTraefikMonerod && s.moneroNodeDomain,
+    s.isStagenetNode && s.isStagenetNodePublic && s.isTraefikStagenet && s.stagenetNodeDomain,
+    s.isMoneroblock && s.isTraefikMoneroblock && s.moneroBlockDomain,
+    s.isOnionMoneroBlockchainExplorer && s.isTraefikOnionExplorer && s.onionMoneroBlockchainExplorerDomain,
+    s.isMonitoring && s.isTraefikGrafana && s.grafanaDomain,
+    s.isPortainer && s.isTraefikPortainer && s.portainerDomain,
+  ].some((d) => typeof d === "string" && d.includes("example.com"));
+}
