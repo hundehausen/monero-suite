@@ -90,3 +90,40 @@ export const generateEnvFile = (services: Service[]) => {
 
   return allEnvs.map((serviceEnv) => convertToEnvString(serviceEnv)).join("\n");
 };
+
+export function generateScriptSummary(
+  checkedServices: Service[],
+  envString: string | null,
+  isExposed: boolean,
+  firewallPorts: string
+): string[] {
+  const steps: string[] = [];
+
+  steps.push("Check for root/sudo privileges");
+  steps.push("Detect OS and package manager");
+  steps.push("Validate network environment");
+  steps.push("Install Docker (skipped if already installed)");
+
+  const serviceNames = checkedServices.map((s) => s.name);
+  steps.push(
+    `Write docker-compose.yml with ${serviceNames.length} service${serviceNames.length !== 1 ? "s" : ""}: ${serviceNames.join(", ")}`
+  );
+
+  if (envString) {
+    steps.push("Write .env configuration file");
+  }
+
+  const hasBash = checkedServices.some((s) => s.bash);
+  if (hasBash) {
+    steps.push("Update system packages and install dependencies");
+    steps.push("Run service-specific setup commands");
+  }
+
+  if (isExposed && firewallPorts) {
+    steps.push(`Configure firewall (ports: ${firewallPorts})`);
+  }
+
+  steps.push("Pull container images and start services");
+
+  return steps;
+}
