@@ -3,6 +3,7 @@ minimumReleaseAge: 4320
 minimumReleaseAgeExclude:
   - next
   - '@next/*'
+  - eslint-config-next
   - react
   - react-dom
   - '@vercel/*'
