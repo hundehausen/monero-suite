@@ -10,6 +10,7 @@ minimumReleaseAgeExclude:
   - '@types/react'
   - '@types/node'
   - '@mantine/*'
+  - 'flatted@3.4.2'
 
 onlyBuiltDependencies:
   - sharp
