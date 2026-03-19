@@ -78,10 +78,10 @@ export const useServices = () => {
     }
   }, [isTraefik, isTraefikGrafana, setGrafanaDomain]);
 
+  // Should remove sync-pruned-blocks flag, if user switches from pruned node to full node
   useEffect(() => {
-    if (!isPrunedNode)
-      isSyncPrunedBlocks &&
-        monerodService.stateFunctions.setIsSyncPrunedBlocks(false);
+    if (!isPrunedNode && isSyncPrunedBlocks)
+      monerodService.stateFunctions.setIsSyncPrunedBlocks(false);
   }, [isPrunedNode, isSyncPrunedBlocks, monerodService.stateFunctions]);
 
   const services: ServiceMap = {

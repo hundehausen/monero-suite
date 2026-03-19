@@ -1,5 +1,5 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
-import { Service, architectures, networkModes, NetworkMode, torProxyModes } from "./types";
+import { Service, architectures, NetworkMode, torProxyModes } from "./types";
 import { DOCKER_IMAGES, SERVICE_PORTS, MONEROD_PORTS } from "@/lib/constants";
 import { getTraefikConfig, getPortBinding } from "@/lib/docker-helpers";
 import { MONITORING_BASH_COMMANDS } from "@/lib/script-generator";

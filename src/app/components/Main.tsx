@@ -7,7 +7,7 @@ import { FaDocker, FaLinux } from "react-icons/fa";
 import { SiDotenv, SiGnubash } from "react-icons/si";
 import { useServicesContext, useHasDefaultDomain } from "@/hooks/services-context";
 import { networkModes } from "@/hooks/use-services";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   generateDockerComposeFile,
   generateBashScriptFile,
@@ -72,11 +72,8 @@ export default function Main() {
       networkMode: stateFunctions.networkMode,
     });
 
-  useEffect(() => {
-    if (!envString && activeTab === "env") {
-      setActiveTab("docker-compose");
-    }
-  }, [envString, activeTab]);
+  // if env tab is no longer available, fall back to docker-compose
+  const effectiveTab = !envString && activeTab === "env" ? "docker-compose" : activeTab;
 
   return (
     <Grid
@@ -93,7 +90,7 @@ export default function Main() {
       </Grid.Col>
       <Grid.Col span={{ xs: 12, md: 7 }}>
         <Card withBorder padding={0} radius="md">
-          <Tabs value={activeTab} onChange={setActiveTab}>
+          <Tabs value={effectiveTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="docker-compose" leftSection={<FaDocker />}>
                 Docker Compose

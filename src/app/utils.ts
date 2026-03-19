@@ -1,15 +1,6 @@
 import type { Service } from "@/hooks/use-services";
 import { Compose } from "compose-spec-schema";
 
-const globalLogSettings = `x-log-config:
-  &log-config
-  logging:
-    driver: json-file
-    options:
-      max-size: "4m"
-      max-file: "3"
-`;
-
 const dockerComposeBase: Compose = {
   name: "monero-suite",
   services: {},
