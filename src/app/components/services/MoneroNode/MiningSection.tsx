@@ -1,3 +1,5 @@
+"use client";
+
 import { NumberInput, SimpleGrid, Switch, TextInput, Title } from "@mantine/core";
 import { useMonerodState } from "@/hooks/services-context";
 import ExplainingLabel from "../../ExplainingLabel";

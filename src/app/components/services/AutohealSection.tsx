@@ -1,3 +1,5 @@
+"use client";
+
 import { Checkbox, Text } from "@mantine/core";
 import { useServicesContext, useAutohealState } from "@/hooks/services-context";
 import AccordionItemComponent from "./AccordionItemComponent";

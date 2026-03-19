@@ -1,3 +1,5 @@
+"use client";
+
 import ComposePreview from "./ComposePreview";
 import Selection from "./Selection";
 import { Card, Grid, Tabs } from "@mantine/core";

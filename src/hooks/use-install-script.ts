@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useRef } from "react";
 import { notifications } from "@mantine/notifications";
 import { uploadInstallScript } from "@/app/actions";

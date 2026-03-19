@@ -1,3 +1,5 @@
+"use client";
+
 import { Accordion } from "@mantine/core";
 import { useState } from "react";
 import {

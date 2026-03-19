@@ -1,3 +1,5 @@
+"use client";
+
 import { MiningMode, P2PoolMode } from "@/hooks/use-services";
 import {
   Alert,

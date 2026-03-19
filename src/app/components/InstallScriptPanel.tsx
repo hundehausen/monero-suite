@@ -1,3 +1,5 @@
+"use client";
+
 import { TbCheck, TbCopy, TbDownload } from "react-icons/tb";
 import {
   ActionIcon,

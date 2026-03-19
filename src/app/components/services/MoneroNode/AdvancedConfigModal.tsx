@@ -1,3 +1,5 @@
+"use client";
+
 import { Button, Group, Modal, ScrollArea, Text, Anchor, Accordion, Badge } from "@mantine/core";
 import LoggingSection from "./LoggingSection";
 import StorageSection from "./StorageSection";

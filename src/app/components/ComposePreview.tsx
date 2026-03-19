@@ -1,3 +1,5 @@
+"use client";
+
 import { stringify } from "yaml";
 import { CodeHighlightTabs } from "@mantine/code-highlight";
 import "@mantine/code-highlight/styles.css";

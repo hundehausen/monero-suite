@@ -1,3 +1,5 @@
+"use client";
+
 import { Alert, Checkbox, Text, TextInput, Stack } from "@mantine/core";
 import {
   useServicesContext,

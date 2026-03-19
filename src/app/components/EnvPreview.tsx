@@ -1,3 +1,5 @@
+"use client";
+
 import { CodeHighlightTabs } from "@mantine/code-highlight";
 import { SiGnubash } from "react-icons/si";
 import { Button, Tooltip } from "@mantine/core";

@@ -1,3 +1,5 @@
+"use client";
+
 import { useQueryState, parseAsBoolean, parseAsStringEnum } from "nuqs";
 import {
   Service,

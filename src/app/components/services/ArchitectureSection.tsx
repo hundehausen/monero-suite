@@ -1,3 +1,5 @@
+"use client";
+
 import { Architecture } from "@/hooks/use-services";
 import { SegmentedControl } from "@mantine/core";
 import { useArchitectureState } from "@/hooks/services-context";

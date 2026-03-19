@@ -1,3 +1,5 @@
+"use client";
+
 import { NetworkMode } from "@/hooks/use-services";
 import { SegmentedControl, Text } from "@mantine/core";
 import { useNetworkModeState } from "@/hooks/services-context";

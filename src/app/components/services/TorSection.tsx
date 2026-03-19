@@ -1,3 +1,5 @@
+"use client";
+
 import { TorProxyMode } from "@/hooks/use-services";
 import { Alert, Checkbox, Code, SegmentedControl, Text, Stack, Divider } from "@mantine/core";
 import { useServicesContext, useTorState, useNetworkModeState } from "@/hooks/services-context";

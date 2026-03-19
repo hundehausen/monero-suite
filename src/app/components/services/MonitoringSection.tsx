@@ -1,3 +1,5 @@
+"use client";
+
 import { Alert, Checkbox, Text, Badge } from "@mantine/core";
 import { useServicesContext, useMonitoringState, useArchitectureState } from "@/hooks/services-context";
 import AccordionItemComponent from "./AccordionItemComponent";

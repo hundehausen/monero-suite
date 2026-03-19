@@ -1,3 +1,5 @@
+"use client";
+
 import { SimpleGrid, TextInput, Title } from "@mantine/core";
 import { useMonerodState } from "@/hooks/services-context";
 import ExplainingLabel from "../../ExplainingLabel";
