@@ -1,12 +1,11 @@
-import { Flex, Title, Text, useMantineColorScheme } from "@mantine/core";
+import { Flex, Title, Text } from "@mantine/core";
 import Link from "next/link";
 import Image from "next/image";
 import { FaDocker, FaGithub } from "react-icons/fa";
-import { DarkModeSwitch } from "react-toggle-dark-mode";
 import Logo from "../../../public/monero-suite-logo-transparent.png";
+import DarkModeToggle from "./DarkModeToggle";
 
 const Header = () => {
-  const { colorScheme, setColorScheme } = useMantineColorScheme();
   return (
     <Flex justify="space-between" align="center" w={"100%"}>
       <Flex align="center" gap={16}>
@@ -73,14 +72,7 @@ const Header = () => {
         >
           <FaDocker size={32} />
         </Link>
-        <DarkModeSwitch
-          checked={colorScheme === "dark"}
-          onChange={() =>
-            setColorScheme(colorScheme === "dark" ? "light" : "dark")
-          }
-          size={32}
-          title="Toggle dark mode"
-        />
+        <DarkModeToggle />
       </Flex>
     </Flex>
   );
