@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
-import "highlight.js/styles/github-dark.css";
+import "./hljs-adaptive.css";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
