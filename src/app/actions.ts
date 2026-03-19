@@ -63,5 +63,11 @@ export async function uploadInstallScript(
     addRandomSuffix: false,
   });
 
-  return configId;
+  const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000";
+
+  return `${baseUrl}/install/${configId}`;
 }

@@ -34,7 +34,7 @@ export function useInstallScript({
   const handleScriptGeneration = async () => {
     setIsUploading(true);
     try {
-      const configId = await uploadInstallScript({
+      const scriptUrl = await uploadInstallScript({
         dockerComposeYaml,
         enabledBashServices,
         envContent: envString || undefined,
@@ -48,7 +48,7 @@ export function useInstallScript({
       };
 
       setCurrentConfigIsUploaded(true);
-      setScriptUrl(`${window.location.origin}/install/${configId}`);
+      setScriptUrl(scriptUrl);
       notifications.show({
         title: "Install command ready",
         message: "Copy the command below and paste it into your terminal.",
