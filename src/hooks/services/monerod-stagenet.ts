@@ -29,7 +29,7 @@ export const useMonerodStagenetService = () => {
     "stagenetNodeDomain",
     parseAsString.withDefault("stagenet.example.com")
   );
-  const [moneroNodeNoLogs, setMoneroNodeNoLogs] = useQueryState(
+  const [moneroNodeNoLogs] = useQueryState(
     "moneroNodeNoLogs",
     parseAsBoolean.withDefault(false)
   );
