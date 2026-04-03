@@ -79,7 +79,7 @@ export default function Main() {
 
   return (
     <Grid
-      gutter="lg"
+      gap="lg"
       align="stretch"
       styles={{
         root: {

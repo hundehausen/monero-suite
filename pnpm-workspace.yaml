@@ -1,16 +1,9 @@
 minimumReleaseAge: 4320
 
 minimumReleaseAgeExclude:
-  - next
+  - 'lodash@4.18.1'
+  - 'next@16.2.2'
   - '@next/*'
-  - eslint-config-next
-  - react
-  - react-dom
-  - '@vercel/*'
-  - '@types/react'
-  - '@types/node'
-  - '@mantine/*'
-  - 'flatted@3.4.2'
 
 onlyBuiltDependencies:
   - sharp

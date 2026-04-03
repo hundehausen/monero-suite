@@ -15,34 +15,34 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@mantine/code-highlight": "8.3.18",
-    "@mantine/core": "8.3.18",
-    "@mantine/hooks": "8.3.18",
-    "@mantine/notifications": "8.3.18",
-    "@vercel/blob": "2.3.1",
+    "@mantine/code-highlight": "9.0.0",
+    "@mantine/core": "9.0.0",
+    "@mantine/hooks": "9.0.0",
+    "@mantine/notifications": "9.0.0",
+    "@vercel/blob": "2.3.3",
     "compose-spec-schema": "1.0.0",
     "date-fns": "4.1.0",
     "highlight.js": "11.11.1",
     "nanoid": "5.1.7",
-    "next": "16.2.0",
+    "next": "16.2.2",
     "nuqs": "2.8.9",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-icons": "5.6.0",
     "sharp": "0.34.5",
-    "typescript": "5.9.3",
-    "yaml": "2.8.2",
+    "typescript": "6.0.2",
+    "yaml": "2.8.3",
     "zod": "4.3.6"
   },
   "devDependencies": {
     "@commitlint/cli": "20.5.0",
     "@commitlint/config-conventional": "20.5.0",
-    "@types/node": "25.5.0",
+    "@types/node": "25.5.1",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "autoprefixer": "10.4.27",
-    "eslint": "10.0.3",
-    "eslint-config-next": "16.2.0",
+    "eslint": "10.1.0",
+    "eslint-config-next": "16.2.2",
     "husky": "9.1.7",
     "postcss": "8.5.8",
     "postcss-preset-mantine": "1.18.0",
@@ -52,7 +52,9 @@
   "packageManager": "pnpm@10.32.1",
   "pnpm": {
     "overrides": {
-      "flatted": "3.4.2"
+      "flatted": "3.4.2",
+      "lodash@>=4.0.0 <=4.17.23": ">=4.18.0",
+      "lodash@<=4.17.23": ">=4.18.0"
     }
   }
 }
