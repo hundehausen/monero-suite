@@ -2,54 +2,50 @@
 
 import { put } from "@vercel/blob";
 import { nanoid } from "nanoid";
-import { z } from "zod/v4";
-import { generateInstallationScript, generateBashCommands } from "@/lib/script-generator";
-
-const installScriptInputSchema = z.object({
-  dockerComposeYaml: z
-    .string()
-    .max(65536)
-    .check(
-      z.refine(
-        (val) => !/^MONERO_COMPOSE_EOF$/m.test(val),
-        "Contains forbidden heredoc delimiter"
-      )
-    ),
-  enabledBashServices: z.object({
-    monitoring: z.boolean(),
-  }),
-  envContent: z
-    .string()
-    .max(8192)
-    .check(
-      z.refine(
-        (val) => !/^MONERO_ENV_EOF$/m.test(val),
-        "Contains forbidden heredoc delimiter"
-      )
-    )
-    .optional(),
-  isExposed: z.boolean(),
-  firewallPorts: z
-    .string()
-    .max(512)
-    .regex(/^(\d{1,5}\/(tcp|udp)(\s+\d{1,5}\/(tcp|udp))*)?$/),
-});
-
-export type InstallScriptInput = z.infer<typeof installScriptInputSchema>;
+import { stringify } from "yaml";
+import { fullConfigSchema, type FullConfig } from "@/lib/config-schema";
+import { generateAllServices } from "@/lib/service-generators";
+import {
+  generateDockerComposeFile,
+  generateEnvFile,
+  getFirewallPorts,
+} from "@/app/utils";
+import {
+  generateInstallationScript,
+  generateBashCommands,
+} from "@/lib/script-generator";
 
 export async function uploadInstallScript(
-  input: InstallScriptInput
+  config: FullConfig
 ): Promise<string> {
-  const parsed = installScriptInputSchema.parse(input);
+  const parsed = fullConfigSchema.parse(config);
 
-  const bashCommands = generateBashCommands(parsed.enabledBashServices);
+  const services = generateAllServices(parsed);
+
+  const architecture = parsed.architecture;
+  const checkedServices = Object.values(services).filter(
+    (service) =>
+      service.checked !== false &&
+      service.checked !== "none" &&
+      service.architecture?.includes(architecture)
+  );
+
+  const dockerCompose = generateDockerComposeFile(checkedServices);
+  const dockerComposeYaml = stringify(dockerCompose);
+
+  const envString = generateEnvFile(checkedServices);
+
+  const monitoringBashCommands = generateBashCommands(parsed.enabledBashServices);
+
+  const isExposed = parsed.networkMode === "exposed";
+  const firewallPorts = getFirewallPorts(checkedServices);
 
   const script = generateInstallationScript(
-    parsed.dockerComposeYaml,
-    bashCommands,
-    parsed.envContent,
-    parsed.isExposed,
-    parsed.firewallPorts
+    dockerComposeYaml,
+    monitoringBashCommands,
+    envString || undefined,
+    isExposed,
+    firewallPorts
   );
 
   const configId = nanoid();

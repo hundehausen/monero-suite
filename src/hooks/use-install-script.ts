@@ -1,52 +1,33 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { notifications } from "@mantine/notifications";
 import { uploadInstallScript } from "@/app/actions";
+import type { FullConfig } from "@/lib/config-schema";
 
 interface UseInstallScriptParams {
-  dockerComposeYaml: string;
-  enabledBashServices: { monitoring: boolean };
-  envString: string | null;
-  isExposed: boolean;
-  firewallPorts: string;
-  networkMode: string | null;
+  config: FullConfig;
 }
 
-export function useInstallScript({
-  dockerComposeYaml,
-  enabledBashServices,
-  envString,
-  isExposed,
-  firewallPorts,
-  networkMode,
-}: UseInstallScriptParams) {
+export function useInstallScript({ config }: UseInstallScriptParams) {
   const [scriptUrl, setScriptUrl] = useState<string>();
   const [installationCommand, setInstallationCommand] = useState<string>();
   const [isUploading, setIsUploading] = useState(false);
   const [currentConfigIsUploaded, setCurrentConfigIsUploaded] = useState(false);
 
-  const lastUploadedConfig = useRef<{
-    config: string | null;
-    networkMode: string | null;
-  }>({ config: null, networkMode: null });
+  const lastUploadedConfig = useRef<string | null>(null);
+
+  const configHash = useMemo(
+    () => JSON.stringify(config),
+    [config]
+  );
 
   const handleScriptGeneration = async () => {
     setIsUploading(true);
     try {
-      const scriptUrl = await uploadInstallScript({
-        dockerComposeYaml,
-        enabledBashServices,
-        envContent: envString || undefined,
-        isExposed,
-        firewallPorts,
-      });
+      const scriptUrl = await uploadInstallScript(config);
 
-      lastUploadedConfig.current = {
-        config: dockerComposeYaml + JSON.stringify(enabledBashServices) + envString,
-        networkMode,
-      };
-
+      lastUploadedConfig.current = configHash;
       setCurrentConfigIsUploaded(true);
       setScriptUrl(scriptUrl);
       notifications.show({
@@ -74,14 +55,10 @@ export function useInstallScript({
 
   useEffect(() => {
     if (!currentConfigIsUploaded) return;
-    const currentConfig = dockerComposeYaml + JSON.stringify(enabledBashServices) + envString;
-    if (
-      lastUploadedConfig.current.config !== currentConfig ||
-      lastUploadedConfig.current.networkMode !== networkMode
-    ) {
+    if (lastUploadedConfig.current !== configHash) {
       setCurrentConfigIsUploaded(false);
     }
-  }, [dockerComposeYaml, enabledBashServices, envString, networkMode, currentConfigIsUploaded]);
+  }, [configHash, currentConfigIsUploaded]);
 
   return { installationCommand, isUploading, currentConfigIsUploaded, handleScriptGeneration };
 }

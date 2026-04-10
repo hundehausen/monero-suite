@@ -1,8 +1,6 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
-import { Service, architectures, NetworkMode, torProxyModes, TorProxyMode } from "./types";
-import { MONEROD_IP, MONEROBLOCK_IP } from "./tor";
-import { DOCKER_IMAGES, SERVICE_PORTS, MONEROD_PORTS } from "@/lib/constants";
-import { getTraefikConfig, getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
+import { Service, NetworkMode, torProxyModes, TorProxyMode } from "./types";
+import { createMoneroblockService } from "@/lib/service-generators/moneroblock";
 
 export const useMoneroblockService = () => {
   const [isMoneroblock, setIsMoneroblock] = useQueryState(
@@ -23,39 +21,8 @@ export const useMoneroblockService = () => {
     isTraefik: boolean,
     certResolverName: string = "monerosuite",
     torProxyMode: TorProxyMode = torProxyModes.none
-  ): Service => {
-    const { labels } = getTraefikConfig(isTraefik, "moneroblock", moneroBlockDomain, SERVICE_PORTS.moneroblock.toString(), certResolverName);
-    return ({
-    name: "Moneroblock",
-    description: "Explore the Monero blockchain with your own private block explorer. View transactions, blocks, and network stats without relying on third-party services.",
-    checked: isMoneroblock,
-    required: false,
-    architecture: [architectures.linuxAmd, architectures.linuxArm],
-    code: {
-      moneroblock: {
-        image: DOCKER_IMAGES.moneroblock,
-        restart: "unless-stopped",
-        container_name: "moneroblock",
-        ports: [getPortBinding(networkMode, SERVICE_PORTS.moneroblock)],
-        ...getTorNetworkConfig(torProxyMode, MONEROBLOCK_IP),
-        command: torProxyMode !== torProxyModes.none
-          ? [`--daemon ${MONEROD_IP}:${MONEROD_PORTS.rpcRestricted}`]
-          : ["--daemon", `monerod:${MONEROD_PORTS.rpcRestricted}`],
-        depends_on: {
-          monerod: {
-            condition: "service_started",
-          },
-        },
-        labels,
-        logging: isMoneroblockLoggingDisabled
-          ? {
-            driver: "none",
-          }
-          : undefined,
-      },
-    },
-  });
-  };
+  ): Service =>
+    createMoneroblockService(isMoneroblock, isMoneroblockLoggingDisabled, moneroBlockDomain, networkMode, isTraefik, certResolverName, torProxyMode);
 
   return {
     getMoneroblockService,

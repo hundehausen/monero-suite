@@ -1,6 +1,5 @@
-import { Service, architectures, networkModes, p2poolModes, torProxyModes, NetworkMode, TorProxyMode, P2PoolMode } from "../types";
+import { Service, architectures, networkModes, p2poolModes, torProxyModes, NetworkMode, TorProxyMode, P2PoolMode } from "@/hooks/services/types";
 import { TOR_IP, MONEROD_IP } from "@/lib/service-constants";
-import { MonerodState } from "./types";
 import {
   safeParse,
   hostListSchema,
@@ -14,11 +13,63 @@ import {
 import { DOCKER_IMAGES } from "@/lib/constants";
 import { getTraefikConfig, getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
 
-/**
- * Generates the Monero daemon service configuration
- */
+interface MonerodDataConfig {
+  isMoneroPublicNode: boolean;
+  moneroNodeNoLogs: boolean;
+  moneroNodeDomain: string;
+  isPrunedNode: boolean;
+  isSyncPrunedBlocks: boolean;
+  isMoneroMainnetVolume: boolean;
+  moneroMainnetBlockchainLocation: string;
+  logLevel: string;
+  maxLogFileSize: string;
+  maxLogFiles: string;
+  p2pBindPort: string;
+  outPeers: string;
+  inPeers: string;
+  limitRateUp: string;
+  limitRateDown: string;
+  noIgd: boolean;
+  hidePort: boolean;
+  allowLocalIp: boolean;
+  maxConnectionsPerIp: string;
+  p2pExternalPort: string;
+  offlineMode: boolean;
+  padTransactions: boolean;
+  anonymousInbound: string;
+  txProxyDisableNoise: boolean;
+  banList: string;
+  enableDnsBlocklist: boolean;
+  disableDnsCheckpoints: boolean;
+  seedNode: string;
+  addPeer: string;
+  addPriorityNode: string;
+  addExclusiveNode: string;
+  dbSyncMode: string;
+  blockSyncSize: string;
+  enforceCheckpointing: boolean;
+  fastBlockSync: boolean;
+  preparationThreads: string;
+  maxConcurrency: string;
+  bootstrapDaemonAddress: string;
+  bootstrapDaemonLogin: string;
+  zmqPubEnabled: boolean;
+  zmqPubBindPort: string;
+  rpcSsl: string;
+  rpcLogin: string;
+  disableRpcBan: boolean;
+  maxTxpoolWeight: string;
+  startMining: string;
+  miningThreads: string;
+  bgMiningEnable: boolean;
+  bgMiningIgnoreBattery: boolean;
+  blockNotify: string;
+  reorgNotify: string;
+  blockRateNotify: string;
+}
+
 export const createMonerodService = (
-  state: MonerodState,
+  state: MonerodDataConfig,
   networkMode: NetworkMode,
   p2PoolMode: P2PoolMode,
   torProxyMode: TorProxyMode,
@@ -82,7 +133,6 @@ export const createMonerodService = (
     blockRateNotify,
   } = state;
 
-  // Sanitize user-provided strings before interpolating into Docker commands
   const { labels } = getTraefikConfig(isTraefik, "monerod", moneroNodeDomain, "18089", certResolverName);
   const sPath = safeParse(pathSchema, moneroMainnetBlockchainLocation, "/home/monero/.bitmonero");
   const sBanList = safeParse(commandValueSchema, banList, "");
@@ -143,7 +193,6 @@ export const createMonerodService = (
             : [`${sPath}:/home/monero/.bitmonero`]),
         ],
         ports: [
-          // When node is public, bind to all interfaces regardless of network mode
           getPortBinding(isMoneroPublicNode ? networkModes.local : networkMode, 18080),
           ...(p2PoolMode !== p2poolModes.none
             ? [getPortBinding(networkMode, 18083)]

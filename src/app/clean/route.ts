@@ -4,6 +4,15 @@ import { isBefore, subHours } from "date-fns";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
+
+  if (!process.env.CRON_SECRET) {
+    console.error("CRON_SECRET environment variable is not set");
+    return Response.json(
+      { error: "Server misconfigured" },
+      { status: 503 }
+    );
+  }
+
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -50,7 +59,6 @@ export async function GET(request: Request) {
     return Response.json(
       { 
         error: "Failed to perform cleanup",
-        message: error instanceof Error ? error.message : "Unknown error",
         timestamp: new Date().toISOString()
       },
       { status: 500 }

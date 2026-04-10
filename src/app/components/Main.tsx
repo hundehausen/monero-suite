@@ -21,6 +21,7 @@ import { generateInstallationScript } from "@/lib/script-generator";
 import { stringify } from "yaml";
 import { useInstallScript } from "@/hooks/use-install-script";
 import InstallScriptPanel from "./InstallScriptPanel";
+import type { FullConfig } from "@/lib/config-schema";
 
 export default function Main() {
   const { services, stateFunctions } = useServicesContext();
@@ -64,17 +65,118 @@ export default function Main() {
     [checkedServices]
   );
 
-  const { installationCommand, isUploading, currentConfigIsUploaded, handleScriptGeneration } =
-    useInstallScript({
-      dockerComposeYaml,
-      enabledBashServices,
-      envString,
-      isExposed,
-      firewallPorts,
-      networkMode: stateFunctions.networkMode,
-    });
+  const config: FullConfig = useMemo(() => ({
+    architecture: stateFunctions.architecture,
+    networkMode: stateFunctions.networkMode,
+    monerod: {
+      isMoneroPublicNode: stateFunctions.isMoneroPublicNode,
+      moneroNodeNoLogs: stateFunctions.moneroNodeNoLogs,
+      moneroNodeDomain: stateFunctions.moneroNodeDomain,
+      isPrunedNode: stateFunctions.isPrunedNode,
+      isSyncPrunedBlocks: stateFunctions.isSyncPrunedBlocks,
+      isMoneroMainnetVolume: stateFunctions.isMoneroMainnetVolume,
+      moneroMainnetBlockchainLocation: stateFunctions.moneroMainnetBlockchainLocation,
+      logLevel: stateFunctions.logLevel,
+      maxLogFileSize: stateFunctions.maxLogFileSize,
+      maxLogFiles: stateFunctions.maxLogFiles,
+      p2pBindPort: stateFunctions.p2pBindPort,
+      outPeers: stateFunctions.outPeers,
+      inPeers: stateFunctions.inPeers,
+      limitRateUp: stateFunctions.limitRateUp,
+      limitRateDown: stateFunctions.limitRateDown,
+      noIgd: stateFunctions.noIgd,
+      hidePort: stateFunctions.hidePort,
+      allowLocalIp: stateFunctions.allowLocalIp,
+      maxConnectionsPerIp: stateFunctions.maxConnectionsPerIp,
+      p2pExternalPort: stateFunctions.p2pExternalPort,
+      offlineMode: stateFunctions.offlineMode,
+      padTransactions: stateFunctions.padTransactions,
+      anonymousInbound: stateFunctions.anonymousInbound,
+      txProxyDisableNoise: stateFunctions.txProxyDisableNoise,
+      banList: stateFunctions.banList,
+      enableDnsBlocklist: stateFunctions.enableDnsBlocklist,
+      disableDnsCheckpoints: stateFunctions.disableDnsCheckpoints,
+      seedNode: stateFunctions.seedNode,
+      addPeer: stateFunctions.addPeer,
+      addPriorityNode: stateFunctions.addPriorityNode,
+      addExclusiveNode: stateFunctions.addExclusiveNode,
+      dbSyncMode: stateFunctions.dbSyncMode,
+      blockSyncSize: stateFunctions.blockSyncSize,
+      enforceCheckpointing: stateFunctions.enforceCheckpointing,
+      fastBlockSync: stateFunctions.fastBlockSync,
+      preparationThreads: stateFunctions.preparationThreads,
+      maxConcurrency: stateFunctions.maxConcurrency,
+      bootstrapDaemonAddress: stateFunctions.bootstrapDaemonAddress,
+      bootstrapDaemonLogin: stateFunctions.bootstrapDaemonLogin,
+      zmqPubEnabled: stateFunctions.zmqPubEnabled,
+      zmqPubBindPort: stateFunctions.zmqPubBindPort,
+      rpcSsl: stateFunctions.rpcSsl,
+      rpcLogin: stateFunctions.rpcLogin,
+      disableRpcBan: stateFunctions.disableRpcBan,
+      maxTxpoolWeight: stateFunctions.maxTxpoolWeight,
+      startMining: stateFunctions.startMining,
+      miningThreads: stateFunctions.miningThreads,
+      bgMiningEnable: stateFunctions.bgMiningEnable,
+      bgMiningIgnoreBattery: stateFunctions.bgMiningIgnoreBattery,
+      blockNotify: stateFunctions.blockNotify,
+      reorgNotify: stateFunctions.reorgNotify,
+      blockRateNotify: stateFunctions.blockRateNotify,
+    },
+    stagenet: {
+      isStagenetNode: stateFunctions.isStagenetNode,
+      isStagenetNodePublic: stateFunctions.isStagenetNodePublic,
+      isMoneroStagenetCustomLocation: stateFunctions.isMoneroStagenetCustomLocation,
+      moneroStagenetBlockchainLocation: stateFunctions.moneroStagenetBlockchainLocation,
+      stagenetNodeDomain: stateFunctions.stagenetNodeDomain,
+    },
+    p2pool: {
+      p2PoolMode: stateFunctions.p2PoolMode,
+      p2PoolPayoutAddress: stateFunctions.p2PoolPayoutAddress,
+      p2PoolMiningThreads: stateFunctions.p2PoolMiningThreads,
+    },
+    mining: {
+      miningMode: stateFunctions.miningMode,
+      xmrigDonateLevel: stateFunctions.xmrigDonateLevel,
+    },
+    tor: {
+      torProxyMode: stateFunctions.torProxyMode,
+      hsMonerod: stateFunctions.hsMonerod,
+      hsMonerodP2P: stateFunctions.hsMonerodP2P,
+      hsStagenet: stateFunctions.hsStagenet,
+      hsP2Pool: stateFunctions.hsP2Pool,
+      hsMoneroblock: stateFunctions.hsMoneroblock,
+      hsOnionExplorer: stateFunctions.hsOnionExplorer,
+      hsGrafana: stateFunctions.hsGrafana,
+      isGlobalTorProxy: stateFunctions.isGlobalTorProxy,
+    },
+    services: {
+      isMoneroWalletRpc: stateFunctions.isMoneroWalletRpc,
+      isMoneroblock: stateFunctions.isMoneroblock,
+      isMoneroblockLoggingDisabled: stateFunctions.isMoneroblockLoggingDisabled,
+      moneroBlockDomain: stateFunctions.moneroBlockDomain,
+      isOnionMoneroBlockchainExplorer: stateFunctions.isOnionMoneroBlockchainExplorer,
+      onionMoneroBlockchainExplorerDomain: stateFunctions.onionMoneroBlockchainExplorerDomain,
+      isWatchtower: stateFunctions.isWatchtower,
+      isMonitoring: stateFunctions.isMonitoring,
+      grafanaDomain: stateFunctions.grafanaDomain,
+      isAutoheal: stateFunctions.isAutoheal,
+      isTraefik: stateFunctions.isTraefik,
+      isTraefikMonerod: stateFunctions.isTraefikMonerod,
+      isTraefikStagenet: stateFunctions.isTraefikStagenet,
+      isTraefikMoneroblock: stateFunctions.isTraefikMoneroblock,
+      isTraefikOnionExplorer: stateFunctions.isTraefikOnionExplorer,
+      isTraefikGrafana: stateFunctions.isTraefikGrafana,
+      isTraefikPortainer: stateFunctions.isTraefikPortainer,
+      isPortainer: stateFunctions.isPortainer,
+      portainerDomain: stateFunctions.portainerDomain,
+      isCuprateEnabled: stateFunctions.isCuprateEnabled,
+    },
+    enabledBashServices,
+  }), [stateFunctions, enabledBashServices]);
 
-  // if env tab is no longer available, fall back to docker-compose
+  const { installationCommand, isUploading, currentConfigIsUploaded, handleScriptGeneration } =
+    useInstallScript({ config });
+
   const effectiveTab = !envString && activeTab === "env" ? "docker-compose" : activeTab;
 
   return (
