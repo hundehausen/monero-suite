@@ -1,56 +1,99 @@
 import { z } from "zod/v4";
 
-const noShellMeta = (val: string) => !/[;&|`$(){}[\]!<>\\'"]/.test(val);
+const BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+
+const validPort = (portStr: string) => {
+  const n = parseInt(portStr, 10);
+  return !isNaN(n) && n >= 0 && n <= 65535;
+};
 
 export const domainSchema = z
   .string()
   .trim()
   .max(253)
-  .regex(/^[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]$/)
+  .regex(/^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*(:\d{1,5})?$/)
+  .check(
+    z.refine((val) => {
+      if (val.includes(":")) {
+        const port = parseInt(val.split(":").pop()!, 10);
+        return port >= 0 && port <= 65535;
+      }
+      return true;
+    }, "Port out of range 0-65535"),
+  )
   .or(z.literal(""));
 
 export const hostPortSchema = z
   .string()
   .trim()
-  .regex(/^[a-zA-Z0-9._-]+(:[0-9]{1,5})?$/)
-  .or(z.string().regex(/^[a-z2-7]{56}\.onion(:[0-9]{1,5})?$/))
+  .regex(/^[a-zA-Z0-9._-]+$/)
+  .check(z.refine((val) => !val.includes(":") || validPort(val.split(":").pop()!), "Port out of range 0-65535"))
+  .or(
+    z.string()
+      .regex(/^[a-z2-7]{56}\.onion$/)
+      .check(z.refine((val) => !val.includes(":") || validPort(val.split(":").pop()!), "Port out of range 0-65535"))
+  )
   .or(z.literal(""));
 
 export const commandValueSchema = z
   .string()
   .trim()
+  .regex(/^[a-zA-Z0-9_.:/=@+\-[\]{}(),#%~^*!?\s]+$/, "Contains disallowed characters")
   .check(
-    z.refine(noShellMeta, "Contains shell metacharacters"),
+    z.refine((val) => !/[\r\n\t\x00]/.test(val), "Contains control characters"),
+    z.refine((val) => !/[;&|`$\\]/.test(val), "Contains shell metacharacters"),
   )
   .or(z.literal(""));
 
 export const moneroAddressSchema = z
   .string()
   .trim()
-  .regex(/^4[0-9A-Za-z]{94}$/)
+  .regex(new RegExp(`^[48][${BASE58}]{94}$`))
   .or(z.literal(""));
 
 export const pathSchema = z
   .string()
   .trim()
-  .regex(/^[a-zA-Z0-9_.~/-]+$/)
+  .regex(/^[a-zA-Z0-9_./~-]+$/)
   .check(
     z.refine((val) => !val.includes(".."), "Path traversal not allowed"),
   )
   .or(z.literal(""));
 
-export const hostListSchema = z.string().transform((val) =>
-  val
-    .split(/[\s,]+/)
-    .map((e) => e.trim())
-    .filter((e) => e.length > 0)
-    .filter((e) => hostPortSchema.safeParse(e).success)
-);
+export const hostListSchema = z
+  .string()
+  .transform((val) =>
+    val
+      .split(/[\s,]+/)
+      .map((e: string) => e.trim())
+      .filter((e: string) => e.length > 0)
+  )
+  .check(
+    z.superRefine((entries: string[], ctx) => {
+      const invalid = entries.filter((e) => !hostPortSchema.safeParse(e).success);
+      if (invalid.length > 0) {
+        ctx.addIssue(`Invalid host entries: ${invalid.join(", ")}`);
+      }
+    })
+  );
+
+export const portSchema = z
+  .string()
+  .trim()
+  .regex(/^[0-9]+$/)
+  .check(z.refine((val) => validPort(val), "Port out of range 0-65535"))
+  .or(z.literal(""));
 
 export const numericStringSchema = z
   .string()
   .trim()
   .regex(/^[0-9]+$/)
+  .or(z.literal(""));
+
+export const signedNumericStringSchema = z
+  .string()
+  .trim()
+  .regex(/^-?[0-9]+$/)
   .or(z.literal(""));
 
 export const rpcLoginSchema = z
@@ -59,11 +102,8 @@ export const rpcLoginSchema = z
   .regex(/^[a-zA-Z0-9_-]+:[a-zA-Z0-9_!@#$%^&*()-]+$/)
   .or(z.literal(""));
 
-/**
- * Safely parse a value against a Zod schema, returning a fallback on failure.
- * Used at the point of consumption (service generators) so the UI shows raw input
- * but generated Docker/bash output is always safe.
- */
+export const rpcSslSchema = z.enum(["autodetect", "enabled", "disabled"]);
+
 export function safeParse<T>(
   schema: z.ZodType<T>,
   value: unknown,

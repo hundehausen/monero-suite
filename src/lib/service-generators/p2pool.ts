@@ -81,20 +81,25 @@ export const createP2PoolService = (
           },
         },
         command: [
-          `--wallet ${sPayoutAddress}`,
-          `--stratum 0.0.0.0:${P2POOL_PORTS.stratum}`,
-          `--p2p 0.0.0.0:${p2PoolMode === p2poolModes.mini ? P2POOL_PORTS.p2pMini : p2PoolMode === p2poolModes.nano ? P2POOL_PORTS.p2pNano : P2POOL_PORTS.p2pFull}`,
-          `--rpc-port ${MONEROD_PORTS.rpcRestricted}`,
-          `--zmq-port ${MONEROD_PORTS.zmqPub}`,
+          "--wallet",
+          sPayoutAddress,
+          "--stratum",
+          `0.0.0.0:${P2POOL_PORTS.stratum}`,
+          "--p2p",
+          `0.0.0.0:${p2PoolMode === p2poolModes.mini ? P2POOL_PORTS.p2pMini : p2PoolMode === p2poolModes.nano ? P2POOL_PORTS.p2pNano : P2POOL_PORTS.p2pFull}`,
+          "--rpc-port",
+          `${MONEROD_PORTS.rpcRestricted}`,
+          "--zmq-port",
+          `${MONEROD_PORTS.zmqPub}`,
           ...(torProxyMode !== torProxyModes.none
-            ? [`--host ${MONEROD_IP}`, "--no-dns"]
-            : ["--host monerod"]),
+            ? ["--host", `${MONEROD_IP}`, "--no-dns"]
+            : ["--host", "monerod"]),
           ...(miningMode === minigModes.p2pool
-            ? [`--start-mining ${p2PoolMiningThreads}`]
+            ? ["--start-mining", `${p2PoolMiningThreads}`]
             : []),
           ...(p2PoolMode === p2poolModes.mini ? ["--mini"] : []),
-          ...(p2PoolMode === p2poolModes.nano ? ["--nano"] : [])
-        ].join(" "),
+          ...(p2PoolMode === p2poolModes.nano ? ["--nano"] : []),
+        ],
       },
     },
   });

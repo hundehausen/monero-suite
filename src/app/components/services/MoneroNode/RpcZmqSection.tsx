@@ -2,6 +2,7 @@
 
 import { NumberInput, Select, SimpleGrid, Switch, TextInput, Title } from "@mantine/core";
 import { useMonerodState } from "@/hooks/services-context";
+import { RPC_SSL_VALUES, type RpcSslValue } from "@/hooks/services/monerod/zmq-rpc-config";
 import ExplainingLabel from "../../ExplainingLabel";
 import AccordionItemComponent from "../AccordionItemComponent";
 
@@ -54,7 +55,11 @@ const RpcZmqSection = () => {
             />
           }
           value={rpcSsl}
-          onChange={(value) => value && setRpcSsl(value)}
+          onChange={(value) => {
+            if (value && (RPC_SSL_VALUES as readonly string[]).includes(value)) {
+              setRpcSsl(value as RpcSslValue);
+            }
+          }}
           data={[
             { value: "autodetect", label: "Autodetect (Default)" },
             { value: "enabled", label: "Enabled" },

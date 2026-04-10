@@ -1,5 +1,6 @@
 import { Service, architectures, networkModes, p2poolModes, torProxyModes, NetworkMode, TorProxyMode, P2PoolMode } from "@/hooks/services/types";
 import { TOR_IP, MONEROD_IP } from "@/lib/service-constants";
+import type { RpcSslValue } from "@/hooks/services/monerod/zmq-rpc-config";
 import {
   safeParse,
   hostListSchema,
@@ -55,7 +56,7 @@ interface MonerodDataConfig {
   bootstrapDaemonLogin: string;
   zmqPubEnabled: boolean;
   zmqPubBindPort: string;
-  rpcSsl: string;
+  rpcSsl: RpcSslValue;
   rpcLogin: string;
   disableRpcBan: boolean;
   maxTxpoolWeight: string;

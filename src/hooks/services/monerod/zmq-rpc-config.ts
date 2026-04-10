@@ -1,22 +1,22 @@
-import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
+import { useQueryState, parseAsBoolean, parseAsString, parseAsStringEnum } from "nuqs";
 
-/**
- * Hook for Monero daemon ZMQ and RPC configuration settings
- */
+export const RPC_SSL_VALUES = ["autodetect", "enabled", "disabled"] as const;
+export type RpcSslValue = (typeof RPC_SSL_VALUES)[number];
+
 export const useZmqRpcConfig = () => {
   const [zmqPubEnabled, setZmqPubEnabled] = useQueryState(
-    "zmqPubEnabled", 
+    "zmqPubEnabled",
     parseAsBoolean.withDefault(false)
   );
-  
+
   const [zmqPubBindPort, setZmqPubBindPort] = useQueryState(
-    "zmqPubBindPort", 
+    "zmqPubBindPort",
     parseAsString.withDefault("18083")
   );
 
   const [rpcSsl, setRpcSsl] = useQueryState(
-    "rpcSsl", 
-    parseAsString.withDefault("autodetect")
+    "rpcSsl",
+    parseAsStringEnum<RpcSslValue>([...RPC_SSL_VALUES]).withDefault("autodetect")
   );
   
   const [rpcLogin, setRpcLogin] = useQueryState(
