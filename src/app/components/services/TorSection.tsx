@@ -96,7 +96,7 @@ const TorSection = () => {
               label={
                 <ExplainingLabel
                   label="Make Tor proxy available outside Docker network"
-                  explanation="This will bind the SOCKS5 port of the Tor service to all network interfaces of the host, making it accessible from other devices on your local network. This option is only available when you're behind NAT. Do not use this option, if your host is part of a public network."
+                  explanation="This will bind the SOCKS5 port of the Tor service to all network interfaces of the host, making it accessible from other devices on your local network. This option is only available when you're behind NAT. Do not use this option if your host is part of a public network."
                 />
               }
               onChange={(event) => setIsGlobalTorProxy(event.currentTarget.checked)}
@@ -128,8 +128,8 @@ const TorSection = () => {
                     label="Monerod (P2P Anonymous Inbound)"
                     explanation={
                       "Creates a hidden service for monerod P2P traffic on port 18084, allowing other Tor nodes to peer with your node anonymously. "
-                      + "This requires a manual step after first deployment: run `docker logs tor` to find the generated .onion address, "
-                      + "then set the monerod flag --anonymous-inbound=<your_onion_address>.onion:18084,127.0.0.1:18084 "
+                      + "After first deployment, run `docker logs tor` to find the generated .onion address. "
+                      + "Then set the monerod flag --anonymous-inbound=<your_onion_address>.onion:18084,127.0.0.1:18084 "
                       + "in the Anonymous Inbound field under Monerod Advanced Settings > Tor/I2P, and redeploy with `docker compose up -d`."
                     }
                   />
