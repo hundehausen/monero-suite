@@ -1,4 +1,5 @@
 import { del, list } from "@vercel/blob";
+import { timingSafeEqual } from "crypto";
 import { isBefore, subHours } from "date-fns";
 
 export const dynamic = "force-dynamic";
@@ -13,8 +14,11 @@ export async function GET(request: Request) {
     );
   }
 
-  const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const authHeader = request.headers.get("authorization") ?? "";
+  const expected = `Bearer ${process.env.CRON_SECRET}`;
+  const a = Buffer.from(authHeader);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length || !timingSafeEqual(a, b)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
