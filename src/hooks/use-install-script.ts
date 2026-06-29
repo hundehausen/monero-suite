@@ -11,9 +11,13 @@ interface UseInstallScriptParams {
 
 export function useInstallScript({ config }: UseInstallScriptParams) {
   const [scriptUrl, setScriptUrl] = useState<string>();
-  const [installationCommand, setInstallationCommand] = useState<string>();
   const [isUploading, setIsUploading] = useState(false);
   const [currentConfigIsUploaded, setCurrentConfigIsUploaded] = useState(false);
+
+  const installationCommand = useMemo(
+    () => (scriptUrl ? `curl -sSL ${scriptUrl} | bash` : undefined),
+    [scriptUrl]
+  );
 
   const lastUploadedConfig = useRef<string | null>(null);
 
@@ -47,11 +51,6 @@ export function useInstallScript({ config }: UseInstallScriptParams) {
       setIsUploading(false);
     }
   };
-
-  useEffect(() => {
-    if (!scriptUrl) return;
-    setInstallationCommand(`curl -sSL ${scriptUrl} | bash`);
-  }, [scriptUrl]);
 
   useEffect(() => {
     if (!currentConfigIsUploaded) return;
