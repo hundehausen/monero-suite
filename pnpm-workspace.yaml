@@ -1,10 +1,19 @@
-minimumReleaseAge: 4320
+minimumReleaseAge: 1440
 
 minimumReleaseAgeExclude:
   - 'lodash@4.18.1'
-  - 'next@16.2.9'
+  - 'next'
   - '@next/*'
+  - 'eslint-config-next'
+  - 'react'
+  - 'react-dom'
 
 onlyBuiltDependencies:
   - sharp
   - unrs-resolver
+
+overrides:
+  postcss: 8.5.23
+  sharp: 0.35.3
+  minimatch: 10.2.5
+  brace-expansion: 5.0.8
