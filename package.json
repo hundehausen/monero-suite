@@ -49,5 +49,5 @@
     "postcss-simple-vars": "7.0.1",
     "standard-version": "9.5.0"
   },
-  "packageManager": "pnpm@10.34.5"
+  "packageManager": "pnpm@11.17.0"
 }
