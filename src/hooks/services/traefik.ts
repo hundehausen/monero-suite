@@ -17,14 +17,6 @@ export const useTraefikService = () => {
     "isTraefikStagenet",
     parseAsBoolean.withDefault(true)
   );
-  const [isTraefikMoneroblock, setIsTraefikMoneroblock] = useQueryState(
-    "isTraefikMoneroblock",
-    parseAsBoolean.withDefault(true)
-  );
-  const [isTraefikOnionExplorer, setIsTraefikOnionExplorer] = useQueryState(
-    "isTraefikOnionExplorer",
-    parseAsBoolean.withDefault(true)
-  );
   const [isTraefikGrafana, setIsTraefikGrafana] = useQueryState(
     "isTraefikGrafana",
     parseAsBoolean.withDefault(true)
@@ -47,10 +39,6 @@ export const useTraefikService = () => {
       setIsTraefikMonerod,
       isTraefikStagenet,
       setIsTraefikStagenet,
-      isTraefikMoneroblock,
-      setIsTraefikMoneroblock,
-      isTraefikOnionExplorer,
-      setIsTraefikOnionExplorer,
       isTraefikGrafana,
       setIsTraefikGrafana,
       isTraefikPortainer,

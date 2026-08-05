@@ -13,7 +13,7 @@ import {
 import { useEffect } from "react";
 
 import { createTorService } from "@/lib/service-generators/tor";
-export { TOR_IP, MONEROD_IP, MONEROD_STAGENET_IP, P2POOL_IP, MONEROBLOCK_IP, EXPLORER_IP, GRAFANA_IP } from "@/lib/service-constants";
+export { TOR_IP, MONEROD_IP, MONEROD_STAGENET_IP, P2POOL_IP, GRAFANA_IP } from "@/lib/service-constants";
 
 export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => {
   const [torProxyMode, setTorProxyMode] = useQueryState<TorProxyMode>(
@@ -27,11 +27,9 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
   const [hsMonerodP2P, setHsMonerodP2P] = useQueryState("hsMonerodP2P", parseAsBoolean.withDefault(false));
   const [hsStagenet, setHsStagenet] = useQueryState("hsStagenet", parseAsBoolean.withDefault(false));
   const [hsP2Pool, setHsP2Pool] = useQueryState("hsP2Pool", parseAsBoolean.withDefault(false));
-  const [hsMoneroblock, setHsMoneroblock] = useQueryState("hsMoneroblock", parseAsBoolean.withDefault(false));
-  const [hsOnionExplorer, setHsOnionExplorer] = useQueryState("hsOnionExplorer", parseAsBoolean.withDefault(false));
   const [hsGrafana, setHsGrafana] = useQueryState("hsGrafana", parseAsBoolean.withDefault(false));
 
-  const isHiddenServices = hsMonerod || hsMonerodP2P || hsStagenet || hsP2Pool || hsMoneroblock || hsOnionExplorer || hsGrafana;
+  const isHiddenServices = hsMonerod || hsMonerodP2P || hsStagenet || hsP2Pool || hsGrafana;
 
   const [isGlobalTorProxy, setIsGlobalTorProxy] = useQueryState(
     "isGlobalTorProxy",
@@ -48,17 +46,13 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
     networkMode: NetworkMode,
     isStagenetNode: boolean = false,
     p2PoolMode: P2PoolMode = p2poolModes.none,
-    isMoneroblock: boolean = false,
-    isOnionMoneroBlockchainExplorer: boolean = false,
     isMonitoring: boolean = false
   ): Service =>
     createTorService(
-      { torProxyMode, hsMonerod, hsMonerodP2P, hsStagenet, hsP2Pool, hsMoneroblock, hsOnionExplorer, hsGrafana, isGlobalTorProxy },
+      { torProxyMode, hsMonerod, hsMonerodP2P, hsStagenet, hsP2Pool, hsGrafana, isGlobalTorProxy },
       networkMode,
       isStagenetNode,
       p2PoolMode,
-      isMoneroblock,
-      isOnionMoneroBlockchainExplorer,
       isMonitoring
     );
 
@@ -76,10 +70,6 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
       setHsStagenet,
       hsP2Pool,
       setHsP2Pool,
-      hsMoneroblock,
-      setHsMoneroblock,
-      hsOnionExplorer,
-      setHsOnionExplorer,
       hsGrafana,
       setHsGrafana,
       isGlobalTorProxy,

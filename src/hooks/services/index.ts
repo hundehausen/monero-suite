@@ -3,8 +3,6 @@ export * from "./monerod";
 export * from "./monerod-stagenet";
 export * from "./p2pool";
 export * from "./monero-wallet-rpc";
-export * from "./moneroblock";
-export * from "./onion-monero-blockchain-explorer";
 export * from "./tor";
 export * from "./watchtower";
 export * from "./monitoring";

@@ -61,7 +61,10 @@ export default function Main() {
   );
 
   const enabledBashServices = useMemo(
-    () => ({ monitoring: checkedServices.some((s) => s.name === "Monitoring") }),
+    () => ({
+      monitoring: checkedServices.some((s) => s.name === "Monitoring"),
+      cuprate: checkedServices.some((s) => s.name === "Cuprate (Experimental)"),
+    }),
     [checkedServices]
   );
 
@@ -144,26 +147,17 @@ export default function Main() {
       hsMonerodP2P: stateFunctions.hsMonerodP2P,
       hsStagenet: stateFunctions.hsStagenet,
       hsP2Pool: stateFunctions.hsP2Pool,
-      hsMoneroblock: stateFunctions.hsMoneroblock,
-      hsOnionExplorer: stateFunctions.hsOnionExplorer,
       hsGrafana: stateFunctions.hsGrafana,
       isGlobalTorProxy: stateFunctions.isGlobalTorProxy,
     },
     services: {
       isMoneroWalletRpc: stateFunctions.isMoneroWalletRpc,
-      isMoneroblock: stateFunctions.isMoneroblock,
-      isMoneroblockLoggingDisabled: stateFunctions.isMoneroblockLoggingDisabled,
-      moneroBlockDomain: stateFunctions.moneroBlockDomain,
-      isOnionMoneroBlockchainExplorer: stateFunctions.isOnionMoneroBlockchainExplorer,
-      onionMoneroBlockchainExplorerDomain: stateFunctions.onionMoneroBlockchainExplorerDomain,
       isWatchtower: stateFunctions.isWatchtower,
       isMonitoring: stateFunctions.isMonitoring,
       grafanaDomain: stateFunctions.grafanaDomain,
       isTraefik: stateFunctions.isTraefik,
       isTraefikMonerod: stateFunctions.isTraefikMonerod,
       isTraefikStagenet: stateFunctions.isTraefikStagenet,
-      isTraefikMoneroblock: stateFunctions.isTraefikMoneroblock,
-      isTraefikOnionExplorer: stateFunctions.isTraefikOnionExplorer,
       isTraefikGrafana: stateFunctions.isTraefikGrafana,
       isTraefikPortainer: stateFunctions.isTraefikPortainer,
       isPortainer: stateFunctions.isPortainer,

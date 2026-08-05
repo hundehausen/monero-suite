@@ -30,7 +30,6 @@ Running a Monero node should be accessible to everyone, not just sysadmins. Mone
 | [monero-wallet-rpc](https://web.getmonero.org/resources/developer-guides/wallet-rpc.html) | Control a Monero wallet programmatically |
 | [P2Pool](https://github.com/SChernykh/p2pool) | Decentralized mining pool (nano, mini, and full sidechains) |
 | [XMRig](https://xmrig.com/) | High-performance CPU miner, connected to your P2Pool node |
-| [MoneroBlock](https://github.com/duggavo/MoneroBlock) | Lightweight Monero block explorer |
 | [Monitoring](https://github.com/lalanza808/docker-monero-node) | Grafana + Prometheus dashboard with node stats and peer map |
 | [Tor](https://github.com/hundehausen/tor-hidden-service-docker) | Proxy for anonymous transactions and hidden services for private access |
 | [Traefik](https://traefik.io) | Reverse proxy — expose services via your own domain with TLS |

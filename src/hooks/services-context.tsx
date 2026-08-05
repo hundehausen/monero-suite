@@ -7,8 +7,6 @@ import {
   useMonerodStagenetService,
   useP2PoolService,
   useMoneroWalletRpcService,
-  useMoneroblockService,
-  useOnionMoneroBlockchainExplorerService,
   useTorService,
   useWatchtowerService,
   useMonitoringService,
@@ -23,8 +21,6 @@ export type MonerodState = ReturnType<typeof useMonerodService>["stateFunctions"
 export type StagenetState = ReturnType<typeof useMonerodStagenetService>["stateFunctions"];
 export type P2PoolState = ReturnType<typeof useP2PoolService>["stateFunctions"];
 export type MoneroWalletRpcState = ReturnType<typeof useMoneroWalletRpcService>["stateFunctions"];
-export type MoneroblockState = ReturnType<typeof useMoneroblockService>["stateFunctions"];
-export type OnionExplorerState = ReturnType<typeof useOnionMoneroBlockchainExplorerService>["stateFunctions"];
 export type TorState = ReturnType<typeof useTorService>["stateFunctions"];
 export type WatchtowerState = ReturnType<typeof useWatchtowerService>["stateFunctions"];
 export type MonitoringState = ReturnType<typeof useMonitoringService>["stateFunctions"];
@@ -97,23 +93,6 @@ export function useMoneroWalletRpcState(): MoneroWalletRpcState {
   return { isMoneroWalletRpc: s.isMoneroWalletRpc, setIsMoneroWalletRpc: s.setIsMoneroWalletRpc };
 }
 
-export function useMoneroblockState(): MoneroblockState {
-  const { stateFunctions: s } = useServicesContext();
-  return {
-    isMoneroblock: s.isMoneroblock, setIsMoneroblock: s.setIsMoneroblock,
-    isMoneroblockLoggingDisabled: s.isMoneroblockLoggingDisabled, setIsMoneroblockLoggingDisabled: s.setIsMoneroblockLoggingDisabled,
-    moneroBlockDomain: s.moneroBlockDomain, setMoneroBlockDomain: s.setMoneroBlockDomain,
-  };
-}
-
-export function useOnionExplorerState(): OnionExplorerState {
-  const { stateFunctions: s } = useServicesContext();
-  return {
-    isOnionMoneroBlockchainExplorer: s.isOnionMoneroBlockchainExplorer, setIsOnionMoneroBlockchainExplorer: s.setIsOnionMoneroBlockchainExplorer,
-    onionMoneroBlockchainExplorerDomain: s.onionMoneroBlockchainExplorerDomain, setOnionMoneroBlockchainExplorerDomain: s.setOnionMoneroBlockchainExplorerDomain,
-  };
-}
-
 export function useTorState(): TorState {
   const { stateFunctions: s } = useServicesContext();
   return {
@@ -123,8 +102,6 @@ export function useTorState(): TorState {
     hsMonerodP2P: s.hsMonerodP2P, setHsMonerodP2P: s.setHsMonerodP2P,
     hsStagenet: s.hsStagenet, setHsStagenet: s.setHsStagenet,
     hsP2Pool: s.hsP2Pool, setHsP2Pool: s.setHsP2Pool,
-    hsMoneroblock: s.hsMoneroblock, setHsMoneroblock: s.setHsMoneroblock,
-    hsOnionExplorer: s.hsOnionExplorer, setHsOnionExplorer: s.setHsOnionExplorer,
     hsGrafana: s.hsGrafana, setHsGrafana: s.setHsGrafana,
     isGlobalTorProxy: s.isGlobalTorProxy, setIsGlobalTorProxy: s.setIsGlobalTorProxy,
   };
@@ -157,8 +134,6 @@ export function useTraefikState(): TraefikState {
     isTraefik: s.isTraefik, setIsTraefik: s.setIsTraefik,
     isTraefikMonerod: s.isTraefikMonerod, setIsTraefikMonerod: s.setIsTraefikMonerod,
     isTraefikStagenet: s.isTraefikStagenet, setIsTraefikStagenet: s.setIsTraefikStagenet,
-    isTraefikMoneroblock: s.isTraefikMoneroblock, setIsTraefikMoneroblock: s.setIsTraefikMoneroblock,
-    isTraefikOnionExplorer: s.isTraefikOnionExplorer, setIsTraefikOnionExplorer: s.setIsTraefikOnionExplorer,
     isTraefikGrafana: s.isTraefikGrafana, setIsTraefikGrafana: s.setIsTraefikGrafana,
     isTraefikPortainer: s.isTraefikPortainer, setIsTraefikPortainer: s.setIsTraefikPortainer,
   };
@@ -183,8 +158,6 @@ export function useHasDefaultDomain(): boolean {
   return [
     s.isMoneroPublicNode && s.isTraefikMonerod && s.moneroNodeDomain,
     s.isStagenetNode && s.isStagenetNodePublic && s.isTraefikStagenet && s.stagenetNodeDomain,
-    s.isMoneroblock && s.isTraefikMoneroblock && s.moneroBlockDomain,
-    s.isOnionMoneroBlockchainExplorer && s.isTraefikOnionExplorer && s.onionMoneroBlockchainExplorerDomain,
     s.isMonitoring && s.isTraefikGrafana && s.grafanaDomain,
     s.isPortainer && s.isTraefikPortainer && s.portainerDomain,
   ].some((d) => typeof d === "string" && d.includes("example.com"));

@@ -98,27 +98,18 @@ const torConfigSchema = z.object({
   hsMonerodP2P: z.boolean(),
   hsStagenet: z.boolean(),
   hsP2Pool: z.boolean(),
-  hsMoneroblock: z.boolean(),
-  hsOnionExplorer: z.boolean(),
   hsGrafana: z.boolean(),
   isGlobalTorProxy: z.boolean(),
 });
 
 const serviceToggleSchema = z.object({
   isMoneroWalletRpc: z.boolean(),
-  isMoneroblock: z.boolean(),
-  isMoneroblockLoggingDisabled: z.boolean(),
-  moneroBlockDomain: domainSchema,
-  isOnionMoneroBlockchainExplorer: z.boolean(),
-  onionMoneroBlockchainExplorerDomain: domainSchema,
   isWatchtower: z.boolean(),
   isMonitoring: z.boolean(),
   grafanaDomain: domainSchema,
   isTraefik: z.boolean(),
   isTraefikMonerod: z.boolean(),
   isTraefikStagenet: z.boolean(),
-  isTraefikMoneroblock: z.boolean(),
-  isTraefikOnionExplorer: z.boolean(),
   isTraefikGrafana: z.boolean(),
   isTraefikPortainer: z.boolean(),
   isPortainer: z.boolean(),
@@ -137,6 +128,7 @@ export const fullConfigSchema = z.object({
   services: serviceToggleSchema,
   enabledBashServices: z.object({
     monitoring: z.boolean(),
+    cuprate: z.boolean(),
   }),
 });
 

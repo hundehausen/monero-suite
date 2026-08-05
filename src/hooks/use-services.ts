@@ -13,8 +13,6 @@ import {
   useMonerodStagenetService,
   useP2PoolService,
   useMoneroWalletRpcService,
-  useMoneroblockService,
-  useOnionMoneroBlockchainExplorerService,
   useTorService,
   useWatchtowerService,
   useMonitoringService,
@@ -46,9 +44,6 @@ export const useServices = () => {
   const monerodStagenetService = useMonerodStagenetService();
   const p2PoolService = useP2PoolService();
   const moneroWalletRpcService = useMoneroWalletRpcService();
-  const moneroblockService = useMoneroblockService();
-  const onionMoneroBlockchainExplorerService =
-    useOnionMoneroBlockchainExplorerService();
   const torService = useTorService({ networkMode });
   const watchtowerService = useWatchtowerService();
   const monitoringService = useMonitoringService();
@@ -62,8 +57,6 @@ export const useServices = () => {
     isTraefik,
     isTraefikMonerod,
     isTraefikStagenet,
-    isTraefikMoneroblock,
-    isTraefikOnionExplorer,
     isTraefikGrafana,
     isTraefikPortainer,
   } = traefikService.stateFunctions;
@@ -109,26 +102,10 @@ export const useServices = () => {
       networkMode,
       torService.stateFunctions.torProxyMode
     ),
-    moneroblock: moneroblockService.getMoneroblockService(
-      networkMode,
-      isTraefik && isTraefikMoneroblock,
-      CERT_RESOLVER_NAME,
-      torService.stateFunctions.torProxyMode
-    ),
-    "onion-monero-blockchain-explorer":
-      onionMoneroBlockchainExplorerService.getOnionMoneroBlockchainExplorerService(
-        networkMode,
-        isTraefik && isTraefikOnionExplorer,
-        CERT_RESOLVER_NAME,
-        torService.stateFunctions.torProxyMode
-      ),
     tor: torService.getTorService(
       networkMode,
       monerodStagenetService.stateFunctions.isStagenetNode,
       p2PoolService.stateFunctions.p2PoolMode,
-      moneroblockService.stateFunctions.isMoneroblock,
-      onionMoneroBlockchainExplorerService.stateFunctions
-        .isOnionMoneroBlockchainExplorer,
       isMonitoring
     ),
     watchtower: watchtowerService.getWatchtowerService(),
@@ -171,8 +148,6 @@ export const useServices = () => {
     ...monerodStagenetService.stateFunctions,
     ...p2PoolService.stateFunctions,
     ...moneroWalletRpcService.stateFunctions,
-    ...moneroblockService.stateFunctions,
-    ...onionMoneroBlockchainExplorerService.stateFunctions,
     ...torService.stateFunctions,
     ...watchtowerService.stateFunctions,
     ...monitoringService.stateFunctions,

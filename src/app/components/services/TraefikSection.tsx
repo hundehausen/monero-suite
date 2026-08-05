@@ -6,8 +6,6 @@ import {
   useTraefikState,
   useMonerodState,
   useStagenetState,
-  useMoneroblockState,
-  useOnionExplorerState,
   useMonitoringState,
   usePortainerState,
 } from "@/hooks/services-context";
@@ -19,15 +17,11 @@ const TraefikSection = () => {
     isTraefik, setIsTraefik,
     isTraefikMonerod, setIsTraefikMonerod,
     isTraefikStagenet, setIsTraefikStagenet,
-    isTraefikMoneroblock, setIsTraefikMoneroblock,
-    isTraefikOnionExplorer, setIsTraefikOnionExplorer,
     isTraefikGrafana, setIsTraefikGrafana,
     isTraefikPortainer, setIsTraefikPortainer,
   } = useTraefikState();
   const { isMoneroPublicNode, moneroNodeDomain, setMoneroNodeDomain } = useMonerodState();
   const { isStagenetNode, isStagenetNodePublic, stagenetNodeDomain, setStagenetNodeDomain } = useStagenetState();
-  const { isMoneroblock, moneroBlockDomain, setMoneroBlockDomain } = useMoneroblockState();
-  const { isOnionMoneroBlockchainExplorer, onionMoneroBlockchainExplorerDomain, setOnionMoneroBlockchainExplorerDomain } = useOnionExplorerState();
   const { isMonitoring, grafanaDomain, setGrafanaDomain } = useMonitoringState();
   const { isPortainer, portainerDomain, setPortainerDomain } = usePortainerState();
 
@@ -51,26 +45,6 @@ const TraefikSection = () => {
       onChange: setStagenetNodeDomain,
       isEnabled: isTraefikStagenet,
       setIsEnabled: setIsTraefikStagenet,
-    },
-    {
-      show: isMoneroblock,
-      checkboxLabel: "Moneroblock Explorer",
-      inputLabel: "Moneroblock Domain",
-      description: "The domain where your Moneroblock explorer will be available.",
-      value: moneroBlockDomain,
-      onChange: setMoneroBlockDomain,
-      isEnabled: isTraefikMoneroblock,
-      setIsEnabled: setIsTraefikMoneroblock,
-    },
-    {
-      show: isOnionMoneroBlockchainExplorer,
-      checkboxLabel: "Onion Monero Explorer",
-      inputLabel: "Onion Explorer Domain",
-      description: "The domain where your Onion Monero Blockchain Explorer will be available.",
-      value: onionMoneroBlockchainExplorerDomain,
-      onChange: setOnionMoneroBlockchainExplorerDomain,
-      isEnabled: isTraefikOnionExplorer,
-      setIsEnabled: setIsTraefikOnionExplorer,
     },
     {
       show: isMonitoring,

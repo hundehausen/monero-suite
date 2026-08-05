@@ -20,10 +20,6 @@ const TorSection = () => {
     setHsStagenet,
     hsP2Pool,
     setHsP2Pool,
-    hsMoneroblock,
-    setHsMoneroblock,
-    hsOnionExplorer,
-    setHsOnionExplorer,
     hsGrafana,
     setHsGrafana,
     isGlobalTorProxy,
@@ -149,20 +145,6 @@ const TorSection = () => {
                 checked={hsP2Pool}
                 label="P2Pool (Stratum)"
                 onChange={(event) => setHsP2Pool(event.currentTarget.checked)}
-              />
-            )}
-            {services["moneroblock"]?.checked && (
-              <Checkbox
-                checked={hsMoneroblock}
-                label="Moneroblock (Block Explorer)"
-                onChange={(event) => setHsMoneroblock(event.currentTarget.checked)}
-              />
-            )}
-            {services["onion-monero-blockchain-explorer"]?.checked && (
-              <Checkbox
-                checked={hsOnionExplorer}
-                label="Onion Monero Blockchain Explorer"
-                onChange={(event) => setHsOnionExplorer(event.currentTarget.checked)}
               />
             )}
             {services["monitoring"]?.checked && (

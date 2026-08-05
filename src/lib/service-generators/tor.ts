@@ -9,8 +9,6 @@ interface TorDataConfig {
   hsMonerodP2P: boolean;
   hsStagenet: boolean;
   hsP2Pool: boolean;
-  hsMoneroblock: boolean;
-  hsOnionExplorer: boolean;
   hsGrafana: boolean;
   isGlobalTorProxy: boolean;
 }
@@ -20,8 +18,6 @@ export const createTorService = (
   networkMode: NetworkMode,
   isStagenetNode: boolean = false,
   p2PoolMode: P2PoolMode = p2poolModes.none,
-  isMoneroblock: boolean = false,
-  isOnionMoneroBlockchainExplorer: boolean = false,
   isMonitoring: boolean = false
 ): Service => {
   const {
@@ -30,13 +26,11 @@ export const createTorService = (
     hsMonerodP2P,
     hsStagenet,
     hsP2Pool,
-    hsMoneroblock,
-    hsOnionExplorer,
     hsGrafana,
     isGlobalTorProxy,
   } = state;
 
-  const isHiddenServices = hsMonerod || hsMonerodP2P || hsStagenet || hsP2Pool || hsMoneroblock || hsOnionExplorer || hsGrafana;
+  const isHiddenServices = hsMonerod || hsMonerodP2P || hsStagenet || hsP2Pool || hsGrafana;
   const isTorEnabled = torProxyMode !== torProxyModes.none || isHiddenServices;
   const isProxyEnabled = torProxyMode !== torProxyModes.none;
 
@@ -110,12 +104,6 @@ export const createTorService = (
         : {}),
       ...(hsP2Pool && p2PoolMode === p2poolModes.nano
         ? { HS_P2POOL_NANO: `p2pool-nano:${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}` }
-        : {}),
-      ...(hsMoneroblock && isMoneroblock
-        ? { HS_MONEROBLOCK: `moneroblock:${SERVICE_PORTS.moneroblock}:80` }
-        : {}),
-      ...(hsOnionExplorer && isOnionMoneroBlockchainExplorer
-        ? { HS_MONERO_ONION_BLOCKCHAIN_EXPLORER: `onion-monero-blockchain-explorer:${SERVICE_PORTS.explorerOnion}:80` }
         : {}),
       ...(hsGrafana && isMonitoring
         ? { HS_GRAFANA: `grafana:${SERVICE_PORTS.grafana}:80` }
