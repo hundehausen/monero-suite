@@ -25,7 +25,7 @@ export const createMoneroWalletRpcService = (
         `--daemon-address=monerod:${MONEROD_PORTS.rpcRestricted}`,
         "--trusted-daemon",
         `--rpc-bind-port=${SERVICE_PORTS.moneroWalletRpc}`,
-        "--wallet-dir /home/monero",
+        "--wallet-dir=/home/monero",
       ],
     },
   },
