@@ -1,6 +1,6 @@
 import { NetworkMode, Service } from "@/hooks/services/types";
 import { architectures } from "@/hooks/services/types";
-import { DOCKER_IMAGES } from "@/lib/constants";
+import { DOCKER_IMAGES, SERVICE_PORTS } from "@/lib/constants";
 import { getPortBinding } from "@/lib/docker-helpers";
 
 export const createCuprateService = (
@@ -23,7 +23,7 @@ export const createCuprateService = (
       volumes: [
         "cuprate-data:/home/cuprate/.local/share/cuprate"
       ],
-      ports: [getPortBinding(networkMode, 18082, 18080)],
+      ports: [getPortBinding(networkMode, SERVICE_PORTS.cuprateRpc, 18080)],
     },
   },
 });

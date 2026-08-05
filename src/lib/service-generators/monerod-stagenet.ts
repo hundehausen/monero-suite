@@ -1,7 +1,7 @@
 import { Service, architectures, networkModes, torProxyModes, NetworkMode, TorProxyMode } from "@/hooks/services/types";
 import { TOR_IP, MONEROD_STAGENET_IP } from "@/lib/service-constants";
 import { safeParse, pathSchema } from "@/lib/schemas";
-import { DOCKER_IMAGES } from "@/lib/constants";
+import { DOCKER_IMAGES, MONEROD_STAGENET_PORTS } from "@/lib/constants";
 import { getTraefikConfig, getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
 
 interface StagenetDataConfig {
@@ -20,7 +20,7 @@ export const createMonerodStagenetService = (
   certResolverName: string = "monerosuite",
   torProxyMode: TorProxyMode = torProxyModes.none
 ): Service => {
-  const { labels } = getTraefikConfig(isTraefik, "monerod-stagenet", state.stagenetNodeDomain, "18089", certResolverName);
+  const { labels } = getTraefikConfig(isTraefik, "monerod-stagenet", state.stagenetNodeDomain, MONEROD_STAGENET_PORTS.rpcRestricted.toString(), certResolverName);
   const sPath = safeParse(pathSchema, state.moneroStagenetBlockchainLocation, "~/.bitmonero");
   return ({
     name: "Monero Stagenet Node",
@@ -59,7 +59,7 @@ export const createMonerodStagenetService = (
           torProxyMode !== torProxyModes.none
             ? {
                 tor: {
-                  condition: "service_healthy",
+                  condition: "service_started",
                 },
               }
             : undefined,

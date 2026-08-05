@@ -50,12 +50,12 @@ export const SERVICE_PORTS = {
   moneroblock: 31312,
   explorerOnion: 8081,
   moneroWalletRpc: 18082,
-  portainer: 8000,
+  portainer: 9000,
   portainerSsl: 9443,
   traefikHttp: 80,
   traefikHttps: 443,
   torSocks: 9050,
-  cuprateRpc: 18082,
+  cuprateRpc: 18090,
 } as const;
 
 // Docker image references.

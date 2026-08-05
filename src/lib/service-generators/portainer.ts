@@ -1,5 +1,5 @@
 import { Service, architectures, NetworkMode } from "@/hooks/services/types";
-import { DOCKER_IMAGES } from "@/lib/constants";
+import { DOCKER_IMAGES, SERVICE_PORTS } from "@/lib/constants";
 import { getTraefikConfig, getPortBinding } from "@/lib/docker-helpers";
 
 export const createPortainerService = (
@@ -9,7 +9,7 @@ export const createPortainerService = (
   isTraefik: boolean,
   certResolverName: string = "monerosuite"
 ): Service => {
-  const { domain, labels } = getTraefikConfig(isTraefik, "portainer", portainerDomain, "8000", certResolverName);
+  const { domain, labels } = getTraefikConfig(isTraefik, "portainer", portainerDomain, SERVICE_PORTS.portainer.toString(), certResolverName);
   return ({
     architecture: [architectures.linuxAmd, architectures.linuxArm],
     checked: isPortainer,

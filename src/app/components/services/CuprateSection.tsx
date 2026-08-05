@@ -42,7 +42,7 @@ const CuprateSection = () => {
         size="lg"
       />
 
-      <Text size="sm">The port mapping on the host is on port 18082, the internal port is 18080. This is to avoid an overlapping port conflict with monerod.</Text>
+      <Text size="sm">The port mapping on the host is on port 18090, the internal port is 18080. This is to avoid overlapping port conflicts with monerod and monero-wallet-rpc.</Text>
 
     </AccordionItemComponent>
   );
