@@ -15,8 +15,6 @@ export const SERVICE_IPS = {
   monerod: "172.28.1.3",
   monerodStagenet: "172.28.1.4",
   p2pool: "172.28.1.5",
-  moneroblock: "172.28.1.6",
-  explorer: "172.28.1.7",
   grafana: "172.28.1.8",
 } as const;
 
@@ -47,8 +45,6 @@ export const P2POOL_PORTS = {
 // Other service ports
 export const SERVICE_PORTS = {
   grafana: 3000,
-  moneroblock: 31312,
-  explorerOnion: 8081,
   moneroWalletRpc: 18082,
   portainer: 9000,
   portainerSsl: 9443,
@@ -69,12 +65,10 @@ export const DOCKER_IMAGES = {
   traefik: "traefik:latest",
   grafana: "grafana/grafana:latest",
   prometheus: "prom/prometheus:latest",
-  monerodExporter: "lalanza808/monerod_exporter:latest",
-  nodemapper: "lalanza808/nodemapper:latest",
+  monerodExporter: "lalanza808/exporter:1.0.0",
+  nodemapper: "lalanza808/nodemapper:1.0.4",
   watchtower: "ghcr.io/nicholas-fedor/watchtower:latest",
   xmrig: "ghcr.io/metal3d/xmrig:latest",
-  moneroblock: "ghcr.io/sethforprivacy/moneroblock:latest",
   portainer: "portainer/portainer-ce:latest",
-  explorerOnion: "vdo1138/xmrblocks:latest",
   cuprate: "ghcr.io/hundehausen/cuprate-docker:latest",
 } as const;
