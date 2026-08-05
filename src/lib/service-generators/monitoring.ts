@@ -1,6 +1,6 @@
-import { Service, architectures, NetworkMode, torProxyModes } from "@/hooks/services/types";
+import { Service, architectures, NetworkMode, torProxyModes, TorProxyMode } from "@/hooks/services/types";
 import { DOCKER_IMAGES, SERVICE_PORTS, MONEROD_PORTS } from "@/lib/constants";
-import { getTraefikConfig, getPortBinding } from "@/lib/docker-helpers";
+import { getTraefikConfig, getPortBinding, getTorClientNetworkConfig } from "@/lib/docker-helpers";
 import { MONITORING_BASH_COMMANDS } from "@/lib/script-generator";
 
 export const createMonitoringService = (
@@ -9,9 +9,11 @@ export const createMonitoringService = (
   networkMode: NetworkMode,
   isTraefik: boolean,
   certResolverName: string = "monerosuite",
-  torProxyMode: string = torProxyModes.none
+  torProxyMode: TorProxyMode = torProxyModes.none
 ): Service => {
   const { domain, labels } = getTraefikConfig(isTraefik, "monitoring", grafanaDomain, SERVICE_PORTS.grafana.toString(), certResolverName, `localhost:${SERVICE_PORTS.grafana}`);
+  const torClientNet = getTorClientNetworkConfig(torProxyMode);
+  const grafanaTorNet = getTorClientNetworkConfig(torProxyMode, ["grafana"]);
   return ({
     name: "Monitoring",
     description:
@@ -55,7 +57,8 @@ export const createMonitoringService = (
           exporter: {
             condition: "service_started"
           }
-        }
+        },
+        ...torClientNet,
       },
       exporter: {
         image: DOCKER_IMAGES.monerodExporter,
@@ -66,7 +69,8 @@ export const createMonitoringService = (
           monerod: {
             condition: "service_healthy"
           }
-        }
+        },
+        ...torClientNet,
       },
       nodemapper: {
         image: DOCKER_IMAGES.nodemapper,
@@ -75,12 +79,13 @@ export const createMonitoringService = (
         environment: {
           NODE_HOST: "monerod",
           NODE_PORT: MONEROD_PORTS.rpcUnrestricted.toString(),
-        }, 
+        },
         depends_on: {
           monerod: {
             condition: "service_healthy"
           }
-        }
+        },
+        ...torClientNet,
       },
       grafana: {
         image: DOCKER_IMAGES.grafana,
@@ -117,15 +122,7 @@ export const createMonitoringService = (
             condition: "service_started",
           },
         },
-        ...(torProxyMode !== torProxyModes.none
-          ? {
-            networks: {
-              monero_suite_net: {
-                aliases: ["grafana"]
-              }
-            }
-          }
-          : {}),
+        ...grafanaTorNet,
       },
     },
   });

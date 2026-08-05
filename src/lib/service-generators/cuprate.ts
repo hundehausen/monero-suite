@@ -24,12 +24,6 @@ export const createCuprateService = (
         "cuprate-data:/home/cuprate/.local/share/cuprate"
       ],
       ports: [getPortBinding(networkMode, 18082, 18080)],
-      networks: ["monero-network"],
-    },
-  },
-  networks: {
-    "monero-network": {
-      external: false,
     },
   },
 });

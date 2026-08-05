@@ -57,11 +57,14 @@ export const createTorService = (
   };
 
   if (isProxyEnabled) {
+    // Stay on default so non-Tor peers can still resolve "tor" if needed;
+    // static IP on tor-proxy is what monerod --tx-proxy/--proxy use.
     service.code.tor.networks = {
-      monero_suite_net: {
+      default: {},
+      [DOCKER_NETWORK.name]: {
         ipv4_address: TOR_IP,
-        aliases: ["tor"]
-      }
+        aliases: ["tor"],
+      },
     };
 
     service.networks = {
@@ -71,10 +74,10 @@ export const createTorService = (
           config: [
             {
               subnet: DOCKER_NETWORK.subnet,
-            }
-          ]
-        }
-      }
+            },
+          ],
+        },
+      },
     };
   }
 

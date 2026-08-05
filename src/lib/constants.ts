@@ -4,7 +4,7 @@
 
 // Docker network configuration for Tor proxy mode
 export const DOCKER_NETWORK = {
-  name: "monero_suite_net",
+  name: "tor-proxy",
   subnet: "172.28.1.0/24",
   driver: "bridge",
 } as const;

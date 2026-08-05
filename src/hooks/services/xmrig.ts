@@ -1,5 +1,5 @@
 import { useQueryState, parseAsStringEnum, parseAsInteger } from "nuqs";
-import { Service, minigModes, MiningMode } from "./types";
+import { Service, minigModes, MiningMode, TorProxyMode, torProxyModes, P2PoolMode, p2poolModes } from "./types";
 import { createXmrigService } from "@/lib/service-generators/xmrig";
 
 export const useXmrigService = () => {
@@ -12,8 +12,10 @@ export const useXmrigService = () => {
     parseAsInteger.withDefault(1)
   );
 
-  const getXmrigService = (): Service =>
-    createXmrigService(miningMode, xmrigDonateLevel);
+  const getXmrigService = (
+    torProxyMode: TorProxyMode = torProxyModes.none,
+    p2PoolMode: P2PoolMode = p2poolModes.full
+  ): Service => createXmrigService(miningMode, xmrigDonateLevel, torProxyMode, p2PoolMode);
 
   return {
     getXmrigService,

@@ -21,20 +21,27 @@ interface P2PoolDataConfig {
   p2PoolMiningThreads: number;
 }
 
+export function getP2PoolContainerName(p2PoolMode: P2PoolMode): string {
+  if (p2PoolMode === p2poolModes.mini) return "p2pool-mini";
+  if (p2PoolMode === p2poolModes.nano) return "p2pool-nano";
+  return "p2pool";
+}
+
 export const createP2PoolService = (
   state: P2PoolDataConfig,
   miningMode: MiningMode,
   torProxyMode: TorProxyMode,
-  networkMode?: NetworkMode
+  networkMode: NetworkMode = networkModes.local
 ): Service => {
   const { p2PoolMode, p2PoolPayoutAddress, p2PoolMiningThreads } = state;
   const sPayoutAddress = safeParse(moneroAddressSchema, p2PoolPayoutAddress, "");
-
-  const p2PoolContainerName = p2PoolMode === p2poolModes.mini
-    ? "p2pool-mini"
-    : p2PoolMode === p2poolModes.nano
-      ? "p2pool-nano"
-      : "p2pool";
+  const p2PoolContainerName = getP2PoolContainerName(p2PoolMode);
+  const p2pPort =
+    p2PoolMode === p2poolModes.mini
+      ? P2POOL_PORTS.p2pMini
+      : p2PoolMode === p2poolModes.nano
+        ? P2POOL_PORTS.p2pNano
+        : P2POOL_PORTS.p2pFull;
 
   return ({
     name: "P2Pool",
@@ -47,14 +54,8 @@ export const createP2PoolService = (
       "p2pool-data": {},
     },
     ufw:
-      networkMode === networkModes.exposed
-        ? p2PoolMode === p2poolModes.mini
-          ? [`${P2POOL_PORTS.p2pMini}/tcp`, `${P2POOL_PORTS.stratum}/tcp`]
-          : p2PoolMode === p2poolModes.full
-            ? [`${P2POOL_PORTS.p2pFull}/tcp`, `${P2POOL_PORTS.stratum}/tcp`]
-            : p2PoolMode === p2poolModes.nano
-              ? [`${P2POOL_PORTS.p2pNano}/tcp`, `${P2POOL_PORTS.stratum}/tcp`]
-              : undefined
+      networkMode === networkModes.exposed && p2PoolMode !== p2poolModes.none
+        ? [`${p2pPort}/tcp`, `${P2POOL_PORTS.stratum}/tcp`]
         : undefined,
     code: {
       [p2PoolContainerName]: {
@@ -70,9 +71,7 @@ export const createP2PoolService = (
         ],
         ports: [
           `${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}`,
-          ...(p2PoolMode === p2poolModes.mini ? [`${P2POOL_PORTS.p2pMini}:${P2POOL_PORTS.p2pMini}`] : []),
-          ...(p2PoolMode === p2poolModes.full ? [`${P2POOL_PORTS.p2pFull}:${P2POOL_PORTS.p2pFull}`] : []),
-          ...(p2PoolMode === p2poolModes.nano ? [`${P2POOL_PORTS.p2pNano}:${P2POOL_PORTS.p2pNano}`] : []),
+          `${p2pPort}:${p2pPort}`,
         ],
         ...getTorNetworkConfig(torProxyMode, P2POOL_IP, [p2PoolContainerName]),
         depends_on: {
@@ -86,7 +85,7 @@ export const createP2PoolService = (
           "--stratum",
           `0.0.0.0:${P2POOL_PORTS.stratum}`,
           "--p2p",
-          `0.0.0.0:${p2PoolMode === p2poolModes.mini ? P2POOL_PORTS.p2pMini : p2PoolMode === p2poolModes.nano ? P2POOL_PORTS.p2pNano : P2POOL_PORTS.p2pFull}`,
+          `0.0.0.0:${p2pPort}`,
           "--rpc-port",
           `${MONEROD_PORTS.rpcRestricted}`,
           "--zmq-port",

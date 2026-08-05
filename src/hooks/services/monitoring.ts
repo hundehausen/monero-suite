@@ -1,5 +1,5 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
-import { Service, NetworkMode, torProxyModes } from "./types";
+import { Service, NetworkMode, TorProxyMode, torProxyModes } from "./types";
 import { SERVICE_PORTS } from "@/lib/constants";
 import { createMonitoringService } from "@/lib/service-generators/monitoring";
 
@@ -17,7 +17,7 @@ export const useMonitoringService = () => {
     networkMode: NetworkMode,
     isTraefik: boolean,
     certResolverName: string = "monerosuite",
-    torProxyMode: string = torProxyModes.none
+    torProxyMode: TorProxyMode = torProxyModes.none
   ): Service =>
     createMonitoringService(isMonitoring, grafanaDomain, networkMode, isTraefik, certResolverName, torProxyMode);
 

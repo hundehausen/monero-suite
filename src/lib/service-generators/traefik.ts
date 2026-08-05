@@ -1,10 +1,12 @@
-import { Service, architectures } from "@/hooks/services/types";
+import { Service, architectures, TorProxyMode, torProxyModes } from "@/hooks/services/types";
 import { DOCKER_IMAGES } from "@/lib/constants";
+import { getTorClientNetworkConfig } from "@/lib/docker-helpers";
 
 export const CERT_RESOLVER_NAME = "monerosuite";
 
 export const createTraefikService = (
-  isTraefik: boolean
+  isTraefik: boolean,
+  torProxyMode: TorProxyMode = torProxyModes.none
 ): Service => ({
   name: "Traefik",
   description:
@@ -35,6 +37,7 @@ export const createTraefikService = (
         "/var/run/docker.sock:/var/run/docker.sock",
         "letsencrypt:/letsencrypt",
       ],
+      ...getTorClientNetworkConfig(torProxyMode),
     },
   },
   ufw: ["443/tcp", "80/tcp"],

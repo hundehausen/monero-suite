@@ -1,5 +1,6 @@
 import { networkModes, NetworkMode, torProxyModes, TorProxyMode } from "@/hooks/services/types";
 import { safeParse, domainSchema } from "@/lib/schemas";
+import { DOCKER_NETWORK } from "@/lib/constants";
 
 /**
  * Generate Traefik router labels for a service.
@@ -57,7 +58,9 @@ export function getPortBinding(
 }
 
 /**
- * Generate the Tor network configuration block for a service.
+ * Dual-home a service on the default Compose network and tor-proxy
+ * with a static IP. Listing only the Tor net would drop the default network
+ * and break peers that stay on default (monitoring, wallet-rpc, Traefik, etc.).
  * Returns empty object when Tor proxy is disabled.
  */
 export function getTorNetworkConfig(
@@ -68,10 +71,29 @@ export function getTorNetworkConfig(
   if (torProxyMode === torProxyModes.none) return {};
   return {
     networks: {
-      monero_suite_net: {
+      default: {},
+      [DOCKER_NETWORK.name]: {
         ipv4_address: ipv4Address,
         ...(aliases ? { aliases } : {}),
       },
+    },
+  };
+}
+
+/**
+ * Dual-home a client service so it can reach monerod/p2pool on the Tor net
+ * without leaving the default network (prometheus↔grafana, Traefik backends).
+ * Returns empty object when Tor proxy is disabled.
+ */
+export function getTorClientNetworkConfig(
+  torProxyMode: TorProxyMode,
+  aliases?: string[]
+): Record<string, unknown> {
+  if (torProxyMode === torProxyModes.none) return {};
+  return {
+    networks: {
+      default: {},
+      [DOCKER_NETWORK.name]: aliases ? { aliases } : {},
     },
   };
 }

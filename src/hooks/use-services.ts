@@ -105,8 +105,10 @@ export const useServices = () => {
       xmrigService.stateFunctions.miningMode,
       torService.stateFunctions.torProxyMode
     ),
-    "monero-wallet-rpc":
-      moneroWalletRpcService.getMoneroWalletRpcService(networkMode),
+    "monero-wallet-rpc": moneroWalletRpcService.getMoneroWalletRpcService(
+      networkMode,
+      torService.stateFunctions.torProxyMode
+    ),
     moneroblock: moneroblockService.getMoneroblockService(
       networkMode,
       isTraefik && isTraefikMoneroblock,
@@ -136,8 +138,13 @@ export const useServices = () => {
       CERT_RESOLVER_NAME,
       torService.stateFunctions.torProxyMode
     ),
-    xmrig: xmrigService.getXmrigService(),
-    traefik: traefikService.getTraefikService(),
+    xmrig: xmrigService.getXmrigService(
+      torService.stateFunctions.torProxyMode,
+      p2PoolService.stateFunctions.p2PoolMode
+    ),
+    traefik: traefikService.getTraefikService(
+      torService.stateFunctions.torProxyMode
+    ),
     portainer: portainerService.getPortainerService(
       networkMode,
       isTraefik && isTraefikPortainer,

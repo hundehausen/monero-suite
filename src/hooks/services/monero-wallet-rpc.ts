@@ -1,5 +1,5 @@
 import { useQueryState, parseAsBoolean } from "nuqs";
-import { Service, NetworkMode } from "./types";
+import { Service, NetworkMode, TorProxyMode, torProxyModes } from "./types";
 import { createMoneroWalletRpcService } from "@/lib/service-generators/monero-wallet-rpc";
 
 export const useMoneroWalletRpcService = () => {
@@ -8,8 +8,11 @@ export const useMoneroWalletRpcService = () => {
     parseAsBoolean.withDefault(false)
   );
 
-  const getMoneroWalletRpcService = (networkMode: NetworkMode): Service =>
-    createMoneroWalletRpcService(isMoneroWalletRpc, networkMode);
+  const getMoneroWalletRpcService = (
+    networkMode: NetworkMode,
+    torProxyMode: TorProxyMode = torProxyModes.none
+  ): Service =>
+    createMoneroWalletRpcService(isMoneroWalletRpc, networkMode, torProxyMode);
 
   return {
     getMoneroWalletRpcService,

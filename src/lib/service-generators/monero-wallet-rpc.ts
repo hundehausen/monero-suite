@@ -1,10 +1,11 @@
-import { Service, architectures, NetworkMode } from "@/hooks/services/types";
+import { Service, architectures, NetworkMode, TorProxyMode, torProxyModes } from "@/hooks/services/types";
 import { DOCKER_IMAGES, SERVICE_PORTS, MONEROD_PORTS } from "@/lib/constants";
-import { getPortBinding } from "@/lib/docker-helpers";
+import { getPortBinding, getTorClientNetworkConfig } from "@/lib/docker-helpers";
 
 export const createMoneroWalletRpcService = (
   isMoneroWalletRpc: boolean,
-  networkMode: NetworkMode
+  networkMode: NetworkMode,
+  torProxyMode: TorProxyMode = torProxyModes.none
 ): Service => ({
   name: "Monero Wallet RPC",
   description:
@@ -19,6 +20,7 @@ export const createMoneroWalletRpcService = (
       container_name: "monero-wallet-rpc",
       ports: [getPortBinding(networkMode, SERVICE_PORTS.moneroWalletRpc)],
       volumes: ["monero-wallet-rpc-data:/home/monero"],
+      ...getTorClientNetworkConfig(torProxyMode),
       command: [
         `--daemon-address=monerod:${MONEROD_PORTS.rpcRestricted}`,
         "--trusted-daemon",
