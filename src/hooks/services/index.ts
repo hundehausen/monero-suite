@@ -8,7 +8,6 @@ export * from "./onion-monero-blockchain-explorer";
 export * from "./tor";
 export * from "./watchtower";
 export * from "./monitoring";
-export * from "./autoheal";
 export * from "./xmrig";
 export * from "./traefik";
 export * from "./portainer";

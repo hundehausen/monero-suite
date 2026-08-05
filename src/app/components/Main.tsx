@@ -159,7 +159,6 @@ export default function Main() {
       isWatchtower: stateFunctions.isWatchtower,
       isMonitoring: stateFunctions.isMonitoring,
       grafanaDomain: stateFunctions.grafanaDomain,
-      isAutoheal: stateFunctions.isAutoheal,
       isTraefik: stateFunctions.isTraefik,
       isTraefikMonerod: stateFunctions.isTraefikMonerod,
       isTraefikStagenet: stateFunctions.isTraefikStagenet,

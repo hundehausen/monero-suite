@@ -71,7 +71,6 @@ export const DOCKER_IMAGES = {
   prometheus: "prom/prometheus:latest",
   monerodExporter: "lalanza808/monerod_exporter:latest",
   nodemapper: "lalanza808/nodemapper:latest",
-  autoheal: "willfarrell/autoheal:latest",
   watchtower: "ghcr.io/nicholas-fedor/watchtower:latest",
   xmrig: "ghcr.io/metal3d/xmrig:latest",
   moneroblock: "ghcr.io/sethforprivacy/moneroblock:latest",

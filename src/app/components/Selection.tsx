@@ -15,7 +15,6 @@ import {
   MonitoringSection,
   PortainerSection,
   WatchtowerSection,
-  AutohealSection,
   CuprateSection,
 } from "./services";
 
@@ -51,7 +50,6 @@ const Selection = () => {
       <MonitoringSection />
       <PortainerSection />
       <WatchtowerSection />
-      <AutohealSection />
       <CuprateSection />
     </Accordion>
   );

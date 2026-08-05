@@ -36,7 +36,6 @@ Running a Monero node should be accessible to everyone, not just sysadmins. Mone
 | [Traefik](https://traefik.io) | Reverse proxy — expose services via your own domain with TLS |
 | [Portainer](https://github.com/portainer/portainer) | Web-based Docker management UI |
 | [Watchtower](https://github.com/nicholas-fedor/watchtower) | Automatically updates running containers |
-| [Autoheal](https://github.com/willfarrell/docker-autoheal) | Automatically restarts unhealthy containers |
 
 ## Quick Start
 
@@ -110,7 +109,7 @@ The generated bash script includes several runtime protections:
 - **Always review the script before running it.** Use the preview button. Read the output. If something looks wrong, don't run it.
 - **Use the manual installation method** if you're uncomfortable with `curl | bash`. Download the `docker-compose.yml` and inspect it at your own pace.
 - **Run on a dedicated VPS or homelab machine**, not on a system with sensitive data.
-- **Keep your system updated.** Monero Suite generates the initial config, but ongoing security (OS patches, Docker updates) is your responsibility. You can use the included Watchtower and Autoheal services to help with this.
+- **Keep your system updated.** Monero Suite generates the initial config, but ongoing security (OS patches, Docker updates) is your responsibility. You can use the included Watchtower service to help with this.
 
 ## Risks and Disclaimer
 

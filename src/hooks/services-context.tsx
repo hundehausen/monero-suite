@@ -12,7 +12,6 @@ import {
   useTorService,
   useWatchtowerService,
   useMonitoringService,
-  useAutohealService,
   useXmrigService,
   useTraefikService,
   usePortainerService,
@@ -29,7 +28,6 @@ export type OnionExplorerState = ReturnType<typeof useOnionMoneroBlockchainExplo
 export type TorState = ReturnType<typeof useTorService>["stateFunctions"];
 export type WatchtowerState = ReturnType<typeof useWatchtowerService>["stateFunctions"];
 export type MonitoringState = ReturnType<typeof useMonitoringService>["stateFunctions"];
-export type AutohealState = ReturnType<typeof useAutohealService>["stateFunctions"];
 export type XmrigState = ReturnType<typeof useXmrigService>["stateFunctions"];
 export type TraefikState = ReturnType<typeof useTraefikService>["stateFunctions"];
 export type PortainerState = ReturnType<typeof usePortainerService>["stateFunctions"];
@@ -143,11 +141,6 @@ export function useMonitoringState(): MonitoringState {
     isMonitoring: s.isMonitoring, setIsMonitoring: s.setIsMonitoring,
     grafanaDomain: s.grafanaDomain, setGrafanaDomain: s.setGrafanaDomain,
   };
-}
-
-export function useAutohealState(): AutohealState {
-  const { stateFunctions: s } = useServicesContext();
-  return { isAutoheal: s.isAutoheal, setIsAutoheal: s.setIsAutoheal };
 }
 
 export function useXmrigState(): XmrigState {

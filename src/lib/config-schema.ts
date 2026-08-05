@@ -114,7 +114,6 @@ const serviceToggleSchema = z.object({
   isWatchtower: z.boolean(),
   isMonitoring: z.boolean(),
   grafanaDomain: domainSchema,
-  isAutoheal: z.boolean(),
   isTraefik: z.boolean(),
   isTraefikMonerod: z.boolean(),
   isTraefikStagenet: z.boolean(),

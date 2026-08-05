@@ -9,7 +9,6 @@ import { createOnionMoneroBlockchainExplorerService } from "./onion-monero-block
 import { createTorService } from "./tor";
 import { createWatchtowerService } from "./watchtower";
 import { createMonitoringService } from "./monitoring";
-import { createAutohealService } from "./autoheal";
 import { createXmrigService } from "./xmrig";
 import { createTraefikService } from "./traefik";
 import { createPortainerService } from "./portainer";
@@ -33,7 +32,6 @@ export function generateAllServices(config: FullConfig): ServiceMap {
     tor: createTorService(tor, networkMode, config.stagenet.isStagenetNode, p2pool.p2PoolMode, services.isMoneroblock, services.isOnionMoneroBlockchainExplorer, services.isMonitoring),
     watchtower: createWatchtowerService(services.isWatchtower),
     monitoring: createMonitoringService(services.isMonitoring, services.grafanaDomain, networkMode, isTraefik && services.isTraefikGrafana, CERT_RESOLVER_NAME, tor.torProxyMode),
-    autoheal: createAutohealService(services.isAutoheal),
     xmrig: createXmrigService(mining.miningMode, mining.xmrigDonateLevel),
     traefik: createTraefikService(isTraefik),
     portainer: createPortainerService(services.isPortainer, services.portainerDomain, networkMode, isTraefik && services.isTraefikPortainer, CERT_RESOLVER_NAME),

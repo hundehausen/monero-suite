@@ -18,7 +18,6 @@ import {
   useTorService,
   useWatchtowerService,
   useMonitoringService,
-  useAutohealService,
   useXmrigService,
   useTraefikService,
   usePortainerService,
@@ -53,7 +52,6 @@ export const useServices = () => {
   const torService = useTorService({ networkMode });
   const watchtowerService = useWatchtowerService();
   const monitoringService = useMonitoringService();
-  const autohealService = useAutohealService();
   const xmrigService = useXmrigService();
   const traefikService = useTraefikService();
   const portainerService = usePortainerService();
@@ -138,7 +136,6 @@ export const useServices = () => {
       CERT_RESOLVER_NAME,
       torService.stateFunctions.torProxyMode
     ),
-    autoheal: autohealService.getAutohealService(),
     xmrig: xmrigService.getXmrigService(),
     traefik: traefikService.getTraefikService(),
     portainer: portainerService.getPortainerService(
@@ -172,7 +169,6 @@ export const useServices = () => {
     ...torService.stateFunctions,
     ...watchtowerService.stateFunctions,
     ...monitoringService.stateFunctions,
-    ...autohealService.stateFunctions,
     ...xmrigService.stateFunctions,
     ...traefikService.stateFunctions,
     ...portainerService.stateFunctions,
