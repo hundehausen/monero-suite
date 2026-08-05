@@ -3,10 +3,7 @@ import { getInstallScript } from "@/app/lib/config-files";
 const FETCH_TIMEOUT_MS = 10_000;
 const MAX_SCRIPT_SIZE = 1024 * 1024;
 const VALID_CONFIG_ID = /^[A-Za-z0-9_-]{21}$/;
-const ALLOWED_HOSTS = [
-  "vercel-storage.com",
-  "public.blob.vercel-storage.com",
-];
+const ALLOWED_HOSTS = ["vercel-storage.com"];
 
 function isAllowedHost(url: string): boolean {
   try {
