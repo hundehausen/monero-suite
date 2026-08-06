@@ -13,7 +13,7 @@ const baseState = {
 describe("createMonerodStagenetService", () => {
   it("points the Traefik load balancer at the stagenet restricted RPC port (38089)", () => {
     const service = createMonerodStagenetService(
-      baseState,
+      { ...baseState, stagenetNodeDomain: "stagenet.mydomain.com" },
       false,
       networkModes.local,
       true,
