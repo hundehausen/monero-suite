@@ -132,7 +132,6 @@ export default function Main() {
       bootstrapDaemonLogin: stateFunctions.bootstrapDaemonLogin,
       zmqPubEnabled: stateFunctions.zmqPubEnabled,
       zmqPubBindPort: stateFunctions.zmqPubBindPort,
-      rpcSsl: stateFunctions.rpcSsl,
       rpcLogin: stateFunctions.rpcLogin,
       disableRpcBan: stateFunctions.disableRpcBan,
       maxTxpoolWeight: stateFunctions.maxTxpoolWeight,

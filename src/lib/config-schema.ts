@@ -9,7 +9,6 @@ import {
   numericStringSchema,
   signedNumericStringSchema,
   rpcLoginSchema,
-  rpcSslSchema,
 } from "@/lib/schemas";
 import { getMonerodP2pPortCollisions } from "@/lib/service-generators/monerod";
 
@@ -61,7 +60,6 @@ const monerodConfigSchema = z.object({
   bootstrapDaemonLogin: rpcLoginSchema,
   zmqPubEnabled: z.boolean(),
   zmqPubBindPort: portSchema,
-  rpcSsl: rpcSslSchema,
   rpcLogin: rpcLoginSchema,
   disableRpcBan: z.boolean(),
   maxTxpoolWeight: numericStringSchema,

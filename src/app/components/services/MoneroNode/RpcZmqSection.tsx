@@ -1,8 +1,7 @@
 "use client";
 
-import { NumberInput, Select, SimpleGrid, Switch, TextInput, Title } from "@mantine/core";
+import { NumberInput, SimpleGrid, Switch, TextInput, Title } from "@mantine/core";
 import { useMonerodState } from "@/hooks/services-context";
-import { RPC_SSL_VALUES, type RpcSslValue } from "@/hooks/services/monerod/zmq-rpc-config";
 import ExplainingLabel from "../../ExplainingLabel";
 import AccordionItemComponent from "../AccordionItemComponent";
 
@@ -12,8 +11,6 @@ const RpcZmqSection = () => {
     setRpcLogin,
     disableRpcBan,
     setDisableRpcBan,
-    rpcSsl,
-    setRpcSsl,
     zmqPubEnabled,
     setZmqPubEnabled,
     zmqPubBindPort,
@@ -46,25 +43,6 @@ const RpcZmqSection = () => {
           }
           checked={disableRpcBan}
           onChange={(event) => setDisableRpcBan(event.currentTarget.checked)}
-        />
-        <Select
-          label={
-            <ExplainingLabel
-              label="RPC SSL Mode"
-              explanation="TLS encryption for RPC connections. Autodetect (default) enables TLS on HTTPS ports. Disable if using a reverse proxy for TLS termination."
-            />
-          }
-          value={rpcSsl}
-          onChange={(value) => {
-            if (value && (RPC_SSL_VALUES as readonly string[]).includes(value)) {
-              setRpcSsl(value as RpcSslValue);
-            }
-          }}
-          data={[
-            { value: "autodetect", label: "Autodetect (Default)" },
-            { value: "enabled", label: "Enabled" },
-            { value: "disabled", label: "Disabled" },
-          ]}
         />
         <Switch
           label={

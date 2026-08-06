@@ -1,5 +1,4 @@
 import { Service, NetworkMode, P2PoolMode, TorProxyMode } from "../types";
-import type { RpcSslValue } from "./zmq-rpc-config";
 
 export interface MonerodState {
   // Basic configuration
@@ -99,8 +98,6 @@ export interface MonerodState {
   setZmqPubEnabled: (value: boolean) => void;
   zmqPubBindPort: string;
   setZmqPubBindPort: (value: string) => void;
-  rpcSsl: RpcSslValue;
-  setRpcSsl: (value: RpcSslValue) => void;
   rpcLogin: string;
   setRpcLogin: (value: string) => void;
   disableRpcBan: boolean;

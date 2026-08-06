@@ -68,7 +68,6 @@ const baseMonerod: FullConfig["monerod"] = {
   bootstrapDaemonLogin: "",
   zmqPubEnabled: false,
   zmqPubBindPort: "18083",
-  rpcSsl: "autodetect",
   rpcLogin: "",
   disableRpcBan: false,
   maxTxpoolWeight: "0",

@@ -1,6 +1,5 @@
 import { Service, architectures, networkModes, p2poolModes, torProxyModes, NetworkMode, TorProxyMode, P2PoolMode } from "@/hooks/services/types";
 import { TOR_IP, MONEROD_IP } from "@/lib/service-constants";
-import type { RpcSslValue } from "@/hooks/services/monerod/zmq-rpc-config";
 import {
   safeParse,
   hostListSchema,
@@ -109,7 +108,6 @@ interface MonerodDataConfig {
   bootstrapDaemonLogin: string;
   zmqPubEnabled: boolean;
   zmqPubBindPort: string;
-  rpcSsl: RpcSslValue;
   rpcLogin: string;
   disableRpcBan: boolean;
   maxTxpoolWeight: string;
@@ -174,7 +172,6 @@ export const createMonerodService = (
     bootstrapDaemonLogin,
     zmqPubEnabled,
     zmqPubBindPort,
-    rpcSsl,
     rpcLogin,
     disableRpcBan,
     maxTxpoolWeight,
@@ -317,7 +314,6 @@ export const createMonerodService = (
           ...(zmqPubPort === null
             ? ["--no-zmq"]
             : [`--zmq-pub=tcp://0.0.0.0:${zmqPubPort}`]),
-          ...(rpcSsl !== "autodetect" ? [`--rpc-ssl=${rpcSsl}`] : []),
           ...(sRpcLogin ? [`--rpc-login=${sRpcLogin}`] : []),
           ...(disableRpcBan || isHiddenServices ? ["--disable-rpc-ban"] : []),
           ...(sBlockNotify ? [`--block-notify=${sBlockNotify}`] : []),

@@ -102,8 +102,6 @@ export const rpcLoginSchema = z
   .regex(/^[a-zA-Z0-9_-]+:[a-zA-Z0-9_!@#$%^&*()-]+$/)
   .or(z.literal(""));
 
-export const rpcSslSchema = z.enum(["autodetect", "enabled", "disabled"]);
-
 export function safeParse<T>(
   schema: z.ZodType<T>,
   value: unknown,

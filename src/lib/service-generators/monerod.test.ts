@@ -69,7 +69,6 @@ const baseState = {
   // ZMQ/RPC
   zmqPubEnabled: false,
   zmqPubBindPort: "18083",
-  rpcSsl: "autodetect",
   rpcLogin: "",
   disableRpcBan: false,
   // Tx pool
