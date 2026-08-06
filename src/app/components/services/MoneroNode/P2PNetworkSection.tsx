@@ -21,8 +21,6 @@ const P2PNetworkSection = () => {
     setLimitRateUp,
     limitRateDown,
     setLimitRateDown,
-    noIgd,
-    setNoIgd,
     hidePort,
     setHidePort,
     allowLocalIp,
@@ -134,16 +132,6 @@ const P2PNetworkSection = () => {
           onChange={(value) => setLimitRateDown(String(value))}
           min={-1}
           step={1024}
-        />
-        <Switch
-          label={
-            <ExplainingLabel
-              label="Disable IGD (UPnP Port Mapping)"
-              explanation="Disables automatic port forwarding via UPnP. Enable this if you prefer to configure port forwarding manually on your router. Recommended to disable for privacy."
-            />
-          }
-          checked={noIgd}
-          onChange={(event) => setNoIgd(event.currentTarget.checked)}
         />
         <Switch
           label={

@@ -38,8 +38,6 @@ export interface MonerodState {
   setLimitRateUp: (value: string) => void;
   limitRateDown: string;
   setLimitRateDown: (value: string) => void;
-  noIgd: boolean;
-  setNoIgd: (value: boolean) => void;
   hidePort: boolean;
   setHidePort: (value: boolean) => void;
   allowLocalIp: boolean;

@@ -34,7 +34,6 @@ const configA: FullConfig = {
     inPeers: "32",
     limitRateUp: "1048576",
     limitRateDown: "2048",
-    noIgd: false,
     hidePort: false,
     allowLocalIp: false,
     maxConnectionsPerIp: "1",

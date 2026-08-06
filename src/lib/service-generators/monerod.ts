@@ -134,7 +134,6 @@ interface MonerodDataConfig {
   inPeers: string;
   limitRateUp: string;
   limitRateDown: string;
-  noIgd: boolean;
   hidePort: boolean;
   allowLocalIp: boolean;
   maxConnectionsPerIp: string;
@@ -197,7 +196,6 @@ export const createMonerodService = (
     inPeers,
     limitRateUp,
     limitRateDown,
-    noIgd,
     hidePort,
     allowLocalIp,
     maxConnectionsPerIp,
@@ -338,7 +336,6 @@ export const createMonerodService = (
               `--max-log-file-size=${sMaxLogFileSize}`,
               `--max-log-files=${sMaxLogFiles}`
             ]),
-          ...(noIgd || torProxyMode === torProxyModes.full ? ["--no-igd"] : []),
           ...(hidePort ? ["--hide-my-port"] : []),
           `--p2p-bind-port=${sP2pBindPort}`,
           ...(sP2pExternalPort !== "0" ? [`--p2p-external-port=${sP2pExternalPort}`] : []),

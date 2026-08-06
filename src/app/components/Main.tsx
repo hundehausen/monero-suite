@@ -126,7 +126,6 @@ export default function Main() {
       inPeers: stateFunctions.inPeers,
       limitRateUp: stateFunctions.limitRateUp,
       limitRateDown: stateFunctions.limitRateDown,
-      noIgd: stateFunctions.noIgd,
       hidePort: stateFunctions.hidePort,
       allowLocalIp: stateFunctions.allowLocalIp,
       maxConnectionsPerIp: stateFunctions.maxConnectionsPerIp,

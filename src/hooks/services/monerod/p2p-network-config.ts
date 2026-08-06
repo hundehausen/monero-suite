@@ -29,11 +29,6 @@ export const useP2PNetworkConfig = () => {
     parseAsString.withDefault("1048576")
   );
   
-  const [noIgd, setNoIgd] = useQueryState(
-    "noIgd", 
-    parseAsBoolean.withDefault(true)
-  );
-  
   const [hidePort, setHidePort] = useQueryState(
     "hidePort", 
     parseAsBoolean.withDefault(false)
@@ -70,8 +65,6 @@ export const useP2PNetworkConfig = () => {
     setLimitRateUp,
     limitRateDown,
     setLimitRateDown,
-    noIgd,
-    setNoIgd,
     hidePort,
     setHidePort,
     allowLocalIp,

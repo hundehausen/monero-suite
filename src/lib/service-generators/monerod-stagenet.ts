@@ -75,7 +75,6 @@ export const createMonerodStagenetService = (
           ...(moneroNodeNoLogs
             ? ["--log-file=/dev/null", "--max-log-file-size=0"]
             : ["--max-log-files=3", "--max-log-file-size=1048576"]),
-          "--no-igd",
           "--out-peers=64",
           "--limit-rate-down=1048576",
           ...(state.isStagenetNodePublic ? ["--public-node"] : []),

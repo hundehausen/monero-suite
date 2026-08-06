@@ -34,7 +34,6 @@ const baseState = {
   maxLogFiles: "50",
   // P2P
   p2pBindPort: "18080",
-  noIgd: false,
   hidePort: false,
   allowLocalIp: false,
   maxConnectionsPerIp: "1",

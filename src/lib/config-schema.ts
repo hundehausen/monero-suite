@@ -40,7 +40,6 @@ const monerodConfigSchema = z.object({
   inPeers: signedNumericStringSchema,
   limitRateUp: signedNumericStringSchema,
   limitRateDown: signedNumericStringSchema,
-  noIgd: z.boolean(),
   hidePort: z.boolean(),
   allowLocalIp: z.boolean(),
   maxConnectionsPerIp: numericStringSchema,
