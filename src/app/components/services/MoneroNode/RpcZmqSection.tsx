@@ -1,7 +1,8 @@
 "use client";
 
 import { NumberInput, SimpleGrid, Switch, TextInput, Title } from "@mantine/core";
-import { useMonerodState } from "@/hooks/services-context";
+import { useMonerodState, useServicesContext } from "@/hooks/services-context";
+import { p2poolModes } from "@/hooks/services";
 import ExplainingLabel from "../../ExplainingLabel";
 import AccordionItemComponent from "../AccordionItemComponent";
 
@@ -16,6 +17,13 @@ const RpcZmqSection = () => {
     zmqPubBindPort,
     setZmqPubBindPort,
   } = useMonerodState();
+
+  const { stateFunctions: s } = useServicesContext();
+
+  // P2Pool and Monitoring require the ZMQ feed, so the switch is forced on
+  // while either is enabled. Display is derived; zmqPubEnabled stays user-set.
+  const needsZmq = s.p2PoolMode !== p2poolModes.none || s.isMonitoring;
+  const zmqEffectivelyOn = zmqPubEnabled || needsZmq;
 
   return (
     <AccordionItemComponent
@@ -48,13 +56,18 @@ const RpcZmqSection = () => {
           label={
             <ExplainingLabel
               label="Enable ZMQ Publisher"
-              explanation="ZMQ interface enables applications to subscribe to node events like new blocks or transactions."
+              explanation={
+                needsZmq
+                  ? "Required by P2Pool / Monitoring — cannot be disabled while either is enabled."
+                  : "ZMQ interface enables applications to subscribe to node events like new blocks or transactions."
+              }
             />
           }
-          checked={zmqPubEnabled}
+          checked={zmqEffectivelyOn}
+          disabled={needsZmq}
           onChange={(event) => setZmqPubEnabled(event.currentTarget.checked)}
         />
-        {zmqPubEnabled && (
+        {zmqEffectivelyOn && (
           <NumberInput
             label={
               <ExplainingLabel
