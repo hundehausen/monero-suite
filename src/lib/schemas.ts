@@ -1,6 +1,11 @@
 import { z } from "zod/v4";
 
-const BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+export const MONERO_ADDRESS_BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+
+export const MONERO_ADDRESS_REGEX = new RegExp(`^[48][${MONERO_ADDRESS_BASE58}]{94}$`);
+
+export const MONERO_ADDRESS_INVALID_CHARACTERS_MESSAGE =
+  "contains invalid characters — 0, O, I and l are not valid in Monero addresses";
 
 const validPort = (portStr: string) => {
   const n = parseInt(portStr, 10);
@@ -48,7 +53,7 @@ export const commandValueSchema = z
 export const moneroAddressSchema = z
   .string()
   .trim()
-  .regex(new RegExp(`^[48][${BASE58}]{94}$`))
+  .regex(MONERO_ADDRESS_REGEX, MONERO_ADDRESS_INVALID_CHARACTERS_MESSAGE)
   .or(z.literal(""));
 
 export const pathSchema = z

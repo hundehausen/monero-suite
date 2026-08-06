@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useInstallScript } from "./use-install-script";
 import type { FullConfig } from "@/lib/config-schema";
@@ -13,6 +13,7 @@ vi.mock("@mantine/notifications", () => ({
 }));
 
 import { uploadInstallScript } from "@/app/actions";
+import { notifications } from "@mantine/notifications";
 
 const configA: FullConfig = {
   architecture: "linux/amd64",
@@ -110,6 +111,10 @@ const changedConfig: FullConfig = {
 };
 
 describe("useInstallScript", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("clears the stale install command when the config changes after an upload (fix 3)", async () => {
     const { result, rerender } = renderHook(
       ({ config }: { config: FullConfig }) => useInstallScript({ config }),
@@ -144,6 +149,36 @@ describe("useInstallScript", () => {
     await act(async () => {
       await result.current.handleScriptGeneration();
     });
+    expect(result.current.installationCommand).toBeUndefined();
+  });
+
+  it("shows the real validation error and never calls the server action when config is invalid", async () => {
+    const invalidConfig: FullConfig = {
+      ...configA,
+      p2pool: {
+        ...configA.p2pool,
+        p2PoolMode: "mini",
+        p2PoolPayoutAddress: "4" + "A".repeat(60) + "O" + "A".repeat(33),
+      },
+    };
+
+    const { result } = renderHook(() => useInstallScript({ config: invalidConfig }));
+    await act(async () => {
+      await result.current.handleScriptGeneration();
+    });
+
+    expect(uploadInstallScript).not.toHaveBeenCalled();
+    expect(notifications.show).toHaveBeenCalledTimes(1);
+    expect(notifications.show).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining("p2pool.p2PoolPayoutAddress"),
+      })
+    );
+    expect(notifications.show).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining("contains invalid characters"),
+      })
+    );
     expect(result.current.installationCommand).toBeUndefined();
   });
 });

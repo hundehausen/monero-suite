@@ -23,6 +23,7 @@ import { useInstallScript } from "@/hooks/use-install-script";
 import InstallScriptPanel from "./InstallScriptPanel";
 import type { FullConfig } from "@/lib/config-schema";
 import { getMonerodP2pPortCollisions } from "@/lib/service-generators/monerod";
+import { MONERO_ADDRESS_REGEX } from "@/lib/schemas";
 
 export default function Main() {
   const { services, stateFunctions } = useServicesContext();
@@ -38,7 +39,7 @@ export default function Main() {
   const hasP2PoolInvalidAddress = useMemo(() => {
     if (stateFunctions.p2PoolMode === "none") return false;
     const addr = stateFunctions.p2PoolPayoutAddress;
-    return !addr || addr.length !== 95 || !addr.startsWith("4");
+    return !addr || !MONERO_ADDRESS_REGEX.test(addr);
   }, [stateFunctions.p2PoolMode, stateFunctions.p2PoolPayoutAddress]);
 
   const hasP2PPortCollision = useMemo(

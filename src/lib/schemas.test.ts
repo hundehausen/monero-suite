@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { hostPortSchema, hostListSchema, numericStringSchema, signedNumericStringSchema } from "./schemas";
+import {
+  hostPortSchema,
+  hostListSchema,
+  numericStringSchema,
+  signedNumericStringSchema,
+  moneroAddressSchema,
+  MONERO_ADDRESS_BASE58,
+  MONERO_ADDRESS_REGEX,
+} from "./schemas";
 import { fullConfigSchema, FullConfig } from "./config-schema";
 
 describe("hostPortSchema", () => {
@@ -49,6 +57,44 @@ describe("numeric schemas", () => {
   it("signedNumericStringSchema accepts -1", () => {
     expect(signedNumericStringSchema.safeParse("-1").success).toBe(true);
     expect(signedNumericStringSchema.safeParse("32").success).toBe(true);
+  });
+});
+
+describe("shared Monero address rule", () => {
+  it("exposes a base58 charset without the excluded characters 0, O, I and l", () => {
+    for (const c of "0OIl") {
+      expect(MONERO_ADDRESS_BASE58, c).not.toContain(c);
+    }
+  });
+
+  it("accepts a valid 95-character primary address", () => {
+    expect(MONERO_ADDRESS_REGEX.test("4" + "A".repeat(94))).toBe(true);
+  });
+
+  it("rejects characters not in the Monero base58 alphabet (0, O, I, l)", () => {
+    for (const bad of ["0", "O", "I", "l"]) {
+      expect(MONERO_ADDRESS_REGEX.test("4" + bad + "A".repeat(93)), bad).toBe(false);
+    }
+  });
+
+  it("rejects a wrong length even when all characters are valid", () => {
+    expect(MONERO_ADDRESS_REGEX.test("4" + "A".repeat(93))).toBe(false);
+    expect(MONERO_ADDRESS_REGEX.test("4" + "A".repeat(95))).toBe(false);
+  });
+
+  it("rejects prefixes other than 4 or 8", () => {
+    for (const bad of ["1", "3", "9"]) {
+      expect(MONERO_ADDRESS_REGEX.test(bad + "A".repeat(94)), bad).toBe(false);
+    }
+  });
+
+  it("moneroAddressSchema rejects an invalid-character address with the charset message", () => {
+    const parsed = moneroAddressSchema.safeParse("4" + "A".repeat(60) + "O" + "A".repeat(33));
+    expect(parsed.success).toBe(false);
+    if (!parsed.success) {
+      expect(parsed.error.issues[0].message).toContain("contains invalid characters");
+      expect(parsed.error.issues[0].message).toContain("0, O, I and l");
+    }
   });
 });
 

@@ -14,6 +14,7 @@ import {
 import { useServicesContext, useP2PoolState, useXmrigState, useArchitectureState } from "@/hooks/services-context";
 import ExplainingLabel from "../ExplainingLabel";
 import AccordionItemComponent from "./AccordionItemComponent";
+import { MONERO_ADDRESS_BASE58 } from "@/lib/schemas";
 
 const P2PoolSection = () => {
   const { services } = useServicesContext();
@@ -36,6 +37,8 @@ const P2PoolSection = () => {
       return `Monero address must be exactly 95 characters (currently ${p2PoolPayoutAddress.length})`;
     if (!p2PoolPayoutAddress.startsWith("4"))
       return "Must be a primary address starting with 4 — subaddresses are not supported by P2Pool";
+    if ([...p2PoolPayoutAddress].some((c) => !MONERO_ADDRESS_BASE58.includes(c)))
+      return "Contains invalid characters — 0, O, I and l are not valid in Monero addresses";
     return null;
   };
 

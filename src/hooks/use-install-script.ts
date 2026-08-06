@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { notifications } from "@mantine/notifications";
 import { uploadInstallScript } from "@/app/actions";
+import { fullConfigSchema } from "@/lib/config-schema";
 import type { FullConfig } from "@/lib/config-schema";
 
 interface UseInstallScriptParams {
@@ -27,6 +28,19 @@ export function useInstallScript({ config }: UseInstallScriptParams) {
   );
 
   const handleScriptGeneration = async () => {
+    const parsed = fullConfigSchema.safeParse(config);
+    if (!parsed.success) {
+      const firstIssue = parsed.error.issues[0];
+      const path = firstIssue.path.join(".");
+      notifications.show({
+        title: "Configuration invalid",
+        message: `${path ? `${path}: ` : ""}${firstIssue.message}`,
+        color: "red",
+        autoClose: false,
+      });
+      return;
+    }
+
     setIsUploading(true);
     try {
       const scriptUrl = await uploadInstallScript(config);
