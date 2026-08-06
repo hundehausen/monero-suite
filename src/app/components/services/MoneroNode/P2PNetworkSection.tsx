@@ -1,9 +1,18 @@
 "use client";
 
+import { useMemo } from "react";
 import { NumberInput, SimpleGrid, Switch, Title } from "@mantine/core";
-import { useMonerodState } from "@/hooks/services-context";
+import { useMonerodState, useServicesContext } from "@/hooks/services-context";
+import { getMonerodP2pPortCollisions } from "@/lib/service-generators/monerod";
+import { MONEROD_PORTS } from "@/lib/constants";
 import ExplainingLabel from "../../ExplainingLabel";
 import AccordionItemComponent from "../AccordionItemComponent";
+
+const describeCollidingPort = (port: number): string => {
+  if (port === MONEROD_PORTS.rpcUnrestricted) return "unrestricted RPC";
+  if (port === MONEROD_PORTS.rpcRestricted) return "restricted RPC";
+  return "ZMQ publisher";
+};
 
 const P2PNetworkSection = () => {
   const {
@@ -29,7 +38,30 @@ const P2PNetworkSection = () => {
     setOfflineMode,
     maxConnectionsPerIp,
     setMaxConnectionsPerIp,
+    zmqPubEnabled,
+    zmqPubBindPort,
   } = useMonerodState();
+
+  const { stateFunctions: s } = useServicesContext();
+
+  const p2pPortCollisions = useMemo(
+    () =>
+      getMonerodP2pPortCollisions(
+        p2pBindPort,
+        zmqPubEnabled,
+        zmqPubBindPort,
+        s.p2PoolMode,
+        s.isMonitoring
+      ),
+    [p2pBindPort, zmqPubEnabled, zmqPubBindPort, s.p2PoolMode, s.isMonitoring]
+  );
+
+  const p2pPortCollisionError =
+    p2pPortCollisions.length > 0
+      ? `This port is used by monerod's ${p2pPortCollisions
+          .map(describeCollidingPort)
+          .join(" and ")} port inside the container. Choose a different port.`
+      : undefined;
 
   return (
     <AccordionItemComponent
@@ -48,6 +80,7 @@ const P2PNetworkSection = () => {
           onChange={(value) => setP2pBindPort(String(value))}
           min={1025}
           max={65535}
+          error={p2pPortCollisionError}
         />
         <NumberInput
           label={

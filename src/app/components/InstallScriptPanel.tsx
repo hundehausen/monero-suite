@@ -22,6 +22,7 @@ interface InstallScriptPanelProps {
   scriptSummary: string[];
   hasDefaultDomain: boolean;
   hasP2PoolInvalidAddress: boolean;
+  hasP2PPortCollision: boolean;
   installationCommand: string | undefined;
   currentConfigIsUploaded: boolean;
   isUploading: boolean;
@@ -33,6 +34,7 @@ export default function InstallScriptPanel({
   scriptSummary,
   hasDefaultDomain,
   hasP2PoolInvalidAddress,
+  hasP2PPortCollision,
   installationCommand,
   currentConfigIsUploaded,
   isUploading,
@@ -48,7 +50,15 @@ export default function InstallScriptPanel({
     URL.revokeObjectURL(url);
   };
 
-  const isBlocked = hasDefaultDomain || hasP2PoolInvalidAddress;
+  const blockReason = hasDefaultDomain
+    ? "Replace all example.com domains in the Traefik section first"
+    : hasP2PoolInvalidAddress
+      ? "Enter a valid Monero payout address in the P2Pool section first"
+      : hasP2PPortCollision
+        ? "Change the P2P bind port in the Monero Node section — it collides with a port monerod binds inside the container"
+        : "";
+
+  const isBlocked = blockReason !== "";
 
   return (
     <Stack gap="md">
@@ -101,15 +111,21 @@ export default function InstallScriptPanel({
         </Text>
       )}
 
+      {hasP2PPortCollision && (
+        <Text c="red" size="sm">
+          The P2P bind port collides with a port monerod binds inside the
+          container (RPC or the active ZMQ publisher port). Change it in the
+          Monero Node section.
+        </Text>
+      )}
+
       <Tooltip
         label={
-          hasDefaultDomain
-            ? "Replace all example.com domains in the Traefik section first"
-            : hasP2PoolInvalidAddress
-              ? "Enter a valid Monero payout address in the P2Pool section first"
-              : currentConfigIsUploaded
-                ? "Command is up to date — change settings to regenerate"
-                : ""
+          isBlocked
+            ? blockReason
+            : currentConfigIsUploaded
+              ? "Command is up to date — change settings to regenerate"
+              : ""
         }
         disabled={!isBlocked && !currentConfigIsUploaded}
       >
@@ -151,11 +167,7 @@ export default function InstallScriptPanel({
       <Text size="sm">Or download and run manually:</Text>
 
       <Tooltip
-        label={
-          hasDefaultDomain
-            ? "Replace all example.com domains in the Traefik section first"
-            : "Enter a valid Monero payout address in the P2Pool section first"
-        }
+        label={blockReason}
         disabled={!isBlocked}
       >
         <Button

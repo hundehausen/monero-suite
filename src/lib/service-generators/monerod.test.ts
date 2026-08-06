@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { createMonerodService, getZmqPubPort } from "@/lib/service-generators/monerod";
+import {
+  createMonerodService,
+  getMonerodP2pPortCollisions,
+  getZmqPubPort,
+} from "@/lib/service-generators/monerod";
 import { MONEROD_PORTS } from "@/lib/constants";
-import { networkModes } from "@/hooks/services/types";
+import { networkModes, p2poolModes } from "@/hooks/services/types";
 import { Service } from "@/hooks/services/types";
 
 /**
@@ -10,7 +14,7 @@ import { Service } from "@/hooks/services/types";
  * src/lib/service-generators/monerod.ts.
  */
 
-type Container = { command?: string[] };
+type Container = { command?: string[]; ports?: string[] };
 
 const cmd = (c: Container): string[] => c.command ?? [];
 
@@ -164,5 +168,81 @@ describe("getZmqPubPort", () => {
 
   it("returns null when nothing needs ZMQ (monerod runs --no-zmq)", () => {
     expect(getZmqPubPort(false, "18083", false)).toBeNull();
+  });
+});
+
+const runFull = (
+  overrides: Partial<typeof baseState> = {},
+  opts: { networkMode?: (typeof networkModes)[keyof typeof networkModes]; p2PoolMode?: (typeof p2poolModes)[keyof typeof p2poolModes]; isMonitoring?: boolean } = {}
+): Service =>
+  createMonerodService(
+    { ...baseState, ...overrides } as Parameters<typeof createMonerodService>[0],
+    opts.networkMode ?? networkModes.local,
+    opts.p2PoolMode ?? p2poolModes.none,
+    "none",
+    opts.isMonitoring ?? false,
+    false,
+    false
+  ) as Service;
+
+describe("monerod P2P bind port propagation", () => {
+  it("publishes a custom P2P bind port on the host (host = container = selected port)", () => {
+    const monerod = runFull({ p2pBindPort: "18085" }).code.monerod as Container;
+    expect(monerod.ports).toEqual(["18085:18085", "18089:18089"]);
+  });
+
+  it("localhost-prefixes the custom P2P binding in exposed mode", () => {
+    const monerod = runFull({ p2pBindPort: "18085" }, { networkMode: networkModes.exposed })
+      .code.monerod as Container;
+    expect(monerod.ports).toEqual(["127.0.0.1:18085:18085", "127.0.0.1:18089:18089"]);
+  });
+
+  it("opens the custom P2P port in the ufw rule for public nodes in exposed mode", () => {
+    const service = runFull(
+      { isMoneroPublicNode: true, p2pBindPort: "18085" },
+      { networkMode: networkModes.exposed }
+    );
+    expect(service.ufw).toEqual(["18085/tcp", "18089/tcp"]);
+  });
+
+  it("keeps the default 18080 binding and ufw rule when the port is untouched", () => {
+    const service = runFull(
+      { isMoneroPublicNode: true },
+      { networkMode: networkModes.exposed }
+    );
+    const monerod = service.code.monerod as Container;
+    expect(monerod.ports).toEqual(["18080:18080", "18089:18089"]);
+    expect(service.ufw).toEqual(["18080/tcp", "18089/tcp"]);
+  });
+});
+
+describe("getMonerodP2pPortCollisions", () => {
+  it("flags the unrestricted and restricted RPC ports monerod binds inside the container", () => {
+    expect(getMonerodP2pPortCollisions("18081", false, "18083", "none", false)).toEqual([18081]);
+    expect(getMonerodP2pPortCollisions("18089", false, "18083", "none", false)).toEqual([18089]);
+  });
+
+  it("flags the active ZMQ port when the user enabled ZMQ on a custom port", () => {
+    expect(getMonerodP2pPortCollisions("18090", true, "18090", "none", false)).toEqual([18090]);
+  });
+
+  it("flags the default ZMQ port when the stack needs ZMQ (p2pool or monitoring)", () => {
+    expect(getMonerodP2pPortCollisions("18083", false, "18083", "mini", false)).toEqual([18083]);
+    expect(getMonerodP2pPortCollisions("18083", false, "18083", "full", false)).toEqual([18083]);
+    expect(getMonerodP2pPortCollisions("18083", false, "18083", "none", true)).toEqual([18083]);
+  });
+
+  it("ignores the user's ZMQ port when ZMQ is effectively off", () => {
+    expect(getMonerodP2pPortCollisions("18083", false, "18083", "none", false)).toEqual([]);
+    expect(getMonerodP2pPortCollisions("18090", false, "18090", "none", false)).toEqual([]);
+  });
+
+  it("ignores the user's ZMQ choice when the stack needs ZMQ but the toggle is off (default 18083 applies)", () => {
+    expect(getMonerodP2pPortCollisions("18090", false, "18090", "full", false)).toEqual([]);
+  });
+
+  it("returns no collision for a malformed p2p port (falls back to the default 18080)", () => {
+    expect(getMonerodP2pPortCollisions("abc", false, "18083", "none", false)).toEqual([]);
+    expect(getMonerodP2pPortCollisions("", false, "18083", "none", false)).toEqual([]);
   });
 });

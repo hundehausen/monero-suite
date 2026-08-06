@@ -11,6 +11,7 @@ import {
   rpcLoginSchema,
   rpcSslSchema,
 } from "@/lib/schemas";
+import { getMonerodP2pPortCollisions } from "@/lib/service-generators/monerod";
 
 const architectureSchema = z.enum(["linux/amd64", "linux/arm64"]);
 const networkModeSchema = z.enum(["exposed", "local"]);
@@ -117,19 +118,41 @@ const serviceToggleSchema = z.object({
   isCuprateEnabled: z.boolean(),
 });
 
-export const fullConfigSchema = z.object({
-  architecture: architectureSchema,
-  networkMode: networkModeSchema,
-  monerod: monerodConfigSchema,
-  stagenet: stagenetConfigSchema,
-  p2pool: p2poolConfigSchema,
-  mining: miningConfigSchema,
-  tor: torConfigSchema,
-  services: serviceToggleSchema,
-  enabledBashServices: z.object({
-    monitoring: z.boolean(),
-    cuprate: z.boolean(),
-  }),
-});
+export const fullConfigSchema = z
+  .object({
+    architecture: architectureSchema,
+    networkMode: networkModeSchema,
+    monerod: monerodConfigSchema,
+    stagenet: stagenetConfigSchema,
+    p2pool: p2poolConfigSchema,
+    mining: miningConfigSchema,
+    tor: torConfigSchema,
+    services: serviceToggleSchema,
+    enabledBashServices: z.object({
+      monitoring: z.boolean(),
+      cuprate: z.boolean(),
+    }),
+  })
+  .superRefine((config, ctx) => {
+    // The P2P bind port must not collide with the ports monerod binds inside
+    // the container (RPC + active ZMQ). Kept in lockstep with the client-side
+    // gating via getMonerodP2pPortCollisions.
+    const collisions = getMonerodP2pPortCollisions(
+      config.monerod.p2pBindPort,
+      config.monerod.zmqPubEnabled,
+      config.monerod.zmqPubBindPort,
+      config.p2pool.p2PoolMode,
+      config.services.isMonitoring
+    );
+    if (collisions.length > 0) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["monerod", "p2pBindPort"],
+        message: `P2P bind port ${config.monerod.p2pBindPort} collides with a port monerod binds inside the container (${collisions.join(
+          ", "
+        )}). Choose a different port.`,
+      });
+    }
+  });
 
 export type FullConfig = z.infer<typeof fullConfigSchema>;

@@ -22,6 +22,7 @@ import { stringify } from "yaml";
 import { useInstallScript } from "@/hooks/use-install-script";
 import InstallScriptPanel from "./InstallScriptPanel";
 import type { FullConfig } from "@/lib/config-schema";
+import { getMonerodP2pPortCollisions } from "@/lib/service-generators/monerod";
 
 export default function Main() {
   const { services, stateFunctions } = useServicesContext();
@@ -39,6 +40,24 @@ export default function Main() {
     const addr = stateFunctions.p2PoolPayoutAddress;
     return !addr || addr.length !== 95 || !addr.startsWith("4");
   }, [stateFunctions.p2PoolMode, stateFunctions.p2PoolPayoutAddress]);
+
+  const hasP2PPortCollision = useMemo(
+    () =>
+      getMonerodP2pPortCollisions(
+        stateFunctions.p2pBindPort,
+        stateFunctions.zmqPubEnabled,
+        stateFunctions.zmqPubBindPort,
+        stateFunctions.p2PoolMode,
+        stateFunctions.isMonitoring
+      ).length > 0,
+    [
+      stateFunctions.p2pBindPort,
+      stateFunctions.zmqPubEnabled,
+      stateFunctions.zmqPubBindPort,
+      stateFunctions.p2PoolMode,
+      stateFunctions.isMonitoring,
+    ]
+  );
 
   const hasDefaultDomain = useHasDefaultDomain();
 
@@ -213,6 +232,7 @@ export default function Main() {
                 scriptSummary={scriptSummary}
                 hasDefaultDomain={hasDefaultDomain}
                 hasP2PoolInvalidAddress={hasP2PoolInvalidAddress}
+                hasP2PPortCollision={hasP2PPortCollision}
                 installationCommand={installationCommand}
                 currentConfigIsUploaded={currentConfigIsUploaded}
                 isUploading={isUploading}

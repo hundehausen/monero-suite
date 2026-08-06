@@ -52,9 +52,8 @@ describe("numeric schemas", () => {
   });
 });
 
-describe("full config server-side validation", () => {
-  const baseConfig = (): FullConfig => ({
-    architecture: "linux/amd64",
+const baseConfig = (): FullConfig => ({
+  architecture: "linux/amd64",
     networkMode: "local",
     monerod: {
       isMoneroPublicNode: false,
@@ -145,6 +144,7 @@ describe("full config server-side validation", () => {
     enabledBashServices: { monitoring: false, cuprate: false },
   });
 
+describe("full config server-side validation", () => {
   it("accepts host:port for seed node and bootstrap daemon (fix 1)", () => {
     const config = baseConfig();
     config.monerod.seedNode = "node.example.org:18080";
@@ -159,5 +159,72 @@ describe("full config server-side validation", () => {
     config.monerod.limitRateUp = "-1";
     config.monerod.limitRateDown = "-1";
     expect(fullConfigSchema.safeParse(config).success).toBe(true);
+  });
+});
+
+const parseP2pBindPort = (config: FullConfig) => {
+  const result = fullConfigSchema.safeParse(config);
+  return {
+    success: result.success,
+    issuePath: result.success ? undefined : result.error.issues[0]?.path,
+  };
+};
+
+describe("monerod P2P bind port collision validation", () => {
+  it("rejects a P2P port colliding with the RPC ports monerod binds inside the container", () => {
+    for (const port of ["18081", "18089"]) {
+      const config = baseConfig();
+      config.monerod.p2pBindPort = port;
+      const { success, issuePath } = parseP2pBindPort(config);
+      expect(success, `p2pBindPort ${port}`).toBe(false);
+      expect(issuePath).toEqual(["monerod", "p2pBindPort"]);
+    }
+  });
+
+  it("rejects a P2P port colliding with the active ZMQ port when ZMQ is enabled", () => {
+    const config = baseConfig();
+    config.monerod.zmqPubEnabled = true;
+    config.monerod.zmqPubBindPort = "18090";
+    config.monerod.p2pBindPort = "18090";
+    expect(parseP2pBindPort(config).success).toBe(false);
+  });
+
+  it("rejects the default ZMQ port when p2pool mode is active", () => {
+    const config = baseConfig();
+    config.p2pool.p2PoolMode = "mini";
+    config.monerod.p2pBindPort = "18083";
+    expect(parseP2pBindPort(config).success).toBe(false);
+  });
+
+  it("rejects the default ZMQ port when monitoring is enabled", () => {
+    const config = baseConfig();
+    config.services.isMonitoring = true;
+    config.monerod.p2pBindPort = "18083";
+    expect(parseP2pBindPort(config).success).toBe(false);
+  });
+
+  it("accepts a P2P port that collides with no in-container bind", () => {
+    for (const port of ["18080", "18082", "18083", "18084", "18090"]) {
+      const config = baseConfig();
+      config.monerod.p2pBindPort = port;
+      expect(parseP2pBindPort(config).success, `p2pBindPort ${port}`).toBe(true);
+    }
+  });
+
+  it("accepts the default ZMQ port when ZMQ is effectively off", () => {
+    const config = baseConfig();
+    config.monerod.p2pBindPort = "18083";
+    expect(parseP2pBindPort(config).success).toBe(true);
+  });
+
+  it("treats p2pool's ZMQ need as satisfied by the default port even when ZMQ is enabled on a custom port", () => {
+    const config = baseConfig();
+    config.p2pool.p2PoolMode = "mini";
+    config.monerod.zmqPubEnabled = true;
+    config.monerod.zmqPubBindPort = "18090";
+    config.monerod.p2pBindPort = "18083";
+    expect(parseP2pBindPort(config).success).toBe(true);
+    config.monerod.p2pBindPort = "18090";
+    expect(parseP2pBindPort(config).success).toBe(false);
   });
 });

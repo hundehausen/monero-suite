@@ -38,6 +38,35 @@ export const getZmqPubPort = (
   return needsZmq ? MONEROD_PORTS.zmqPub : null;
 };
 
+/**
+ * Ports monerod binds inside the container that the P2P bind port must not
+ * collide with: the unrestricted RPC port, the restricted RPC port, and the
+ * active ZMQ pub port (mirrors getZmqPubPort semantics). Shared by the UI
+ * (inline error, install-command gating) and the server-side config schema so
+ * client and server reject the same combinations.
+ * Returns the occupied ports equal to the effective P2P bind port — empty
+ * means no collision. A malformed P2P port falls back to the default (18080).
+ */
+export const getMonerodP2pPortCollisions = (
+  p2pBindPort: string,
+  zmqPubEnabled: boolean,
+  zmqPubBindPort: string,
+  p2PoolMode: P2PoolMode,
+  isMonitoring: boolean
+): number[] => {
+  const effectiveP2pPort = Number(
+    safeParse(numericStringSchema, p2pBindPort, String(MONEROD_PORTS.p2p))
+  );
+  const zmqPubPort = getZmqPubPort(
+    zmqPubEnabled,
+    zmqPubBindPort,
+    p2PoolMode !== p2poolModes.none || isMonitoring
+  );
+  const occupied: number[] = [MONEROD_PORTS.rpcUnrestricted, MONEROD_PORTS.rpcRestricted];
+  if (zmqPubPort !== null) occupied.push(zmqPubPort);
+  return [...new Set(occupied.filter((port) => port === effectiveP2pPort))];
+};
+
 interface MonerodDataConfig {
   isMoneroPublicNode: boolean;
   moneroNodeNoLogs: boolean;
@@ -205,7 +234,7 @@ export const createMonerodService = (
     architecture: [architectures.linuxAmd, architectures.linuxArm],
     ufw:
       isMoneroPublicNode && networkMode === networkModes.exposed
-        ? ["18080/tcp", "18089/tcp"]
+        ? [`${sP2pBindPort}/tcp`, "18089/tcp"]
         : undefined,
     volumes: isMoneroMainnetVolume
       ? {
@@ -223,7 +252,7 @@ export const createMonerodService = (
             : [`${sPath}:/home/monero/.bitmonero`]),
         ],
         ports: [
-          getPortBinding(isMoneroPublicNode ? networkModes.local : networkMode, 18080),
+          getPortBinding(isMoneroPublicNode ? networkModes.local : networkMode, sP2pBindPort),
           getPortBinding(isMoneroPublicNode ? networkModes.local : networkMode, 18089),
         ],
         depends_on:
