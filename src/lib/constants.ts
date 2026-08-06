@@ -54,6 +54,9 @@ export const SERVICE_PORTS = {
   cuprateRpc: 18090,
 } as const;
 
+export const GRAFANA_LOCAL_DOMAIN = `localhost:${SERVICE_PORTS.grafana}` as const;
+export const GRAFANA_TRAEFIK_DEFAULT_DOMAIN = "monitor.example.com" as const;
+
 // Docker image references.
 // Using :latest tags is intentional — users often run Watchtower for
 // automatic updates, and pinned versions would require manual bumps.

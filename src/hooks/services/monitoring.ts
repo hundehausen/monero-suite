@@ -1,6 +1,6 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
 import { Service, NetworkMode, TorProxyMode, torProxyModes } from "./types";
-import { SERVICE_PORTS } from "@/lib/constants";
+import { GRAFANA_LOCAL_DOMAIN } from "@/lib/constants";
 import { createMonitoringService } from "@/lib/service-generators/monitoring";
 
 export const useMonitoringService = () => {
@@ -10,7 +10,7 @@ export const useMonitoringService = () => {
   );
   const [grafanaDomain, setGrafanaDomain] = useQueryState(
     "grafanaDomain",
-    parseAsString.withDefault(`localhost:${SERVICE_PORTS.grafana}`)
+    parseAsString.withDefault(GRAFANA_LOCAL_DOMAIN)
   );
 
   const getMonitoringService = (

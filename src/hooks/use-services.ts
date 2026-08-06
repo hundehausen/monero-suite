@@ -25,6 +25,7 @@ import {
 } from "./services";
 import { getZmqPubPort } from "@/lib/service-generators/monerod";
 import { MONEROD_PORTS } from "@/lib/constants";
+import { nextGrafanaDomain } from "@/lib/grafana-domain";
 
 export * from "./services";
 
@@ -63,18 +64,19 @@ export const useServices = () => {
     isTraefikGrafana,
     isTraefikPortainer,
   } = traefikService.stateFunctions;
-  const { isMonitoring, setGrafanaDomain } = monitoringService.stateFunctions;
+  const { isMonitoring, grafanaDomain, setGrafanaDomain } = monitoringService.stateFunctions;
   const { p2PoolMode } = p2PoolService.stateFunctions;
   const { miningMode, setMiningMode } = xmrigService.stateFunctions;
   const { isPrunedNode, isSyncPrunedBlocks } = monerodService.stateFunctions;
 
-  // Reset Grafana domain to localhost when Traefik is disabled for Grafana
-  // (Grafana uses this for GF_SERVER_ROOT_URL regardless of Traefik)
+  // Sync Grafana domain with Traefik: local default when off, prefill
+  // monitor.example.com when enabling Traefik on a localhost domain.
   useEffect(() => {
-    if (!isTraefik || !isTraefikGrafana) {
-      setGrafanaDomain("localhost:3000");
+    const next = nextGrafanaDomain(isTraefik, isTraefikGrafana, grafanaDomain);
+    if (next !== null) {
+      setGrafanaDomain(next);
     }
-  }, [isTraefik, isTraefikGrafana, setGrafanaDomain]);
+  }, [isTraefik, isTraefikGrafana, grafanaDomain, setGrafanaDomain]);
 
   // Mining requires P2Pool (xmrig pools into p2pool, p2pool mode mines via
   // the p2pool service). Reset mining mode when P2Pool is turned off so a
