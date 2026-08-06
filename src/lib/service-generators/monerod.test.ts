@@ -51,7 +51,7 @@ const baseState = {
   // Network security
   banList: "",
   enableDnsBlocklist: false,
-  disableDnsCheckpoints: false,
+  dnsCheckpoints: "default",
   // Peers
   seedNode: "",
   addPeer: "",
@@ -60,7 +60,6 @@ const baseState = {
   // Performance
   dbSyncMode: "",
   blockSyncSize: "0",
-  enforceCheckpointing: false,
   fastBlockSync: true,
   preparationThreads: "4",
   maxConcurrency: "0",
@@ -145,6 +144,26 @@ describe("monerod peer/rate flags", () => {
       "--limit-rate-up=1048576",
       "--limit-rate-down=2048",
     ]);
+  });
+});
+
+describe("monerod DNS checkpoint flags (fix 6)", () => {
+  it("emits neither flag for the default mode", () => {
+    const flags = run({ dnsCheckpoints: "default" });
+    expect(flags).not.toContain("--disable-dns-checkpoints");
+    expect(flags).not.toContain("--enforce-dns-checkpointing");
+  });
+
+  it("emits only --disable-dns-checkpoints for skip", () => {
+    const flags = run({ dnsCheckpoints: "skip" });
+    expect(flags).toContain("--disable-dns-checkpoints");
+    expect(flags).not.toContain("--enforce-dns-checkpointing");
+  });
+
+  it("emits only --enforce-dns-checkpointing for enforce", () => {
+    const flags = run({ dnsCheckpoints: "enforce" });
+    expect(flags).toContain("--enforce-dns-checkpointing");
+    expect(flags).not.toContain("--disable-dns-checkpoints");
   });
 });
 

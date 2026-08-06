@@ -14,11 +14,6 @@ export const usePerformanceConfig = () => {
     parseAsString.withDefault("0")
   );
   
-  const [enforceCheckpointing, setEnforceCheckpointing] = useQueryState(
-    "enforceCheckpointing", 
-    parseAsBoolean.withDefault(false)
-  );
-  
   const [fastBlockSync, setFastBlockSync] = useQueryState(
     "fastBlockSync", 
     parseAsBoolean.withDefault(true)
@@ -49,8 +44,6 @@ export const usePerformanceConfig = () => {
     setDbSyncMode,
     blockSyncSize,
     setBlockSyncSize,
-    enforceCheckpointing,
-    setEnforceCheckpointing,
     fastBlockSync,
     setFastBlockSync,
     preparationThreads,

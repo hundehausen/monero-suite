@@ -13,8 +13,6 @@ const PerformanceSection = () => {
     setFastBlockSync,
     blockSyncSize,
     setBlockSyncSize,
-    enforceCheckpointing,
-    setEnforceCheckpointing,
     preparationThreads,
     setPreparationThreads,
     maxConcurrency,
@@ -65,16 +63,6 @@ const PerformanceSection = () => {
           onChange={(value) => setBlockSyncSize(String(value))}
           min={0}
           max={1000}
-        />
-        <Switch
-          label={
-            <ExplainingLabel
-              label="Enforce DNS Checkpointing"
-              explanation="Enforce MoneroPulse DNS checkpoints. The node will roll back the chain if the local copy doesn't match the checkpoint hash."
-            />
-          }
-          checked={enforceCheckpointing}
-          onChange={(event) => setEnforceCheckpointing(event.currentTarget.checked)}
         />
         <NumberInput
           label={

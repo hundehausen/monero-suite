@@ -1,5 +1,7 @@
 import { Service, NetworkMode, P2PoolMode, TorProxyMode } from "../types";
 
+export type DnsCheckpointsMode = "default" | "skip" | "enforce";
+
 export interface MonerodState {
   // Basic configuration
   isMoneroPublicNode: boolean;
@@ -62,8 +64,8 @@ export interface MonerodState {
   setBanList: (value: string) => void;
   enableDnsBlocklist: boolean;
   setEnableDnsBlocklist: (value: boolean) => void;
-  disableDnsCheckpoints: boolean;
-  setDisableDnsCheckpoints: (value: boolean) => void;
+  dnsCheckpoints: DnsCheckpointsMode;
+  setDnsCheckpoints: (value: DnsCheckpointsMode) => void;
 
   // Network Peers configuration
   seedNode: string;
@@ -80,8 +82,6 @@ export interface MonerodState {
   setDbSyncMode: (value: string) => void;
   blockSyncSize: string;
   setBlockSyncSize: (value: string) => void;
-  enforceCheckpointing: boolean;
-  setEnforceCheckpointing: (value: boolean) => void;
   fastBlockSync: boolean;
   setFastBlockSync: (value: boolean) => void;
   preparationThreads: string;

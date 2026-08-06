@@ -17,6 +17,7 @@ const networkModeSchema = z.enum(["exposed", "local"]);
 const p2PoolModeSchema = z.enum(["none", "mini", "full", "nano"]);
 const miningModeSchema = z.enum(["none", "xmrig", "p2pool"]);
 const torProxyModeSchema = z.enum(["none", "tx-only", "full"]);
+const dnsCheckpointsSchema = z.enum(["default", "skip", "enforce"]);
 
 const monerodConfigSchema = z.object({
   isMoneroPublicNode: z.boolean(),
@@ -45,14 +46,13 @@ const monerodConfigSchema = z.object({
   txProxyDisableNoise: z.boolean(),
   banList: commandValueSchema,
   enableDnsBlocklist: z.boolean(),
-  disableDnsCheckpoints: z.boolean(),
+  dnsCheckpoints: dnsCheckpointsSchema,
   seedNode: hostPortSchema,
   addPeer: z.string().max(2048),
   addPriorityNode: z.string().max(2048),
   addExclusiveNode: z.string().max(2048),
   dbSyncMode: commandValueSchema,
   blockSyncSize: numericStringSchema,
-  enforceCheckpointing: z.boolean(),
   fastBlockSync: z.boolean(),
   preparationThreads: numericStringSchema,
   maxConcurrency: numericStringSchema,

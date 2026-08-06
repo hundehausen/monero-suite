@@ -1,7 +1,8 @@
 "use client";
 
-import { SimpleGrid, Switch, TextInput, Title } from "@mantine/core";
+import { SegmentedControl, SimpleGrid, Switch, TextInput, Title } from "@mantine/core";
 import { useMonerodState } from "@/hooks/services-context";
+import type { DnsCheckpointsMode } from "@/hooks/services/monerod/types";
 import ExplainingLabel from "../../ExplainingLabel";
 import AccordionItemComponent from "../AccordionItemComponent";
 
@@ -11,8 +12,8 @@ const NetworkSecuritySection = () => {
     setEnableDnsBlocklist,
     banList,
     setBanList,
-    disableDnsCheckpoints,
-    setDisableDnsCheckpoints,
+    dnsCheckpoints,
+    setDnsCheckpoints,
   } = useMonerodState();
 
   const banListError = (): string | null => {
@@ -50,16 +51,36 @@ const NetworkSecuritySection = () => {
           placeholder="/path/to/custom-ban-list.txt"
           error={banListError()}
         />
-        <Switch
-          label={
-            <ExplainingLabel
-              label="Skip DNS Checkpoints"
-              explanation="Don't use MoneroPulse DNS checkpoints for extra verification. Only disable if you know what you're doing - this reduces protection against deep reorgs."
-            />
-          }
-          checked={disableDnsCheckpoints}
-          onChange={(event) => setDisableDnsCheckpoints(event.currentTarget.checked)}
-        />
+        <div>
+          <ExplainingLabel
+            label="DNS Checkpoints"
+            explanation="Control how MoneroPulse DNS checkpoints are used for extra verification against deep reorgs. Skip disables them (reduces protection), Enforce rolls the chain back when the local copy doesn't match the checkpoint hash."
+          />
+          <SegmentedControl
+            value={dnsCheckpoints}
+            onChange={(value) => setDnsCheckpoints(value as DnsCheckpointsMode)}
+            fullWidth
+            styles={{
+              label: {
+                fontSize: "16px",
+              },
+            }}
+            data={[
+              {
+                label: "Default",
+                value: "default",
+              },
+              {
+                label: "Skip",
+                value: "skip",
+              },
+              {
+                label: "Enforce",
+                value: "enforce",
+              },
+            ]}
+          />
+        </div>
       </SimpleGrid>
     </AccordionItemComponent>
   );

@@ -95,14 +95,13 @@ interface MonerodDataConfig {
   txProxyDisableNoise: boolean;
   banList: string;
   enableDnsBlocklist: boolean;
-  disableDnsCheckpoints: boolean;
+  dnsCheckpoints: "default" | "skip" | "enforce";
   seedNode: string;
   addPeer: string;
   addPriorityNode: string;
   addExclusiveNode: string;
   dbSyncMode: string;
   blockSyncSize: string;
-  enforceCheckpointing: boolean;
   fastBlockSync: boolean;
   preparationThreads: string;
   maxConcurrency: string;
@@ -159,14 +158,13 @@ export const createMonerodService = (
     anonymousInbound,
     banList,
     enableDnsBlocklist,
-    disableDnsCheckpoints,
+    dnsCheckpoints,
     seedNode,
     addPeer,
     addPriorityNode,
     addExclusiveNode,
     dbSyncMode,
     blockSyncSize,
-    enforceCheckpointing,
     fastBlockSync,
     preparationThreads,
     maxConcurrency,
@@ -281,6 +279,8 @@ export const createMonerodService = (
           "--check-updates=disabled",
           ...(enableDnsBlocklist ? ["--enable-dns-blocklist"] : []),
           ...(sBanList ? [`--ban-list=${sBanList}`] : []),
+          ...(dnsCheckpoints === "enforce" ? ["--enforce-dns-checkpointing"] : []),
+          ...(dnsCheckpoints === "skip" ? ["--disable-dns-checkpoints"] : []),
           ...(moneroNodeNoLogs
             ? ["--log-file=/dev/null", "--max-log-file-size=0"]
             : [
@@ -307,7 +307,6 @@ export const createMonerodService = (
           ...(sDbSyncMode ? [`--db-sync-mode=${sDbSyncMode}`] : []),
           ...(sBlockSyncSize !== "0" ? [`--block-sync-size=${sBlockSyncSize}`] : []),
           ...(sMaxTxpoolWeight !== "0" ? [`--max-txpool-weight=${sMaxTxpoolWeight}`] : []),
-          ...(enforceCheckpointing ? ["--enforce-dns-checkpointing"] : []),
           ...(fastBlockSync ? ["--fast-block-sync=1"] : ["--fast-block-sync=0"]),
           ...(sPreparationThreads !== "4" ? [`--prep-blocks-threads=${sPreparationThreads}`] : []),
           ...(sMaxConcurrency !== "0" ? [`--max-concurrency=${sMaxConcurrency}`] : []),
@@ -341,7 +340,6 @@ export const createMonerodService = (
               "--add-peer=plowsof3t5hogddwabaeiyrno25efmzfxyro2vligremt7sxpsclfaid.onion:18083",
             ]
             : []),
-          ...(disableDnsCheckpoints ? ["--disable-dns-checkpoints"] : []),
           ...(sSeedNode ? [`--seed-node=${sSeedNode}`] : []),
           ...sAddPeer.map((host) => `--add-peer=${host}`),
           ...sAddPriorityNode.map((host) => `--add-priority-node=${host}`),

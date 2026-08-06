@@ -82,14 +82,13 @@ const baseConfig = (): FullConfig => ({
       txProxyDisableNoise: false,
       banList: "",
       enableDnsBlocklist: false,
-      disableDnsCheckpoints: false,
+      dnsCheckpoints: "default",
       seedNode: "",
       addPeer: "",
       addPriorityNode: "",
       addExclusiveNode: "",
       dbSyncMode: "",
       blockSyncSize: "0",
-      enforceCheckpointing: false,
       fastBlockSync: true,
       preparationThreads: "4",
       maxConcurrency: "0",
@@ -158,6 +157,17 @@ describe("full config server-side validation", () => {
     config.monerod.limitRateUp = "-1";
     config.monerod.limitRateDown = "-1";
     expect(fullConfigSchema.safeParse(config).success).toBe(true);
+  });
+
+  it("accepts each DNS checkpoint mode and rejects anything else (fix 6)", () => {
+    for (const mode of ["default", "skip", "enforce"] as const) {
+      const config = baseConfig();
+      config.monerod.dnsCheckpoints = mode;
+      expect(fullConfigSchema.safeParse(config).success, mode).toBe(true);
+    }
+    const config = baseConfig();
+    config.monerod.dnsCheckpoints = "bogus" as FullConfig["monerod"]["dnsCheckpoints"];
+    expect(fullConfigSchema.safeParse(config).success).toBe(false);
   });
 });
 

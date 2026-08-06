@@ -1,4 +1,5 @@
-import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
+import { useQueryState, parseAsBoolean, parseAsString, parseAsStringEnum } from "nuqs";
+import { DnsCheckpointsMode } from "./types";
 
 /**
  * Hook for Monero daemon network security configuration settings
@@ -14,9 +15,9 @@ export const useNetworkSecurityConfig = () => {
     parseAsBoolean.withDefault(true)
   );
   
-  const [disableDnsCheckpoints, setDisableDnsCheckpoints] = useQueryState(
-    "disableDnsCheckpoints",
-    parseAsBoolean.withDefault(false)
+  const [dnsCheckpoints, setDnsCheckpoints] = useQueryState(
+    "dnsCheckpoints",
+    parseAsStringEnum<DnsCheckpointsMode>(["default", "skip", "enforce"]).withDefault("default")
   );
 
   return {
@@ -24,7 +25,7 @@ export const useNetworkSecurityConfig = () => {
     setBanList,
     enableDnsBlocklist,
     setEnableDnsBlocklist,
-    disableDnsCheckpoints,
-    setDisableDnsCheckpoints,
+    dnsCheckpoints,
+    setDnsCheckpoints,
   };
 };
