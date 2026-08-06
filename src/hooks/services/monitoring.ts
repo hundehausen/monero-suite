@@ -16,10 +16,11 @@ export const useMonitoringService = () => {
   const getMonitoringService = (
     networkMode: NetworkMode,
     isTraefik: boolean,
+    zmqPubPort: number,
     certResolverName: string = "monerosuite",
     torProxyMode: TorProxyMode = torProxyModes.none
   ): Service =>
-    createMonitoringService(isMonitoring, grafanaDomain, networkMode, isTraefik, certResolverName, torProxyMode);
+    createMonitoringService(isMonitoring, grafanaDomain, networkMode, isTraefik, certResolverName, torProxyMode, zmqPubPort);
 
   return {
     getMonitoringService,

@@ -30,8 +30,31 @@ vi.mock("./services", async () => {
     const [p2PoolPayoutAddress, setP2PoolPayoutAddress] = React.useState("");
     const [p2PoolMiningThreads, setP2PoolMiningThreads] = React.useState(4);
     return {
-      getP2PoolService: () => stub(p2PoolMode),
+      // Record the resolved ZMQ port so tests can assert propagation.
+      getP2PoolService: (_networkMode: string, _miningMode: string, _torProxyMode: string, zmqPubPort: number) => ({
+        ...stub(p2PoolMode),
+        code: { p2pool: { command: ["--zmq-port", String(zmqPubPort)] } },
+      }),
       stateFunctions: { p2PoolMode, setP2PoolMode, p2PoolPayoutAddress, setP2PoolPayoutAddress, p2PoolMiningThreads, setP2PoolMiningThreads },
+    };
+  };
+
+  const useMonerodService = () => {
+    const [zmqPubEnabled, setZmqPubEnabled] = React.useState(false);
+    const [zmqPubBindPort, setZmqPubBindPort] = React.useState("18083");
+    return {
+      getMonerodService: () => stub(true),
+      stateFunctions: { isPrunedNode: false, isSyncPrunedBlocks: false, setIsSyncPrunedBlocks: () => {}, zmqPubEnabled, setZmqPubEnabled, zmqPubBindPort, setZmqPubBindPort },
+    };
+  };
+
+  const useMonitoringService = () => {
+    return {
+      getMonitoringService: (_networkMode: string, _isTraefik: boolean, zmqPubPort: number) => ({
+        ...stub(false),
+        env: { ZMQ_PORT: zmqPubPort },
+      }),
+      stateFunctions: { isMonitoring: false, setIsMonitoring: () => {}, grafanaDomain: "localhost:3000", setGrafanaDomain: () => {} },
     };
   };
 
@@ -51,10 +74,7 @@ vi.mock("./services", async () => {
     minigModes: { none: "none", xmrig: "xmrig", p2pool: "p2pool" },
     torProxyModes: { none: "none", txonly: "tx-only", full: "full" },
     CERT_RESOLVER_NAME: "monerosuite",
-    useMonerodService: () => ({
-      getMonerodService: () => stub(true),
-      stateFunctions: { isPrunedNode: false, isSyncPrunedBlocks: false, setIsSyncPrunedBlocks: () => {} },
-    }),
+    useMonerodService,
     useMonerodStagenetService: () => ({
       getMonerodStagenetService: () => stub(false),
       stateFunctions: { isStagenetNode: false },
@@ -72,10 +92,7 @@ vi.mock("./services", async () => {
       getWatchtowerService: () => stub(false),
       stateFunctions: { isWatchtower: false },
     }),
-    useMonitoringService: () => ({
-      getMonitoringService: () => stub(false),
-      stateFunctions: { isMonitoring: false, setIsMonitoring: () => {}, grafanaDomain: "localhost:3000", setGrafanaDomain: () => {} },
-    }),
+    useMonitoringService,
     useXmrigService,
     useTraefikService: () => ({
       getTraefikService: () => stub(false),
@@ -93,6 +110,7 @@ vi.mock("./services", async () => {
 });
 
 import { useServices } from "./use-services";
+import { MONEROD_PORTS } from "@/lib/constants";
 
 describe("useServices miningMode reset (fix 6)", () => {
   it("resets miningMode to none when P2Pool is switched to none", () => {
@@ -113,5 +131,31 @@ describe("useServices miningMode reset (fix 6)", () => {
     const { result } = renderHook(() => useServices());
     expect(result.current.stateFunctions.p2PoolMode).toBe("full");
     expect(result.current.stateFunctions.miningMode).toBe("xmrig");
+  });
+});
+
+describe("useServices ZMQ port propagation", () => {
+  it("forwards a custom ZMQ pub port to p2pool and monitoring", () => {
+    const { result } = renderHook(() => useServices());
+    act(() => {
+      result.current.stateFunctions.setZmqPubEnabled(true);
+      result.current.stateFunctions.setZmqPubBindPort("18090");
+    });
+
+    const p2pool = result.current.services.p2pool.code.p2pool as { command?: string[] };
+    expect(p2pool.command?.[1]).toBe("18090");
+    expect(result.current.services.monitoring.env?.ZMQ_PORT).toBe(18090);
+  });
+
+  it("falls back to the default ZMQ port for malformed values instead of NaN", () => {
+    const { result } = renderHook(() => useServices());
+    act(() => {
+      result.current.stateFunctions.setZmqPubEnabled(true);
+      result.current.stateFunctions.setZmqPubBindPort("abc");
+    });
+
+    const p2pool = result.current.services.p2pool.code.p2pool as { command?: string[] };
+    expect(p2pool.command?.[1]).toBe(String(MONEROD_PORTS.zmqPub));
+    expect(result.current.services.monitoring.env?.ZMQ_PORT).toBe(MONEROD_PORTS.zmqPub);
   });
 });

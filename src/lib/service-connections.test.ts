@@ -176,10 +176,34 @@ describe("monerod <-> p2pool connection", () => {
     }
   );
 
-  it("monerod publishes the ZMQ port when p2pool is enabled", () => {
+  it("keeps the ZMQ feed off the host when p2pool is enabled (Docker-network only)", () => {
     const services = generateAllServices(makeConfig());
     const monerod = services.monerod.code.monerod as ContainerSpec;
-    expect(monerod.ports).toContain(`${MONEROD_PORTS.zmqPub}:${MONEROD_PORTS.zmqPub}`);
+    const monerodCmd = cmd(monerod);
+    // monerod still enables ZMQ for p2pool...
+    expect(monerodCmd).toContain(`--zmq-pub=tcp://0.0.0.0:${MONEROD_PORTS.zmqPub}`);
+    // ...but the port is reachable only inside the Docker network
+    expect(monerod.ports).not.toContain(`${MONEROD_PORTS.zmqPub}:${MONEROD_PORTS.zmqPub}`);
+    expect(monerod.ports).not.toContain(`127.0.0.1:${MONEROD_PORTS.zmqPub}:${MONEROD_PORTS.zmqPub}`);
+  });
+
+  it("propagates a custom ZMQ pub port from monerod to p2pool and monitoring, and never publishes it on the host", () => {
+    const customPort = "18090";
+    const services = generateAllServices(
+      makeConfig({ monerod: { ...baseMonerod, zmqPubEnabled: true, zmqPubBindPort: customPort } })
+    );
+    const monerod = services.monerod.code.monerod as ContainerSpec;
+    const p2pool = services.p2pool.code.p2pool as ContainerSpec;
+
+    // monerod binds ZMQ on the custom port...
+    expect(cmd(monerod)).toContain(`--zmq-pub=tcp://0.0.0.0:${customPort}`);
+    // ...p2pool and monitoring point at exactly that port...
+    expect(flagValue(cmd(p2pool), "--zmq-port")).toBe(customPort);
+    expect(services.monitoring.env?.ZMQ_PORT).toBe(Number(customPort));
+    // ...and no host port is published for it
+    for (const p of monerod.ports ?? []) {
+      expect(String(p)).not.toContain(customPort);
+    }
   });
 
   it("monerod uses --no-zmq when neither p2pool nor monitoring need ZMQ", () => {

@@ -12,8 +12,31 @@ import {
   rpcLoginSchema,
   moneroAddressSchema,
 } from "@/lib/schemas";
-import { DOCKER_IMAGES } from "@/lib/constants";
+import { DOCKER_IMAGES, MONEROD_PORTS } from "@/lib/constants";
 import { getTraefikConfig, getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
+
+/**
+ * The port monerod actually binds ZMQ pub to — the single source of truth that
+ * consumers (p2pool, monitoring) must connect to. Sanitizes raw input so both
+ * producers and consumers resolve the same value for ANY input: non-numeric
+ * or out-of-range values fall back to the default ZMQ port. Returns null when
+ * monerod runs with --no-zmq (neither the stack nor a user-enabled ZMQ needs it).
+ */
+export const getZmqPubPort = (
+  zmqPubEnabled: boolean,
+  zmqPubBindPort: string,
+  needsZmq: boolean
+): number | null => {
+  if (zmqPubEnabled) {
+    const port = Number(
+      safeParse(numericStringSchema, zmqPubBindPort, String(MONEROD_PORTS.zmqPub))
+    );
+    return Number.isInteger(port) && port >= 1 && port <= 65535
+      ? port
+      : MONEROD_PORTS.zmqPub;
+  }
+  return needsZmq ? MONEROD_PORTS.zmqPub : null;
+};
 
 interface MonerodDataConfig {
   isMoneroPublicNode: boolean;
@@ -161,12 +184,17 @@ export const createMonerodService = (
   const sLimitRateDown = safeParse(signedNumericStringSchema, limitRateDown, "2048");
   const sP2pExternalPort = safeParse(numericStringSchema, p2pExternalPort, "0");
   const sMaxConnectionsPerIp = safeParse(numericStringSchema, maxConnectionsPerIp, "1");
-  const sZmqPubBindPort = safeParse(numericStringSchema, zmqPubBindPort, "18083");
   const sBlockSyncSize = safeParse(numericStringSchema, blockSyncSize, "0");
   const sMaxTxpoolWeight = safeParse(numericStringSchema, maxTxpoolWeight, "0");
   const sPreparationThreads = safeParse(numericStringSchema, preparationThreads, "4");
   const sMaxConcurrency = safeParse(numericStringSchema, maxConcurrency, "0");
   const sMiningThreads = safeParse(numericStringSchema, miningThreads, "1");
+
+  const zmqPubPort = getZmqPubPort(
+    zmqPubEnabled,
+    zmqPubBindPort,
+    p2PoolMode !== p2poolModes.none || isMonitoring
+  );
 
   return {
     name: "Monero Node",
@@ -196,9 +224,6 @@ export const createMonerodService = (
         ],
         ports: [
           getPortBinding(isMoneroPublicNode ? networkModes.local : networkMode, 18080),
-          ...(p2PoolMode !== p2poolModes.none
-            ? [getPortBinding(networkMode, 18083)]
-            : []),
           getPortBinding(isMoneroPublicNode ? networkModes.local : networkMode, 18089),
         ],
         depends_on:
@@ -260,11 +285,9 @@ export const createMonerodService = (
           ...(sMaxConcurrency !== "0" ? [`--max-concurrency=${sMaxConcurrency}`] : []),
           ...(sBootstrapAddr ? [`--bootstrap-daemon-address=${sBootstrapAddr}`] : []),
           ...(sBootstrapLogin ? [`--bootstrap-daemon-login=${sBootstrapLogin}`] : []),
-          ...(zmqPubEnabled
-            ? [`--zmq-pub=tcp://0.0.0.0:${sZmqPubBindPort}`]
-            : ((p2PoolMode !== p2poolModes.none || isMonitoring)
-              ? ["--zmq-pub=tcp://0.0.0.0:18083"]
-              : ["--no-zmq"])),
+          ...(zmqPubPort === null
+            ? ["--no-zmq"]
+            : [`--zmq-pub=tcp://0.0.0.0:${zmqPubPort}`]),
           ...(rpcSsl !== "autodetect" ? [`--rpc-ssl=${rpcSsl}`] : []),
           ...(sRpcLogin ? [`--rpc-login=${sRpcLogin}`] : []),
           ...(disableRpcBan || isHiddenServices ? ["--disable-rpc-ban"] : []),

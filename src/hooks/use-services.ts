@@ -9,6 +9,7 @@ import {
   NetworkMode,
   architectures,
   networkModes,
+  p2poolModes,
   useMonerodService,
   useMonerodStagenetService,
   useP2PoolService,
@@ -22,6 +23,8 @@ import {
   useCuprateService,
   CERT_RESOLVER_NAME,
 } from "./services";
+import { getZmqPubPort } from "@/lib/service-generators/monerod";
+import { MONEROD_PORTS } from "@/lib/constants";
 
 export * from "./services";
 
@@ -88,6 +91,14 @@ export const useServices = () => {
       monerodService.stateFunctions.setIsSyncPrunedBlocks(false);
   }, [isPrunedNode, isSyncPrunedBlocks, monerodService.stateFunctions]);
 
+  // The port monerod actually binds ZMQ on — consumers must follow it.
+  const zmqPubPort =
+    getZmqPubPort(
+      monerodService.stateFunctions.zmqPubEnabled,
+      monerodService.stateFunctions.zmqPubBindPort,
+      p2PoolMode !== p2poolModes.none || isMonitoring
+    ) ?? MONEROD_PORTS.zmqPub;
+
   const services: ServiceMap = {
     monerod: monerodService.getMonerodService(
       networkMode,
@@ -107,7 +118,8 @@ export const useServices = () => {
     p2pool: p2PoolService.getP2PoolService(
       networkMode,
       xmrigService.stateFunctions.miningMode,
-      torService.stateFunctions.torProxyMode
+      torService.stateFunctions.torProxyMode,
+      zmqPubPort
     ),
     "monero-wallet-rpc": moneroWalletRpcService.getMoneroWalletRpcService(
       networkMode,
@@ -123,6 +135,7 @@ export const useServices = () => {
     monitoring: monitoringService.getMonitoringService(
       networkMode,
       isTraefik && isTraefikGrafana,
+      zmqPubPort,
       CERT_RESOLVER_NAME,
       torService.stateFunctions.torProxyMode
     ),

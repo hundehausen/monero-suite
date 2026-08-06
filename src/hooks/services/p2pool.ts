@@ -33,13 +33,15 @@ export const useP2PoolService = () => {
   const getP2PoolService = (
     networkMode: NetworkMode,
     miningMode: MiningMode,
-    torProxyMode: TorProxyMode
+    torProxyMode: TorProxyMode,
+    zmqPubPort: number
   ): Service =>
     createP2PoolService(
       { p2PoolMode, p2PoolPayoutAddress, p2PoolMiningThreads },
       miningMode,
       torProxyMode,
-      networkMode
+      networkMode,
+      zmqPubPort
     );
 
   return {

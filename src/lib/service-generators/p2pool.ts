@@ -31,7 +31,8 @@ export const createP2PoolService = (
   state: P2PoolDataConfig,
   miningMode: MiningMode,
   torProxyMode: TorProxyMode,
-  networkMode: NetworkMode = networkModes.local
+  networkMode: NetworkMode = networkModes.local,
+  zmqPubPort: number
 ): Service => {
   const { p2PoolMode, p2PoolPayoutAddress, p2PoolMiningThreads } = state;
   const sPayoutAddress = safeParse(moneroAddressSchema, p2PoolPayoutAddress, "");
@@ -89,7 +90,7 @@ export const createP2PoolService = (
           "--rpc-port",
           `${MONEROD_PORTS.rpcRestricted}`,
           "--zmq-port",
-          `${MONEROD_PORTS.zmqPub}`,
+          `${zmqPubPort}`,
           ...(torProxyMode !== torProxyModes.none
             ? ["--host", `${MONEROD_IP}`, "--no-dns"]
             : ["--host", "monerod"]),
