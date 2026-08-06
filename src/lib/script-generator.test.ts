@@ -25,3 +25,22 @@ describe("generateInstallationScript spinner escapes", () => {
     expect(script.includes("\x1b")).toBe(false);
   });
 });
+
+describe("generateInstallationScript docker compose", () => {
+  it("runs compose via $SUDO, pull nofail, up fatal", () => {
+    const script = sampleScript();
+
+    expect(script).toContain("run_cmd $SUDO docker compose pull &");
+    expect(script).toContain('show_spinner $! "Pulling container images" nofail');
+
+    expect(script).toContain("run_cmd $SUDO docker compose up -d &");
+    expect(script).toContain('show_spinner $! "Starting Monero Suite containers"');
+    // up spinner must NOT pass nofail
+    expect(script).not.toMatch(
+      /show_spinner \$! "Starting Monero Suite containers" nofail/
+    );
+
+    // success message still present (runs only if up did not exit)
+    expect(script).toContain("Monero Suite installation completed successfully!");
+  });
+});

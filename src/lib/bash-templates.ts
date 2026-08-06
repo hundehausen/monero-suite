@@ -351,11 +351,11 @@ export const COMPLETION_TEMPLATE = `
     section "Starting Services"
     cd ${installationPath}
 
-    run_cmd docker compose pull &
+    run_cmd $SUDO docker compose pull &
     show_spinner $! "Pulling container images" nofail
 
-    run_cmd docker compose up -d &
-    show_spinner $! "Starting Monero Suite containers" nofail
+    run_cmd $SUDO docker compose up -d &
+    show_spinner $! "Starting Monero Suite containers"
 
     echo -e "\\n\${GREEN}Monero Suite installation completed successfully!\${NC}\n"
     echo -e "\${BLUE}Useful commands:\${NC}"
