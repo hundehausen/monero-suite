@@ -155,6 +155,7 @@ export default function Main() {
       p2PoolMode: stateFunctions.p2PoolMode,
       p2PoolPayoutAddress: stateFunctions.p2PoolPayoutAddress,
       p2PoolMiningThreads: stateFunctions.p2PoolMiningThreads,
+      isP2PoolStratumPublic: stateFunctions.isP2PoolStratumPublic,
     },
     mining: {
       miningMode: stateFunctions.miningMode,

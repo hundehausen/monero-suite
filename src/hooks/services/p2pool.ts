@@ -3,6 +3,7 @@ import {
   parseAsString,
   parseAsStringEnum,
   parseAsInteger,
+  parseAsBoolean,
 } from "nuqs";
 import {
   Service,
@@ -29,6 +30,10 @@ export const useP2PoolService = () => {
     "p2PoolMiningThreads",
     parseAsInteger.withDefault(4)
   );
+  const [isP2PoolStratumPublic, setIsP2PoolStratumPublic] = useQueryState(
+    "isP2PoolStratumPublic",
+    parseAsBoolean.withDefault(false)
+  );
 
   const getP2PoolService = (
     networkMode: NetworkMode,
@@ -37,7 +42,7 @@ export const useP2PoolService = () => {
     zmqPubPort: number
   ): Service =>
     createP2PoolService(
-      { p2PoolMode, p2PoolPayoutAddress, p2PoolMiningThreads },
+      { p2PoolMode, p2PoolPayoutAddress, p2PoolMiningThreads, isP2PoolStratumPublic },
       miningMode,
       torProxyMode,
       networkMode,
@@ -53,6 +58,8 @@ export const useP2PoolService = () => {
       setP2PoolPayoutAddress,
       p2PoolMiningThreads,
       setP2PoolMiningThreads,
+      isP2PoolStratumPublic,
+      setIsP2PoolStratumPublic,
     },
   };
 };

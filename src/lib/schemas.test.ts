@@ -116,7 +116,7 @@ const baseConfig = (): FullConfig => ({
       moneroStagenetBlockchainLocation: "",
       stagenetNodeDomain: "stagenet.example.com",
     },
-    p2pool: { p2PoolMode: "none", p2PoolPayoutAddress: "", p2PoolMiningThreads: 1 },
+    p2pool: { p2PoolMode: "none", p2PoolPayoutAddress: "", p2PoolMiningThreads: 1, isP2PoolStratumPublic: false },
     mining: { miningMode: "none", xmrigDonateLevel: 1 },
     tor: {
       torProxyMode: "none",

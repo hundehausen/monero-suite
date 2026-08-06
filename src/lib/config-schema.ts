@@ -86,6 +86,7 @@ const p2poolConfigSchema = z.object({
   p2PoolMode: p2PoolModeSchema,
   p2PoolPayoutAddress: moneroAddressSchema,
   p2PoolMiningThreads: z.number().int().min(1).max(256),
+  isP2PoolStratumPublic: z.boolean(),
 });
 
 const miningConfigSchema = z.object({

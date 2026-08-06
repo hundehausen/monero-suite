@@ -85,6 +85,7 @@ export function useP2PoolState(): P2PoolState {
     p2PoolMode: s.p2PoolMode, setP2PoolMode: s.setP2PoolMode,
     p2PoolPayoutAddress: s.p2PoolPayoutAddress, setP2PoolPayoutAddress: s.setP2PoolPayoutAddress,
     p2PoolMiningThreads: s.p2PoolMiningThreads, setP2PoolMiningThreads: s.setP2PoolMiningThreads,
+    isP2PoolStratumPublic: s.isP2PoolStratumPublic, setIsP2PoolStratumPublic: s.setIsP2PoolStratumPublic,
   };
 }
 

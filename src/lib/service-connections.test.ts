@@ -97,6 +97,7 @@ const makeConfig = (overrides: Partial<FullConfig> = {}): FullConfig => ({
     p2PoolMode: p2poolModes.full,
     p2PoolPayoutAddress: VALID_ADDRESS,
     p2PoolMiningThreads: 4,
+    isP2PoolStratumPublic: false,
   },
   mining: { miningMode: "xmrig", xmrigDonateLevel: 1 },
   tor: {
@@ -156,7 +157,7 @@ describe("monerod <-> p2pool connection", () => {
     "p2pool (%s) reaches monerod's restricted RPC and ZMQ pub ports that monerod actually binds",
     (mode) => {
       const services = generateAllServices(
-        makeConfig({ p2pool: { p2PoolMode: mode, p2PoolPayoutAddress: VALID_ADDRESS, p2PoolMiningThreads: 4 } })
+        makeConfig({ p2pool: { p2PoolMode: mode, p2PoolPayoutAddress: VALID_ADDRESS, p2PoolMiningThreads: 4, isP2PoolStratumPublic: false } })
       );
       const monerod = services.monerod.code.monerod as ContainerSpec;
       const p2pool = services.p2pool.code[getP2PoolContainerName(mode)] as ContainerSpec;
@@ -209,7 +210,7 @@ describe("monerod <-> p2pool connection", () => {
   it("monerod uses --no-zmq when neither p2pool nor monitoring need ZMQ", () => {
     const services = generateAllServices(
       makeConfig({
-        p2pool: { p2PoolMode: "none", p2PoolPayoutAddress: "", p2PoolMiningThreads: 1 },
+        p2pool: { p2PoolMode: "none", p2PoolPayoutAddress: "", p2PoolMiningThreads: 1, isP2PoolStratumPublic: false },
         services: { ...makeConfig().services, isMonitoring: false },
       })
     );
@@ -223,7 +224,7 @@ describe("xmrig <-> p2pool connection", () => {
     "xmrig POOL_URL points at the right p2pool container and stratum port (%s)",
     (mode) => {
       const services = generateAllServices(
-        makeConfig({ p2pool: { p2PoolMode: mode, p2PoolPayoutAddress: VALID_ADDRESS, p2PoolMiningThreads: 4 } })
+        makeConfig({ p2pool: { p2PoolMode: mode, p2PoolPayoutAddress: VALID_ADDRESS, p2PoolMiningThreads: 4, isP2PoolStratumPublic: false } })
       );
       const containerName = getP2PoolContainerName(mode);
       const p2pool = services.p2pool.code[containerName] as ContainerSpec;

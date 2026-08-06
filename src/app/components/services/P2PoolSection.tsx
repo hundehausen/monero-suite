@@ -4,6 +4,7 @@ import { MiningMode, P2PoolMode } from "@/hooks/use-services";
 import {
   Alert,
   Box,
+  Checkbox,
   Input,
   SegmentedControl,
   Slider,
@@ -23,6 +24,8 @@ const P2PoolSection = () => {
     setP2PoolPayoutAddress,
     p2PoolMiningThreads,
     setP2PoolMiningThreads,
+    isP2PoolStratumPublic,
+    setIsP2PoolStratumPublic,
   } = useP2PoolState();
   const { miningMode, setMiningMode } = useXmrigState();
   const { architecture } = useArchitectureState();
@@ -108,6 +111,17 @@ const P2PoolSection = () => {
               onChange={(e) => setP2PoolPayoutAddress(e.currentTarget.value)}
             />
           </Input.Wrapper>
+          <Checkbox
+            mt="md"
+            checked={isP2PoolStratumPublic}
+            label={
+              <ExplainingLabel
+                label="Allow external miners (expose stratum publicly)"
+                explanation="Anyone who can reach port 3333 on this host can point miners at your stratum. Only enable this if you want to let external miners connect. In-container miners (XMRig) and other devices on your local network reach the stratum without it."
+              />
+            }
+            onChange={(event) => setIsP2PoolStratumPublic(event.currentTarget.checked)}
+          />
           <Text>CPU Mining</Text>
           <SegmentedControl
             value={miningMode}

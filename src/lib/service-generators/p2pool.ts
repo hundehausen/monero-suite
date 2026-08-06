@@ -13,12 +13,13 @@ import {
 import { P2POOL_IP, MONEROD_IP } from "@/lib/service-constants";
 import { safeParse, moneroAddressSchema } from "@/lib/schemas";
 import { DOCKER_IMAGES, P2POOL_PORTS, MONEROD_PORTS } from "@/lib/constants";
-import { getTorNetworkConfig } from "@/lib/docker-helpers";
+import { getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
 
 interface P2PoolDataConfig {
   p2PoolMode: P2PoolMode;
   p2PoolPayoutAddress: string;
   p2PoolMiningThreads: number;
+  isP2PoolStratumPublic: boolean;
 }
 
 export function getP2PoolContainerName(p2PoolMode: P2PoolMode): string {
@@ -34,7 +35,7 @@ export const createP2PoolService = (
   networkMode: NetworkMode = networkModes.local,
   zmqPubPort: number
 ): Service => {
-  const { p2PoolMode, p2PoolPayoutAddress, p2PoolMiningThreads } = state;
+  const { p2PoolMode, p2PoolPayoutAddress, p2PoolMiningThreads, isP2PoolStratumPublic } = state;
   const sPayoutAddress = safeParse(moneroAddressSchema, p2PoolPayoutAddress, "");
   const p2PoolContainerName = getP2PoolContainerName(p2PoolMode);
   const p2pPort =
@@ -56,7 +57,10 @@ export const createP2PoolService = (
     },
     ufw:
       networkMode === networkModes.exposed && p2PoolMode !== p2poolModes.none
-        ? [`${p2pPort}/tcp`, `${P2POOL_PORTS.stratum}/tcp`]
+        ? [
+            `${p2pPort}/tcp`,
+            ...(isP2PoolStratumPublic ? [`${P2POOL_PORTS.stratum}/tcp`] : []),
+          ]
         : undefined,
     code: {
       [p2PoolContainerName]: {
@@ -71,7 +75,9 @@ export const createP2PoolService = (
           "/dev/hugepages:/dev/hugepages:rw",
         ],
         ports: [
-          `${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}`,
+          isP2PoolStratumPublic
+            ? `${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}`
+            : getPortBinding(networkMode, P2POOL_PORTS.stratum),
           `${p2pPort}:${p2pPort}`,
         ],
         ...getTorNetworkConfig(torProxyMode, P2POOL_IP, [p2PoolContainerName]),
