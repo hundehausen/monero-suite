@@ -36,4 +36,4 @@ next-env.d.ts
 
 /testfiles
 
-.vscode
+.vscode.worktrees/
