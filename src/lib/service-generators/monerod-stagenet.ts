@@ -52,7 +52,6 @@ export const createMonerodStagenetService = (
         ],
         ports: [
           getPortBinding(state.isStagenetNodePublic ? networkModes.local : networkMode, 38080),
-          getPortBinding(state.isStagenetNodePublic ? networkModes.local : networkMode, 38081),
           getPortBinding(state.isStagenetNodePublic ? networkModes.local : networkMode, 38089),
         ],
         depends_on:

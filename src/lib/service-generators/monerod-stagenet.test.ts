@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createMonerodStagenetService } from "./monerod-stagenet";
-import { networkModes, torProxyModes, TorProxyMode } from "@/hooks/services/types";
+import { networkModes, torProxyModes, TorProxyMode, NetworkMode } from "@/hooks/services/types";
 
 const baseState = {
   isStagenetNode: true,
@@ -54,5 +54,40 @@ describe("createMonerodStagenetService", () => {
       torProxyModes.none
     );
     expect(service.code["monerod-stagenet"].depends_on).toBeUndefined();
+  });
+});
+
+describe("createMonerodStagenetService host port publishing", () => {
+  type Container = { command?: string[]; ports?: string[] };
+
+  const code = (stateOverrides: Partial<typeof baseState>, networkMode: NetworkMode): Container => {
+    const service = createMonerodStagenetService(
+      { ...baseState, ...stateOverrides },
+      false,
+      networkMode,
+      false,
+      "monerosuite",
+      torProxyModes.none
+    );
+    return service.code["monerod-stagenet"] as unknown as Container;
+  };
+
+  it("publishes only the P2P and restricted RPC ports — never the unrestricted RPC — in local mode", () => {
+    const monerodStagenet = code({}, networkModes.local);
+    expect(monerodStagenet.ports).toEqual(["38080:38080", "38089:38089"]);
+  });
+
+  it("localhost-prefixes port bindings in exposed mode", () => {
+    const monerodStagenet = code({}, networkModes.exposed);
+    expect(monerodStagenet.ports).toEqual([
+      "127.0.0.1:38080:38080",
+      "127.0.0.1:38089:38089",
+    ]);
+  });
+
+  it("still binds the unrestricted RPC inside the container so other services reach it", () => {
+    const monerodStagenet = code({}, networkModes.local);
+    expect(monerodStagenet.command).toContain("--rpc-bind-ip=0.0.0.0");
+    expect(monerodStagenet.command).toContain("--rpc-bind-port=38081");
   });
 });
