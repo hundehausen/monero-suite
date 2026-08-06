@@ -6,7 +6,7 @@ describe("createPortainerService", () => {
   it("points the Traefik load balancer at the Portainer HTTP UI port (9000), not the Edge agent tunnel (8000)", () => {
     const service = createPortainerService(
       true,
-      "portainer.example.com",
+      "portainer.mydomain.com",
       networkModes.local,
       true,
       "monerosuite"

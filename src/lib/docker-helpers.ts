@@ -3,8 +3,19 @@ import { safeParse, domainSchema } from "@/lib/schemas";
 import { DOCKER_NETWORK } from "@/lib/constants";
 
 /**
+ * Domains that must not receive Traefik labels / ACME attempts:
+ * empty, localhost, loopback, example.com and its subdomains.
+ * Port suffixes (host:port) are stripped before the check.
+ */
+export function isPlaceholderDomain(domain: string): boolean {
+  const host = domain.trim().toLowerCase().split(":")[0] ?? "";
+  if (!host || host === "localhost" || host === "127.0.0.1") return true;
+  return host === "example.com" || host.endsWith(".example.com");
+}
+
+/**
  * Generate Traefik router labels for a service.
- * Returns undefined when Traefik is disabled.
+ * Returns undefined when Traefik is disabled or domain is a placeholder.
  */
 export function getTraefikLabels(
   isTraefik: boolean,
@@ -13,7 +24,7 @@ export function getTraefikLabels(
   port: string,
   certResolverName: string
 ): Record<string, string> | undefined {
-  if (!isTraefik) return undefined;
+  if (!isTraefik || isPlaceholderDomain(domain)) return undefined;
   return {
     "traefik.enable": "true",
     [`traefik.http.routers.${serviceName}.rule`]: `Host(\`${domain}\`)`,
