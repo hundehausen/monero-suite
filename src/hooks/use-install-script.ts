@@ -56,6 +56,7 @@ export function useInstallScript({ config }: UseInstallScriptParams) {
     if (!currentConfigIsUploaded) return;
     if (lastUploadedConfig.current !== configHash) {
       setCurrentConfigIsUploaded(false);
+      setScriptUrl(undefined);
     }
   }, [configHash, currentConfigIsUploaded]);
 

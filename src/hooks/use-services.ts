@@ -61,6 +61,8 @@ export const useServices = () => {
     isTraefikPortainer,
   } = traefikService.stateFunctions;
   const { isMonitoring, setGrafanaDomain } = monitoringService.stateFunctions;
+  const { p2PoolMode } = p2PoolService.stateFunctions;
+  const { miningMode, setMiningMode } = xmrigService.stateFunctions;
   const { isPrunedNode, isSyncPrunedBlocks } = monerodService.stateFunctions;
 
   // Reset Grafana domain to localhost when Traefik is disabled for Grafana
@@ -70,6 +72,15 @@ export const useServices = () => {
       setGrafanaDomain("localhost:3000");
     }
   }, [isTraefik, isTraefikGrafana, setGrafanaDomain]);
+
+  // Mining requires P2Pool (xmrig pools into p2pool, p2pool mode mines via
+  // the p2pool service). Reset mining mode when P2Pool is turned off so a
+  // stale xmrig/p2pool mining selection isn't silently kept in the config.
+  useEffect(() => {
+    if (p2PoolMode === "none" && miningMode !== "none") {
+      setMiningMode("none");
+    }
+  }, [p2PoolMode, miningMode, setMiningMode]);
 
   // Should remove sync-pruned-blocks flag, if user switches from pruned node to full node
   useEffect(() => {

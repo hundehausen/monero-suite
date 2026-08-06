@@ -8,6 +8,7 @@ import {
   commandValueSchema,
   pathSchema,
   numericStringSchema,
+  signedNumericStringSchema,
   rpcLoginSchema,
   moneroAddressSchema,
 } from "@/lib/schemas";
@@ -154,10 +155,10 @@ export const createMonerodService = (
   const sMaxLogFileSize = safeParse(numericStringSchema, maxLogFileSize, "104850000");
   const sMaxLogFiles = safeParse(numericStringSchema, maxLogFiles, "50");
   const sP2pBindPort = safeParse(numericStringSchema, p2pBindPort, "18080");
-  const sOutPeers = safeParse(numericStringSchema, outPeers, "64");
-  const sInPeers = safeParse(numericStringSchema, inPeers, "32");
-  const sLimitRateUp = safeParse(numericStringSchema, limitRateUp, "1048576");
-  const sLimitRateDown = safeParse(numericStringSchema, limitRateDown, "2048");
+  const sOutPeers = safeParse(signedNumericStringSchema, outPeers, "64");
+  const sInPeers = safeParse(signedNumericStringSchema, inPeers, "32");
+  const sLimitRateUp = safeParse(signedNumericStringSchema, limitRateUp, "1048576");
+  const sLimitRateDown = safeParse(signedNumericStringSchema, limitRateDown, "2048");
   const sP2pExternalPort = safeParse(numericStringSchema, p2pExternalPort, "0");
   const sMaxConnectionsPerIp = safeParse(numericStringSchema, maxConnectionsPerIp, "1");
   const sZmqPubBindPort = safeParse(numericStringSchema, zmqPubBindPort, "18083");
@@ -238,10 +239,10 @@ export const createMonerodService = (
           ...(hidePort ? ["--hide-my-port"] : []),
           `--p2p-bind-port=${sP2pBindPort}`,
           ...(sP2pExternalPort !== "0" ? [`--p2p-external-port=${sP2pExternalPort}`] : []),
-          `--out-peers=${sOutPeers}`,
-          `--in-peers=${sInPeers}`,
+          ...(sOutPeers !== "-1" ? [`--out-peers=${sOutPeers}`] : []),
+          ...(sInPeers !== "-1" ? [`--in-peers=${sInPeers}`] : []),
           ...(sLimitRateUp !== "-1" ? [`--limit-rate-up=${sLimitRateUp}`] : []),
-          `--limit-rate-down=${sLimitRateDown}`,
+          ...(sLimitRateDown !== "-1" ? [`--limit-rate-down=${sLimitRateDown}`] : []),
           ...(allowLocalIp ? ["--allow-local-ip"] : []),
           ...(sMaxConnectionsPerIp !== "1" ? [`--max-connections-per-ip=${sMaxConnectionsPerIp}`] : []),
           ...(isPrunedNode ? ["--prune-blockchain"] : []),

@@ -26,11 +26,11 @@ export const domainSchema = z
 export const hostPortSchema = z
   .string()
   .trim()
-  .regex(/^[a-zA-Z0-9._-]+$/)
+  .regex(/^[a-zA-Z0-9._-]+(?::\d{1,5})?$/)
   .check(z.refine((val) => !val.includes(":") || validPort(val.split(":").pop()!), "Port out of range 0-65535"))
   .or(
     z.string()
-      .regex(/^[a-z2-7]{56}\.onion$/)
+      .regex(/^[a-z2-7]{56}\.onion(?::\d{1,5})?$/)
       .check(z.refine((val) => !val.includes(":") || validPort(val.split(":").pop()!), "Port out of range 0-65535"))
   )
   .or(z.literal(""));
