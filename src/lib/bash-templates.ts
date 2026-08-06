@@ -56,14 +56,14 @@ show_spinner() {
     else
         while kill -0 $pid 2>/dev/null; do
             i=$(( (i + 1) % spin_len ))
-            printf "\r\${MONERO_ORANGE}[\${SPINNER:$i:1}]\${NC} %s..." "$message"
+            printf "\\r\${MONERO_ORANGE}[\${SPINNER:$i:1}]\${NC} %s..." "$message"
             sleep 0.1
         done
         wait $pid
     fi
 
     local ret=$?
-    printf "\r\x1b[2K"
+    printf "\\r\\033[2K"
     if [ $ret -eq 0 ]; then
         printf "\${GREEN}[✓]\${NC} %s\n" "$message"
     elif [ "$nofail" = "nofail" ]; then
