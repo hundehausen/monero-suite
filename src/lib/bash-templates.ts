@@ -331,7 +331,18 @@ setup_monero_suite() {
 \${DOCKER_COMPOSE_CONTENT}
 MONERO_COMPOSE_EOF
     echo -e "\${GREEN}[✓]\${NC} Writing docker-compose.yml"
+
+    # Expand ~/ in bind-mount sources to the installing user's home
+    # (not root's home when compose later runs under $SUDO)
+    INSTALL_USER_HOME=$(getent passwd "\${SUDO_USER:-\$USER}" 2>/dev/null | cut -d: -f6)
+    INSTALL_USER_HOME=\${INSTALL_USER_HOME:-\$HOME}
+    if [ -n "\$INSTALL_USER_HOME" ] && [ -f ${installationPath}/docker-compose.yml ]; then
+        sed -i.bak -E "s|([:[:space:]])~/|\\1\${INSTALL_USER_HOME}/|g" ${installationPath}/docker-compose.yml
+        rm -f ${installationPath}/docker-compose.yml.bak
+        echo -e "\${GREEN}[✓]\${NC} Expanding ~/ paths in docker-compose.yml"
+    fi
 `;
+
 
 export const ENV_FILE_TEMPLATE = `
     # Write environment file

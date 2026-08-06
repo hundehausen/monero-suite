@@ -44,3 +44,16 @@ describe("generateInstallationScript docker compose", () => {
     expect(script).toContain("Monero Suite installation completed successfully!");
   });
 });
+
+describe("generateInstallationScript home path expansion", () => {
+  it("expands ~/ bind-mount sources using SUDO_USER home before starting services", () => {
+    const script = sampleScript();
+
+    expect(script).toContain("INSTALL_USER_HOME");
+    expect(script).toContain("SUDO_USER");
+    expect(script).toMatch(/getent passwd/);
+    // sed expands ~/ after a colon or whitespace
+    expect(script).toMatch(/sed /);
+    expect(script).toContain("docker-compose.yml");
+  });
+});
