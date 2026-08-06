@@ -7,3 +7,6 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+For monerod configs check docs first: https://github.com/monero-project/monero-docs/raw/refs/heads/master/docs/en/interacting/monerod-reference.md
+For monero-wallet-rpc configs check docs: https://github.com/monero-project/monero-docs/raw/refs/heads/master/docs/en/interacting/monero-wallet-rpc-reference.md
