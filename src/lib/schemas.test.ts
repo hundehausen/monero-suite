@@ -7,6 +7,8 @@ import {
   moneroAddressSchema,
   MONERO_ADDRESS_BASE58,
   MONERO_ADDRESS_REGEX,
+  MONERO_PRIMARY_ADDRESS_PREFIX,
+  isValidP2PoolPayoutAddress,
 } from "./schemas";
 import { fullConfigSchema, FullConfig } from "./config-schema";
 
@@ -95,6 +97,22 @@ describe("shared Monero address rule", () => {
       expect(parsed.error.issues[0].message).toContain("contains invalid characters");
       expect(parsed.error.issues[0].message).toContain("0, O, I and l");
     }
+  });
+
+  it("exposes the primary-address prefix constant used by the P2Pool gate", () => {
+    expect(MONERO_PRIMARY_ADDRESS_PREFIX).toBe("4");
+  });
+
+  it("isValidP2PoolPayoutAddress rejects an 8-prefixed 95-char subaddress but accepts a 4-prefixed primary", () => {
+    const subaddress = "8" + "A".repeat(94);
+    expect(MONERO_ADDRESS_REGEX.test(subaddress)).toBe(true);
+    expect(isValidP2PoolPayoutAddress(subaddress)).toBe(false);
+    expect(isValidP2PoolPayoutAddress("4" + "A".repeat(94))).toBe(true);
+  });
+
+  it("isValidP2PoolPayoutAddress rejects empty and invalid-character addresses", () => {
+    expect(isValidP2PoolPayoutAddress("")).toBe(false);
+    expect(isValidP2PoolPayoutAddress("4" + "O" + "A".repeat(93))).toBe(false);
   });
 });
 

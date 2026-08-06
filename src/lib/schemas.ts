@@ -4,6 +4,16 @@ export const MONERO_ADDRESS_BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghi
 
 export const MONERO_ADDRESS_REGEX = new RegExp(`^[48][${MONERO_ADDRESS_BASE58}]{94}$`);
 
+export const MONERO_PRIMARY_ADDRESS_PREFIX = "4";
+
+export function isValidP2PoolPayoutAddress(addr: string): boolean {
+  return (
+    !!addr &&
+    addr.startsWith(MONERO_PRIMARY_ADDRESS_PREFIX) &&
+    MONERO_ADDRESS_REGEX.test(addr)
+  );
+}
+
 export const MONERO_ADDRESS_INVALID_CHARACTERS_MESSAGE =
   "contains invalid characters — 0, O, I and l are not valid in Monero addresses";
 
