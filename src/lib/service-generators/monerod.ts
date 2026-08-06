@@ -18,15 +18,17 @@ import { getTraefikConfig, getPortBinding, getTorNetworkConfig } from "@/lib/doc
  * The port monerod actually binds ZMQ pub to — the single source of truth that
  * consumers (p2pool, monitoring) must connect to. Sanitizes raw input so both
  * producers and consumers resolve the same value for ANY input: non-numeric
- * or out-of-range values fall back to the default ZMQ port. Returns null when
- * monerod runs with --no-zmq (neither the stack nor a user-enabled ZMQ needs it).
+ * or out-of-range values fall back to the default ZMQ port. A user-set custom
+ * port is honored whenever ZMQ is effectively on — either the user enabled it
+ * or the stack (p2pool/monitoring) forces it. Returns null when monerod runs
+ * with --no-zmq (neither the stack nor a user-enabled ZMQ needs it).
  */
 export const getZmqPubPort = (
   zmqPubEnabled: boolean,
   zmqPubBindPort: string,
   needsZmq: boolean
 ): number | null => {
-  if (zmqPubEnabled) {
+  if (zmqPubEnabled || needsZmq) {
     const port = Number(
       safeParse(numericStringSchema, zmqPubBindPort, String(MONEROD_PORTS.zmqPub))
     );
@@ -34,7 +36,7 @@ export const getZmqPubPort = (
       ? port
       : MONEROD_PORTS.zmqPub;
   }
-  return needsZmq ? MONEROD_PORTS.zmqPub : null;
+  return null;
 };
 
 /**

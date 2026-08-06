@@ -161,8 +161,20 @@ describe("getZmqPubPort", () => {
     }
   });
 
-  it("binds the default port when the stack needs ZMQ but the user did not customize it", () => {
-    expect(getZmqPubPort(false, "18090", true)).toBe(MONEROD_PORTS.zmqPub);
+  it("returns the custom port when the stack forces ZMQ on (p2pool/monitoring)", () => {
+    expect(getZmqPubPort(false, "18090", true)).toBe(18090);
+  });
+
+  it("falls back to the default ZMQ port for malformed or out-of-range values when the stack forces ZMQ on", () => {
+    for (const bad of ["abc", "", "0", "65536", "-5"]) {
+      expect(getZmqPubPort(false, bad, true), `input ${JSON.stringify(bad)}`).toBe(
+        MONEROD_PORTS.zmqPub
+      );
+    }
+  });
+
+  it("binds the default port when the stack needs ZMQ and the user did not customize it", () => {
+    expect(getZmqPubPort(false, "18083", true)).toBe(MONEROD_PORTS.zmqPub);
   });
 
   it("returns null when nothing needs ZMQ (monerod runs --no-zmq)", () => {
@@ -236,8 +248,8 @@ describe("getMonerodP2pPortCollisions", () => {
     expect(getMonerodP2pPortCollisions("18090", false, "18090", "none", false)).toEqual([]);
   });
 
-  it("ignores the user's ZMQ choice when the stack needs ZMQ but the toggle is off (default 18083 applies)", () => {
-    expect(getMonerodP2pPortCollisions("18090", false, "18090", "full", false)).toEqual([]);
+  it("honors the user's custom ZMQ port when the stack needs ZMQ but the toggle is off", () => {
+    expect(getMonerodP2pPortCollisions("18090", false, "18090", "full", false)).toEqual([18090]);
   });
 
   it("returns no collision for a malformed p2p port (falls back to the default 18080)", () => {
