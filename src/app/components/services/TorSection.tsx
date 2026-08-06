@@ -134,7 +134,7 @@ const TorSection = () => {
                   }
                   onChange={(event) => setHsMonerodP2P(event.currentTarget.checked)}
                 />
-                {hsMonerodP2P && anonymousInbound.length === 0 && (
+                {hsMonerodP2P && anonymousInbound.trim().length === 0 && (
                   <Alert variant="light" color="yellow" title="P2P Hidden Service Accepts No Connections Yet">
                     monerod will not listen on port 18084 until an Anonymous Inbound value is set. After your first deployment,
                     run <Code>docker logs tor</Code> to find the generated .onion address, then paste it into{" "}
@@ -142,7 +142,7 @@ const TorSection = () => {
                     <Code>&lt;onion&gt;:18084,127.0.0.1:18084</Code>, and redeploy with <Code>docker compose up -d</Code>.
                   </Alert>
                 )}
-                {!hsMonerodP2P && anonymousInbound.length > 0 && (
+                {!hsMonerodP2P && anonymousInbound.trim().length > 0 && (
                   <Alert variant="light" color="blue" title="Anonymous Inbound Has No Hidden Service">
                     This Anonymous Inbound value has no effect: the Monerod (P2P Anonymous Inbound) hidden service is
                     disabled, so nothing listens on or forwards to port 18084. Enable the hidden service above and complete

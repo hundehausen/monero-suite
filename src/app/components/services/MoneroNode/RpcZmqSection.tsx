@@ -1,8 +1,13 @@
 "use client";
 
+import { useMemo } from "react";
 import { NumberInput, SimpleGrid, Switch, TextInput, Title } from "@mantine/core";
 import { useMonerodState, useServicesContext } from "@/hooks/services-context";
 import { p2poolModes } from "@/hooks/services";
+import {
+  getMonerodCollisionRoleLabel,
+  getMonerodZmqPortCollisions,
+} from "@/lib/service-generators/monerod";
 import ExplainingLabel from "../../ExplainingLabel";
 import AccordionItemComponent from "../AccordionItemComponent";
 
@@ -24,6 +29,25 @@ const RpcZmqSection = () => {
   // while either is enabled. Display is derived; zmqPubEnabled stays user-set.
   const needsZmq = s.p2PoolMode !== p2poolModes.none || s.isMonitoring;
   const zmqEffectivelyOn = zmqPubEnabled || needsZmq;
+
+  const zmqPortCollisions = useMemo(
+    () =>
+      getMonerodZmqPortCollisions(
+        zmqPubEnabled,
+        zmqPubBindPort,
+        s.p2PoolMode,
+        s.isMonitoring,
+        s.p2pBindPort
+      ),
+    [zmqPubEnabled, zmqPubBindPort, s.p2PoolMode, s.isMonitoring, s.p2pBindPort]
+  );
+
+  const zmqPortCollisionError =
+    zmqPortCollisions.length > 0
+      ? `This ZMQ publisher port is used by monerod's ${zmqPortCollisions
+          .map((port) => getMonerodCollisionRoleLabel("zmq", port))
+          .join(" and ")} port inside the container. Choose a different port.`
+      : undefined;
 
   return (
     <AccordionItemComponent
@@ -79,6 +103,7 @@ const RpcZmqSection = () => {
             onChange={(value) => setZmqPubBindPort(String(value))}
             min={1025}
             max={65535}
+            error={zmqPortCollisionError}
           />
         )}
       </SimpleGrid>

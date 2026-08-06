@@ -176,7 +176,7 @@ describe("useInstallScript", () => {
     );
     expect(notifications.show).toHaveBeenCalledWith(
       expect.objectContaining({
-        message: expect.stringContaining("contains invalid characters"),
+        message: expect.stringContaining("must be a primary Monero address"),
       })
     );
     expect(result.current.installationCommand).toBeUndefined();

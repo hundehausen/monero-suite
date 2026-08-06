@@ -4,13 +4,18 @@ import {
   hostPortSchema,
   commandValueSchema,
   moneroAddressSchema,
+  p2PoolPayoutAddressSchema,
   pathSchema,
   portSchema,
   numericStringSchema,
   signedNumericStringSchema,
   rpcLoginSchema,
 } from "@/lib/schemas";
-import { getMonerodP2pPortCollisions } from "@/lib/service-generators/monerod";
+import {
+  getMonerodP2pPortCollisions,
+  getMonerodZmqPortCollisions,
+  getMonerodCollisionRoleLabel,
+} from "@/lib/service-generators/monerod";
 
 const architectureSchema = z.enum(["linux/amd64", "linux/arm64"]);
 const networkModeSchema = z.enum(["exposed", "local"]);
@@ -82,7 +87,7 @@ const stagenetConfigSchema = z.object({
 
 const p2poolConfigSchema = z.object({
   p2PoolMode: p2PoolModeSchema,
-  p2PoolPayoutAddress: moneroAddressSchema,
+  p2PoolPayoutAddress: p2PoolPayoutAddressSchema,
   p2PoolMiningThreads: z.number().int().min(1).max(256),
   isP2PoolStratumPublic: z.boolean(),
 });
@@ -136,20 +141,41 @@ export const fullConfigSchema = z
     // The P2P bind port must not collide with the ports monerod binds inside
     // the container (RPC + active ZMQ). Kept in lockstep with the client-side
     // gating via getMonerodP2pPortCollisions.
-    const collisions = getMonerodP2pPortCollisions(
+    const p2pCollisions = getMonerodP2pPortCollisions(
       config.monerod.p2pBindPort,
       config.monerod.zmqPubEnabled,
       config.monerod.zmqPubBindPort,
       config.p2pool.p2PoolMode,
       config.services.isMonitoring
     );
-    if (collisions.length > 0) {
+    if (p2pCollisions.length > 0) {
+      const roles = p2pCollisions
+        .map((port) => getMonerodCollisionRoleLabel("p2p", port))
+        .join(" and ");
       ctx.addIssue({
         code: "custom",
         path: ["monerod", "p2pBindPort"],
-        message: `P2P bind port ${config.monerod.p2pBindPort} collides with a port monerod binds inside the container (${collisions.join(
-          ", "
-        )}). Choose a different port.`,
+        message: `P2P bind port ${config.monerod.p2pBindPort} collides with monerod's ${roles} port inside the container — monerod would fail to start. Choose a different port.`,
+      });
+    }
+
+    // The active ZMQ pub port must likewise not collide with the RPC ports or
+    // the P2P bind port monerod binds inside the container.
+    const zmqCollisions = getMonerodZmqPortCollisions(
+      config.monerod.zmqPubEnabled,
+      config.monerod.zmqPubBindPort,
+      config.p2pool.p2PoolMode,
+      config.services.isMonitoring,
+      config.monerod.p2pBindPort
+    );
+    if (zmqCollisions.length > 0) {
+      const roles = zmqCollisions
+        .map((port) => getMonerodCollisionRoleLabel("zmq", port))
+        .join(" and ");
+      ctx.addIssue({
+        code: "custom",
+        path: ["monerod", "zmqPubBindPort"],
+        message: `ZMQ publisher port ${config.monerod.zmqPubBindPort} collides with monerod's ${roles} port inside the container — monerod would fail to start. Choose a different port.`,
       });
     }
   });

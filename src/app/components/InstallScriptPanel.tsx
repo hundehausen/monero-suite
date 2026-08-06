@@ -22,7 +22,7 @@ interface InstallScriptPanelProps {
   scriptSummary: string[];
   hasDefaultDomain: boolean;
   hasP2PoolInvalidAddress: boolean;
-  hasP2PPortCollision: boolean;
+  hasMonerodPortCollision: boolean;
   installationCommand: string | undefined;
   currentConfigIsUploaded: boolean;
   isUploading: boolean;
@@ -34,7 +34,7 @@ export default function InstallScriptPanel({
   scriptSummary,
   hasDefaultDomain,
   hasP2PoolInvalidAddress,
-  hasP2PPortCollision,
+  hasMonerodPortCollision,
   installationCommand,
   currentConfigIsUploaded,
   isUploading,
@@ -54,8 +54,8 @@ export default function InstallScriptPanel({
     ? "Replace all example.com domains in the Traefik section first"
     : hasP2PoolInvalidAddress
       ? "Enter a valid Monero payout address in the P2Pool section first"
-      : hasP2PPortCollision
-        ? "Change the P2P bind port in the Monero Node section — it collides with a port monerod binds inside the container"
+      : hasMonerodPortCollision
+        ? "Change the P2P or ZMQ publisher bind port in the Monero Node section — it collides with a port monerod binds inside the container"
         : "";
 
   const isBlocked = blockReason !== "";
@@ -111,10 +111,10 @@ export default function InstallScriptPanel({
         </Text>
       )}
 
-      {hasP2PPortCollision && (
+      {hasMonerodPortCollision && (
         <Text c="red" size="sm">
-          The P2P bind port collides with a port monerod binds inside the
-          container (RPC or the active ZMQ publisher port). Change it in the
+          The P2P or ZMQ publisher bind port collides with a port monerod binds
+          inside the container (RPC, ZMQ publisher, or P2P). Change it in the
           Monero Node section.
         </Text>
       )}

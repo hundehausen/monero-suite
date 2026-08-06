@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   createMonerodService,
   getMonerodP2pPortCollisions,
+  getMonerodZmqPortCollisions,
   getZmqPubPort,
 } from "@/lib/service-generators/monerod";
 import { MONEROD_PORTS } from "@/lib/constants";
@@ -274,5 +275,36 @@ describe("getMonerodP2pPortCollisions", () => {
   it("returns no collision for a malformed p2p port (falls back to the default 18080)", () => {
     expect(getMonerodP2pPortCollisions("abc", false, "18083", "none", false)).toEqual([]);
     expect(getMonerodP2pPortCollisions("", false, "18083", "none", false)).toEqual([]);
+  });
+});
+
+describe("getMonerodZmqPortCollisions", () => {
+  it("returns no collision when ZMQ is not active (nothing forces or enables it)", () => {
+    expect(getMonerodZmqPortCollisions(false, "18083", "none", false, "18080")).toEqual([]);
+    expect(getMonerodZmqPortCollisions(false, "18090", "none", false, "18080")).toEqual([]);
+  });
+
+  it("flags the unrestricted and restricted RPC ports monerod binds inside the container", () => {
+    expect(getMonerodZmqPortCollisions(true, "18081", "none", false, "18080")).toEqual([18081]);
+    expect(getMonerodZmqPortCollisions(true, "18089", "none", false, "18080")).toEqual([18089]);
+  });
+
+  it("flags the effective P2P port when ZMQ is enabled on the same port", () => {
+    expect(getMonerodZmqPortCollisions(true, "18085", "none", false, "18085")).toEqual([18085]);
+  });
+
+  it("honors a custom collision port even when ZMQ is forced on by the stack (regression)", () => {
+    expect(getMonerodZmqPortCollisions(false, "18089", "full", false, "18080")).toEqual([18089]);
+    expect(getMonerodZmqPortCollisions(false, "18081", "mini", false, "18080")).toEqual([18081]);
+    expect(getMonerodZmqPortCollisions(false, "18081", "none", true, "18080")).toEqual([18081]);
+  });
+
+  it("falls back to the default ZMQ port on malformed input and flags a collision against it", () => {
+    expect(getMonerodZmqPortCollisions(true, "abc", "none", false, "18080")).toEqual([]);
+    expect(getMonerodZmqPortCollisions(true, "", "none", false, "18083")).toEqual([18083]);
+  });
+
+  it("falls back the effective P2P port to 18080 on malformed P2P input", () => {
+    expect(getMonerodZmqPortCollisions(true, "18080", "none", false, "abc")).toEqual([18080]);
   });
 });

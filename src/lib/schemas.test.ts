@@ -5,6 +5,7 @@ import {
   numericStringSchema,
   signedNumericStringSchema,
   moneroAddressSchema,
+  p2PoolPayoutAddressSchema,
   MONERO_ADDRESS_BASE58,
   MONERO_ADDRESS_REGEX,
   MONERO_PRIMARY_ADDRESS_PREFIX,
@@ -113,6 +114,35 @@ describe("shared Monero address rule", () => {
   it("isValidP2PoolPayoutAddress rejects empty and invalid-character addresses", () => {
     expect(isValidP2PoolPayoutAddress("")).toBe(false);
     expect(isValidP2PoolPayoutAddress("4" + "O" + "A".repeat(93))).toBe(false);
+  });
+});
+
+describe("p2PoolPayoutAddressSchema", () => {
+  it("accepts a valid 95-character primary address", () => {
+    expect(p2PoolPayoutAddressSchema.safeParse("4" + "A".repeat(94)).success).toBe(true);
+  });
+
+  it("rejects an 8-prefixed subaddress with a P2Pool-specific message", () => {
+    const parsed = p2PoolPayoutAddressSchema.safeParse("8" + "A".repeat(94));
+    expect(parsed.success).toBe(false);
+    if (!parsed.success) {
+      expect(parsed.error.issues[0].message).toContain("primary Monero address");
+      expect(parsed.error.issues[0].message).toContain("subaddresses");
+    }
+  });
+
+  it("rejects an invalid-character primary address", () => {
+    expect(p2PoolPayoutAddressSchema.safeParse("4" + "O" + "A".repeat(93)).success).toBe(false);
+  });
+
+  it("accepts an empty string (payout optional when p2pool is off)", () => {
+    expect(p2PoolPayoutAddressSchema.safeParse("").success).toBe(true);
+  });
+
+  it("accepts a whitespace-padded valid primary address (trim before refining)", () => {
+    expect(p2PoolPayoutAddressSchema.safeParse("  " + "4" + "A".repeat(94) + "  ").success).toBe(
+      true
+    );
   });
 });
 
@@ -299,5 +329,81 @@ describe("monerod P2P bind port collision validation", () => {
     expect(parseP2pBindPort(config).success).toBe(true);
     config.monerod.p2pBindPort = "18090";
     expect(parseP2pBindPort(config).success).toBe(false);
+  });
+});
+
+describe("monerod ZMQ publisher port collision validation", () => {
+  it("rejects a ZMQ port colliding with the RPC ports monerod binds inside the container", () => {
+    for (const port of ["18081", "18089"]) {
+      const config = baseConfig();
+      config.monerod.zmqPubEnabled = true;
+      config.monerod.zmqPubBindPort = port;
+      const { success, issuePath } = parseP2pBindPort(config);
+      expect(success, `zmqPubBindPort ${port}`).toBe(false);
+      expect(issuePath).toEqual(["monerod", "zmqPubBindPort"]);
+    }
+  });
+
+  it("rejects a custom ZMQ port colliding with the effective P2P port", () => {
+    const config = baseConfig();
+    config.monerod.zmqPubEnabled = true;
+    config.monerod.zmqPubBindPort = "18085";
+    config.monerod.p2pBindPort = "18085";
+    const result = fullConfigSchema.safeParse(config);
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    const zmqIssue = result.error.issues.find(
+      (issue) => issue.path.join(".") === "monerod.zmqPubBindPort"
+    );
+    expect(zmqIssue).toBeDefined();
+  });
+
+  it("rejects a custom ZMQ port colliding even when the stack forces ZMQ on (regression)", () => {
+    const config = baseConfig();
+    config.p2pool.p2PoolMode = "full";
+    config.monerod.zmqPubBindPort = "18089";
+    const { success, issuePath } = parseP2pBindPort(config);
+    expect(success).toBe(false);
+    expect(issuePath).toEqual(["monerod", "zmqPubBindPort"]);
+  });
+
+  it("accepts a ZMQ port that collides with nothing monerod binds inside the container", () => {
+    const config = baseConfig();
+    config.monerod.zmqPubEnabled = true;
+    config.monerod.zmqPubBindPort = "18090";
+    expect(parseP2pBindPort(config).success).toBe(true);
+  });
+
+  it("accepts a ZMQ port that would collide while ZMQ is effectively off", () => {
+    const config = baseConfig();
+    config.monerod.zmqPubEnabled = false;
+    config.monerod.zmqPubBindPort = "18089";
+    expect(parseP2pBindPort(config).success).toBe(true);
+  });
+});
+
+describe("p2pool payout address server-side validation", () => {
+  it("rejects an 8-prefixed subaddress payout address", () => {
+    const config = baseConfig();
+    config.p2pool.p2PoolMode = "mini";
+    config.p2pool.p2PoolPayoutAddress = "8" + "A".repeat(94);
+    const result = fullConfigSchema.safeParse(config);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].path).toEqual(["p2pool", "p2PoolPayoutAddress"]);
+    }
+  });
+
+  it("accepts a valid primary payout address", () => {
+    const config = baseConfig();
+    config.p2pool.p2PoolMode = "mini";
+    config.p2pool.p2PoolPayoutAddress = "4" + "A".repeat(94);
+    expect(fullConfigSchema.safeParse(config).success).toBe(true);
+  });
+
+  it("accepts an empty payout address when p2pool is active but the mode is none", () => {
+    const config = baseConfig();
+    config.p2pool.p2PoolPayoutAddress = "";
+    expect(fullConfigSchema.safeParse(config).success).toBe(true);
   });
 });

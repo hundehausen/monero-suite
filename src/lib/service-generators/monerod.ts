@@ -68,6 +68,56 @@ export const getMonerodP2pPortCollisions = (
   return [...new Set(occupied.filter((port) => port === effectiveP2pPort))];
 };
 
+/**
+ * Ports that the active ZMQ pub port must not collide with: the unrestricted
+ * RPC port, the restricted RPC port, and the effective P2P bind port (which
+ * shares getMonerodP2pPortCollisions's fallback-to-default semantics).
+ * Mirrors getZmqPubPort for the active-port resolution: a custom port is
+ * honored whenever ZMQ is effectively on (user-enabled or forced by the
+ * stack). Returns the occupied ports equal to the active ZMQ port — empty
+ * when ZMQ is inactive (monerod runs --no-zmq) or there is no collision.
+ */
+export const getMonerodZmqPortCollisions = (
+  zmqPubEnabled: boolean,
+  zmqPubBindPort: string,
+  p2PoolMode: P2PoolMode,
+  isMonitoring: boolean,
+  p2pBindPort: string
+): number[] => {
+  const zmqPubPort = getZmqPubPort(
+    zmqPubEnabled,
+    zmqPubBindPort,
+    p2PoolMode !== p2poolModes.none || isMonitoring
+  );
+  if (zmqPubPort === null) return [];
+  const effectiveP2pPort = Number(
+    safeParse(numericStringSchema, p2pBindPort, String(MONEROD_PORTS.p2p))
+  );
+  const occupied: number[] = [
+    MONEROD_PORTS.rpcUnrestricted,
+    MONEROD_PORTS.rpcRestricted,
+    effectiveP2pPort,
+  ];
+  return [...new Set(occupied.filter((port) => port === zmqPubPort))];
+};
+
+/**
+ * Role of a port monerod binds inside the container, resolved from the
+ * direction of a collision helper. Shared by the P2P and ZMQ input errors so
+ * each message names the ACTUAL occupied role: the two RPC ports by number,
+ * the promoted other side by the input being validated (a port colliding in
+ * the P2P direction is the ZMQ publisher, in the ZMQ direction it is the P2P
+ * bind port). Returns a role label without a trailing "port".
+ */
+export const getMonerodCollisionRoleLabel = (
+  colliding: "p2p" | "zmq",
+  port: number
+): string => {
+  if (port === MONEROD_PORTS.rpcUnrestricted) return "unrestricted RPC";
+  if (port === MONEROD_PORTS.rpcRestricted) return "restricted RPC";
+  return colliding === "zmq" ? "P2P" : "ZMQ publisher";
+};
+
 interface MonerodDataConfig {
   isMoneroPublicNode: boolean;
   moneroNodeNoLogs: boolean;

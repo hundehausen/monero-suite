@@ -3,16 +3,9 @@
 import { useMemo } from "react";
 import { NumberInput, SimpleGrid, Switch, Title } from "@mantine/core";
 import { useMonerodState, useServicesContext } from "@/hooks/services-context";
-import { getMonerodP2pPortCollisions } from "@/lib/service-generators/monerod";
-import { MONEROD_PORTS } from "@/lib/constants";
+import { getMonerodP2pPortCollisions, getMonerodCollisionRoleLabel } from "@/lib/service-generators/monerod";
 import ExplainingLabel from "../../ExplainingLabel";
 import AccordionItemComponent from "../AccordionItemComponent";
-
-const describeCollidingPort = (port: number): string => {
-  if (port === MONEROD_PORTS.rpcUnrestricted) return "unrestricted RPC";
-  if (port === MONEROD_PORTS.rpcRestricted) return "restricted RPC";
-  return "ZMQ publisher";
-};
 
 const P2PNetworkSection = () => {
   const {
@@ -59,7 +52,7 @@ const P2PNetworkSection = () => {
   const p2pPortCollisionError =
     p2pPortCollisions.length > 0
       ? `This port is used by monerod's ${p2pPortCollisions
-          .map(describeCollidingPort)
+          .map((port) => getMonerodCollisionRoleLabel("p2p", port))
           .join(" and ")} port inside the container. Choose a different port.`
       : undefined;
 

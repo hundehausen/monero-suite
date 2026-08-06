@@ -66,6 +66,15 @@ export const moneroAddressSchema = z
   .regex(MONERO_ADDRESS_REGEX, MONERO_ADDRESS_INVALID_CHARACTERS_MESSAGE)
   .or(z.literal(""));
 
+export const p2PoolPayoutAddressSchema = z
+  .string()
+  .trim()
+  .refine(
+    (val) => val === "" || isValidP2PoolPayoutAddress(val),
+    `must be a primary Monero address starting with ${MONERO_PRIMARY_ADDRESS_PREFIX} — subaddresses are not supported by P2Pool`
+  )
+  .or(z.literal(""));
+
 export const pathSchema = z
   .string()
   .trim()
