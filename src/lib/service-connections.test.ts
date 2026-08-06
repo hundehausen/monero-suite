@@ -185,7 +185,7 @@ describe("monerod <-> p2pool connection", () => {
     expect(monerod.ports).not.toContain(`127.0.0.1:${MONEROD_PORTS.zmqPub}:${MONEROD_PORTS.zmqPub}`);
   });
 
-  it("propagates a custom ZMQ pub port from monerod to p2pool and monitoring, and never publishes it on the host", () => {
+  it("propagates a custom ZMQ pub port from monerod to p2pool, and never publishes it on the host", () => {
     const customPort = "18090";
     const services = generateAllServices(
       makeConfig({ monerod: { ...baseMonerod, zmqPubEnabled: true, zmqPubBindPort: customPort } })
@@ -195,9 +195,14 @@ describe("monerod <-> p2pool connection", () => {
 
     // monerod binds ZMQ on the custom port...
     expect(cmd(monerod)).toContain(`--zmq-pub=tcp://0.0.0.0:${customPort}`);
-    // ...p2pool and monitoring point at exactly that port...
+    // ...p2pool points at exactly that port...
     expect(flagValue(cmd(p2pool), "--zmq-port")).toBe(customPort);
-    expect(services.monitoring.env?.ZMQ_PORT).toBe(Number(customPort));
+    // monitoring env keeps only GF_* keys — no unused monerod port vars
+    expect(services.monitoring.env).not.toHaveProperty("ZMQ_PORT");
+    expect(services.monitoring.env).not.toHaveProperty("P2P_PORT");
+    expect(services.monitoring.env).not.toHaveProperty("RESTRICTED_PORT");
+    expect(services.monitoring.env).not.toHaveProperty("UNRESTRICTED_PORT");
+    expect(services.monitoring.env?.GF_SECURITY_ADMIN_USER).toBe("admin");
     // ...and no host port is published for it
     for (const p of monerod.ports ?? []) {
       expect(String(p)).not.toContain(customPort);

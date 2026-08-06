@@ -9,8 +9,7 @@ export const createMonitoringService = (
   networkMode: NetworkMode,
   isTraefik: boolean,
   certResolverName: string = "monerosuite",
-  torProxyMode: TorProxyMode = torProxyModes.none,
-  zmqPubPort: number
+  torProxyMode: TorProxyMode = torProxyModes.none
 ): Service => {
   const { domain, labels } = getTraefikConfig(isTraefik, "monitoring", grafanaDomain, SERVICE_PORTS.grafana.toString(), certResolverName, `localhost:${SERVICE_PORTS.grafana}`);
   const torClientNet = getTorClientNetworkConfig(torProxyMode);
@@ -27,10 +26,6 @@ export const createMonitoringService = (
       prometheus: {},
     },
     env: {
-      P2P_PORT: MONEROD_PORTS.p2p,
-      RESTRICTED_PORT: MONEROD_PORTS.rpcRestricted,
-      ZMQ_PORT: zmqPubPort,
-      UNRESTRICTED_PORT: MONEROD_PORTS.rpcUnrestricted,
       GF_USERS_ALLOW_SIGN_UP: false,
       GF_USERS_ALLOW_ORG_CREATE: false,
       GF_AUTH_ANONYMOUS_ENABLED: true,

@@ -23,7 +23,7 @@ export function generateAllServices(config: FullConfig): ServiceMap {
   const isTraefik = services.isTraefik;
 
   // The port monerod actually binds ZMQ on — consumers must follow it. Never
-  // published on the host: p2pool and monitoring reach it over the Docker net.
+  // published on the host: p2pool reaches it over the Docker net.
   const zmqPubPort =
     getZmqPubPort(
       config.monerod.zmqPubEnabled,
@@ -38,7 +38,7 @@ export function generateAllServices(config: FullConfig): ServiceMap {
     "monero-wallet-rpc": createMoneroWalletRpcService(services.isMoneroWalletRpc, networkMode, tor.torProxyMode),
     tor: createTorService(tor, networkMode, config.stagenet.isStagenetNode, p2pool.p2PoolMode, services.isMonitoring),
     watchtower: createWatchtowerService(services.isWatchtower),
-    monitoring: createMonitoringService(services.isMonitoring, services.grafanaDomain, networkMode, isTraefik && services.isTraefikGrafana, CERT_RESOLVER_NAME, tor.torProxyMode, zmqPubPort),
+    monitoring: createMonitoringService(services.isMonitoring, services.grafanaDomain, networkMode, isTraefik && services.isTraefikGrafana, CERT_RESOLVER_NAME, tor.torProxyMode),
     xmrig: createXmrigService(mining.miningMode, mining.xmrigDonateLevel, tor.torProxyMode, p2pool.p2PoolMode),
     traefik: createTraefikService(isTraefik, tor.torProxyMode),
     portainer: createPortainerService(services.isPortainer, services.portainerDomain, networkMode, isTraefik && services.isTraefikPortainer, CERT_RESOLVER_NAME),

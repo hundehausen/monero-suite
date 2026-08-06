@@ -50,9 +50,9 @@ vi.mock("./services", async () => {
 
   const useMonitoringService = () => {
     return {
-      getMonitoringService: (_networkMode: string, _isTraefik: boolean, zmqPubPort: number) => ({
+      getMonitoringService: (_networkMode: string, _isTraefik: boolean) => ({
         ...stub(false),
-        env: { ZMQ_PORT: zmqPubPort },
+        env: { GF_SECURITY_ADMIN_USER: "admin" },
       }),
       stateFunctions: { isMonitoring: false, setIsMonitoring: () => {}, grafanaDomain: "localhost:3000", setGrafanaDomain: () => {} },
     };
@@ -135,7 +135,7 @@ describe("useServices miningMode reset (fix 6)", () => {
 });
 
 describe("useServices ZMQ port propagation", () => {
-  it("forwards a custom ZMQ pub port to p2pool and monitoring", () => {
+  it("forwards a custom ZMQ pub port to p2pool", () => {
     const { result } = renderHook(() => useServices());
     act(() => {
       result.current.stateFunctions.setZmqPubEnabled(true);
@@ -144,7 +144,6 @@ describe("useServices ZMQ port propagation", () => {
 
     const p2pool = result.current.services.p2pool.code.p2pool as { command?: string[] };
     expect(p2pool.command?.[1]).toBe("18090");
-    expect(result.current.services.monitoring.env?.ZMQ_PORT).toBe(18090);
   });
 
   it("falls back to the default ZMQ port for malformed values instead of NaN", () => {
@@ -156,6 +155,5 @@ describe("useServices ZMQ port propagation", () => {
 
     const p2pool = result.current.services.p2pool.code.p2pool as { command?: string[] };
     expect(p2pool.command?.[1]).toBe(String(MONEROD_PORTS.zmqPub));
-    expect(result.current.services.monitoring.env?.ZMQ_PORT).toBe(MONEROD_PORTS.zmqPub);
   });
 });

@@ -137,7 +137,6 @@ export const useServices = () => {
     monitoring: monitoringService.getMonitoringService(
       networkMode,
       isTraefik && isTraefikGrafana,
-      zmqPubPort,
       CERT_RESOLVER_NAME,
       torService.stateFunctions.torProxyMode
     ),
