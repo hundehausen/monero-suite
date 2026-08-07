@@ -1,0 +1,28 @@
+# Minimal Debian image with systemd as PID 1 for install.sh e2e runs.
+# Docker is intentionally NOT preinstalled — install.sh must exercise get.docker.com.
+FROM debian:trixie
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    container=docker
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        systemd \
+        systemd-sysv \
+        ca-certificates \
+        curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && systemctl mask \
+        systemd-udevd.service \
+        systemd-udevd-kernel.socket \
+        systemd-udevd-control.socket \
+        dev-hugepages.mount \
+        sys-fs-fuse-connections.mount \
+        systemd-remount-fs.service \
+        getty@.service \
+        console-getty.service
+
+# Signal systemd that it is running under a container (quieter boot).
+STOPSIGNAL SIGRTMIN+3
+
+CMD ["/sbin/init"]

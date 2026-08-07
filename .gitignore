@@ -36,4 +36,10 @@ next-env.d.ts
 
 /testfiles
 
+# e2e run outputs (keep directory via .gitkeep)
+/e2e/artifacts/*
+!/e2e/artifacts/.gitkeep
+/e2e/test-results/
+/e2e/playwright-report/
+
 .vscode.worktrees/
