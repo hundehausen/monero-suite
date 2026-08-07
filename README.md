@@ -88,9 +88,7 @@ Monero Suite is designed with the assumption that you should never blindly trust
 
 All user-generated content is validated server-side before upload:
 
-- **Input size limits** — Docker Compose YAML (64 KB), env content (8 KB), firewall ports (512 bytes)
-- **Server-side bash generation** — Bash setup commands (package installs, config file downloads) are never accepted from the client. The frontend sends only boolean flags indicating which services are enabled, and all bash content is generated server-side from hardcoded constants. This eliminates command injection as an attack vector.
-- **Heredoc injection prevention** — Inputs containing heredoc delimiters are rejected, preventing shell escape attacks in the generated script.
+- **Server-side bash generation** — Bash setup commands (package installs, config file downloads) are never accepted from the client, and all bash content is generated server-side from hardcoded constants. This eliminates command injection as an attack vector.
 - **Firewall port validation** — Strict regex enforcement (`port/protocol` format only)
 - **Fetch safety** — Script retrieval enforces a 10-second timeout and 1 MB size limit with proper abort handling.
 
@@ -122,17 +120,6 @@ The generated bash script includes several runtime protections:
 
 This project is not affiliated with, endorsed by, or sponsored by the Monero Project.
 
-## Roadmap
-
-- Merchant software ([MoneroPay](https://github.com/moneropay/moneropay), [HotShop](https://github.com/CryptoGrampy/HotShop))
-- [Monero Light Wallet Server](https://github.com/vtnerd/monero-lws)
-- [Onion Monero Blockchain Explorer](https://github.com/moneroexamples/onion-monero-blockchain-explorer) (JavaScript-free block explorer)
-- [nerostr](https://github.com/pluja/nerostr) (Monero-paid Nostr relay)
-
 ## Contributing
 
 Contributions are welcome. Open an issue or submit a pull request.
-
-## License
-
-[MIT](LICENSE)
