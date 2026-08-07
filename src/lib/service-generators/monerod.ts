@@ -308,15 +308,9 @@ export const createMonerodService = (
               },
             }
             : undefined,
-        healthcheck: {
-          // Accept 401 so a user-configured --rpc-login (digest auth) doesn't
-          // mark the container unhealthy and block depends_on: service_healthy.
-          test: `curl -s -o /dev/null -w "%{http_code}" http://localhost:18081/get_height | grep -Eq "^(200|401)$" || exit 1`,
-          interval: "60s",
-          timeout: "5s",
-          retries: 10,
-          start_period: "40s",
-        },
+        // No healthcheck override: rely on the image's built-in HEALTHCHECK
+        // (/healthcheck.sh), which reads --rpc-bind-port and --rpc-login from
+        // the daemon's own cmdline and validates the get_height response body.
         ...getTorNetworkConfig(torProxyMode, MONEROD_IP),
         command: [
           "--rpc-restricted-bind-ip=0.0.0.0",

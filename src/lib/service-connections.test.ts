@@ -265,19 +265,13 @@ describe("monitoring stack connections", () => {
     expect(monitoring.nodemapper.image).toBe("lalanza808/nodemapper:1.0.4");
   });
 
-  it("exporter/nodemapper wait for a healthy monerod, and monerod defines a healthcheck", () => {
+  it("exporter/nodemapper wait for a healthy monerod, which relies on the image's built-in healthcheck", () => {
     expect(monitoring.exporter.depends_on?.monerod).toEqual({ condition: "service_healthy" });
     expect(monitoring.nodemapper.depends_on?.monerod).toEqual({ condition: "service_healthy" });
+    // No compose-level override: the upstream sethforprivacy/simple-monerod image
+    // ships its own HEALTHCHECK (/healthcheck.sh), which the exporters depend on.
     const monerod = services.monerod.code.monerod as ContainerSpec;
-    expect(monerod.healthcheck?.test).toBeTruthy();
-  });
-
-  it("monerod healthcheck tolerates 401 so --rpc-login doesn't block dependents", () => {
-    const monerod = services.monerod.code.monerod as ContainerSpec;
-    const test = monerod.healthcheck?.test;
-    const testStr = Array.isArray(test) ? test.join(" ") : String(test);
-    expect(testStr).toContain(String(MONEROD_PORTS.rpcUnrestricted));
-    expect(testStr).toContain("401");
+    expect(monerod.healthcheck).toBeUndefined();
   });
 
   it("grafana is reachable on its service port and wired to the prometheus datasource name", () => {
