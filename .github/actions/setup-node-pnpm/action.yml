@@ -1,0 +1,41 @@
+name: Setup Node.js and pnpm
+description: >
+  Install pnpm, set up Node.js with the pnpm store cache, install dependencies
+  with a frozen lockfile, and optionally cache the Next.js build cache.
+
+inputs:
+  node-version:
+    description: Node.js version passed to actions/setup-node
+    required: false
+    default: "24.x"
+  cache-next:
+    description: When true, restore/save .next/cache for faster Next.js builds
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: Install pnpm
+      uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+
+    - name: Setup Node.js
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: pnpm
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    # Post-job save; restore must run before `pnpm build`.
+    - name: Cache Next.js build
+      if: inputs.cache-next == 'true'
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .next/cache
+        key: ${{ runner.os }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('src/**', 'next.config.js', 'tsconfig.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}-
+          ${{ runner.os }}-nextjs-

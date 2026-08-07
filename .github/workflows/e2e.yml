@@ -1,7 +1,10 @@
 name: E2E
 
-# Heavy privileged job. PRs to main only (expand later if needed).
+# Heavy privileged job on PRs and pushes to main.
+# Path filter gates the expensive job so docs-only changes stay cheap.
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
 
@@ -10,7 +13,39 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      e2e: ${{ steps.filter.outputs.e2e }}
+    steps:
+      # Required for push events (local git diff). Harmless on pull_request.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Detect install-relevant path changes
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        id: filter
+        with:
+          filters: |
+            e2e:
+              - 'src/**'
+              - 'e2e/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'next.config.js'
+              - 'tsconfig.json'
+              - '.github/workflows/e2e.yml'
+              - '.github/actions/**'
+
   e2e:
+    needs: changes
+    if: needs.changes.outputs.e2e == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -18,17 +53,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: "24.x"
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/setup-node-pnpm
 
       - name: Build
         run: pnpm build
@@ -52,3 +78,32 @@ jobs:
             e2e/test-results/
           if-no-files-found: ignore
           retention-days: 7
+
+  # Always-green when paths skip E2E; fails if E2E ran and failed.
+  # Prefer this as a required status check over the conditional `e2e` job.
+  e2e-status:
+    name: E2E
+    needs: [changes, e2e]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Evaluate E2E outcome
+        run: |
+          set -euo pipefail
+          if [[ "${{ needs.changes.result }}" != "success" ]]; then
+            echo "Path filter job failed: ${{ needs.changes.result }}"
+            exit 1
+          fi
+          if [[ "${{ needs.changes.outputs.e2e }}" != "true" ]]; then
+            echo "E2E not required for these path changes — OK."
+            exit 0
+          fi
+          if [[ "${{ needs.e2e.result }}" == "success" ]]; then
+            echo "E2E job succeeded."
+            exit 0
+          fi
+          echo "E2E job result: ${{ needs.e2e.result }}"
+          exit 1
