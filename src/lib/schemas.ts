@@ -101,6 +101,27 @@ export const hostListSchema = z
     })
   );
 
+/**
+ * Non-transforming variant of hostListSchema for the server-side config
+ * schema: keeps the field typed as string (matching the client state) while
+ * rejecting entries that are not valid host[:port] values. Without this,
+ * arbitrary strings (including newlines) pass fullConfigSchema and rely solely
+ * on the generators' safeParse fallback to be dropped.
+ */
+export const hostListStringSchema = z
+  .string()
+  .trim()
+  .max(2048)
+  .check(
+    z.superRefine((val, ctx) => {
+      const entries = val.split(/[\s,]+/).filter((e) => e.length > 0);
+      const invalid = entries.filter((e) => !hostPortSchema.safeParse(e).success);
+      if (invalid.length > 0) {
+        ctx.addIssue(`Invalid host entries: ${invalid.join(", ")}`);
+      }
+    })
+  );
+
 export const portSchema = z
   .string()
   .trim()
