@@ -199,6 +199,29 @@ for c in grafana prometheus monerod_exporter nodemapper; do
   wait_container_running "${c}" "${MONITORING_ATTEMPTS}" "${MONITORING_SLEEP_SECS}"
 done
 
+echo "==> Grafana /api/health probe"
+grafana_ok=0
+for ((i = 1; i <= GRAFANA_ATTEMPTS; i++)); do
+  if docker exec "${CONTAINER_NAME}" bash -c \
+    'curl -sS --max-time 5 http://127.0.0.1:3000/api/health' \
+    >"${ARTIFACTS_DIR}/grafana-health.json" 2>"${ARTIFACTS_DIR}/grafana-health.err"; then
+    # Grafana returns JSON like {"database":"ok",...} (spacing may vary).
+    if grep -Eq '"database"[[:space:]]*:[[:space:]]*"ok"' \
+      "${ARTIFACTS_DIR}/grafana-health.json" 2>/dev/null; then
+      grafana_ok=1
+      break
+    fi
+  fi
+  err="$(tr '\n' ' ' <"${ARTIFACTS_DIR}/grafana-health.err" 2>/dev/null || true)"
+  body="$(tr '\n' ' ' <"${ARTIFACTS_DIR}/grafana-health.json" 2>/dev/null || true)"
+  echo "    Grafana not healthy yet (attempt ${i}/${GRAFANA_ATTEMPTS})${err:+ — ${err}}${body:+ — body: ${body}}"
+  sleep "${GRAFANA_SLEEP_SECS}"
+done
+[[ "${grafana_ok}" -eq 1 ]] || die "Grafana /api/health probe failed"
+echo "    grafana /api/health response:"
+cat "${ARTIFACTS_DIR}/grafana-health.json"
+echo
+
 echo "==> E2E container run succeeded"
 # teardown trap will compose-down + rm container
 exit 0
