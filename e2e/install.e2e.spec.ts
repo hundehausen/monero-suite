@@ -7,9 +7,10 @@ const e2eDir = path.join(__dirname);
 const artifactsDir = path.join(e2eDir, "artifacts");
 
 /**
- * Deterministic minimal config — every toggle set explicitly so the run
- * does not depend on future default changes. Traefik off so example.com
- * domains do not block the install panel (hasDefaultDomain).
+ * Deterministic config — every toggle set explicitly so the run does not
+ * depend on future default changes. Monitoring on for Grafana/Prometheus
+ * artifact coverage. Traefik off so example.com domains do not block the
+ * install panel (hasDefaultDomain).
  */
 const CANNED_URL =
   "/?architecture=linux%2Famd64" +
@@ -22,7 +23,7 @@ const CANNED_URL =
   "&isCuprateEnabled=false" +
   "&isMoneroWalletRpc=false" +
   "&isTraefik=false" +
-  "&isMonitoring=false" +
+  "&isMonitoring=true" +
   "&isWatchtower=false" +
   "&isPortainer=false" +
   "&p2PoolMode=none" +
@@ -86,6 +87,20 @@ test.describe("install artifact e2e", () => {
     expect(installContents).toContain("monerod");
     expect(installContents).toContain("--offline");
     expect(installContents).toContain("docker compose up -d");
+    // Monitoring path must be present in the generated install.
+    expect(installContents).toContain("MONERO_ENV_EOF");
+    expect(installContents).toContain("monitoring/grafana");
+    expect(installContents).toContain("container_name: grafana");
+    expect(installContents).toContain("container_name: prometheus");
+    expect(installContents).toContain("container_name: monerod_exporter");
+    expect(installContents).toContain("container_name: nodemapper");
+    expect(installContents).toContain("GF_SECURITY_ADMIN_USER");
+
+    const composeContents = fs.readFileSync(composePath, "utf8");
+    expect(composeContents).toContain("container_name: grafana");
+    expect(composeContents).toContain("container_name: prometheus");
+    expect(composeContents).toContain("container_name: monerod_exporter");
+    expect(composeContents).toContain("container_name: nodemapper");
   });
 
   test("static validation of downloaded artifacts", async () => {
