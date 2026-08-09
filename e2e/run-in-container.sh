@@ -18,6 +18,10 @@ SYSTEMD_ATTEMPTS="${E2E_SYSTEMD_ATTEMPTS:-30}"
 SYSTEMD_SLEEP_SECS="${E2E_SYSTEMD_SLEEP_SECS:-2}"
 MONEROD_ATTEMPTS="${E2E_MONEROD_ATTEMPTS:-12}"
 MONEROD_SLEEP_SECS="${E2E_MONEROD_SLEEP_SECS:-10}"
+MONITORING_ATTEMPTS="${E2E_MONITORING_ATTEMPTS:-24}"
+MONITORING_SLEEP_SECS="${E2E_MONITORING_SLEEP_SECS:-5}"
+GRAFANA_ATTEMPTS="${E2E_GRAFANA_ATTEMPTS:-24}"
+GRAFANA_SLEEP_SECS="${E2E_GRAFANA_SLEEP_SECS:-5}"
 
 die() {
   echo "ERROR: $*" >&2
@@ -26,6 +30,30 @@ die() {
 
 require_file() {
   [[ -f "$1" ]] || die "missing required file: $1"
+}
+
+# Wait until docker container $1 reports State.Status=running.
+# Fails fast on restarting|exited|dead. Empty/missing keeps polling.
+wait_container_running() {
+  local name="$1"
+  local attempts="$2"
+  local sleep_secs="$3"
+  local i status
+  for ((i = 1; i <= attempts; i++)); do
+    status="$(
+      docker exec "${CONTAINER_NAME}" bash -c \
+        "docker inspect -f '{{.State.Status}}' ${name} 2>/dev/null || true"
+    )"
+    echo "    attempt ${i}/${attempts}: ${name} status='${status:-missing}'"
+    if [[ "${status}" == "running" ]]; then
+      return 0
+    fi
+    if [[ "${status}" == "restarting" || "${status}" == "exited" || "${status}" == "dead" ]]; then
+      die "${name} container status is ${status}"
+    fi
+    sleep "${sleep_secs}"
+  done
+  die "${name} did not reach running state in time"
 }
 
 dump_debug() {
@@ -39,6 +67,19 @@ dump_debug() {
     echo "===== monerod logs (if any) ====="
     docker exec "${CONTAINER_NAME}" bash -c \
       "docker logs monerod 2>&1 | tail -n 200 || true" 2>&1 || true
+    for c in grafana prometheus monerod_exporter nodemapper; do
+      echo "===== ${c} logs (if any) ====="
+      docker exec "${CONTAINER_NAME}" bash -c \
+        "docker logs ${c} 2>&1 | tail -n 200 || true" 2>&1 || true
+    done
+    if [[ -f "${ARTIFACTS_DIR}/grafana-health.err" ]]; then
+      echo "===== grafana-health.err ====="
+      cat "${ARTIFACTS_DIR}/grafana-health.err" 2>&1 || true
+    fi
+    if [[ -f "${ARTIFACTS_DIR}/grafana-health.json" ]]; then
+      echo "===== grafana-health.json ====="
+      cat "${ARTIFACTS_DIR}/grafana-health.json" 2>&1 || true
+    fi
   } >"${CONTAINER_LOG}" 2>&1 || true
   echo "Wrote ${CONTAINER_LOG}" >&2
 }
@@ -125,23 +166,7 @@ set -e
 [[ "${install_ec}" -eq 0 ]] || die "install.sh exited with ${install_ec}"
 
 echo "==> Polling monerod container status"
-monerod_ready=0
-for ((i = 1; i <= MONEROD_ATTEMPTS; i++)); do
-  status="$(
-    docker exec "${CONTAINER_NAME}" bash -c \
-      "docker inspect -f '{{.State.Status}}' monerod 2>/dev/null || true"
-  )"
-  echo "    attempt ${i}/${MONEROD_ATTEMPTS}: monerod status='${status:-missing}'"
-  if [[ "${status}" == "running" ]]; then
-    monerod_ready=1
-    break
-  fi
-  if [[ "${status}" == "restarting" || "${status}" == "exited" || "${status}" == "dead" ]]; then
-    die "monerod container status is ${status}"
-  fi
-  sleep "${MONEROD_SLEEP_SECS}"
-done
-[[ "${monerod_ready}" -eq 1 ]] || die "monerod did not reach running state in time"
+wait_container_running "monerod" "${MONEROD_ATTEMPTS}" "${MONEROD_SLEEP_SECS}"
 
 echo "==> RPC probe (unrestricted RPC inside monerod container)"
 # Port 18081 is not published to the host in local networkMode; probe inside monerod.
@@ -168,6 +193,11 @@ done
 echo "    get_info response:"
 cat "${ARTIFACTS_DIR}/get_info.json"
 echo
+
+echo "==> Polling monitoring stack containers"
+for c in grafana prometheus monerod_exporter nodemapper; do
+  wait_container_running "${c}" "${MONITORING_ATTEMPTS}" "${MONITORING_SLEEP_SECS}"
+done
 
 echo "==> E2E container run succeeded"
 # teardown trap will compose-down + rm container
