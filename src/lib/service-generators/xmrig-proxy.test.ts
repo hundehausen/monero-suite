@@ -36,9 +36,8 @@ describe("xmrig POOL_URL with proxy", () => {
       p2poolModes.full,
       true
     );
-    expect(xmrig.code.xmrig.environment?.POOL_URL).toBe(
-      `xmrig-proxy:${SERVICE_PORTS.xmrigProxy}`
-    );
+    const env = xmrig.code.xmrig.environment as Record<string, string | number>;
+    expect(env.POOL_URL).toBe(`xmrig-proxy:${SERVICE_PORTS.xmrigProxy}`);
   });
 
   it("points xmrig at p2pool when the proxy is off", () => {
@@ -49,6 +48,7 @@ describe("xmrig POOL_URL with proxy", () => {
       p2poolModes.full,
       false
     );
-    expect(xmrig.code.xmrig.environment?.POOL_URL).toBe(`p2pool:${P2POOL_PORTS.stratum}`);
+    const env = xmrig.code.xmrig.environment as Record<string, string | number>;
+    expect(env.POOL_URL).toBe(`p2pool:${P2POOL_PORTS.stratum}`);
   });
 });

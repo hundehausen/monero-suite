@@ -28,8 +28,11 @@ Running a Monero node should be accessible to everyone, not just sysadmins. Mone
 | [monerod](https://getmonero.org) | The Monero daemon — syncs and validates the blockchain |
 | [Cuprate](https://github.com/cuprate/cuprate) | Alternative Monero node written in Rust (experimental) |
 | [monero-wallet-rpc](https://web.getmonero.org/resources/developer-guides/wallet-rpc.html) | Control a Monero wallet programmatically |
+| [monero-lws](https://github.com/vtnerd/monero-lws) | Light wallet server — scan view keys for Cake/Skylight/MyMonero-compatible wallets |
+| [MoneroPay](https://github.com/moneropay/moneropay) | HTTP payment API on top of wallet-rpc (hot wallet, SQLite) |
 | [P2Pool](https://github.com/SChernykh/p2pool) | Decentralized mining pool (nano, mini, and full sidechains) |
 | [XMRig](https://xmrig.com/) | High-performance CPU miner, connected to your P2Pool node |
+| [XMRig-proxy](https://github.com/xmrig/xmrig-proxy) | Stratum proxy in front of P2Pool (amd64) |
 | [Monitoring](https://github.com/lalanza808/docker-monero-node) | Grafana + Prometheus dashboard with node stats and peer map |
 | [Tor](https://github.com/hundehausen/tor-hidden-service-docker) | Proxy for anonymous transactions and hidden services for private access |
 | [Traefik](https://traefik.io) | Reverse proxy — expose services via your own domain with TLS |

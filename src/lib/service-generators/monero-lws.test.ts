@@ -3,7 +3,7 @@ import { createMoneroLwsService } from "./monero-lws";
 import { networkModes, torProxyModes } from "@/hooks/services/types";
 import { DOCKER_IMAGES, MONEROD_PORTS, SERVICE_PORTS } from "@/lib/constants";
 
-const run = (on: boolean, zmq = MONEROD_PORTS.zmqPub) =>
+const run = (on: boolean, zmq: number = MONEROD_PORTS.zmqPub) =>
   createMoneroLwsService(
     { isMoneroLws: on, lwsDomain: "lws.example.com" },
     networkModes.local,

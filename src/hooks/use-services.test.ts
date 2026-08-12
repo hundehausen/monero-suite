@@ -50,7 +50,7 @@ vi.mock("./services", async () => {
 
   const useMonitoringService = () => {
     return {
-      getMonitoringService: (_networkMode: string, _isTraefik: boolean) => ({
+      getMonitoringService: () => ({
         ...stub(false),
         env: { GF_SECURITY_ADMIN_USER: "admin" },
       }),
