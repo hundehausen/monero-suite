@@ -2,13 +2,22 @@
 import { describe, expect, it, vi } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 
-vi.mock("nuqs", () => ({
-  parseAsStringEnum: () => ({ withDefault: () => ({}) }),
-  parseAsString: () => ({ withDefault: () => ({}) }),
-  parseAsBoolean: () => ({ withDefault: () => ({}) }),
-  parseAsInteger: () => ({ withDefault: () => ({}) }),
-  useQueryState: () => ["linux/amd64", () => {}],
-}));
+vi.mock("nuqs", async () => {
+  const React = await import("react");
+  return {
+    parseAsStringEnum: () => ({ withDefault: () => ({}) }),
+    parseAsString: () => ({ withDefault: () => ({}) }),
+    parseAsBoolean: () => ({ withDefault: () => ({}) }),
+    parseAsInteger: () => ({ withDefault: () => ({}) }),
+    useQueryState: (key: string) => {
+      // Always call the same hooks so rules-of-hooks is satisfied; pick by key.
+      const architecture = React.useState("linux/amd64");
+      const networkMode = React.useState("local");
+      if (key === "networkMode") return networkMode;
+      return architecture;
+    },
+  };
+});
 
 vi.mock("./services", async () => {
   const React = await import("react");
@@ -50,7 +59,7 @@ vi.mock("./services", async () => {
 
   const useMonitoringService = () => {
     return {
-      getMonitoringService: (_networkMode: string, _isTraefik: boolean) => ({
+      getMonitoringService: () => ({
         ...stub(false),
         env: { GF_SECURITY_ADMIN_USER: "admin" },
       }),
@@ -80,23 +89,49 @@ vi.mock("./services", async () => {
       stateFunctions: { isStagenetNode: false },
     }),
     useP2PoolService,
-    useMoneroWalletRpcService: () => ({
-      getMoneroWalletRpcService: () => stub(false),
-      stateFunctions: { isMoneroWalletRpc: false, setIsMoneroWalletRpc: () => {} },
-    }),
-    useTorService: () => ({
-      getTorService: () => stub(false),
-      stateFunctions: { torProxyMode: "none", isHiddenServices: false },
-    }),
+    useMoneroWalletRpcService: () => {
+      const [isMoneroWalletRpc, setIsMoneroWalletRpc] = React.useState(false);
+      return {
+        getMoneroWalletRpcService: () => stub(isMoneroWalletRpc),
+        stateFunctions: { isMoneroWalletRpc, setIsMoneroWalletRpc },
+      };
+    },
+    useTorService: () => {
+      const [hsXmrigProxy, setHsXmrigProxy] = React.useState(false);
+      return {
+        getTorService: () => stub(false),
+        stateFunctions: {
+          torProxyMode: "none",
+          isHiddenServices: false,
+          hsLws: false,
+          hsMoneroPay: false,
+          hsXmrigProxy,
+          setHsXmrigProxy,
+        },
+      };
+    },
     useWatchtowerService: () => ({
       getWatchtowerService: () => stub(false),
       stateFunctions: { isWatchtower: false },
     }),
     useMonitoringService,
     useXmrigService,
+    useXmrigProxyService: () => {
+      const [isXmrigProxy, setIsXmrigProxy] = React.useState(false);
+      const [isXmrigProxyPublic, setIsXmrigProxyPublic] = React.useState(false);
+      return {
+        getXmrigProxyService: () => stub(isXmrigProxy),
+        stateFunctions: {
+          isXmrigProxy,
+          setIsXmrigProxy,
+          isXmrigProxyPublic,
+          setIsXmrigProxyPublic,
+        },
+      };
+    },
     useTraefikService: () => ({
       getTraefikService: () => stub(false),
-      stateFunctions: { isTraefik: false, isTraefikMonerod: false, isTraefikStagenet: false, isTraefikGrafana: false, isTraefikPortainer: false },
+      stateFunctions: { isTraefik: false, isTraefikMonerod: false, isTraefikStagenet: false, isTraefikGrafana: false, isTraefikPortainer: false, isTraefikLws: false, isTraefikMoneroPay: false },
     }),
     usePortainerService: () => ({
       getPortainerService: () => stub(false),
@@ -106,6 +141,27 @@ vi.mock("./services", async () => {
       getCuprateService: () => stub(false),
       stateFunctions: { isCuprateEnabled: false },
     }),
+    useMoneroLwsService: () => {
+      const [isMoneroLws, setIsMoneroLws] = React.useState(false);
+      return {
+        getMoneroLwsService: (_n: string, _t: boolean, _c: string, _tor: string, zmqPubPort: number) => ({
+          name: "Monero Light Wallet Server",
+          description: "",
+          checked: isMoneroLws,
+          required: false,
+          architecture: ["linux/amd64", "linux/arm64"],
+          code: { "monero-lws": { command: ["--sub=tcp://monerod:" + zmqPubPort] } },
+        }),
+        stateFunctions: { isMoneroLws, setIsMoneroLws, lwsDomain: "lws.example.com", setLwsDomain: () => {} },
+      };
+    },
+    useMoneroPayService: () => {
+      const [isMoneroPay, setIsMoneroPay] = React.useState(false);
+      return {
+        getMoneroPayService: () => stub(isMoneroPay),
+        stateFunctions: { isMoneroPay, setIsMoneroPay, moneroPayDomain: "pay.example.com", setMoneroPayDomain: () => {} },
+      };
+    },
   };
 });
 
@@ -155,5 +211,111 @@ describe("useServices ZMQ port propagation", () => {
 
     const p2pool = result.current.services.p2pool.code.p2pool as { command?: string[] };
     expect(p2pool.command?.[1]).toBe(String(MONEROD_PORTS.zmqPub));
+  });
+});
+
+describe("useServices monero-lws wiring", () => {
+  it("enables monero-lws and forwards the ZMQ pub port", () => {
+    const { result } = renderHook(() => useServices());
+
+    act(() => {
+      result.current.stateFunctions.setIsMoneroLws(true);
+    });
+
+    expect(result.current.services["monero-lws"].checked).toBe(true);
+    const lws = result.current.services["monero-lws"].code["monero-lws"] as {
+      command?: string[];
+    };
+    expect(lws.command?.[0]).toContain(`tcp://monerod:`);
+    expect(lws.command?.[0]).toContain(String(MONEROD_PORTS.zmqPub));
+  });
+});
+
+describe("useServices xmrig-proxy reset", () => {
+  it("enabling proxy while p2PoolMode is none is reset to false", () => {
+    const { result } = renderHook(() => useServices());
+
+    act(() => {
+      result.current.stateFunctions.setP2PoolMode("none");
+    });
+    expect(result.current.stateFunctions.p2PoolMode).toBe("none");
+
+    act(() => {
+      result.current.stateFunctions.setIsXmrigProxy(true);
+    });
+
+    expect(result.current.stateFunctions.isXmrigProxy).toBe(false);
+  });
+
+  it("clears public and hidden-service flags when P2Pool is switched to none", () => {
+    const { result } = renderHook(() => useServices());
+
+    act(() => {
+      result.current.stateFunctions.setIsXmrigProxy(true);
+      result.current.stateFunctions.setIsXmrigProxyPublic(true);
+      result.current.stateFunctions.setHsXmrigProxy(true);
+    });
+    expect(result.current.stateFunctions.isXmrigProxy).toBe(true);
+    expect(result.current.stateFunctions.isXmrigProxyPublic).toBe(true);
+    expect(result.current.stateFunctions.hsXmrigProxy).toBe(true);
+
+    act(() => {
+      result.current.stateFunctions.setP2PoolMode("none");
+    });
+
+    expect(result.current.stateFunctions.isXmrigProxy).toBe(false);
+    expect(result.current.stateFunctions.isXmrigProxyPublic).toBe(false);
+    expect(result.current.stateFunctions.hsXmrigProxy).toBe(false);
+  });
+
+  it("enabling proxy then switching architecture to arm64 resets the flags", () => {
+    const { result } = renderHook(() => useServices());
+
+    act(() => {
+      result.current.stateFunctions.setIsXmrigProxy(true);
+      result.current.stateFunctions.setIsXmrigProxyPublic(true);
+      result.current.stateFunctions.setHsXmrigProxy(true);
+    });
+    expect(result.current.stateFunctions.isXmrigProxy).toBe(true);
+    expect(result.current.stateFunctions.architecture).toBe("linux/amd64");
+
+    act(() => {
+      result.current.stateFunctions.setArchitecture("linux/arm64");
+    });
+
+    expect(result.current.stateFunctions.architecture).toBe("linux/arm64");
+    expect(result.current.stateFunctions.isXmrigProxy).toBe(false);
+    expect(result.current.stateFunctions.isXmrigProxyPublic).toBe(false);
+    expect(result.current.stateFunctions.hsXmrigProxy).toBe(false);
+  });
+});
+
+describe("useServices MoneroPay auto-enable wallet-rpc", () => {
+  it("enabling MoneroPay sets isMoneroWalletRpc true", () => {
+    const { result } = renderHook(() => useServices());
+
+    expect(result.current.stateFunctions.isMoneroWalletRpc).toBe(false);
+
+    act(() => {
+      result.current.stateFunctions.setIsMoneroPay(true);
+    });
+
+    expect(result.current.stateFunctions.isMoneroPay).toBe(true);
+    expect(result.current.stateFunctions.isMoneroWalletRpc).toBe(true);
+  });
+
+  it("disabling wallet-rpc while MoneroPay is on is immediately turned back on", () => {
+    const { result } = renderHook(() => useServices());
+
+    act(() => {
+      result.current.stateFunctions.setIsMoneroPay(true);
+    });
+    expect(result.current.stateFunctions.isMoneroWalletRpc).toBe(true);
+
+    act(() => {
+      result.current.stateFunctions.setIsMoneroWalletRpc(false);
+    });
+
+    expect(result.current.stateFunctions.isMoneroWalletRpc).toBe(true);
   });
 });

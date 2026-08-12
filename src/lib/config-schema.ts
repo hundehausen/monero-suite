@@ -104,6 +104,9 @@ const torConfigSchema = z.object({
   hsStagenet: z.boolean(),
   hsP2Pool: z.boolean(),
   hsGrafana: z.boolean(),
+  hsLws: z.boolean(),
+  hsMoneroPay: z.boolean(),
+  hsXmrigProxy: z.boolean(),
   isGlobalTorProxy: z.boolean(),
 });
 
@@ -120,6 +123,14 @@ const serviceToggleSchema = z.object({
   isPortainer: z.boolean(),
   portainerDomain: domainSchema,
   isCuprateEnabled: z.boolean(),
+  isMoneroLws: z.boolean(),
+  isMoneroPay: z.boolean(),
+  isXmrigProxy: z.boolean(),
+  isXmrigProxyPublic: z.boolean(),
+  isTraefikLws: z.boolean(),
+  isTraefikMoneroPay: z.boolean(),
+  lwsDomain: domainSchema,
+  moneroPayDomain: domainSchema,
 });
 
 export const fullConfigSchema = z
@@ -146,7 +157,8 @@ export const fullConfigSchema = z
       config.monerod.zmqPubEnabled,
       config.monerod.zmqPubBindPort,
       config.p2pool.p2PoolMode,
-      config.services.isMonitoring
+      config.services.isMonitoring,
+      config.services.isMoneroLws
     );
     if (p2pCollisions.length > 0) {
       const roles = p2pCollisions
@@ -166,7 +178,8 @@ export const fullConfigSchema = z
       config.monerod.zmqPubBindPort,
       config.p2pool.p2PoolMode,
       config.services.isMonitoring,
-      config.monerod.p2pBindPort
+      config.monerod.p2pBindPort,
+      config.services.isMoneroLws
     );
     if (zmqCollisions.length > 0) {
       const roles = zmqCollisions

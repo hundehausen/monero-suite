@@ -3,11 +3,11 @@
 import { useMemo } from "react";
 import { NumberInput, SimpleGrid, Switch, TextInput, Title } from "@mantine/core";
 import { useMonerodState, useServicesContext } from "@/hooks/services-context";
-import { p2poolModes } from "@/hooks/services";
 import {
   getMonerodCollisionRoleLabel,
   getMonerodZmqPortCollisions,
 } from "@/lib/service-generators/monerod";
+import { stackNeedsZmq } from "@/lib/stack-needs-zmq";
 import ExplainingLabel from "../../ExplainingLabel";
 import AccordionItemComponent from "../AccordionItemComponent";
 
@@ -25,9 +25,9 @@ const RpcZmqSection = () => {
 
   const { stateFunctions: s } = useServicesContext();
 
-  // P2Pool and Monitoring require the ZMQ feed, so the switch is forced on
-  // while either is enabled. Display is derived; zmqPubEnabled stays user-set.
-  const needsZmq = s.p2PoolMode !== p2poolModes.none || s.isMonitoring;
+  // P2Pool, Monitoring, and Light Wallet Server require the ZMQ feed, so the
+  // switch is forced on while any is enabled. Display is derived; zmqPubEnabled stays user-set.
+  const needsZmq = stackNeedsZmq(s.p2PoolMode, s.isMonitoring, s.isMoneroLws);
   const zmqEffectivelyOn = zmqPubEnabled || needsZmq;
 
   const zmqPortCollisions = useMemo(
@@ -37,9 +37,10 @@ const RpcZmqSection = () => {
         zmqPubBindPort,
         s.p2PoolMode,
         s.isMonitoring,
-        s.p2pBindPort
+        s.p2pBindPort,
+        s.isMoneroLws
       ),
-    [zmqPubEnabled, zmqPubBindPort, s.p2PoolMode, s.isMonitoring, s.p2pBindPort]
+    [zmqPubEnabled, zmqPubBindPort, s.p2PoolMode, s.isMonitoring, s.p2pBindPort, s.isMoneroLws]
   );
 
   const zmqPortCollisionError =
@@ -82,7 +83,7 @@ const RpcZmqSection = () => {
               label="Enable ZMQ Publisher"
               explanation={
                 needsZmq
-                  ? "Required by P2Pool / Monitoring — cannot be disabled while either is enabled."
+                  ? "Required by P2Pool / Monitoring / Light Wallet Server — cannot be disabled while any of these is enabled."
                   : "ZMQ interface enables applications to subscribe to node events like new blocks or transactions."
               }
             />

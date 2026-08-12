@@ -8,7 +8,10 @@ import {
   MoneroNodeSection,
   StagenetNodeSection,
   MoneroWalletRpcSection,
+  MoneroLwsSection,
+  MoneroPaySection,
   P2PoolSection,
+  XmrigProxySection,
   TraefikSection,
   TorSection,
   MonitoringSection,
@@ -42,8 +45,11 @@ const Selection = () => {
       <MoneroNodeSection />
       <StagenetNodeSection />
       <MoneroWalletRpcSection />
+      <MoneroLwsSection />
+      <MoneroPaySection />
       <TraefikSection />
       <P2PoolSection />
+      <XmrigProxySection />
       <TorSection />
       <MonitoringSection />
       <PortainerSection />

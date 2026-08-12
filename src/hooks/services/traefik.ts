@@ -25,6 +25,14 @@ export const useTraefikService = () => {
     "isTraefikPortainer",
     parseAsBoolean.withDefault(true)
   );
+  const [isTraefikLws, setIsTraefikLws] = useQueryState(
+    "isTraefikLws",
+    parseAsBoolean.withDefault(true)
+  );
+  const [isTraefikMoneroPay, setIsTraefikMoneroPay] = useQueryState(
+    "isTraefikMoneroPay",
+    parseAsBoolean.withDefault(true)
+  );
 
   const getTraefikService = (
     torProxyMode: TorProxyMode = torProxyModes.none
@@ -43,6 +51,10 @@ export const useTraefikService = () => {
       setIsTraefikGrafana,
       isTraefikPortainer,
       setIsTraefikPortainer,
+      isTraefikLws,
+      setIsTraefikLws,
+      isTraefikMoneroPay,
+      setIsTraefikMoneroPay,
     },
   };
 };

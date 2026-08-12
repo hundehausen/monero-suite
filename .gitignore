@@ -43,3 +43,5 @@ next-env.d.ts
 /e2e/playwright-report/
 
 .vscode.worktrees/
+
+.worktrees/

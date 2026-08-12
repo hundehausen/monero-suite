@@ -2,6 +2,13 @@
 const isDev = process.env.NODE_ENV === "development";
 
 const nextConfig = {
+  // next dev only serves HTTP. Browsers on another machine use the LAN IP as
+  // origin; without this, /_next chunks and HMR return 403.
+  ...(isDev
+    ? {
+        allowedDevOrigins: ["192.168.*.*", "10.*.*.*", "172.*.*.*"],
+      }
+    : {}),
   async headers() {
     return [
       {
@@ -14,10 +21,17 @@ const nextConfig = {
             value: "strict-origin-when-cross-origin",
           },
           { key: "X-DNS-Prefetch-Control", value: "on" },
-          {
-            key: "Strict-Transport-Security",
-            value: "max-age=63072000; includeSubDomains; preload",
-          },
+          // HSTS and upgrade-insecure-requests assume HTTPS. next dev is HTTP,
+          // including over LAN (http://192.168.x.x:3000), so they pin the
+          // browser onto a TLS port that is not serving TLS.
+          ...(!isDev
+            ? [
+                {
+                  key: "Strict-Transport-Security",
+                  value: "max-age=63072000; includeSubDomains; preload",
+                },
+              ]
+            : []),
           {
             key: "Content-Security-Policy",
             value: [
@@ -31,7 +45,7 @@ const nextConfig = {
               "frame-ancestors 'none'",
               "form-action 'self'",
               "base-uri 'self'",
-              "upgrade-insecure-requests",
+              ...(!isDev ? ["upgrade-insecure-requests"] : []),
             ].join("; "),
           },
         ],

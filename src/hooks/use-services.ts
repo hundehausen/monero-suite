@@ -9,7 +9,6 @@ import {
   NetworkMode,
   architectures,
   networkModes,
-  p2poolModes,
   useMonerodService,
   useMonerodStagenetService,
   useP2PoolService,
@@ -18,14 +17,19 @@ import {
   useWatchtowerService,
   useMonitoringService,
   useXmrigService,
+  useXmrigProxyService,
   useTraefikService,
   usePortainerService,
   useCuprateService,
+  useMoneroLwsService,
+  useMoneroPayService,
   CERT_RESOLVER_NAME,
 } from "./services";
 import { getZmqPubPort } from "@/lib/service-generators/monerod";
+import { isXmrigProxyEffective } from "@/lib/service-generators/xmrig-proxy";
 import { MONEROD_PORTS } from "@/lib/constants";
 import { nextGrafanaDomain } from "@/lib/grafana-domain";
+import { stackNeedsZmq } from "@/lib/stack-needs-zmq";
 
 export * from "./services";
 
@@ -52,9 +56,12 @@ export const useServices = () => {
   const watchtowerService = useWatchtowerService();
   const monitoringService = useMonitoringService();
   const xmrigService = useXmrigService();
+  const xmrigProxyService = useXmrigProxyService();
   const traefikService = useTraefikService();
   const portainerService = usePortainerService();
   const cuprateService = useCuprateService();
+  const moneroLwsService = useMoneroLwsService();
+  const moneroPayService = useMoneroPayService();
 
   // Extract state functions from each service
   const {
@@ -63,11 +70,23 @@ export const useServices = () => {
     isTraefikStagenet,
     isTraefikGrafana,
     isTraefikPortainer,
+    isTraefikLws,
+    isTraefikMoneroPay,
   } = traefikService.stateFunctions;
   const { isMonitoring, grafanaDomain, setGrafanaDomain } = monitoringService.stateFunctions;
   const { p2PoolMode } = p2PoolService.stateFunctions;
   const { miningMode, setMiningMode } = xmrigService.stateFunctions;
+  const {
+    isXmrigProxy,
+    setIsXmrigProxy,
+    isXmrigProxyPublic,
+    setIsXmrigProxyPublic,
+  } = xmrigProxyService.stateFunctions;
+  const { hsXmrigProxy, setHsXmrigProxy } = torService.stateFunctions;
   const { isPrunedNode, isSyncPrunedBlocks } = monerodService.stateFunctions;
+  const { isMoneroLws } = moneroLwsService.stateFunctions;
+  const { isMoneroPay } = moneroPayService.stateFunctions;
+  const { isMoneroWalletRpc, setIsMoneroWalletRpc } = moneroWalletRpcService.stateFunctions;
 
   // Sync Grafana domain with Traefik: local default when off, prefill
   // monitor.example.com when enabling Traefik on a localhost domain.
@@ -87,18 +106,66 @@ export const useServices = () => {
     }
   }, [p2PoolMode, miningMode, setMiningMode]);
 
+  // Proxy requires P2Pool (it upstreams to p2pool stratum) and amd64
+  // images. Reset the toggle plus public/HS flags so a stale selection
+  // cannot publish ports or point Tor at a container that was filtered out.
+  useEffect(() => {
+    if (p2PoolMode !== "none") return;
+    if (isXmrigProxy) setIsXmrigProxy(false);
+    if (isXmrigProxyPublic) setIsXmrigProxyPublic(false);
+    if (hsXmrigProxy) setHsXmrigProxy(false);
+  }, [
+    p2PoolMode,
+    isXmrigProxy,
+    isXmrigProxyPublic,
+    hsXmrigProxy,
+    setIsXmrigProxy,
+    setIsXmrigProxyPublic,
+    setHsXmrigProxy,
+  ]);
+
+  useEffect(() => {
+    if (architecture === architectures.linuxAmd) return;
+    if (isXmrigProxy) setIsXmrigProxy(false);
+    if (isXmrigProxyPublic) setIsXmrigProxyPublic(false);
+    if (hsXmrigProxy) setHsXmrigProxy(false);
+  }, [
+    architecture,
+    isXmrigProxy,
+    isXmrigProxyPublic,
+    hsXmrigProxy,
+    setIsXmrigProxy,
+    setIsXmrigProxyPublic,
+    setHsXmrigProxy,
+  ]);
+
   // Should remove sync-pruned-blocks flag, if user switches from pruned node to full node
   useEffect(() => {
     if (!isPrunedNode && isSyncPrunedBlocks)
       monerodService.stateFunctions.setIsSyncPrunedBlocks(false);
   }, [isPrunedNode, isSyncPrunedBlocks, monerodService.stateFunctions]);
 
+  // MoneroPay talks to wallet-rpc. Keep wallet-rpc on whenever pay is enabled,
+  // including if the user tries to turn wallet-rpc off while pay is still on.
+  useEffect(() => {
+    if (isMoneroPay && !isMoneroWalletRpc) {
+      setIsMoneroWalletRpc(true);
+    }
+  }, [isMoneroPay, isMoneroWalletRpc, setIsMoneroWalletRpc]);
+
+  const isXmrigProxyOn = isXmrigProxyEffective(
+    isXmrigProxy,
+    p2PoolMode,
+    architecture
+  );
+
   // The port monerod actually binds ZMQ on — consumers must follow it.
+  const needsZmq = stackNeedsZmq(p2PoolMode, isMonitoring, isMoneroLws);
   const zmqPubPort =
     getZmqPubPort(
       monerodService.stateFunctions.zmqPubEnabled,
       monerodService.stateFunctions.zmqPubBindPort,
-      p2PoolMode !== p2poolModes.none || isMonitoring
+      needsZmq
     ) ?? MONEROD_PORTS.zmqPub;
 
   const services: ServiceMap = {
@@ -107,6 +174,7 @@ export const useServices = () => {
       p2PoolService.stateFunctions.p2PoolMode,
       torService.stateFunctions.torProxyMode,
       isMonitoring,
+      isMoneroLws,
       torService.stateFunctions.isHiddenServices,
       isTraefik && isTraefikMonerod,
       CERT_RESOLVER_NAME
@@ -131,7 +199,10 @@ export const useServices = () => {
       networkMode,
       monerodStagenetService.stateFunctions.isStagenetNode,
       p2PoolService.stateFunctions.p2PoolMode,
-      isMonitoring
+      isMonitoring,
+      isMoneroLws,
+      isMoneroPay,
+      isXmrigProxyOn
     ),
     watchtower: watchtowerService.getWatchtowerService(),
     monitoring: monitoringService.getMonitoringService(
@@ -142,7 +213,14 @@ export const useServices = () => {
     ),
     xmrig: xmrigService.getXmrigService(
       torService.stateFunctions.torProxyMode,
-      p2PoolService.stateFunctions.p2PoolMode
+      p2PoolService.stateFunctions.p2PoolMode,
+      isXmrigProxyOn
+    ),
+    "xmrig-proxy": xmrigProxyService.getXmrigProxyService(
+      p2PoolService.stateFunctions.p2PoolMode,
+      networkMode,
+      torService.stateFunctions.torProxyMode,
+      isXmrigProxyOn
     ),
     traefik: traefikService.getTraefikService(
       torService.stateFunctions.torProxyMode
@@ -154,6 +232,19 @@ export const useServices = () => {
     ),
     cuprate: cuprateService.getCuprateService(
       networkMode
+    ),
+    "monero-lws": moneroLwsService.getMoneroLwsService(
+      networkMode,
+      isTraefik && isTraefikLws,
+      CERT_RESOLVER_NAME,
+      torService.stateFunctions.torProxyMode,
+      zmqPubPort
+    ),
+    moneropay: moneroPayService.getMoneroPayService(
+      networkMode,
+      isTraefik && isTraefikMoneroPay,
+      CERT_RESOLVER_NAME,
+      torService.stateFunctions.torProxyMode
     ),
   };
 
@@ -177,9 +268,12 @@ export const useServices = () => {
     ...watchtowerService.stateFunctions,
     ...monitoringService.stateFunctions,
     ...xmrigService.stateFunctions,
+    ...xmrigProxyService.stateFunctions,
     ...traefikService.stateFunctions,
     ...portainerService.stateFunctions,
     ...cuprateService.stateFunctions,
+    ...moneroLwsService.stateFunctions,
+    ...moneroPayService.stateFunctions,
   };
 
   return {

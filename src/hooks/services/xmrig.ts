@@ -14,8 +14,9 @@ export const useXmrigService = () => {
 
   const getXmrigService = (
     torProxyMode: TorProxyMode = torProxyModes.none,
-    p2PoolMode: P2PoolMode = p2poolModes.full
-  ): Service => createXmrigService(miningMode, xmrigDonateLevel, torProxyMode, p2PoolMode);
+    p2PoolMode: P2PoolMode = p2poolModes.full,
+    isXmrigProxy = false
+  ): Service => createXmrigService(miningMode, xmrigDonateLevel, torProxyMode, p2PoolMode, isXmrigProxy);
 
   return {
     getXmrigService,

@@ -104,6 +104,9 @@ const makeConfig = (overrides: Partial<FullConfig> = {}): FullConfig => ({
     hsStagenet: true,
     hsP2Pool: true,
     hsGrafana: true,
+    hsLws: false,
+    hsMoneroPay: false,
+    hsXmrigProxy: false,
     isGlobalTorProxy: false,
   },
   services: {
@@ -119,6 +122,14 @@ const makeConfig = (overrides: Partial<FullConfig> = {}): FullConfig => ({
     isPortainer: true,
     portainerDomain: "portainer.mydomain.com",
     isCuprateEnabled: true,
+    isMoneroLws: false,
+    isMoneroPay: false,
+    isXmrigProxy: false,
+    isXmrigProxyPublic: false,
+    isTraefikLws: false,
+    isTraefikMoneroPay: false,
+    lwsDomain: "lws.example.com",
+    moneroPayDomain: "pay.example.com",
   },
   enabledBashServices: { monitoring: true, cuprate: true },
   ...overrides,
@@ -240,6 +251,84 @@ describe("xmrig <-> p2pool connection", () => {
   );
 });
 
+describe("xmrig-proxy <-> p2pool / xmrig connection", () => {
+  it("when proxy+xmrig+p2pool-mini, proxy -o is p2pool-mini:3333 and xmrig POOL_URL is xmrig-proxy:3334", () => {
+    const config = makeConfig({
+      p2pool: {
+        p2PoolMode: p2poolModes.mini,
+        p2PoolPayoutAddress: VALID_ADDRESS,
+        p2PoolMiningThreads: 4,
+        isP2PoolStratumPublic: false,
+      },
+      mining: { miningMode: "xmrig", xmrigDonateLevel: 1 },
+      services: { ...makeConfig().services, isXmrigProxy: true },
+    });
+    const services = generateAllServices(config);
+    const proxy = services["xmrig-proxy"].code["xmrig-proxy"] as ContainerSpec;
+    const xmrig = services.xmrig.code.xmrig as ContainerSpec;
+
+    expect(flagValue(cmd(proxy), "-o")).toBe(`p2pool-mini:${P2POOL_PORTS.stratum}`);
+    expect(xmrig.environment?.POOL_URL).toBe(`xmrig-proxy:${SERVICE_PORTS.xmrigProxy}`);
+    expect(xmrig.depends_on).toHaveProperty("xmrig-proxy");
+  });
+
+  it("XMRig-proxy hidden service forwards the stratum port the proxy actually binds", () => {
+    const config = makeConfig({
+      services: { ...makeConfig().services, isXmrigProxy: true },
+      tor: { ...makeConfig().tor, hsXmrigProxy: true },
+    });
+    const services = generateAllServices(config);
+    const proxy = services["xmrig-proxy"].code["xmrig-proxy"] as ContainerSpec;
+    const tor = services.tor.code.tor as ContainerSpec;
+    expect(cmd(proxy)).toContain("--bind");
+    expect(cmd(proxy)).toContain(`0.0.0.0:${SERVICE_PORTS.xmrigProxy}`);
+    expect(tor.environment?.HS_XMRIG_PROXY).toBe(
+      `xmrig-proxy:${SERVICE_PORTS.xmrigProxy}:${SERVICE_PORTS.xmrigProxy}`
+    );
+  });
+
+  it("leaves xmrig-proxy unchecked when p2PoolMode is none even if the raw flag is true", () => {
+    const services = generateAllServices(
+      makeConfig({
+        p2pool: {
+          p2PoolMode: p2poolModes.none,
+          p2PoolPayoutAddress: "",
+          p2PoolMiningThreads: 1,
+          isP2PoolStratumPublic: false,
+        },
+        services: { ...makeConfig().services, isXmrigProxy: true, isXmrigProxyPublic: true },
+        tor: { ...makeConfig().tor, hsXmrigProxy: true },
+      })
+    );
+    expect(services["xmrig-proxy"].checked).toBe(false);
+    const xmrig = services.xmrig.code.xmrig as ContainerSpec;
+    expect(xmrig.environment?.POOL_URL).not.toBe(
+      `xmrig-proxy:${SERVICE_PORTS.xmrigProxy}`
+    );
+    expect(xmrig.depends_on?.["xmrig-proxy"]).toBeUndefined();
+    const tor = services.tor.code.tor as ContainerSpec;
+    expect(tor.environment?.HS_XMRIG_PROXY).toBeUndefined();
+  });
+
+  it("does not emit HS_XMRIG_PROXY or point xmrig at the proxy on arm64", () => {
+    const services = generateAllServices(
+      makeConfig({
+        architecture: "linux/arm64",
+        services: { ...makeConfig().services, isXmrigProxy: true },
+        tor: { ...makeConfig().tor, hsXmrigProxy: true },
+      })
+    );
+    expect(services["xmrig-proxy"].checked).toBe(false);
+    const xmrig = services.xmrig.code.xmrig as ContainerSpec;
+    expect(xmrig.environment?.POOL_URL).not.toBe(
+      `xmrig-proxy:${SERVICE_PORTS.xmrigProxy}`
+    );
+    expect(xmrig.depends_on?.["xmrig-proxy"]).toBeUndefined();
+    const tor = services.tor.code.tor as ContainerSpec;
+    expect(tor.environment?.HS_XMRIG_PROXY).toBeUndefined();
+  });
+});
+
 describe("monitoring stack connections", () => {
   const services = generateAllServices(makeConfig());
   const monitoring = services.monitoring.code as Record<string, ContainerSpec>;
@@ -340,6 +429,53 @@ describe("tor connections", () => {
     for (const ip of Object.values(SERVICE_IPS)) {
       expect(ip.startsWith(`${subnetPrefix}.`)).toBe(true);
     }
+  });
+
+  it("LWS hidden service forwards the REST port monero-lws actually binds", () => {
+    const config = makeConfig({
+      services: { ...makeConfig().services, isMoneroLws: true },
+      tor: { ...makeConfig().tor, hsLws: true },
+    });
+    const services = generateAllServices(config);
+    const lws = services["monero-lws"].code["monero-lws"] as ContainerSpec;
+    const tor = services.tor.code.tor as ContainerSpec;
+    expect(lws.command).toContain(`--rest-server=http://0.0.0.0:${SERVICE_PORTS.moneroLws}`);
+    expect(tor.environment?.HS_MONERO_LWS).toBe(
+      `monero-lws:${SERVICE_PORTS.moneroLws}:${SERVICE_PORTS.moneroLws}`
+    );
+  });
+
+  it("MoneroPay hidden service forwards the API port moneropay actually binds", () => {
+    const config = makeConfig({
+      services: { ...makeConfig().services, isMoneroPay: true },
+      tor: { ...makeConfig().tor, hsMoneroPay: true },
+    });
+    const services = generateAllServices(config);
+    const pay = services.moneropay.code.moneropay as ContainerSpec;
+    const tor = services.tor.code.tor as ContainerSpec;
+    expect(pay.environment?.BIND).toBe(`0.0.0.0:${SERVICE_PORTS.moneroPay}`);
+    expect(tor.environment?.HS_MONEROPAY).toBe(
+      `moneropay:${SERVICE_PORTS.moneroPay}:${SERVICE_PORTS.moneroPay}`
+    );
+  });
+});
+
+describe("moneropay <-> monero-wallet-rpc connection", () => {
+  it("RPC_ADDRESS host/port equals wallet-rpc container_name and --rpc-bind-port", () => {
+    const config = makeConfig({
+      services: { ...makeConfig().services, isMoneroPay: true, isMoneroWalletRpc: true },
+    });
+    const services = generateAllServices(config);
+    const pay = services.moneropay.code.moneropay as ContainerSpec;
+    const walletRpc = services["monero-wallet-rpc"].code["monero-wallet-rpc"] as ContainerSpec;
+    const rpcAddress = String(pay.environment?.RPC_ADDRESS ?? "");
+    const url = new URL(rpcAddress);
+    expect(url.hostname).toBe(walletRpc.container_name);
+    const bindPort = cmd(walletRpc)
+      .find((a) => a.startsWith("--rpc-bind-port="))
+      ?.split("=")[1];
+    expect(url.port).toBe(bindPort);
+    expect(url.pathname).toBe("/json_rpc");
   });
 });
 
@@ -469,5 +605,22 @@ describe("architecture filtering", () => {
     const names = checkedServicesForArch("linux/amd64").map((s) => s.name);
     expect(names).toContain("Monitoring");
     expect(names).toContain("XMRig");
+  });
+
+  it("drops XMRig Proxy on linux/arm64 and keeps it on linux/amd64", () => {
+    const withProxy = (architecture: FullConfig["architecture"]) =>
+      Object.values(
+        generateAllServices(
+          makeConfig({ architecture, services: { ...makeConfig().services, isXmrigProxy: true } })
+        )
+      ).filter(
+        (s) =>
+          s.checked !== false &&
+          s.checked !== "none" &&
+          s.architecture?.includes(architecture)
+      ).map((s) => s.name);
+
+    expect(withProxy("linux/arm64")).not.toContain("XMRig Proxy");
+    expect(withProxy("linux/amd64")).toContain("XMRig Proxy");
   });
 });

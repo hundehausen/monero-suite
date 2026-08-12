@@ -22,6 +22,7 @@ export const SERVICE_IPS = {
 export const MONEROD_PORTS = {
   p2p: 18080,
   rpcUnrestricted: 18081,
+  zmqRpc: 18082,
   zmqPub: 18083,
   torP2p: 18084,
   rpcRestricted: 18089,
@@ -46,6 +47,10 @@ export const P2POOL_PORTS = {
 export const SERVICE_PORTS = {
   grafana: 3000,
   moneroWalletRpc: 18082,
+  moneroLws: 8443,
+  moneroLwsAdmin: 8081,
+  moneroPay: 5000,
+  xmrigProxy: 3334,
   portainer: 9000,
   portainerSsl: 9443,
   traefikHttp: 80,
@@ -74,4 +79,10 @@ export const DOCKER_IMAGES = {
   xmrig: "ghcr.io/metal3d/xmrig:latest",
   portainer: "portainer/portainer-ce:latest",
   cuprate: "ghcr.io/hundehausen/cuprate-docker:latest",
+  moneroLws: "ghcr.io/vtnerd/monero-lws:latest",
+  moneroPay: "registry.gitlab.com/moneropay/moneropay:v2",
+  xmrigProxy: "xmrig/xmrig-proxy:latest",
 } as const;
+
+export const LWS_TRAEFIK_DEFAULT_DOMAIN = "lws.example.com" as const;
+export const MONEROPAY_TRAEFIK_DEFAULT_DOMAIN = "pay.example.com" as const;
