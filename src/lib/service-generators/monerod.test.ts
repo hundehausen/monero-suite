@@ -204,7 +204,12 @@ describe("getZmqPubPort", () => {
 
 const runFull = (
   overrides: Partial<typeof baseState> = {},
-  opts: { networkMode?: (typeof networkModes)[keyof typeof networkModes]; p2PoolMode?: (typeof p2poolModes)[keyof typeof p2poolModes]; isMonitoring?: boolean } = {}
+  opts: {
+    networkMode?: (typeof networkModes)[keyof typeof networkModes];
+    p2PoolMode?: (typeof p2poolModes)[keyof typeof p2poolModes];
+    isMonitoring?: boolean;
+    isMoneroLws?: boolean;
+  } = {}
 ): Service =>
   createMonerodService(
     { ...baseState, ...overrides } as Parameters<typeof createMonerodService>[0],
@@ -212,7 +217,7 @@ const runFull = (
     opts.p2PoolMode ?? p2poolModes.none,
     "none",
     opts.isMonitoring ?? false,
-    false,
+    opts.isMoneroLws ?? false,
     false,
     false
   ) as Service;
@@ -276,6 +281,18 @@ describe("getMonerodP2pPortCollisions", () => {
   it("returns no collision for a malformed p2p port (falls back to the default 18080)", () => {
     expect(getMonerodP2pPortCollisions("abc", false, "18083", "none", false)).toEqual([]);
     expect(getMonerodP2pPortCollisions("", false, "18083", "none", false)).toEqual([]);
+  });
+});
+
+describe("monerod ZMQ when monero-lws is enabled", () => {
+  it("binds ZMQ RPC and enables ZMQ pub (not --no-zmq)", () => {
+    const monerod = runFull({}, { isMoneroLws: true }).code.monerod as Container;
+    const command = cmd(monerod);
+    expect(command).toContain("--zmq-rpc-bind-ip=0.0.0.0");
+    expect(command).toContain(`--zmq-rpc-bind-port=${MONEROD_PORTS.zmqRpc}`);
+    expect(command).toContain("--confirm-zmq-rpc-external-bind");
+    expect(command.some((a) => a.startsWith("--zmq-pub="))).toBe(true);
+    expect(command).not.toContain("--no-zmq");
   });
 });
 
