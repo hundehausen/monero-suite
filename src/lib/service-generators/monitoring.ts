@@ -20,7 +20,7 @@ export const createMonitoringService = (
       "Visualize your node's performance with Grafana dashboards. View blockchain stats, network peers on a world map, and system metrics in real-time.",
     checked: isMonitoring,
     required: false,
-    architecture: [architectures.linuxAmd],
+    architecture: [architectures.linuxAmd, architectures.linuxArm],
     volumes: {
       grafana: {},
       prometheus: {},

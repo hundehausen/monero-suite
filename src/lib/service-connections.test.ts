@@ -449,3 +449,25 @@ describe("compose-wide invariants (all services enabled)", () => {
     }
   });
 });
+
+const checkedServicesForArch = (architecture: FullConfig["architecture"]): Service[] =>
+  Object.values(generateAllServices(makeConfig({ architecture }))).filter(
+    (s) =>
+      s.checked !== false &&
+      s.checked !== "none" &&
+      s.architecture?.includes(architecture)
+  );
+
+describe("architecture filtering", () => {
+  it("keeps monitoring on linux/arm64 and still drops XMRig", () => {
+    const names = checkedServicesForArch("linux/arm64").map((s) => s.name);
+    expect(names).toContain("Monitoring");
+    expect(names).not.toContain("XMRig");
+  });
+
+  it("keeps both monitoring and XMRig on linux/amd64", () => {
+    const names = checkedServicesForArch("linux/amd64").map((s) => s.name);
+    expect(names).toContain("Monitoring");
+    expect(names).toContain("XMRig");
+  });
+});
