@@ -85,6 +85,8 @@ const configA: FullConfig = {
     hsStagenet: false,
     hsP2Pool: false,
     hsGrafana: false,
+    hsLws: false,
+    hsMoneroPay: false,
     isGlobalTorProxy: false,
   },
   services: {
@@ -100,6 +102,13 @@ const configA: FullConfig = {
     isPortainer: false,
     portainerDomain: "portainer.example.com",
     isCuprateEnabled: false,
+    isMoneroLws: false,
+    isMoneroPay: false,
+    isXmrigProxy: false,
+    isTraefikLws: false,
+    isTraefikMoneroPay: false,
+    lwsDomain: "lws.example.com",
+    moneroPayDomain: "pay.example.com",
   },
   enabledBashServices: { monitoring: false, cuprate: false },
 };

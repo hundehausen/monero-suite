@@ -185,6 +185,8 @@ export default function Main() {
       hsStagenet: stateFunctions.hsStagenet,
       hsP2Pool: stateFunctions.hsP2Pool,
       hsGrafana: stateFunctions.hsGrafana,
+      hsLws: false,
+      hsMoneroPay: false,
       isGlobalTorProxy: stateFunctions.isGlobalTorProxy,
     },
     services: {
@@ -200,6 +202,13 @@ export default function Main() {
       isPortainer: stateFunctions.isPortainer,
       portainerDomain: stateFunctions.portainerDomain,
       isCuprateEnabled: stateFunctions.isCuprateEnabled,
+      isMoneroLws: false,
+      isMoneroPay: false,
+      isXmrigProxy: false,
+      isTraefikLws: false,
+      isTraefikMoneroPay: false,
+      lwsDomain: "lws.example.com",
+      moneroPayDomain: "pay.example.com",
     },
     enabledBashServices,
   }), [stateFunctions, enabledBashServices]);

@@ -1,7 +1,7 @@
 import type { FullConfig } from "@/lib/config-schema";
 import type { ServiceMap } from "@/hooks/services/types";
-import { p2poolModes } from "@/hooks/services/types";
 import { MONEROD_PORTS } from "@/lib/constants";
+import { stackNeedsZmq } from "@/lib/stack-needs-zmq";
 import { getZmqPubPort, createMonerodService } from "./monerod";
 import { createMonerodStagenetService } from "./monerod-stagenet";
 import { createP2PoolService } from "./p2pool";
@@ -28,11 +28,11 @@ export function generateAllServices(config: FullConfig): ServiceMap {
     getZmqPubPort(
       config.monerod.zmqPubEnabled,
       config.monerod.zmqPubBindPort,
-      p2pool.p2PoolMode !== p2poolModes.none || services.isMonitoring
+      stackNeedsZmq(p2pool.p2PoolMode, services.isMonitoring, services.isMoneroLws)
     ) ?? MONEROD_PORTS.zmqPub;
 
   const servicesMap: ServiceMap = {
-    monerod: createMonerodService(config.monerod, networkMode, p2pool.p2PoolMode, tor.torProxyMode, services.isMonitoring, tor.hsMonerod || tor.hsMonerodP2P || tor.hsStagenet || tor.hsP2Pool || tor.hsGrafana, isTraefik && services.isTraefikMonerod, CERT_RESOLVER_NAME),
+    monerod: createMonerodService(config.monerod, networkMode, p2pool.p2PoolMode, tor.torProxyMode, services.isMonitoring, services.isMoneroLws, tor.hsMonerod || tor.hsMonerodP2P || tor.hsStagenet || tor.hsP2Pool || tor.hsGrafana, isTraefik && services.isTraefikMonerod, CERT_RESOLVER_NAME),
     "monerod-stagenet": createMonerodStagenetService(config.stagenet, config.monerod.moneroNodeNoLogs, networkMode, isTraefik && services.isTraefikStagenet, CERT_RESOLVER_NAME, tor.torProxyMode),
     p2pool: createP2PoolService(p2pool, mining.miningMode, tor.torProxyMode, networkMode, zmqPubPort),
     "monero-wallet-rpc": createMoneroWalletRpcService(services.isMoneroWalletRpc, networkMode, tor.torProxyMode),

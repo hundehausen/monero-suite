@@ -1,4 +1,4 @@
-import { Service, architectures, networkModes, p2poolModes, torProxyModes, NetworkMode, TorProxyMode, P2PoolMode } from "@/hooks/services/types";
+import { Service, architectures, networkModes, torProxyModes, NetworkMode, TorProxyMode, P2PoolMode } from "@/hooks/services/types";
 import { TOR_IP, MONEROD_IP } from "@/lib/service-constants";
 import {
   safeParse,
@@ -13,6 +13,7 @@ import {
 } from "@/lib/schemas";
 import { DOCKER_IMAGES, MONEROD_PORTS } from "@/lib/constants";
 import { getTraefikConfig, getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
+import { stackNeedsZmq } from "@/lib/stack-needs-zmq";
 
 /**
  * The port monerod actually binds ZMQ pub to — the single source of truth that
@@ -53,7 +54,8 @@ export const getMonerodP2pPortCollisions = (
   zmqPubEnabled: boolean,
   zmqPubBindPort: string,
   p2PoolMode: P2PoolMode,
-  isMonitoring: boolean
+  isMonitoring: boolean,
+  isMoneroLws: boolean = false
 ): number[] => {
   const effectiveP2pPort = Number(
     safeParse(numericStringSchema, p2pBindPort, String(MONEROD_PORTS.p2p))
@@ -61,9 +63,13 @@ export const getMonerodP2pPortCollisions = (
   const zmqPubPort = getZmqPubPort(
     zmqPubEnabled,
     zmqPubBindPort,
-    p2PoolMode !== p2poolModes.none || isMonitoring
+    stackNeedsZmq(p2PoolMode, isMonitoring, isMoneroLws)
   );
-  const occupied: number[] = [MONEROD_PORTS.rpcUnrestricted, MONEROD_PORTS.rpcRestricted];
+  const occupied: number[] = [
+    MONEROD_PORTS.rpcUnrestricted,
+    MONEROD_PORTS.rpcRestricted,
+  ];
+  if (isMoneroLws) occupied.push(MONEROD_PORTS.zmqRpc);
   if (zmqPubPort !== null) occupied.push(zmqPubPort);
   return [...new Set(occupied.filter((port) => port === effectiveP2pPort))];
 };
@@ -82,12 +88,13 @@ export const getMonerodZmqPortCollisions = (
   zmqPubBindPort: string,
   p2PoolMode: P2PoolMode,
   isMonitoring: boolean,
-  p2pBindPort: string
+  p2pBindPort: string,
+  isMoneroLws: boolean = false
 ): number[] => {
   const zmqPubPort = getZmqPubPort(
     zmqPubEnabled,
     zmqPubBindPort,
-    p2PoolMode !== p2poolModes.none || isMonitoring
+    stackNeedsZmq(p2PoolMode, isMonitoring, isMoneroLws)
   );
   if (zmqPubPort === null) return [];
   const effectiveP2pPort = Number(
@@ -98,6 +105,7 @@ export const getMonerodZmqPortCollisions = (
     MONEROD_PORTS.rpcRestricted,
     effectiveP2pPort,
   ];
+  if (isMoneroLws) occupied.push(MONEROD_PORTS.zmqRpc);
   return [...new Set(occupied.filter((port) => port === zmqPubPort))];
 };
 
@@ -176,6 +184,7 @@ export const createMonerodService = (
   p2PoolMode: P2PoolMode,
   torProxyMode: TorProxyMode,
   isMonitoring: boolean,
+  isMoneroLws: boolean = false,
   isHiddenServices: boolean,
   isTraefik: boolean,
   certResolverName: string = "monerosuite"
@@ -267,7 +276,7 @@ export const createMonerodService = (
   const zmqPubPort = getZmqPubPort(
     zmqPubEnabled,
     zmqPubBindPort,
-    p2PoolMode !== p2poolModes.none || isMonitoring
+    stackNeedsZmq(p2PoolMode, isMonitoring, isMoneroLws)
   );
 
   return {
@@ -356,6 +365,13 @@ export const createMonerodService = (
           ...(zmqPubPort === null
             ? ["--no-zmq"]
             : [`--zmq-pub=tcp://0.0.0.0:${zmqPubPort}`]),
+          ...(isMoneroLws
+            ? [
+                `--zmq-rpc-bind-ip=0.0.0.0`,
+                `--zmq-rpc-bind-port=${MONEROD_PORTS.zmqRpc}`,
+                `--confirm-zmq-rpc-external-bind`,
+              ]
+            : []),
           ...(sRpcLogin ? [`--rpc-login=${sRpcLogin}`] : []),
           ...(disableRpcBan || isHiddenServices ? ["--disable-rpc-ban"] : []),
           ...(sBlockNotify ? [`--block-notify=${sBlockNotify}`] : []),

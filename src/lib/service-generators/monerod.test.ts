@@ -100,6 +100,7 @@ const run = (overrides: PeerOverrides = {}): string[] =>
         "none",
         false,
         false,
+        false,
         false
       ) as Service
     ).code.monerod as Container
@@ -211,6 +212,7 @@ const runFull = (
     opts.p2PoolMode ?? p2poolModes.none,
     "none",
     opts.isMonitoring ?? false,
+    false,
     false,
     false
   ) as Service;
