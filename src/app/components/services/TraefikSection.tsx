@@ -8,6 +8,7 @@ import {
   useStagenetState,
   useMonitoringState,
   usePortainerState,
+  useMoneroLwsState,
 } from "@/hooks/services-context";
 import AccordionItemComponent from "./AccordionItemComponent";
 
@@ -19,11 +20,13 @@ const TraefikSection = () => {
     isTraefikStagenet, setIsTraefikStagenet,
     isTraefikGrafana, setIsTraefikGrafana,
     isTraefikPortainer, setIsTraefikPortainer,
+    isTraefikLws, setIsTraefikLws,
   } = useTraefikState();
   const { isMoneroPublicNode, moneroNodeDomain, setMoneroNodeDomain } = useMonerodState();
   const { isStagenetNode, isStagenetNodePublic, stagenetNodeDomain, setStagenetNodeDomain } = useStagenetState();
   const { isMonitoring, grafanaDomain, setGrafanaDomain } = useMonitoringState();
   const { isPortainer, portainerDomain, setPortainerDomain } = usePortainerState();
+  const { isMoneroLws, lwsDomain, setLwsDomain } = useMoneroLwsState();
 
   const domainInputs = [
     {
@@ -65,6 +68,16 @@ const TraefikSection = () => {
       onChange: setPortainerDomain,
       isEnabled: isTraefikPortainer,
       setIsEnabled: setIsTraefikPortainer,
+    },
+    {
+      show: isMoneroLws,
+      checkboxLabel: "Light Wallet Server",
+      inputLabel: "Light Wallet Server Domain",
+      description: "The domain where your Light Wallet Server REST API will be available.",
+      value: lwsDomain,
+      onChange: setLwsDomain,
+      isEnabled: isTraefikLws,
+      setIsEnabled: setIsTraefikLws,
     },
   ];
 

@@ -106,6 +106,7 @@ export function useTorState(): TorState {
     hsStagenet: s.hsStagenet, setHsStagenet: s.setHsStagenet,
     hsP2Pool: s.hsP2Pool, setHsP2Pool: s.setHsP2Pool,
     hsGrafana: s.hsGrafana, setHsGrafana: s.setHsGrafana,
+    hsLws: s.hsLws, setHsLws: s.setHsLws,
     isGlobalTorProxy: s.isGlobalTorProxy, setIsGlobalTorProxy: s.setIsGlobalTorProxy,
   };
 }
@@ -139,6 +140,7 @@ export function useTraefikState(): TraefikState {
     isTraefikStagenet: s.isTraefikStagenet, setIsTraefikStagenet: s.setIsTraefikStagenet,
     isTraefikGrafana: s.isTraefikGrafana, setIsTraefikGrafana: s.setIsTraefikGrafana,
     isTraefikPortainer: s.isTraefikPortainer, setIsTraefikPortainer: s.setIsTraefikPortainer,
+    isTraefikLws: s.isTraefikLws, setIsTraefikLws: s.setIsTraefikLws,
   };
 }
 
@@ -171,5 +173,6 @@ export function useHasDefaultDomain(): boolean {
     s.isStagenetNode && s.isStagenetNodePublic && s.isTraefikStagenet && s.stagenetNodeDomain,
     s.isMonitoring && s.isTraefikGrafana && s.grafanaDomain,
     s.isPortainer && s.isTraefikPortainer && s.portainerDomain,
+    s.isMoneroLws && s.isTraefikLws && s.lwsDomain,
   ].some((d) => typeof d === "string" && d.includes("example.com"));
 }

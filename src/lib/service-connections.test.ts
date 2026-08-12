@@ -350,6 +350,20 @@ describe("tor connections", () => {
       expect(ip.startsWith(`${subnetPrefix}.`)).toBe(true);
     }
   });
+
+  it("LWS hidden service forwards the REST port monero-lws actually binds", () => {
+    const config = makeConfig({
+      services: { ...makeConfig().services, isMoneroLws: true },
+      tor: { ...makeConfig().tor, hsLws: true },
+    });
+    const services = generateAllServices(config);
+    const lws = services["monero-lws"].code["monero-lws"] as ContainerSpec;
+    const tor = services.tor.code.tor as ContainerSpec;
+    expect(lws.command).toContain(`--rest-server=http://0.0.0.0:${SERVICE_PORTS.moneroLws}`);
+    expect(tor.environment?.HS_MONERO_LWS).toBe(
+      `monero-lws:${SERVICE_PORTS.moneroLws}:${SERVICE_PORTS.moneroLws}`
+    );
+  });
 });
 
 describe("traefik connections", () => {

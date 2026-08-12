@@ -22,6 +22,8 @@ const TorSection = () => {
     setHsP2Pool,
     hsGrafana,
     setHsGrafana,
+    hsLws,
+    setHsLws,
     isGlobalTorProxy,
     setIsGlobalTorProxy,
   } = useTorState();
@@ -170,6 +172,13 @@ const TorSection = () => {
                 checked={hsGrafana}
                 label="Grafana (Monitoring Dashboard)"
                 onChange={(event) => setHsGrafana(event.currentTarget.checked)}
+              />
+            )}
+            {services["monero-lws"]?.checked && (
+              <Checkbox
+                checked={hsLws}
+                label="Light Wallet Server (REST API)"
+                onChange={(event) => setHsLws(event.currentTarget.checked)}
               />
             )}
           </Stack>

@@ -33,11 +33,11 @@ export function generateAllServices(config: FullConfig): ServiceMap {
     ) ?? MONEROD_PORTS.zmqPub;
 
   const servicesMap: ServiceMap = {
-    monerod: createMonerodService(config.monerod, networkMode, p2pool.p2PoolMode, tor.torProxyMode, services.isMonitoring, services.isMoneroLws, tor.hsMonerod || tor.hsMonerodP2P || tor.hsStagenet || tor.hsP2Pool || tor.hsGrafana, isTraefik && services.isTraefikMonerod, CERT_RESOLVER_NAME),
+    monerod: createMonerodService(config.monerod, networkMode, p2pool.p2PoolMode, tor.torProxyMode, services.isMonitoring, services.isMoneroLws, tor.hsMonerod || tor.hsMonerodP2P || tor.hsStagenet || tor.hsP2Pool || tor.hsGrafana || tor.hsLws, isTraefik && services.isTraefikMonerod, CERT_RESOLVER_NAME),
     "monerod-stagenet": createMonerodStagenetService(config.stagenet, config.monerod.moneroNodeNoLogs, networkMode, isTraefik && services.isTraefikStagenet, CERT_RESOLVER_NAME, tor.torProxyMode),
     p2pool: createP2PoolService(p2pool, mining.miningMode, tor.torProxyMode, networkMode, zmqPubPort),
     "monero-wallet-rpc": createMoneroWalletRpcService(services.isMoneroWalletRpc, networkMode, tor.torProxyMode),
-    tor: createTorService(tor, networkMode, config.stagenet.isStagenetNode, p2pool.p2PoolMode, services.isMonitoring),
+    tor: createTorService(tor, networkMode, config.stagenet.isStagenetNode, p2pool.p2PoolMode, services.isMonitoring, services.isMoneroLws),
     watchtower: createWatchtowerService(services.isWatchtower),
     monitoring: createMonitoringService(services.isMonitoring, services.grafanaDomain, networkMode, isTraefik && services.isTraefikGrafana, CERT_RESOLVER_NAME, tor.torProxyMode),
     xmrig: createXmrigService(mining.miningMode, mining.xmrigDonateLevel, tor.torProxyMode, p2pool.p2PoolMode),

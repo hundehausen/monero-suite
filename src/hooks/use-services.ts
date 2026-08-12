@@ -65,6 +65,7 @@ export const useServices = () => {
     isTraefikStagenet,
     isTraefikGrafana,
     isTraefikPortainer,
+    isTraefikLws,
   } = traefikService.stateFunctions;
   const { isMonitoring, grafanaDomain, setGrafanaDomain } = monitoringService.stateFunctions;
   const { p2PoolMode } = p2PoolService.stateFunctions;
@@ -136,7 +137,8 @@ export const useServices = () => {
       networkMode,
       monerodStagenetService.stateFunctions.isStagenetNode,
       p2PoolService.stateFunctions.p2PoolMode,
-      isMonitoring
+      isMonitoring,
+      isMoneroLws
     ),
     watchtower: watchtowerService.getWatchtowerService(),
     monitoring: monitoringService.getMonitoringService(
@@ -162,7 +164,7 @@ export const useServices = () => {
     ),
     "monero-lws": moneroLwsService.getMoneroLwsService(
       networkMode,
-      isTraefik && false,
+      isTraefik && isTraefikLws,
       CERT_RESOLVER_NAME,
       torService.stateFunctions.torProxyMode,
       zmqPubPort

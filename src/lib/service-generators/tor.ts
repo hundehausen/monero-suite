@@ -10,6 +10,7 @@ interface TorDataConfig {
   hsStagenet: boolean;
   hsP2Pool: boolean;
   hsGrafana: boolean;
+  hsLws: boolean;
   isGlobalTorProxy: boolean;
 }
 
@@ -18,7 +19,8 @@ export const createTorService = (
   networkMode: NetworkMode,
   isStagenetNode: boolean = false,
   p2PoolMode: P2PoolMode = p2poolModes.none,
-  isMonitoring: boolean = false
+  isMonitoring: boolean = false,
+  isMoneroLws: boolean = false
 ): Service => {
   const {
     torProxyMode,
@@ -27,10 +29,11 @@ export const createTorService = (
     hsStagenet,
     hsP2Pool,
     hsGrafana,
+    hsLws,
     isGlobalTorProxy,
   } = state;
 
-  const isHiddenServices = hsMonerod || hsMonerodP2P || hsStagenet || hsP2Pool || hsGrafana;
+  const isHiddenServices = hsMonerod || hsMonerodP2P || hsStagenet || hsP2Pool || hsGrafana || hsLws;
   const isTorEnabled = torProxyMode !== torProxyModes.none || isHiddenServices;
   const isProxyEnabled = torProxyMode !== torProxyModes.none;
 
@@ -107,6 +110,9 @@ export const createTorService = (
         : {}),
       ...(hsGrafana && isMonitoring
         ? { HS_GRAFANA: `grafana:${SERVICE_PORTS.grafana}:80` }
+        : {}),
+      ...(hsLws && isMoneroLws
+        ? { HS_MONERO_LWS: `monero-lws:${SERVICE_PORTS.moneroLws}:${SERVICE_PORTS.moneroLws}` }
         : {}),
     };
   }

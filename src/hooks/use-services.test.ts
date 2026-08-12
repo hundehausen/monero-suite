@@ -86,7 +86,7 @@ vi.mock("./services", async () => {
     }),
     useTorService: () => ({
       getTorService: () => stub(false),
-      stateFunctions: { torProxyMode: "none", isHiddenServices: false },
+      stateFunctions: { torProxyMode: "none", isHiddenServices: false, hsLws: false },
     }),
     useWatchtowerService: () => ({
       getWatchtowerService: () => stub(false),
@@ -96,7 +96,7 @@ vi.mock("./services", async () => {
     useXmrigService,
     useTraefikService: () => ({
       getTraefikService: () => stub(false),
-      stateFunctions: { isTraefik: false, isTraefikMonerod: false, isTraefikStagenet: false, isTraefikGrafana: false, isTraefikPortainer: false },
+      stateFunctions: { isTraefik: false, isTraefikMonerod: false, isTraefikStagenet: false, isTraefikGrafana: false, isTraefikPortainer: false, isTraefikLws: false },
     }),
     usePortainerService: () => ({
       getPortainerService: () => stub(false),
