@@ -4,6 +4,7 @@ export { default as MoneroNodeSection } from "./MoneroNodeSection";
 export { default as StagenetNodeSection } from "./StagenetNodeSection";
 export { default as MoneroWalletRpcSection } from "./MoneroWalletRpcSection";
 export { default as P2PoolSection } from "./P2PoolSection";
+export { default as XmrigProxySection } from "./XmrigProxySection";
 export { default as TraefikSection } from "./TraefikSection";
 export { default as TorSection } from "./TorSection";
 export { default as MonitoringSection } from "./MonitoringSection";

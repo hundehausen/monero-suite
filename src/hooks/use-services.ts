@@ -17,6 +17,7 @@ import {
   useWatchtowerService,
   useMonitoringService,
   useXmrigService,
+  useXmrigProxyService,
   useTraefikService,
   usePortainerService,
   useCuprateService,
@@ -54,6 +55,7 @@ export const useServices = () => {
   const watchtowerService = useWatchtowerService();
   const monitoringService = useMonitoringService();
   const xmrigService = useXmrigService();
+  const xmrigProxyService = useXmrigProxyService();
   const traefikService = useTraefikService();
   const portainerService = usePortainerService();
   const cuprateService = useCuprateService();
@@ -73,6 +75,7 @@ export const useServices = () => {
   const { isMonitoring, grafanaDomain, setGrafanaDomain } = monitoringService.stateFunctions;
   const { p2PoolMode } = p2PoolService.stateFunctions;
   const { miningMode, setMiningMode } = xmrigService.stateFunctions;
+  const { isXmrigProxy, setIsXmrigProxy } = xmrigProxyService.stateFunctions;
   const { isPrunedNode, isSyncPrunedBlocks } = monerodService.stateFunctions;
   const { isMoneroLws } = moneroLwsService.stateFunctions;
   const { isMoneroPay } = moneroPayService.stateFunctions;
@@ -95,6 +98,14 @@ export const useServices = () => {
       setMiningMode("none");
     }
   }, [p2PoolMode, miningMode, setMiningMode]);
+
+  // Proxy requires P2Pool (it upstreams to p2pool stratum). Reset when
+  // P2Pool is turned off so a stale proxy toggle isn't silently kept.
+  useEffect(() => {
+    if (p2PoolMode === "none" && isXmrigProxy) {
+      setIsXmrigProxy(false);
+    }
+  }, [p2PoolMode, isXmrigProxy, setIsXmrigProxy]);
 
   // Should remove sync-pruned-blocks flag, if user switches from pruned node to full node
   useEffect(() => {
@@ -152,7 +163,8 @@ export const useServices = () => {
       p2PoolService.stateFunctions.p2PoolMode,
       isMonitoring,
       isMoneroLws,
-      isMoneroPay
+      isMoneroPay,
+      isXmrigProxy
     ),
     watchtower: watchtowerService.getWatchtowerService(),
     monitoring: monitoringService.getMonitoringService(
@@ -163,7 +175,13 @@ export const useServices = () => {
     ),
     xmrig: xmrigService.getXmrigService(
       torService.stateFunctions.torProxyMode,
-      p2PoolService.stateFunctions.p2PoolMode
+      p2PoolService.stateFunctions.p2PoolMode,
+      isXmrigProxy
+    ),
+    "xmrig-proxy": xmrigProxyService.getXmrigProxyService(
+      p2PoolService.stateFunctions.p2PoolMode,
+      networkMode,
+      torService.stateFunctions.torProxyMode
     ),
     traefik: traefikService.getTraefikService(
       torService.stateFunctions.torProxyMode
@@ -211,6 +229,7 @@ export const useServices = () => {
     ...watchtowerService.stateFunctions,
     ...monitoringService.stateFunctions,
     ...xmrigService.stateFunctions,
+    ...xmrigProxyService.stateFunctions,
     ...traefikService.stateFunctions,
     ...portainerService.stateFunctions,
     ...cuprateService.stateFunctions,

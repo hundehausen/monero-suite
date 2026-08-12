@@ -191,6 +191,7 @@ export default function Main() {
       hsGrafana: stateFunctions.hsGrafana,
       hsLws: stateFunctions.hsLws,
       hsMoneroPay: stateFunctions.hsMoneroPay,
+      hsXmrigProxy: stateFunctions.hsXmrigProxy,
       isGlobalTorProxy: stateFunctions.isGlobalTorProxy,
     },
     services: {
@@ -208,7 +209,8 @@ export default function Main() {
       isCuprateEnabled: stateFunctions.isCuprateEnabled,
       isMoneroLws: stateFunctions.isMoneroLws,
       isMoneroPay: stateFunctions.isMoneroPay,
-      isXmrigProxy: false,
+      isXmrigProxy: stateFunctions.isXmrigProxy,
+      isXmrigProxyPublic: stateFunctions.isXmrigProxyPublic,
       isTraefikLws: stateFunctions.isTraefikLws,
       isTraefikMoneroPay: stateFunctions.isTraefikMoneroPay,
       lwsDomain: stateFunctions.lwsDomain,

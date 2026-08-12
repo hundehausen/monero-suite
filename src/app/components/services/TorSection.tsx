@@ -26,6 +26,8 @@ const TorSection = () => {
     setHsLws,
     hsMoneroPay,
     setHsMoneroPay,
+    hsXmrigProxy,
+    setHsXmrigProxy,
     isGlobalTorProxy,
     setIsGlobalTorProxy,
   } = useTorState();
@@ -188,6 +190,13 @@ const TorSection = () => {
                 checked={hsMoneroPay}
                 label="MoneroPay API"
                 onChange={(event) => setHsMoneroPay(event.currentTarget.checked)}
+              />
+            )}
+            {services["xmrig-proxy"]?.checked && (
+              <Checkbox
+                checked={hsXmrigProxy}
+                label="XMRig-proxy (Stratum)"
+                onChange={(event) => setHsXmrigProxy(event.currentTarget.checked)}
               />
             )}
           </Stack>

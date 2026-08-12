@@ -97,6 +97,19 @@ vi.mock("./services", async () => {
     }),
     useMonitoringService,
     useXmrigService,
+    useXmrigProxyService: () => {
+      const [isXmrigProxy, setIsXmrigProxy] = React.useState(false);
+      const [isXmrigProxyPublic, setIsXmrigProxyPublic] = React.useState(false);
+      return {
+        getXmrigProxyService: () => stub(isXmrigProxy),
+        stateFunctions: {
+          isXmrigProxy,
+          setIsXmrigProxy,
+          isXmrigProxyPublic,
+          setIsXmrigProxyPublic,
+        },
+      };
+    },
     useTraefikService: () => ({
       getTraefikService: () => stub(false),
       stateFunctions: { isTraefik: false, isTraefikMonerod: false, isTraefikStagenet: false, isTraefikGrafana: false, isTraefikPortainer: false, isTraefikLws: false, isTraefikMoneroPay: false },
@@ -196,6 +209,23 @@ describe("useServices monero-lws wiring", () => {
     };
     expect(lws.command?.[0]).toContain(`tcp://monerod:`);
     expect(lws.command?.[0]).toContain(String(MONEROD_PORTS.zmqPub));
+  });
+});
+
+describe("useServices xmrig-proxy reset", () => {
+  it("enabling proxy while p2PoolMode is none is reset to false", () => {
+    const { result } = renderHook(() => useServices());
+
+    act(() => {
+      result.current.stateFunctions.setP2PoolMode("none");
+    });
+    expect(result.current.stateFunctions.p2PoolMode).toBe("none");
+
+    act(() => {
+      result.current.stateFunctions.setIsXmrigProxy(true);
+    });
+
+    expect(result.current.stateFunctions.isXmrigProxy).toBe(false);
   });
 });
 

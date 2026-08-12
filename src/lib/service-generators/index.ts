@@ -10,6 +10,7 @@ import { createTorService } from "./tor";
 import { createWatchtowerService } from "./watchtower";
 import { createMonitoringService } from "./monitoring";
 import { createXmrigService } from "./xmrig";
+import { createXmrigProxyService } from "./xmrig-proxy";
 import { createTraefikService } from "./traefik";
 import { createPortainerService } from "./portainer";
 import { createCuprateService } from "./cuprate";
@@ -38,10 +39,11 @@ export function generateAllServices(config: FullConfig): ServiceMap {
     "monerod-stagenet": createMonerodStagenetService(config.stagenet, config.monerod.moneroNodeNoLogs, networkMode, isTraefik && services.isTraefikStagenet, CERT_RESOLVER_NAME, tor.torProxyMode),
     p2pool: createP2PoolService(p2pool, mining.miningMode, tor.torProxyMode, networkMode, zmqPubPort),
     "monero-wallet-rpc": createMoneroWalletRpcService(services.isMoneroWalletRpc, networkMode, tor.torProxyMode),
-    tor: createTorService(tor, networkMode, config.stagenet.isStagenetNode, p2pool.p2PoolMode, services.isMonitoring, services.isMoneroLws, services.isMoneroPay),
+    tor: createTorService(tor, networkMode, config.stagenet.isStagenetNode, p2pool.p2PoolMode, services.isMonitoring, services.isMoneroLws, services.isMoneroPay, services.isXmrigProxy),
     watchtower: createWatchtowerService(services.isWatchtower),
     monitoring: createMonitoringService(services.isMonitoring, services.grafanaDomain, networkMode, isTraefik && services.isTraefikGrafana, CERT_RESOLVER_NAME, tor.torProxyMode),
-    xmrig: createXmrigService(mining.miningMode, mining.xmrigDonateLevel, tor.torProxyMode, p2pool.p2PoolMode),
+    xmrig: createXmrigService(mining.miningMode, mining.xmrigDonateLevel, tor.torProxyMode, p2pool.p2PoolMode, services.isXmrigProxy),
+    "xmrig-proxy": createXmrigProxyService(services.isXmrigProxy, p2pool.p2PoolMode, networkMode, services.isXmrigProxyPublic, tor.torProxyMode),
     traefik: createTraefikService(isTraefik, tor.torProxyMode),
     portainer: createPortainerService(services.isPortainer, services.portainerDomain, networkMode, isTraefik && services.isTraefikPortainer, CERT_RESOLVER_NAME),
     cuprate: createCuprateService(services.isCuprateEnabled, networkMode),

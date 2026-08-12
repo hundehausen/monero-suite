@@ -12,6 +12,7 @@ interface TorDataConfig {
   hsGrafana: boolean;
   hsLws: boolean;
   hsMoneroPay: boolean;
+  hsXmrigProxy: boolean;
   isGlobalTorProxy: boolean;
 }
 
@@ -22,7 +23,8 @@ export const createTorService = (
   p2PoolMode: P2PoolMode = p2poolModes.none,
   isMonitoring: boolean = false,
   isMoneroLws: boolean = false,
-  isMoneroPay: boolean = false
+  isMoneroPay: boolean = false,
+  isXmrigProxy: boolean = false
 ): Service => {
   const {
     torProxyMode,
@@ -33,10 +35,11 @@ export const createTorService = (
     hsGrafana,
     hsLws,
     hsMoneroPay,
+    hsXmrigProxy,
     isGlobalTorProxy,
   } = state;
 
-  const isHiddenServices = hsMonerod || hsMonerodP2P || hsStagenet || hsP2Pool || hsGrafana || hsLws || hsMoneroPay;
+  const isHiddenServices = hsMonerod || hsMonerodP2P || hsStagenet || hsP2Pool || hsGrafana || hsLws || hsMoneroPay || hsXmrigProxy;
   const isTorEnabled = torProxyMode !== torProxyModes.none || isHiddenServices;
   const isProxyEnabled = torProxyMode !== torProxyModes.none;
 
@@ -119,6 +122,9 @@ export const createTorService = (
         : {}),
       ...(hsMoneroPay && isMoneroPay
         ? { HS_MONEROPAY: `moneropay:${SERVICE_PORTS.moneroPay}:${SERVICE_PORTS.moneroPay}` }
+        : {}),
+      ...(hsXmrigProxy && isXmrigProxy
+        ? { HS_XMRIG_PROXY: `xmrig-proxy:${SERVICE_PORTS.xmrigProxy}:${SERVICE_PORTS.xmrigProxy}` }
         : {}),
     };
   }

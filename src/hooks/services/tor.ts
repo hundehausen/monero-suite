@@ -30,8 +30,9 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
   const [hsGrafana, setHsGrafana] = useQueryState("hsGrafana", parseAsBoolean.withDefault(false));
   const [hsLws, setHsLws] = useQueryState("hsLws", parseAsBoolean.withDefault(false));
   const [hsMoneroPay, setHsMoneroPay] = useQueryState("hsMoneroPay", parseAsBoolean.withDefault(false));
+  const [hsXmrigProxy, setHsXmrigProxy] = useQueryState("hsXmrigProxy", parseAsBoolean.withDefault(false));
 
-  const isHiddenServices = hsMonerod || hsMonerodP2P || hsStagenet || hsP2Pool || hsGrafana || hsLws || hsMoneroPay;
+  const isHiddenServices = hsMonerod || hsMonerodP2P || hsStagenet || hsP2Pool || hsGrafana || hsLws || hsMoneroPay || hsXmrigProxy;
 
   const [isGlobalTorProxy, setIsGlobalTorProxy] = useQueryState(
     "isGlobalTorProxy",
@@ -50,16 +51,18 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
     p2PoolMode: P2PoolMode = p2poolModes.none,
     isMonitoring: boolean = false,
     isMoneroLws: boolean = false,
-    isMoneroPay: boolean = false
+    isMoneroPay: boolean = false,
+    isXmrigProxy: boolean = false
   ): Service =>
     createTorService(
-      { torProxyMode, hsMonerod, hsMonerodP2P, hsStagenet, hsP2Pool, hsGrafana, hsLws, hsMoneroPay, isGlobalTorProxy },
+      { torProxyMode, hsMonerod, hsMonerodP2P, hsStagenet, hsP2Pool, hsGrafana, hsLws, hsMoneroPay, hsXmrigProxy, isGlobalTorProxy },
       networkMode,
       isStagenetNode,
       p2PoolMode,
       isMonitoring,
       isMoneroLws,
-      isMoneroPay
+      isMoneroPay,
+      isXmrigProxy
     );
 
   return {
@@ -82,6 +85,8 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
       setHsLws,
       hsMoneroPay,
       setHsMoneroPay,
+      hsXmrigProxy,
+      setHsXmrigProxy,
       isGlobalTorProxy,
       setIsGlobalTorProxy,
     },

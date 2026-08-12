@@ -245,6 +245,7 @@ const baseConfig = (): FullConfig => ({
       hsGrafana: false,
       hsLws: false,
       hsMoneroPay: false,
+      hsXmrigProxy: false,
       isGlobalTorProxy: false,
     },
     services: {
@@ -263,6 +264,7 @@ const baseConfig = (): FullConfig => ({
       isMoneroLws: false,
       isMoneroPay: false,
       isXmrigProxy: false,
+      isXmrigProxyPublic: false,
       isTraefikLws: false,
       isTraefikMoneroPay: false,
       lwsDomain: "lws.example.com",
