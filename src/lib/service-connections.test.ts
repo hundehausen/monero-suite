@@ -286,6 +286,47 @@ describe("xmrig-proxy <-> p2pool / xmrig connection", () => {
       `xmrig-proxy:${SERVICE_PORTS.xmrigProxy}:${SERVICE_PORTS.xmrigProxy}`
     );
   });
+
+  it("leaves xmrig-proxy unchecked when p2PoolMode is none even if the raw flag is true", () => {
+    const services = generateAllServices(
+      makeConfig({
+        p2pool: {
+          p2PoolMode: p2poolModes.none,
+          p2PoolPayoutAddress: "",
+          p2PoolMiningThreads: 1,
+          isP2PoolStratumPublic: false,
+        },
+        services: { ...makeConfig().services, isXmrigProxy: true, isXmrigProxyPublic: true },
+        tor: { ...makeConfig().tor, hsXmrigProxy: true },
+      })
+    );
+    expect(services["xmrig-proxy"].checked).toBe(false);
+    const xmrig = services.xmrig.code.xmrig as ContainerSpec;
+    expect(xmrig.environment?.POOL_URL).not.toBe(
+      `xmrig-proxy:${SERVICE_PORTS.xmrigProxy}`
+    );
+    expect(xmrig.depends_on?.["xmrig-proxy"]).toBeUndefined();
+    const tor = services.tor.code.tor as ContainerSpec;
+    expect(tor.environment?.HS_XMRIG_PROXY).toBeUndefined();
+  });
+
+  it("does not emit HS_XMRIG_PROXY or point xmrig at the proxy on arm64", () => {
+    const services = generateAllServices(
+      makeConfig({
+        architecture: "linux/arm64",
+        services: { ...makeConfig().services, isXmrigProxy: true },
+        tor: { ...makeConfig().tor, hsXmrigProxy: true },
+      })
+    );
+    expect(services["xmrig-proxy"].checked).toBe(false);
+    const xmrig = services.xmrig.code.xmrig as ContainerSpec;
+    expect(xmrig.environment?.POOL_URL).not.toBe(
+      `xmrig-proxy:${SERVICE_PORTS.xmrigProxy}`
+    );
+    expect(xmrig.depends_on?.["xmrig-proxy"]).toBeUndefined();
+    const tor = services.tor.code.tor as ContainerSpec;
+    expect(tor.environment?.HS_XMRIG_PROXY).toBeUndefined();
+  });
 });
 
 describe("monitoring stack connections", () => {

@@ -26,6 +26,7 @@ import {
   CERT_RESOLVER_NAME,
 } from "./services";
 import { getZmqPubPort } from "@/lib/service-generators/monerod";
+import { isXmrigProxyEffective } from "@/lib/service-generators/xmrig-proxy";
 import { MONEROD_PORTS } from "@/lib/constants";
 import { nextGrafanaDomain } from "@/lib/grafana-domain";
 import { stackNeedsZmq } from "@/lib/stack-needs-zmq";
@@ -75,7 +76,13 @@ export const useServices = () => {
   const { isMonitoring, grafanaDomain, setGrafanaDomain } = monitoringService.stateFunctions;
   const { p2PoolMode } = p2PoolService.stateFunctions;
   const { miningMode, setMiningMode } = xmrigService.stateFunctions;
-  const { isXmrigProxy, setIsXmrigProxy } = xmrigProxyService.stateFunctions;
+  const {
+    isXmrigProxy,
+    setIsXmrigProxy,
+    isXmrigProxyPublic,
+    setIsXmrigProxyPublic,
+  } = xmrigProxyService.stateFunctions;
+  const { hsXmrigProxy, setHsXmrigProxy } = torService.stateFunctions;
   const { isPrunedNode, isSyncPrunedBlocks } = monerodService.stateFunctions;
   const { isMoneroLws } = moneroLwsService.stateFunctions;
   const { isMoneroPay } = moneroPayService.stateFunctions;
@@ -99,13 +106,38 @@ export const useServices = () => {
     }
   }, [p2PoolMode, miningMode, setMiningMode]);
 
-  // Proxy requires P2Pool (it upstreams to p2pool stratum). Reset when
-  // P2Pool is turned off so a stale proxy toggle isn't silently kept.
+  // Proxy requires P2Pool (it upstreams to p2pool stratum) and amd64
+  // images. Reset the toggle plus public/HS flags so a stale selection
+  // cannot publish ports or point Tor at a container that was filtered out.
   useEffect(() => {
-    if (p2PoolMode === "none" && isXmrigProxy) {
-      setIsXmrigProxy(false);
-    }
-  }, [p2PoolMode, isXmrigProxy, setIsXmrigProxy]);
+    if (p2PoolMode !== "none") return;
+    if (isXmrigProxy) setIsXmrigProxy(false);
+    if (isXmrigProxyPublic) setIsXmrigProxyPublic(false);
+    if (hsXmrigProxy) setHsXmrigProxy(false);
+  }, [
+    p2PoolMode,
+    isXmrigProxy,
+    isXmrigProxyPublic,
+    hsXmrigProxy,
+    setIsXmrigProxy,
+    setIsXmrigProxyPublic,
+    setHsXmrigProxy,
+  ]);
+
+  useEffect(() => {
+    if (architecture === architectures.linuxAmd) return;
+    if (isXmrigProxy) setIsXmrigProxy(false);
+    if (isXmrigProxyPublic) setIsXmrigProxyPublic(false);
+    if (hsXmrigProxy) setHsXmrigProxy(false);
+  }, [
+    architecture,
+    isXmrigProxy,
+    isXmrigProxyPublic,
+    hsXmrigProxy,
+    setIsXmrigProxy,
+    setIsXmrigProxyPublic,
+    setHsXmrigProxy,
+  ]);
 
   // Should remove sync-pruned-blocks flag, if user switches from pruned node to full node
   useEffect(() => {
@@ -120,6 +152,12 @@ export const useServices = () => {
       setIsMoneroWalletRpc(true);
     }
   }, [isMoneroPay, isMoneroWalletRpc, setIsMoneroWalletRpc]);
+
+  const isXmrigProxyOn = isXmrigProxyEffective(
+    isXmrigProxy,
+    p2PoolMode,
+    architecture
+  );
 
   // The port monerod actually binds ZMQ on — consumers must follow it.
   const needsZmq = stackNeedsZmq(p2PoolMode, isMonitoring, isMoneroLws);
@@ -164,7 +202,7 @@ export const useServices = () => {
       isMonitoring,
       isMoneroLws,
       isMoneroPay,
-      isXmrigProxy
+      isXmrigProxyOn
     ),
     watchtower: watchtowerService.getWatchtowerService(),
     monitoring: monitoringService.getMonitoringService(
@@ -176,12 +214,13 @@ export const useServices = () => {
     xmrig: xmrigService.getXmrigService(
       torService.stateFunctions.torProxyMode,
       p2PoolService.stateFunctions.p2PoolMode,
-      isXmrigProxy
+      isXmrigProxyOn
     ),
     "xmrig-proxy": xmrigProxyService.getXmrigProxyService(
       p2PoolService.stateFunctions.p2PoolMode,
       networkMode,
-      torService.stateFunctions.torProxyMode
+      torService.stateFunctions.torProxyMode,
+      isXmrigProxyOn
     ),
     traefik: traefikService.getTraefikService(
       torService.stateFunctions.torProxyMode

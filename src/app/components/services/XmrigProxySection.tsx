@@ -21,6 +21,7 @@ const XmrigProxySection = () => {
   const isAmd64 = architecture === architectures.linuxAmd;
   const hasP2Pool = p2PoolMode !== "none";
   const enabled = hasP2Pool && isAmd64;
+  const proxyOn = isXmrigProxy && enabled;
   const description =
     services["xmrig-proxy"]?.description ??
     "Stratum proxy in front of your P2Pool node. Point many miners at one connection.";
@@ -29,7 +30,7 @@ const XmrigProxySection = () => {
     <AccordionItemComponent
       value="xmrig-proxy"
       title="XMRig-proxy"
-      checked={isXmrigProxy}
+      checked={proxyOn}
     >
       <Text size="sm">{description}</Text>
 
@@ -47,7 +48,7 @@ const XmrigProxySection = () => {
 
       <Checkbox
         mt="md"
-        checked={isXmrigProxy}
+        checked={proxyOn}
         disabled={!enabled}
         label={
           <Tooltip
@@ -66,7 +67,7 @@ const XmrigProxySection = () => {
         size="lg"
       />
 
-      {isXmrigProxy && enabled && (
+      {proxyOn && (
         <Checkbox
           mt="md"
           checked={isXmrigProxyPublic}

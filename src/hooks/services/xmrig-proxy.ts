@@ -21,10 +21,11 @@ export const useXmrigProxyService = () => {
   const getXmrigProxyService = (
     p2PoolMode: P2PoolMode,
     networkMode: NetworkMode,
-    torProxyMode: TorProxyMode = torProxyModes.none
+    torProxyMode: TorProxyMode = torProxyModes.none,
+    isXmrigProxyEnabled = isXmrigProxy
   ): Service =>
     createXmrigProxyService(
-      isXmrigProxy,
+      isXmrigProxyEnabled,
       p2PoolMode,
       networkMode,
       isXmrigProxyPublic,
