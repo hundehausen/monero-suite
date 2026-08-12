@@ -9,6 +9,7 @@ import {
   useMonitoringState,
   usePortainerState,
   useMoneroLwsState,
+  useMoneroPayState,
 } from "@/hooks/services-context";
 import AccordionItemComponent from "./AccordionItemComponent";
 
@@ -21,12 +22,14 @@ const TraefikSection = () => {
     isTraefikGrafana, setIsTraefikGrafana,
     isTraefikPortainer, setIsTraefikPortainer,
     isTraefikLws, setIsTraefikLws,
+    isTraefikMoneroPay, setIsTraefikMoneroPay,
   } = useTraefikState();
   const { isMoneroPublicNode, moneroNodeDomain, setMoneroNodeDomain } = useMonerodState();
   const { isStagenetNode, isStagenetNodePublic, stagenetNodeDomain, setStagenetNodeDomain } = useStagenetState();
   const { isMonitoring, grafanaDomain, setGrafanaDomain } = useMonitoringState();
   const { isPortainer, portainerDomain, setPortainerDomain } = usePortainerState();
   const { isMoneroLws, lwsDomain, setLwsDomain } = useMoneroLwsState();
+  const { isMoneroPay, moneroPayDomain, setMoneroPayDomain } = useMoneroPayState();
 
   const domainInputs = [
     {
@@ -78,6 +81,16 @@ const TraefikSection = () => {
       onChange: setLwsDomain,
       isEnabled: isTraefikLws,
       setIsEnabled: setIsTraefikLws,
+    },
+    {
+      show: isMoneroPay,
+      checkboxLabel: "MoneroPay",
+      inputLabel: "MoneroPay Domain",
+      description: "The domain where your MoneroPay HTTP API will be available.",
+      value: moneroPayDomain,
+      onChange: setMoneroPayDomain,
+      isEnabled: isTraefikMoneroPay,
+      setIsEnabled: setIsTraefikMoneroPay,
     },
   ];
 

@@ -11,3 +11,4 @@ export * from "./traefik";
 export * from "./portainer";
 export * from "./cuprate";
 export * from "./monero-lws";
+export * from "./moneropay";

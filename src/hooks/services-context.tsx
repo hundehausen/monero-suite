@@ -15,6 +15,7 @@ import {
   usePortainerService,
   useCuprateService,
   useMoneroLwsService,
+  useMoneroPayService,
 } from "./services";
 
 // Derive state types from each service hook
@@ -30,6 +31,7 @@ export type TraefikState = ReturnType<typeof useTraefikService>["stateFunctions"
 export type PortainerState = ReturnType<typeof usePortainerService>["stateFunctions"];
 export type CuprateState = ReturnType<typeof useCuprateService>["stateFunctions"];
 export type MoneroLwsState = ReturnType<typeof useMoneroLwsService>["stateFunctions"];
+export type MoneroPayState = ReturnType<typeof useMoneroPayService>["stateFunctions"];
 
 // Full context type derived from useServices
 export type ServicesContextType = ReturnType<typeof useServices>;
@@ -107,6 +109,7 @@ export function useTorState(): TorState {
     hsP2Pool: s.hsP2Pool, setHsP2Pool: s.setHsP2Pool,
     hsGrafana: s.hsGrafana, setHsGrafana: s.setHsGrafana,
     hsLws: s.hsLws, setHsLws: s.setHsLws,
+    hsMoneroPay: s.hsMoneroPay, setHsMoneroPay: s.setHsMoneroPay,
     isGlobalTorProxy: s.isGlobalTorProxy, setIsGlobalTorProxy: s.setIsGlobalTorProxy,
   };
 }
@@ -141,6 +144,7 @@ export function useTraefikState(): TraefikState {
     isTraefikGrafana: s.isTraefikGrafana, setIsTraefikGrafana: s.setIsTraefikGrafana,
     isTraefikPortainer: s.isTraefikPortainer, setIsTraefikPortainer: s.setIsTraefikPortainer,
     isTraefikLws: s.isTraefikLws, setIsTraefikLws: s.setIsTraefikLws,
+    isTraefikMoneroPay: s.isTraefikMoneroPay, setIsTraefikMoneroPay: s.setIsTraefikMoneroPay,
   };
 }
 
@@ -165,6 +169,14 @@ export function useMoneroLwsState(): MoneroLwsState {
   };
 }
 
+export function useMoneroPayState(): MoneroPayState {
+  const { stateFunctions: s } = useServicesContext();
+  return {
+    isMoneroPay: s.isMoneroPay, setIsMoneroPay: s.setIsMoneroPay,
+    moneroPayDomain: s.moneroPayDomain, setMoneroPayDomain: s.setMoneroPayDomain,
+  };
+}
+
 export function useHasDefaultDomain(): boolean {
   const { stateFunctions: s } = useServicesContext();
   if (!s.isTraefik) return false;
@@ -174,5 +186,6 @@ export function useHasDefaultDomain(): boolean {
     s.isMonitoring && s.isTraefikGrafana && s.grafanaDomain,
     s.isPortainer && s.isTraefikPortainer && s.portainerDomain,
     s.isMoneroLws && s.isTraefikLws && s.lwsDomain,
+    s.isMoneroPay && s.isTraefikMoneroPay && s.moneroPayDomain,
   ].some((d) => typeof d === "string" && d.includes("example.com"));
 }

@@ -21,6 +21,7 @@ import {
   usePortainerService,
   useCuprateService,
   useMoneroLwsService,
+  useMoneroPayService,
   CERT_RESOLVER_NAME,
 } from "./services";
 import { getZmqPubPort } from "@/lib/service-generators/monerod";
@@ -57,6 +58,7 @@ export const useServices = () => {
   const portainerService = usePortainerService();
   const cuprateService = useCuprateService();
   const moneroLwsService = useMoneroLwsService();
+  const moneroPayService = useMoneroPayService();
 
   // Extract state functions from each service
   const {
@@ -66,12 +68,15 @@ export const useServices = () => {
     isTraefikGrafana,
     isTraefikPortainer,
     isTraefikLws,
+    isTraefikMoneroPay,
   } = traefikService.stateFunctions;
   const { isMonitoring, grafanaDomain, setGrafanaDomain } = monitoringService.stateFunctions;
   const { p2PoolMode } = p2PoolService.stateFunctions;
   const { miningMode, setMiningMode } = xmrigService.stateFunctions;
   const { isPrunedNode, isSyncPrunedBlocks } = monerodService.stateFunctions;
   const { isMoneroLws } = moneroLwsService.stateFunctions;
+  const { isMoneroPay } = moneroPayService.stateFunctions;
+  const { isMoneroWalletRpc, setIsMoneroWalletRpc } = moneroWalletRpcService.stateFunctions;
 
   // Sync Grafana domain with Traefik: local default when off, prefill
   // monitor.example.com when enabling Traefik on a localhost domain.
@@ -96,6 +101,14 @@ export const useServices = () => {
     if (!isPrunedNode && isSyncPrunedBlocks)
       monerodService.stateFunctions.setIsSyncPrunedBlocks(false);
   }, [isPrunedNode, isSyncPrunedBlocks, monerodService.stateFunctions]);
+
+  // MoneroPay talks to wallet-rpc. Keep wallet-rpc on whenever pay is enabled,
+  // including if the user tries to turn wallet-rpc off while pay is still on.
+  useEffect(() => {
+    if (isMoneroPay && !isMoneroWalletRpc) {
+      setIsMoneroWalletRpc(true);
+    }
+  }, [isMoneroPay, isMoneroWalletRpc, setIsMoneroWalletRpc]);
 
   // The port monerod actually binds ZMQ on — consumers must follow it.
   const needsZmq = stackNeedsZmq(p2PoolMode, isMonitoring, isMoneroLws);
@@ -138,7 +151,8 @@ export const useServices = () => {
       monerodStagenetService.stateFunctions.isStagenetNode,
       p2PoolService.stateFunctions.p2PoolMode,
       isMonitoring,
-      isMoneroLws
+      isMoneroLws,
+      isMoneroPay
     ),
     watchtower: watchtowerService.getWatchtowerService(),
     monitoring: monitoringService.getMonitoringService(
@@ -169,6 +183,12 @@ export const useServices = () => {
       torService.stateFunctions.torProxyMode,
       zmqPubPort
     ),
+    moneropay: moneroPayService.getMoneroPayService(
+      networkMode,
+      isTraefik && isTraefikMoneroPay,
+      CERT_RESOLVER_NAME,
+      torService.stateFunctions.torProxyMode
+    ),
   };
 
   const filteredServices: ServiceMap = Object.fromEntries(
@@ -195,6 +215,7 @@ export const useServices = () => {
     ...portainerService.stateFunctions,
     ...cuprateService.stateFunctions,
     ...moneroLwsService.stateFunctions,
+    ...moneroPayService.stateFunctions,
   };
 
   return {

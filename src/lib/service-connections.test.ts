@@ -364,6 +364,39 @@ describe("tor connections", () => {
       `monero-lws:${SERVICE_PORTS.moneroLws}:${SERVICE_PORTS.moneroLws}`
     );
   });
+
+  it("MoneroPay hidden service forwards the API port moneropay actually binds", () => {
+    const config = makeConfig({
+      services: { ...makeConfig().services, isMoneroPay: true },
+      tor: { ...makeConfig().tor, hsMoneroPay: true },
+    });
+    const services = generateAllServices(config);
+    const pay = services.moneropay.code.moneropay as ContainerSpec;
+    const tor = services.tor.code.tor as ContainerSpec;
+    expect(pay.environment?.BIND).toBe(`0.0.0.0:${SERVICE_PORTS.moneroPay}`);
+    expect(tor.environment?.HS_MONEROPAY).toBe(
+      `moneropay:${SERVICE_PORTS.moneroPay}:${SERVICE_PORTS.moneroPay}`
+    );
+  });
+});
+
+describe("moneropay <-> monero-wallet-rpc connection", () => {
+  it("RPC_ADDRESS host/port equals wallet-rpc container_name and --rpc-bind-port", () => {
+    const config = makeConfig({
+      services: { ...makeConfig().services, isMoneroPay: true, isMoneroWalletRpc: true },
+    });
+    const services = generateAllServices(config);
+    const pay = services.moneropay.code.moneropay as ContainerSpec;
+    const walletRpc = services["monero-wallet-rpc"].code["monero-wallet-rpc"] as ContainerSpec;
+    const rpcAddress = String(pay.environment?.RPC_ADDRESS ?? "");
+    const url = new URL(rpcAddress);
+    expect(url.hostname).toBe(walletRpc.container_name);
+    const bindPort = cmd(walletRpc)
+      .find((a) => a.startsWith("--rpc-bind-port="))
+      ?.split("=")[1];
+    expect(url.port).toBe(bindPort);
+    expect(url.pathname).toBe("/json_rpc");
+  });
 });
 
 describe("traefik connections", () => {

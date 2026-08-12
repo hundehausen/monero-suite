@@ -24,6 +24,8 @@ const TorSection = () => {
     setHsGrafana,
     hsLws,
     setHsLws,
+    hsMoneroPay,
+    setHsMoneroPay,
     isGlobalTorProxy,
     setIsGlobalTorProxy,
   } = useTorState();
@@ -179,6 +181,13 @@ const TorSection = () => {
                 checked={hsLws}
                 label="Light Wallet Server (REST API)"
                 onChange={(event) => setHsLws(event.currentTarget.checked)}
+              />
+            )}
+            {services.moneropay?.checked && (
+              <Checkbox
+                checked={hsMoneroPay}
+                label="MoneroPay API"
+                onChange={(event) => setHsMoneroPay(event.currentTarget.checked)}
               />
             )}
           </Stack>

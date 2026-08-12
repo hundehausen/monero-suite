@@ -80,13 +80,16 @@ vi.mock("./services", async () => {
       stateFunctions: { isStagenetNode: false },
     }),
     useP2PoolService,
-    useMoneroWalletRpcService: () => ({
-      getMoneroWalletRpcService: () => stub(false),
-      stateFunctions: { isMoneroWalletRpc: false, setIsMoneroWalletRpc: () => {} },
-    }),
+    useMoneroWalletRpcService: () => {
+      const [isMoneroWalletRpc, setIsMoneroWalletRpc] = React.useState(false);
+      return {
+        getMoneroWalletRpcService: () => stub(isMoneroWalletRpc),
+        stateFunctions: { isMoneroWalletRpc, setIsMoneroWalletRpc },
+      };
+    },
     useTorService: () => ({
       getTorService: () => stub(false),
-      stateFunctions: { torProxyMode: "none", isHiddenServices: false, hsLws: false },
+      stateFunctions: { torProxyMode: "none", isHiddenServices: false, hsLws: false, hsMoneroPay: false },
     }),
     useWatchtowerService: () => ({
       getWatchtowerService: () => stub(false),
@@ -96,7 +99,7 @@ vi.mock("./services", async () => {
     useXmrigService,
     useTraefikService: () => ({
       getTraefikService: () => stub(false),
-      stateFunctions: { isTraefik: false, isTraefikMonerod: false, isTraefikStagenet: false, isTraefikGrafana: false, isTraefikPortainer: false, isTraefikLws: false },
+      stateFunctions: { isTraefik: false, isTraefikMonerod: false, isTraefikStagenet: false, isTraefikGrafana: false, isTraefikPortainer: false, isTraefikLws: false, isTraefikMoneroPay: false },
     }),
     usePortainerService: () => ({
       getPortainerService: () => stub(false),
@@ -118,6 +121,13 @@ vi.mock("./services", async () => {
           code: { "monero-lws": { command: ["--sub=tcp://monerod:" + zmqPubPort] } },
         }),
         stateFunctions: { isMoneroLws, setIsMoneroLws, lwsDomain: "lws.example.com", setLwsDomain: () => {} },
+      };
+    },
+    useMoneroPayService: () => {
+      const [isMoneroPay, setIsMoneroPay] = React.useState(false);
+      return {
+        getMoneroPayService: () => stub(isMoneroPay),
+        stateFunctions: { isMoneroPay, setIsMoneroPay, moneroPayDomain: "pay.example.com", setMoneroPayDomain: () => {} },
       };
     },
   };
@@ -186,5 +196,35 @@ describe("useServices monero-lws wiring", () => {
     };
     expect(lws.command?.[0]).toContain(`tcp://monerod:`);
     expect(lws.command?.[0]).toContain(String(MONEROD_PORTS.zmqPub));
+  });
+});
+
+describe("useServices MoneroPay auto-enable wallet-rpc", () => {
+  it("enabling MoneroPay sets isMoneroWalletRpc true", () => {
+    const { result } = renderHook(() => useServices());
+
+    expect(result.current.stateFunctions.isMoneroWalletRpc).toBe(false);
+
+    act(() => {
+      result.current.stateFunctions.setIsMoneroPay(true);
+    });
+
+    expect(result.current.stateFunctions.isMoneroPay).toBe(true);
+    expect(result.current.stateFunctions.isMoneroWalletRpc).toBe(true);
+  });
+
+  it("disabling wallet-rpc while MoneroPay is on is immediately turned back on", () => {
+    const { result } = renderHook(() => useServices());
+
+    act(() => {
+      result.current.stateFunctions.setIsMoneroPay(true);
+    });
+    expect(result.current.stateFunctions.isMoneroWalletRpc).toBe(true);
+
+    act(() => {
+      result.current.stateFunctions.setIsMoneroWalletRpc(false);
+    });
+
+    expect(result.current.stateFunctions.isMoneroWalletRpc).toBe(true);
   });
 });
