@@ -42,9 +42,10 @@ const P2PNetworkSection = () => {
         zmqPubEnabled,
         zmqPubBindPort,
         s.p2PoolMode,
-        s.isMonitoring
+        s.isMonitoring,
+        s.isMoneroLws
       ),
-    [p2pBindPort, zmqPubEnabled, zmqPubBindPort, s.p2PoolMode, s.isMonitoring]
+    [p2pBindPort, zmqPubEnabled, zmqPubBindPort, s.p2PoolMode, s.isMonitoring, s.isMoneroLws]
   );
 
   const p2pPortCollisionError =

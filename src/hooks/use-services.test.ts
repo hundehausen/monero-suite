@@ -106,6 +106,20 @@ vi.mock("./services", async () => {
       getCuprateService: () => stub(false),
       stateFunctions: { isCuprateEnabled: false },
     }),
+    useMoneroLwsService: () => {
+      const [isMoneroLws, setIsMoneroLws] = React.useState(false);
+      return {
+        getMoneroLwsService: (_n: string, _t: boolean, _c: string, _tor: string, zmqPubPort: number) => ({
+          name: "Monero Light Wallet Server",
+          description: "",
+          checked: isMoneroLws,
+          required: false,
+          architecture: ["linux/amd64", "linux/arm64"],
+          code: { "monero-lws": { command: ["--sub=tcp://monerod:" + zmqPubPort] } },
+        }),
+        stateFunctions: { isMoneroLws, setIsMoneroLws, lwsDomain: "lws.example.com", setLwsDomain: () => {} },
+      };
+    },
   };
 });
 
@@ -155,5 +169,22 @@ describe("useServices ZMQ port propagation", () => {
 
     const p2pool = result.current.services.p2pool.code.p2pool as { command?: string[] };
     expect(p2pool.command?.[1]).toBe(String(MONEROD_PORTS.zmqPub));
+  });
+});
+
+describe("useServices monero-lws wiring", () => {
+  it("enables monero-lws and forwards the ZMQ pub port", () => {
+    const { result } = renderHook(() => useServices());
+
+    act(() => {
+      result.current.stateFunctions.setIsMoneroLws(true);
+    });
+
+    expect(result.current.services["monero-lws"].checked).toBe(true);
+    const lws = result.current.services["monero-lws"].code["monero-lws"] as {
+      command?: string[];
+    };
+    expect(lws.command?.[0]).toContain(`tcp://monerod:`);
+    expect(lws.command?.[0]).toContain(String(MONEROD_PORTS.zmqPub));
   });
 });

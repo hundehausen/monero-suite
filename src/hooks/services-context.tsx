@@ -14,6 +14,7 @@ import {
   useTraefikService,
   usePortainerService,
   useCuprateService,
+  useMoneroLwsService,
 } from "./services";
 
 // Derive state types from each service hook
@@ -28,6 +29,7 @@ export type XmrigState = ReturnType<typeof useXmrigService>["stateFunctions"];
 export type TraefikState = ReturnType<typeof useTraefikService>["stateFunctions"];
 export type PortainerState = ReturnType<typeof usePortainerService>["stateFunctions"];
 export type CuprateState = ReturnType<typeof useCuprateService>["stateFunctions"];
+export type MoneroLwsState = ReturnType<typeof useMoneroLwsService>["stateFunctions"];
 
 // Full context type derived from useServices
 export type ServicesContextType = ReturnType<typeof useServices>;
@@ -151,6 +153,14 @@ export function usePortainerState(): PortainerState {
 export function useCuprateState(): CuprateState {
   const { stateFunctions: s } = useServicesContext();
   return { isCuprateEnabled: s.isCuprateEnabled, setIsCuprateEnabled: s.setIsCuprateEnabled };
+}
+
+export function useMoneroLwsState(): MoneroLwsState {
+  const { stateFunctions: s } = useServicesContext();
+  return {
+    isMoneroLws: s.isMoneroLws, setIsMoneroLws: s.setIsMoneroLws,
+    lwsDomain: s.lwsDomain, setLwsDomain: s.setLwsDomain,
+  };
 }
 
 export function useHasDefaultDomain(): boolean {

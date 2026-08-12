@@ -13,6 +13,7 @@ import { createXmrigService } from "./xmrig";
 import { createTraefikService } from "./traefik";
 import { createPortainerService } from "./portainer";
 import { createCuprateService } from "./cuprate";
+import { createMoneroLwsService } from "./monero-lws";
 import { CERT_RESOLVER_NAME } from "./traefik";
 
 export { CERT_RESOLVER_NAME } from "./traefik";
@@ -43,6 +44,14 @@ export function generateAllServices(config: FullConfig): ServiceMap {
     traefik: createTraefikService(isTraefik, tor.torProxyMode),
     portainer: createPortainerService(services.isPortainer, services.portainerDomain, networkMode, isTraefik && services.isTraefikPortainer, CERT_RESOLVER_NAME),
     cuprate: createCuprateService(services.isCuprateEnabled, networkMode),
+    "monero-lws": createMoneroLwsService(
+      { isMoneroLws: services.isMoneroLws, lwsDomain: services.lwsDomain },
+      networkMode,
+      isTraefik && services.isTraefikLws,
+      CERT_RESOLVER_NAME,
+      tor.torProxyMode,
+      zmqPubPort
+    ),
   };
 
   return servicesMap;

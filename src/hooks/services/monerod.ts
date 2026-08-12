@@ -56,6 +56,7 @@ export const useMonerodService = (): MonerodServiceHook => {
     p2PoolMode: P2PoolMode,
     torProxyMode: TorProxyMode,
     isMonitoring: boolean,
+    isMoneroLws: boolean,
     isHiddenServices: boolean,
     isTraefik: boolean,
     certResolverName: string = "monerosuite"
@@ -66,7 +67,7 @@ export const useMonerodService = (): MonerodServiceHook => {
       p2PoolMode,
       torProxyMode,
       isMonitoring,
-      false,
+      isMoneroLws,
       isHiddenServices,
       isTraefik,
       certResolverName

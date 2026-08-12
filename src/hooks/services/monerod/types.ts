@@ -130,6 +130,7 @@ export interface MonerodServiceHook {
     p2PoolMode: P2PoolMode,
     torProxyMode: TorProxyMode,
     isMonitoring: boolean,
+    isMoneroLws: boolean,
     isHiddenServices: boolean,
     isTraefik: boolean,
     certResolverName?: string

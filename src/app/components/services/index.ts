@@ -10,4 +10,5 @@ export { default as MonitoringSection } from "./MonitoringSection";
 export { default as PortainerSection } from "./PortainerSection";
 export { default as WatchtowerSection } from "./WatchtowerSection";
 export { default as CuprateSection } from "./CuprateSection";
+export { default as MoneroLwsSection } from "./MoneroLwsSection";
 export * from "./types";

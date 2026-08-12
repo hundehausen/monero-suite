@@ -9,7 +9,6 @@ import {
   NetworkMode,
   architectures,
   networkModes,
-  p2poolModes,
   useMonerodService,
   useMonerodStagenetService,
   useP2PoolService,
@@ -21,11 +20,13 @@ import {
   useTraefikService,
   usePortainerService,
   useCuprateService,
+  useMoneroLwsService,
   CERT_RESOLVER_NAME,
 } from "./services";
 import { getZmqPubPort } from "@/lib/service-generators/monerod";
 import { MONEROD_PORTS } from "@/lib/constants";
 import { nextGrafanaDomain } from "@/lib/grafana-domain";
+import { stackNeedsZmq } from "@/lib/stack-needs-zmq";
 
 export * from "./services";
 
@@ -55,6 +56,7 @@ export const useServices = () => {
   const traefikService = useTraefikService();
   const portainerService = usePortainerService();
   const cuprateService = useCuprateService();
+  const moneroLwsService = useMoneroLwsService();
 
   // Extract state functions from each service
   const {
@@ -68,6 +70,7 @@ export const useServices = () => {
   const { p2PoolMode } = p2PoolService.stateFunctions;
   const { miningMode, setMiningMode } = xmrigService.stateFunctions;
   const { isPrunedNode, isSyncPrunedBlocks } = monerodService.stateFunctions;
+  const { isMoneroLws } = moneroLwsService.stateFunctions;
 
   // Sync Grafana domain with Traefik: local default when off, prefill
   // monitor.example.com when enabling Traefik on a localhost domain.
@@ -94,11 +97,12 @@ export const useServices = () => {
   }, [isPrunedNode, isSyncPrunedBlocks, monerodService.stateFunctions]);
 
   // The port monerod actually binds ZMQ on — consumers must follow it.
+  const needsZmq = stackNeedsZmq(p2PoolMode, isMonitoring, isMoneroLws);
   const zmqPubPort =
     getZmqPubPort(
       monerodService.stateFunctions.zmqPubEnabled,
       monerodService.stateFunctions.zmqPubBindPort,
-      p2PoolMode !== p2poolModes.none || isMonitoring
+      needsZmq
     ) ?? MONEROD_PORTS.zmqPub;
 
   const services: ServiceMap = {
@@ -107,6 +111,7 @@ export const useServices = () => {
       p2PoolService.stateFunctions.p2PoolMode,
       torService.stateFunctions.torProxyMode,
       isMonitoring,
+      isMoneroLws,
       torService.stateFunctions.isHiddenServices,
       isTraefik && isTraefikMonerod,
       CERT_RESOLVER_NAME
@@ -155,6 +160,13 @@ export const useServices = () => {
     cuprate: cuprateService.getCuprateService(
       networkMode
     ),
+    "monero-lws": moneroLwsService.getMoneroLwsService(
+      networkMode,
+      isTraefik && false,
+      CERT_RESOLVER_NAME,
+      torService.stateFunctions.torProxyMode,
+      zmqPubPort
+    ),
   };
 
   const filteredServices: ServiceMap = Object.fromEntries(
@@ -180,6 +192,7 @@ export const useServices = () => {
     ...traefikService.stateFunctions,
     ...portainerService.stateFunctions,
     ...cuprateService.stateFunctions,
+    ...moneroLwsService.stateFunctions,
   };
 
   return {

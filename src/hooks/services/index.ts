@@ -10,3 +10,4 @@ export * from "./xmrig";
 export * from "./traefik";
 export * from "./portainer";
 export * from "./cuprate";
+export * from "./monero-lws";

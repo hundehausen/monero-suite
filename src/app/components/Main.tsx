@@ -48,7 +48,8 @@ export default function Main() {
         stateFunctions.zmqPubEnabled,
         stateFunctions.zmqPubBindPort,
         stateFunctions.p2PoolMode,
-        stateFunctions.isMonitoring
+        stateFunctions.isMonitoring,
+        stateFunctions.isMoneroLws
       ).length > 0,
     [
       stateFunctions.p2pBindPort,
@@ -56,6 +57,7 @@ export default function Main() {
       stateFunctions.zmqPubBindPort,
       stateFunctions.p2PoolMode,
       stateFunctions.isMonitoring,
+      stateFunctions.isMoneroLws,
     ]
   );
 
@@ -66,7 +68,8 @@ export default function Main() {
         stateFunctions.zmqPubBindPort,
         stateFunctions.p2PoolMode,
         stateFunctions.isMonitoring,
-        stateFunctions.p2pBindPort
+        stateFunctions.p2pBindPort,
+        stateFunctions.isMoneroLws
       ).length > 0,
     [
       stateFunctions.zmqPubEnabled,
@@ -74,6 +77,7 @@ export default function Main() {
       stateFunctions.p2PoolMode,
       stateFunctions.isMonitoring,
       stateFunctions.p2pBindPort,
+      stateFunctions.isMoneroLws,
     ]
   );
 
@@ -202,12 +206,12 @@ export default function Main() {
       isPortainer: stateFunctions.isPortainer,
       portainerDomain: stateFunctions.portainerDomain,
       isCuprateEnabled: stateFunctions.isCuprateEnabled,
-      isMoneroLws: false,
+      isMoneroLws: stateFunctions.isMoneroLws,
       isMoneroPay: false,
       isXmrigProxy: false,
       isTraefikLws: false,
       isTraefikMoneroPay: false,
-      lwsDomain: "lws.example.com",
+      lwsDomain: stateFunctions.lwsDomain,
       moneroPayDomain: "pay.example.com",
     },
     enabledBashServices,
