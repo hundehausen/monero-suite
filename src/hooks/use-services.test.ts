@@ -10,13 +10,11 @@ vi.mock("nuqs", async () => {
     parseAsBoolean: () => ({ withDefault: () => ({}) }),
     parseAsInteger: () => ({ withDefault: () => ({}) }),
     useQueryState: (key: string) => {
-      if (key === "architecture") {
-        return React.useState("linux/amd64");
-      }
-      if (key === "networkMode") {
-        return React.useState("local");
-      }
-      return ["linux/amd64", () => {}];
+      // Always call the same hooks so rules-of-hooks is satisfied; pick by key.
+      const architecture = React.useState("linux/amd64");
+      const networkMode = React.useState("local");
+      if (key === "networkMode") return networkMode;
+      return architecture;
     },
   };
 });
