@@ -9,7 +9,7 @@ import {
   torProxyModes,
   TorProxyMode,
   NetworkMode,
-} from "@/hooks/services/types";
+} from "@/lib/service-types";
 import { P2POOL_IP, MONEROD_IP } from "@/lib/service-constants";
 import { safeParse, moneroAddressSchema } from "@/lib/schemas";
 import { DOCKER_IMAGES, P2POOL_PORTS, MONEROD_PORTS } from "@/lib/constants";

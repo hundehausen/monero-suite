@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createMonitoringService } from "./monitoring";
-import { architectures, networkModes } from "@/hooks/services/types";
+import { architectures, networkModes } from "@/lib/service-types";
 
 describe("createMonitoringService", () => {
   it("is available on linux/amd64 and linux/arm64", () => {

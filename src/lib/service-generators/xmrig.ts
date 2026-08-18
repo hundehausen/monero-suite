@@ -1,4 +1,4 @@
-import { Service, architectures, minigModes, MiningMode, TorProxyMode, torProxyModes, P2PoolMode, p2poolModes } from "@/hooks/services/types";
+import { Service, architectures, minigModes, MiningMode, TorProxyMode, torProxyModes, P2PoolMode, p2poolModes } from "@/lib/service-types";
 import { DOCKER_IMAGES, P2POOL_PORTS, SERVICE_PORTS } from "@/lib/constants";
 import { getTorClientNetworkConfig } from "@/lib/docker-helpers";
 import { getP2PoolContainerName } from "@/lib/service-generators/p2pool";

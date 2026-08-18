@@ -6,7 +6,7 @@ import {
   torProxyModes,
   P2PoolMode,
   NetworkMode,
-} from "@/hooks/services/types";
+} from "@/lib/service-types";
 import { P2POOL_PORTS } from "@/lib/constants";
 
 const VALID_ADDRESS =

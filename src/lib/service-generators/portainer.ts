@@ -1,4 +1,4 @@
-import { Service, architectures, NetworkMode } from "@/hooks/services/types";
+import { Service, architectures, NetworkMode } from "@/lib/service-types";
 import { DOCKER_IMAGES, SERVICE_PORTS } from "@/lib/constants";
 import { getTraefikConfig, getPortBinding } from "@/lib/docker-helpers";
 

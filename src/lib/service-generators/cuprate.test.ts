@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createCuprateService } from "./cuprate";
 import { createMoneroWalletRpcService } from "./monero-wallet-rpc";
-import { networkModes } from "@/hooks/services/types";
+import { networkModes } from "@/lib/service-types";
 
 describe("createCuprateService", () => {
   it.each([networkModes.local, networkModes.exposed])(

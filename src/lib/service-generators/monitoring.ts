@@ -1,4 +1,4 @@
-import { Service, architectures, NetworkMode, torProxyModes, TorProxyMode } from "@/hooks/services/types";
+import { Service, architectures, NetworkMode, torProxyModes, TorProxyMode } from "@/lib/service-types";
 import { DOCKER_IMAGES, SERVICE_PORTS, MONEROD_PORTS } from "@/lib/constants";
 import { getTraefikConfig, getPortBinding, getTorClientNetworkConfig } from "@/lib/docker-helpers";
 import { MONITORING_BASH_COMMANDS } from "@/lib/script-generator";

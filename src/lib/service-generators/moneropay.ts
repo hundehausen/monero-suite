@@ -4,7 +4,7 @@ import {
   NetworkMode,
   TorProxyMode,
   torProxyModes,
-} from "@/hooks/services/types";
+} from "@/lib/service-types";
 import { DOCKER_IMAGES, SERVICE_PORTS } from "@/lib/constants";
 import {
   getTraefikConfig,

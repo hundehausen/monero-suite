@@ -1,5 +1,5 @@
-import { NetworkMode, Service } from "@/hooks/services/types";
-import { architectures } from "@/hooks/services/types";
+import { NetworkMode, Service } from "@/lib/service-types";
+import { architectures } from "@/lib/service-types";
 import { DOCKER_IMAGES, SERVICE_PORTS } from "@/lib/constants";
 import { getPortBinding } from "@/lib/docker-helpers";
 import { CUPRATE_BASH_COMMANDS } from "@/lib/script-generator";

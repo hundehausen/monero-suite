@@ -1,4 +1,4 @@
-import { Service, architectures, networkModes, torProxyModes, NetworkMode, TorProxyMode, P2PoolMode } from "@/hooks/services/types";
+import { Service, architectures, networkModes, torProxyModes, NetworkMode, TorProxyMode, P2PoolMode } from "@/lib/service-types";
 import { TOR_IP, MONEROD_IP } from "@/lib/service-constants";
 import {
   safeParse,

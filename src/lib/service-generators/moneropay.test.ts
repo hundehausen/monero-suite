@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createMoneroPayService } from "./moneropay";
-import { networkModes, torProxyModes } from "@/hooks/services/types";
+import { networkModes, torProxyModes } from "@/lib/service-types";
 import { DOCKER_IMAGES, SERVICE_PORTS } from "@/lib/constants";
 
 const pay = createMoneroPayService(

@@ -6,8 +6,8 @@ import {
   getZmqPubPort,
 } from "@/lib/service-generators/monerod";
 import { MONEROD_PORTS } from "@/lib/constants";
-import { networkModes, p2poolModes } from "@/hooks/services/types";
-import { Service } from "@/hooks/services/types";
+import { networkModes, p2poolModes } from "@/lib/service-types";
+import { Service } from "@/lib/service-types";
 
 /**
  * monerod omits peer/rate flags set to -1 so monerod's own defaults apply

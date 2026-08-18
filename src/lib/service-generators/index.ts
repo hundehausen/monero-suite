@@ -1,5 +1,5 @@
 import type { FullConfig } from "@/lib/config-schema";
-import type { ServiceMap } from "@/hooks/services/types";
+import type { ServiceMap } from "@/lib/service-types";
 import { MONEROD_PORTS } from "@/lib/constants";
 import { stackNeedsZmq } from "@/lib/stack-needs-zmq";
 import { getZmqPubPort, createMonerodService } from "./monerod";

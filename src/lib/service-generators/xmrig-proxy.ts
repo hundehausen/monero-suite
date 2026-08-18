@@ -7,7 +7,7 @@ import {
   TorProxyMode,
   torProxyModes,
   networkModes,
-} from "@/hooks/services/types";
+} from "@/lib/service-types";
 import { DOCKER_IMAGES, P2POOL_PORTS, SERVICE_PORTS } from "@/lib/constants";
 import { getPortBinding, getTorClientNetworkConfig } from "@/lib/docker-helpers";
 import { getP2PoolContainerName } from "@/lib/service-generators/p2pool";

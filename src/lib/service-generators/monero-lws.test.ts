@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createMoneroLwsService } from "./monero-lws";
-import { networkModes, torProxyModes } from "@/hooks/services/types";
+import { networkModes, torProxyModes } from "@/lib/service-types";
 import { DOCKER_IMAGES, MONEROD_PORTS, SERVICE_PORTS } from "@/lib/constants";
 
 const run = (on: boolean, zmq: number = MONEROD_PORTS.zmqPub) =>

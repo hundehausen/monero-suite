@@ -1,4 +1,4 @@
-import { Service, architectures } from "@/hooks/services/types";
+import { Service, architectures } from "@/lib/service-types";
 import { DOCKER_IMAGES } from "@/lib/constants";
 
 export const createWatchtowerService = (

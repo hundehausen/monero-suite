@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { stackNeedsZmq } from "./stack-needs-zmq";
-import { p2poolModes } from "@/hooks/services/types";
+import { p2poolModes } from "@/lib/service-types";
 
 describe("stackNeedsZmq", () => {
   it("is false when nothing needs the feed", () => {

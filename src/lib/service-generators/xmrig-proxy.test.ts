@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createXmrigProxyService, isXmrigProxyEffective } from "./xmrig-proxy";
 import { createXmrigService } from "./xmrig";
-import { architectures, networkModes, p2poolModes, torProxyModes, minigModes } from "@/hooks/services/types";
+import { architectures, networkModes, p2poolModes, torProxyModes, minigModes } from "@/lib/service-types";
 import { P2POOL_PORTS, SERVICE_PORTS } from "@/lib/constants";
 
 describe("xmrig-proxy", () => {

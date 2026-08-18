@@ -1,4 +1,4 @@
-import { Service, architectures, torProxyModes, TorProxyMode, NetworkMode, p2poolModes, P2PoolMode } from "@/hooks/services/types";
+import { Service, architectures, torProxyModes, TorProxyMode, NetworkMode, p2poolModes, P2PoolMode } from "@/lib/service-types";
 import { TOR_IP } from "@/lib/service-constants";
 import { DOCKER_NETWORK, DOCKER_IMAGES, SERVICE_PORTS, P2POOL_PORTS, MONEROD_PORTS, MONEROD_STAGENET_PORTS } from "@/lib/constants";
 import { getPortBinding } from "@/lib/docker-helpers";

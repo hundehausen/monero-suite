@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { generateAllServices } from "@/lib/service-generators";
 import { generateDockerComposeFile } from "@/app/utils";
 import type { FullConfig } from "@/lib/config-schema";
-import type { Service } from "@/hooks/services/types";
+import type { Service } from "@/lib/service-types";
 import {
   DOCKER_IMAGES,
   DOCKER_NETWORK,
@@ -12,7 +12,7 @@ import {
   SERVICE_IPS,
   SERVICE_PORTS,
 } from "@/lib/constants";
-import { p2poolModes } from "@/hooks/services/types";
+import { p2poolModes } from "@/lib/service-types";
 import { getP2PoolContainerName } from "@/lib/service-generators/p2pool";
 import { CERT_RESOLVER_NAME } from "@/lib/service-generators/traefik";
 

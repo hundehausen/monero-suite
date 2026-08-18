@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createMonerodStagenetService } from "./monerod-stagenet";
-import { networkModes, torProxyModes, TorProxyMode, NetworkMode } from "@/hooks/services/types";
+import { networkModes, torProxyModes, TorProxyMode, NetworkMode } from "@/lib/service-types";
 
 const baseState = {
   isStagenetNode: true,
