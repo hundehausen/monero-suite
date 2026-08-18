@@ -1,5 +1,5 @@
 import type { FullConfig } from "@/lib/config-schema";
-import type { ServiceMap } from "@/lib/service-types";
+import type { Architecture, ServiceMap } from "@/lib/service-types";
 import { MONEROD_PORTS } from "@/lib/constants";
 import { stackNeedsZmq } from "@/lib/stack-needs-zmq";
 import { getZmqPubPort, createMonerodService } from "./monerod";
@@ -19,6 +19,30 @@ import { createMoneroPayService } from "./moneropay";
 import { CERT_RESOLVER_NAME } from "./traefik";
 
 export { CERT_RESOLVER_NAME } from "./traefik";
+
+export function anyHiddenService(tor: FullConfig["tor"]): boolean {
+  return (
+    tor.hsMonerod ||
+    tor.hsMonerodP2P ||
+    tor.hsStagenet ||
+    tor.hsP2Pool ||
+    tor.hsGrafana ||
+    tor.hsLws ||
+    tor.hsMoneroPay ||
+    tor.hsXmrigProxy
+  );
+}
+
+export function filterServicesByArchitecture(
+  services: ServiceMap,
+  architecture: Architecture
+): ServiceMap {
+  return Object.fromEntries(
+    Object.entries(services).filter(([, service]) =>
+      service.architecture?.includes(architecture)
+    )
+  );
+}
 
 export function generateAllServices(config: FullConfig): ServiceMap {
   const { networkMode, tor, p2pool, mining, services } = config;
@@ -41,7 +65,7 @@ export function generateAllServices(config: FullConfig): ServiceMap {
   );
 
   const servicesMap: ServiceMap = {
-    monerod: createMonerodService(config.monerod, networkMode, p2pool.p2PoolMode, tor.torProxyMode, services.isMonitoring, services.isMoneroLws, tor.hsMonerod || tor.hsMonerodP2P || tor.hsStagenet || tor.hsP2Pool || tor.hsGrafana || tor.hsLws || tor.hsMoneroPay, isTraefik && services.isTraefikMonerod, CERT_RESOLVER_NAME),
+    monerod: createMonerodService(config.monerod, networkMode, p2pool.p2PoolMode, tor.torProxyMode, services.isMonitoring, services.isMoneroLws, anyHiddenService(tor), isTraefik && services.isTraefikMonerod, CERT_RESOLVER_NAME),
     "monerod-stagenet": createMonerodStagenetService(config.stagenet, config.monerod.moneroNodeNoLogs, networkMode, isTraefik && services.isTraefikStagenet, CERT_RESOLVER_NAME, tor.torProxyMode),
     p2pool: createP2PoolService(p2pool, mining.miningMode, tor.torProxyMode, networkMode, zmqPubPort),
     "monero-wallet-rpc": createMoneroWalletRpcService(services.isMoneroWalletRpc, networkMode, tor.torProxyMode),
