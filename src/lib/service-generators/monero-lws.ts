@@ -64,6 +64,7 @@ export const createMoneroLwsService = (
           `--sub=tcp://monerod:${zmqPubPort}`,
           `--rest-server=http://0.0.0.0:${SERVICE_PORTS.moneroLws}`,
           `--admin-rest-server=http://0.0.0.0:${SERVICE_PORTS.moneroLwsAdmin}`,
+          "--confirm-external-bind",
           "--max-subaddresses=50",
           "--log-level=1",
         ],

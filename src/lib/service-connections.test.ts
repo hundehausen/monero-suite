@@ -477,6 +477,36 @@ describe("moneropay <-> monero-wallet-rpc connection", () => {
     expect(url.port).toBe(bindPort);
     expect(url.pathname).toBe("/json_rpc");
   });
+
+  it("MoneroPay RPC_USERNAME/PASSWORD match wallet-rpc --rpc-login", () => {
+    const config = makeConfig({
+      services: { ...makeConfig().services, isMoneroPay: true, isMoneroWalletRpc: true },
+    });
+    const services = generateAllServices(config);
+    const pay = services.moneropay.code.moneropay as ContainerSpec;
+    const walletRpc = services["monero-wallet-rpc"].code["monero-wallet-rpc"] as ContainerSpec;
+    const user = pay.environment?.RPC_USERNAME;
+    const password = pay.environment?.RPC_PASSWORD;
+    expect(user).toBeTruthy();
+    expect(password).toBeTruthy();
+    expect(cmd(walletRpc)).toContain(`--rpc-login=${user}:${password}`);
+  });
+
+  it("MoneroPay waits until wallet-rpc is healthy, and wallets live under the image home volume", () => {
+    const config = makeConfig({
+      services: { ...makeConfig().services, isMoneroPay: true, isMoneroWalletRpc: true },
+    });
+    const services = generateAllServices(config);
+    const pay = services.moneropay.code.moneropay as ContainerSpec;
+    const walletRpc = services["monero-wallet-rpc"].code["monero-wallet-rpc"] as ContainerSpec;
+
+    expect(pay.depends_on?.["monero-wallet-rpc"]).toEqual({
+      condition: "service_healthy",
+    });
+    expect(cmd(walletRpc)).toContain("--wallet-dir=/home/monero/wallet");
+    expect(walletRpc.volumes).toContain("monero-wallet-rpc-data:/home/monero");
+    expect(services["monero-wallet-rpc"].code["wallet-rpc-vol-chown"]).toBeUndefined();
+  });
 });
 
 describe("traefik connections", () => {

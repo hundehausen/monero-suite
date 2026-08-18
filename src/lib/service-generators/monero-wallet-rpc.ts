@@ -13,6 +13,10 @@ export const createMoneroWalletRpcService = (
   checked: isMoneroWalletRpc,
   required: false,
   architecture: [architectures.linuxAmd, architectures.linuxArm],
+  env: {
+    WALLET_RPC_USER: "monero",
+    WALLET_RPC_PASSWORD: "changeme",
+  },
   code: {
     "monero-wallet-rpc": {
       image: DOCKER_IMAGES.moneroWalletRpc,
@@ -25,7 +29,8 @@ export const createMoneroWalletRpcService = (
         `--daemon-address=monerod:${MONEROD_PORTS.rpcRestricted}`,
         "--trusted-daemon",
         `--rpc-bind-port=${SERVICE_PORTS.moneroWalletRpc}`,
-        "--wallet-dir=/home/monero",
+        "--rpc-login=${WALLET_RPC_USER}:${WALLET_RPC_PASSWORD}",
+        "--wallet-dir=/home/monero/wallet",
       ],
     },
   },

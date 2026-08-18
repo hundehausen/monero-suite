@@ -29,6 +29,8 @@ describe("createMoneroLwsService", () => {
     expect(c.command).toContain("--sub=tcp://monerod:18090");
     expect(c.command).toContain(`--rest-server=http://0.0.0.0:${SERVICE_PORTS.moneroLws}`);
     expect(c.command).toContain(`--admin-rest-server=http://0.0.0.0:${SERVICE_PORTS.moneroLwsAdmin}`);
+    // 0.0.0.0 is an external bind; without this flag monero-lws exits on start.
+    expect(c.command).toContain("--confirm-external-bind");
     expect(c.command).toContain("--max-subaddresses=50");
     expect(c.ports).toContain(`${SERVICE_PORTS.moneroLws}:${SERVICE_PORTS.moneroLws}`);
     expect(c.ports).toContain(`${SERVICE_PORTS.moneroLwsAdmin}:${SERVICE_PORTS.moneroLwsAdmin}`);
