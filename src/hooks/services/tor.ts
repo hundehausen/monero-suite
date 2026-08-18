@@ -2,17 +2,13 @@
 
 import { useQueryState, parseAsBoolean, parseAsStringEnum } from "nuqs";
 import {
-  Service,
   networkModes,
   torProxyModes,
   TorProxyMode,
   NetworkMode,
-  p2poolModes,
-  P2PoolMode,
 } from "./types";
 import { useEffect } from "react";
 
-import { createTorService } from "@/lib/service-generators/tor";
 export { TOR_IP, MONEROD_IP, MONEROD_STAGENET_IP, P2POOL_IP, GRAFANA_IP } from "@/lib/service-constants";
 
 export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => {
@@ -45,28 +41,7 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
     }
   }, [networkMode, setIsGlobalTorProxy]);
 
-  const getTorService = (
-    networkMode: NetworkMode,
-    isStagenetNode: boolean = false,
-    p2PoolMode: P2PoolMode = p2poolModes.none,
-    isMonitoring: boolean = false,
-    isMoneroLws: boolean = false,
-    isMoneroPay: boolean = false,
-    isXmrigProxy: boolean = false
-  ): Service =>
-    createTorService(
-      { torProxyMode, hsMonerod, hsMonerodP2P, hsStagenet, hsP2Pool, hsGrafana, hsLws, hsMoneroPay, hsXmrigProxy, isGlobalTorProxy },
-      networkMode,
-      isStagenetNode,
-      p2PoolMode,
-      isMonitoring,
-      isMoneroLws,
-      isMoneroPay,
-      isXmrigProxy
-    );
-
   return {
-    getTorService,
     stateFunctions: {
       torProxyMode,
       setTorProxyMode,

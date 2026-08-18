@@ -6,14 +6,9 @@ import {
   parseAsBoolean,
 } from "nuqs";
 import {
-  Service,
   p2poolModes,
   P2PoolMode,
-  MiningMode,
-  TorProxyMode,
-  NetworkMode,
 } from "./types";
-import { createP2PoolService } from "@/lib/service-generators/p2pool";
 
 export const useP2PoolService = () => {
   const [p2PoolMode, setP2PoolMode] = useQueryState<P2PoolMode>(
@@ -35,22 +30,7 @@ export const useP2PoolService = () => {
     parseAsBoolean.withDefault(false)
   );
 
-  const getP2PoolService = (
-    networkMode: NetworkMode,
-    miningMode: MiningMode,
-    torProxyMode: TorProxyMode,
-    zmqPubPort: number
-  ): Service =>
-    createP2PoolService(
-      { p2PoolMode, p2PoolPayoutAddress, p2PoolMiningThreads, isP2PoolStratumPublic },
-      miningMode,
-      torProxyMode,
-      networkMode,
-      zmqPubPort
-    );
-
   return {
-    getP2PoolService,
     stateFunctions: {
       p2PoolMode,
       setP2PoolMode,

@@ -4,7 +4,10 @@ import { put } from "@vercel/blob";
 import { nanoid } from "nanoid";
 import { stringify } from "yaml";
 import { fullConfigSchema, type FullConfig } from "@/lib/config-schema";
-import { generateAllServices } from "@/lib/service-generators";
+import {
+  filterServicesByArchitecture,
+  generateAllServices,
+} from "@/lib/service-generators";
 import {
   generateDockerComposeFile,
   generateEnvFile,
@@ -13,6 +16,7 @@ import {
 import {
   generateInstallationScript,
   generateBashCommands,
+  bashServicesFromConfig,
 } from "@/lib/script-generator";
 
 export async function uploadInstallScript(
@@ -21,21 +25,18 @@ export async function uploadInstallScript(
   const parsed = fullConfigSchema.parse(config);
 
   const services = generateAllServices(parsed);
-
-  const architecture = parsed.architecture;
-  const checkedServices = Object.values(services).filter(
-    (service) =>
-      service.checked !== false &&
-      service.checked !== "none" &&
-      service.architecture?.includes(architecture)
-  );
+  const checkedServices = Object.values(
+    filterServicesByArchitecture(services, parsed.architecture)
+  ).filter((service) => service.checked !== false && service.checked !== "none");
 
   const dockerCompose = generateDockerComposeFile(checkedServices);
   const dockerComposeYaml = stringify(dockerCompose);
 
   const envString = generateEnvFile(checkedServices);
 
-  const monitoringBashCommands = generateBashCommands(parsed.enabledBashServices);
+  const monitoringBashCommands = generateBashCommands(
+    bashServicesFromConfig(parsed)
+  );
 
   const isExposed = parsed.networkMode === "exposed";
   const firewallPorts = getFirewallPorts(checkedServices);
