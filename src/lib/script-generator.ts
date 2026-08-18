@@ -4,6 +4,7 @@ import {
   ENV_FILE_TEMPLATE,
   COMPLETION_TEMPLATE,
 } from "./bash-templates";
+import type { FullConfig } from "./config-schema";
 
 export const MONITORING_BASH_COMMANDS = `
 # Set up monitoring configuration
@@ -27,6 +28,13 @@ curl -fsSL -o cuprate/Cuprated.toml https://raw.githubusercontent.com/hundehause
 export interface EnabledBashServices {
   monitoring: boolean;
   cuprate: boolean;
+}
+
+export function bashServicesFromConfig(config: FullConfig): EnabledBashServices {
+  return {
+    monitoring: config.services.isMonitoring,
+    cuprate: config.services.isCuprateEnabled,
+  };
 }
 
 export function generateBashCommands(services: EnabledBashServices): string {

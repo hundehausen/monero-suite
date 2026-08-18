@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { generateInstallationScript } from "./script-generator";
+import { bashServicesFromConfig, generateInstallationScript } from "./script-generator";
+import type { FullConfig } from "./config-schema";
 
 function sampleScript() {
   return generateInstallationScript(
@@ -42,6 +43,19 @@ describe("generateInstallationScript docker compose", () => {
 
     // success message still present (runs only if up did not exit)
     expect(script).toContain("Monero Suite installation completed successfully!");
+  });
+});
+
+describe("bashServicesFromConfig", () => {
+  it("derives bash flags from service toggles, not enabledBashServices", () => {
+    const config = {
+      services: { isMonitoring: false, isCuprateEnabled: true },
+      enabledBashServices: { monitoring: true, cuprate: false },
+    } as FullConfig;
+    expect(bashServicesFromConfig(config)).toEqual({
+      monitoring: false,
+      cuprate: true,
+    });
   });
 });
 
