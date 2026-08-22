@@ -16,9 +16,9 @@ const NetworkModeSection = () => {
       <Text size="sm">
         Select where your server is running. If it&apos;s a home machine behind
         a router, choose Local Network. If it&apos;s a VPS or cloud server
-        connected directly to the internet, choose VPS — this restricts
-        certain ports to localhost so they aren&apos;t accidentally exposed
-        publicly.
+        connected directly to the internet, choose VPS. That binds service
+        ports to localhost and leaves the Monero P2P port unpublished unless
+        you set Node Visibility to Public.
       </Text>
       <SegmentedControl
         value={networkMode}

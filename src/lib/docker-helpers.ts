@@ -69,6 +69,24 @@ export function getPortBinding(
 }
 
 /**
+ * Host publish for monerod P2P. Empty when a private VPS node should not
+ * map the port at all: 127.0.0.1:p2p is not a useful P2P bind, and other
+ * Compose services already reach the container on the Docker network.
+ * Public nodes and local/NAT hosts publish on all interfaces so inbound
+ * peers, UPnP, and port-forwarding can work.
+ */
+export function getP2pPortBinding(
+  isPublicNode: boolean,
+  networkMode: NetworkMode,
+  port: string | number
+): string[] {
+  if (isPublicNode || networkMode === networkModes.local) {
+    return [`${port}:${port}`];
+  }
+  return [];
+}
+
+/**
  * Dual-home a service on the default Compose network and tor-proxy
  * with a static IP. Listing only the Tor net would drop the default network
  * and break peers that stay on default (monitoring, wallet-rpc, Traefik, etc.).

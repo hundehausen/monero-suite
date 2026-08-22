@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { getTraefikLabels, isPlaceholderDomain } from "./docker-helpers";
+import { getTraefikLabels, isPlaceholderDomain, getP2pPortBinding } from "./docker-helpers";
+import { networkModes } from "./service-types";
 
 describe("isPlaceholderDomain", () => {
   it.each([
@@ -23,6 +24,23 @@ describe("isPlaceholderDomain", () => {
     "monitor.real-domain.net",
   ])("treats %j as real", (domain) => {
     expect(isPlaceholderDomain(domain)).toBe(false);
+  });
+});
+
+describe("getP2pPortBinding", () => {
+  it("omits the host mapping for a private VPS node", () => {
+    expect(getP2pPortBinding(false, networkModes.exposed, 18080)).toEqual([]);
+    expect(getP2pPortBinding(false, networkModes.exposed, "18085")).toEqual([]);
+  });
+
+  it("publishes on all interfaces for a public node, including on a VPS", () => {
+    expect(getP2pPortBinding(true, networkModes.exposed, 18080)).toEqual(["18080:18080"]);
+    expect(getP2pPortBinding(true, networkModes.local, "18085")).toEqual(["18085:18085"]);
+  });
+
+  it("publishes on all interfaces for a private node on a local/NAT host", () => {
+    expect(getP2pPortBinding(false, networkModes.local, 18080)).toEqual(["18080:18080"]);
+    expect(getP2pPortBinding(false, networkModes.local, 38080)).toEqual(["38080:38080"]);
   });
 });
 

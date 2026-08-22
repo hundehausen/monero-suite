@@ -12,7 +12,7 @@ import {
   moneroAddressSchema,
 } from "@/lib/schemas";
 import { DOCKER_IMAGES, MONEROD_BAN_LIST_PATH, MONEROD_PORTS } from "@/lib/constants";
-import { getTraefikConfig, getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
+import { getTraefikConfig, getPortBinding, getP2pPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
 import { stackNeedsZmq } from "@/lib/stack-needs-zmq";
 import type { FullConfig } from "@/lib/config-schema";
 import type { GenerationCtx } from "./ctx";
@@ -249,7 +249,7 @@ export const createMonerodService = (
             : [`${sPath}:/home/monero/.bitmonero`]),
         ],
         ports: [
-          getPortBinding(isMoneroPublicNode ? networkModes.local : networkMode, sP2pBindPort),
+          ...getP2pPortBinding(isMoneroPublicNode, networkMode, sP2pBindPort),
           getPortBinding(isMoneroPublicNode ? networkModes.local : networkMode, 18089),
         ],
         depends_on:

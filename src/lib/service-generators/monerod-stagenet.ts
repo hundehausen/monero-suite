@@ -2,7 +2,7 @@ import { Service, architectures, networkModes, torProxyModes } from "@/lib/servi
 import { TOR_IP, MONEROD_STAGENET_IP } from "@/lib/service-constants";
 import { safeParse, pathSchema } from "@/lib/schemas";
 import { DOCKER_IMAGES, MONEROD_BAN_LIST_PATH, MONEROD_STAGENET_PORTS } from "@/lib/constants";
-import { getTraefikConfig, getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
+import { getTraefikConfig, getPortBinding, getP2pPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
 import type { FullConfig } from "@/lib/config-schema";
 import { CERT_RESOLVER_NAME } from "./traefik";
 
@@ -45,8 +45,8 @@ export const createMonerodStagenetService = (
               ]),
         ],
         ports: [
-          getPortBinding(state.isStagenetNodePublic ? networkModes.local : networkMode, 38080),
-          getPortBinding(state.isStagenetNodePublic ? networkModes.local : networkMode, 38089),
+          ...getP2pPortBinding(state.isStagenetNodePublic, networkMode, MONEROD_STAGENET_PORTS.p2p),
+          getPortBinding(state.isStagenetNodePublic ? networkModes.local : networkMode, MONEROD_STAGENET_PORTS.rpcRestricted),
         ],
         depends_on:
           torProxyMode !== torProxyModes.none

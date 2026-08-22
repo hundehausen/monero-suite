@@ -65,7 +65,7 @@ const P2PNetworkSection = () => {
           label={
             <ExplainingLabel
               label="P2P Bind Port"
-              explanation="Port for P2P network communications with other nodes. Default is 18080."
+              explanation="Port for P2P network communications with other nodes. Default is 18080. On a VPS this port is only published on the host when Node Visibility is Public. Private nodes still make outbound P2P connections, and other containers reach this port on the Docker network."
             />
           }
           value={parseInt(p2pBindPort)}

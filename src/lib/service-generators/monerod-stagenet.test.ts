@@ -66,12 +66,14 @@ describe("createMonerodStagenetService host port publishing", () => {
     expect(monerodStagenet.ports).toEqual(["38080:38080", "38089:38089"]);
   });
 
-  it("localhost-prefixes port bindings in exposed mode", () => {
+  it("omits the P2P host mapping in exposed mode for a private stagenet node", () => {
     const monerodStagenet = code({}, networkModes.exposed);
-    expect(monerodStagenet.ports).toEqual([
-      "127.0.0.1:38080:38080",
-      "127.0.0.1:38089:38089",
-    ]);
+    expect(monerodStagenet.ports).toEqual(["127.0.0.1:38089:38089"]);
+  });
+
+  it("publishes P2P on all interfaces for a public stagenet node on a VPS", () => {
+    const monerodStagenet = code({ isStagenetNodePublic: true }, networkModes.exposed);
+    expect(monerodStagenet.ports).toEqual(["38080:38080", "38089:38089"]);
   });
 
   it("still binds the unrestricted RPC inside the container so other services reach it", () => {

@@ -176,10 +176,17 @@ describe("monerod P2P bind port propagation", () => {
     expect(monerod.ports).toEqual(["18085:18085", "18089:18089"]);
   });
 
-  it("localhost-prefixes the custom P2P binding in exposed mode", () => {
+  it("omits the P2P host mapping in exposed mode for a private node", () => {
     const monerod = runFull({ p2pBindPort: "18085" }, { networkMode: networkModes.exposed })
       .code.monerod as Container;
-    expect(monerod.ports).toEqual(["127.0.0.1:18085:18085", "127.0.0.1:18089:18089"]);
+    expect(monerod.ports).toEqual(["127.0.0.1:18089:18089"]);
+  });
+
+  it("still localhost-binds restricted RPC in exposed mode when P2P is omitted", () => {
+    const monerod = runFull({}, { networkMode: networkModes.exposed })
+      .code.monerod as Container;
+    expect(monerod.ports).toEqual(["127.0.0.1:18089:18089"]);
+    expect(monerod.ports?.some((p) => p.includes("18080"))).toBe(false);
   });
 
   it("opens the custom P2P port in the ufw rule for public nodes in exposed mode", () => {
@@ -188,6 +195,7 @@ describe("monerod P2P bind port propagation", () => {
       { networkMode: networkModes.exposed }
     );
     expect(service.ufw).toEqual(["18085/tcp", "18089/tcp"]);
+    expect((service.code.monerod as Container).ports).toEqual(["18085:18085", "18089:18089"]);
   });
 
   it("keeps the default 18080 binding and ufw rule when the port is untouched", () => {
