@@ -90,6 +90,32 @@ describe("monerod peer/rate flags", () => {
   });
 });
 
+describe("monerod ban-list flag", () => {
+  // ghcr.io/sethforprivacy/simple-monerod CMD includes
+  // --ban-list=/home/monero/ban_list.txt. Compose `command` replaces CMD,
+  // so the generator must pass that path itself unless the user clears it.
+  const imageBanListFlag = "--ban-list=/home/monero/ban_list.txt";
+
+  it("emits the image's baked-in ban list path by default", () => {
+    expect(run()).toContain(imageBanListFlag);
+  });
+
+  it("honors a custom ban list path", () => {
+    const flags = run({ banList: "/opt/custom-bans.txt" });
+    expect(flags).toContain("--ban-list=/opt/custom-bans.txt");
+    expect(flags).not.toContain(imageBanListFlag);
+  });
+
+  it("omits --ban-list only when the user clears the path", () => {
+    const flags = run({ banList: "" });
+    expect(flags.some((a) => a.startsWith("--ban-list="))).toBe(false);
+  });
+
+  it("falls back to the image path when the value fails validation", () => {
+    expect(run({ banList: "$(rm -rf /)" })).toContain(imageBanListFlag);
+  });
+});
+
 describe("monerod DNS checkpoint flags (fix 6)", () => {
   it("emits neither flag for the default mode", () => {
     const flags = run({ dnsCheckpoints: "default" });

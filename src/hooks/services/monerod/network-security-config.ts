@@ -1,4 +1,5 @@
 import { useQueryState, parseAsBoolean, parseAsString, parseAsStringEnum } from "nuqs";
+import { MONEROD_BAN_LIST_PATH } from "@/lib/constants";
 import { DnsCheckpointsMode } from "./types";
 
 /**
@@ -7,7 +8,7 @@ import { DnsCheckpointsMode } from "./types";
 export const useNetworkSecurityConfig = () => {
   const [banList, setBanList] = useQueryState(
     "banList",
-    parseAsString.withDefault("/home/monero/ban_list.txt")
+    parseAsString.withDefault(MONEROD_BAN_LIST_PATH)
   );
   
   const [enableDnsBlocklist, setEnableDnsBlocklist] = useQueryState(

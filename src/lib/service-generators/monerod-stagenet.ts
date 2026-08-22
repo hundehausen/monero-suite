@@ -1,7 +1,7 @@
 import { Service, architectures, networkModes, torProxyModes } from "@/lib/service-types";
 import { TOR_IP, MONEROD_STAGENET_IP } from "@/lib/service-constants";
 import { safeParse, pathSchema } from "@/lib/schemas";
-import { DOCKER_IMAGES, MONEROD_STAGENET_PORTS } from "@/lib/constants";
+import { DOCKER_IMAGES, MONEROD_BAN_LIST_PATH, MONEROD_STAGENET_PORTS } from "@/lib/constants";
 import { getTraefikConfig, getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
 import type { FullConfig } from "@/lib/config-schema";
 import { CERT_RESOLVER_NAME } from "./traefik";
@@ -65,6 +65,7 @@ export const createMonerodStagenetService = (
           "--rpc-bind-port=38081",
           "--confirm-external-bind",
           "--enable-dns-blocklist",
+          `--ban-list=${MONEROD_BAN_LIST_PATH}`,
           "--check-updates=disabled",
           ...(moneroNodeNoLogs
             ? ["--log-file=/dev/null", "--max-log-file-size=0"]

@@ -62,6 +62,12 @@ export const SERVICE_PORTS = {
 export const GRAFANA_LOCAL_DOMAIN = `localhost:${SERVICE_PORTS.grafana}` as const;
 export const GRAFANA_TRAEFIK_DEFAULT_DOMAIN = "monitor.example.com" as const;
 
+// Path the sethforprivacy simple-monerod image copies Boog900's list to
+// (WORKDIR /home/monero, COPY .../ban_list.txt ./ban_list.txt). Compose
+// `command` replaces the image CMD, so generators must pass this path
+// explicitly or the baked-in list is unused.
+export const MONEROD_BAN_LIST_PATH = "/home/monero/ban_list.txt" as const;
+
 // Docker image references.
 // Using :latest tags is intentional — users often run Watchtower for
 // automatic updates, and pinned versions would require manual bumps.

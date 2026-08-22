@@ -79,4 +79,9 @@ describe("createMonerodStagenetService host port publishing", () => {
     expect(monerodStagenet.command).toContain("--rpc-bind-ip=0.0.0.0");
     expect(monerodStagenet.command).toContain("--rpc-bind-port=38081");
   });
+
+  it("sets --ban-list to the image path because compose command replaces CMD", () => {
+    const monerodStagenet = code({}, networkModes.local);
+    expect(monerodStagenet.command).toContain("--ban-list=/home/monero/ban_list.txt");
+  });
 });

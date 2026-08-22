@@ -7,6 +7,10 @@ describe("makeFullConfig", () => {
     expect(fullConfigSchema.safeParse(makeFullConfig()).success).toBe(true);
   });
 
+  it("defaults banList to the path the sethforprivacy image ships", () => {
+    expect(makeFullConfig().monerod.banList).toBe("/home/monero/ban_list.txt");
+  });
+
   it("deep-merges a services override without dropping the rest of the group", () => {
     const config = makeFullConfig({ services: { isXmrigProxy: true } });
     expect(config.services.isXmrigProxy).toBe(true);

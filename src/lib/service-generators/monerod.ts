@@ -11,7 +11,7 @@ import {
   rpcLoginSchema,
   moneroAddressSchema,
 } from "@/lib/schemas";
-import { DOCKER_IMAGES, MONEROD_PORTS } from "@/lib/constants";
+import { DOCKER_IMAGES, MONEROD_BAN_LIST_PATH, MONEROD_PORTS } from "@/lib/constants";
 import { getTraefikConfig, getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
 import { stackNeedsZmq } from "@/lib/stack-needs-zmq";
 import type { FullConfig } from "@/lib/config-schema";
@@ -190,7 +190,7 @@ export const createMonerodService = (
 
   const { labels } = getTraefikConfig(isTraefik, "monerod", moneroNodeDomain, "18089", CERT_RESOLVER_NAME);
   const sPath = safeParse(pathSchema, moneroMainnetBlockchainLocation, "/home/monero/.bitmonero");
-  const sBanList = safeParse(commandValueSchema, banList, "");
+  const sBanList = safeParse(commandValueSchema, banList, MONEROD_BAN_LIST_PATH);
   const sAnonymousInbound = safeParse(commandValueSchema, anonymousInbound, "");
   const sDbSyncMode = safeParse(commandValueSchema, dbSyncMode, "");
   const sSeedNode = safeParse(hostPortSchema, seedNode, "");
@@ -272,6 +272,9 @@ export const createMonerodService = (
           "--confirm-external-bind",
           "--check-updates=disabled",
           ...(enableDnsBlocklist ? ["--enable-dns-blocklist"] : []),
+          // Compose `command` replaces the image CMD, which is the only
+          // place the baked-in --ban-list would have applied. Empty string
+          // is the user opt-out; invalid input falls back to the image path.
           ...(sBanList ? [`--ban-list=${sBanList}`] : []),
           ...(dnsCheckpoints === "enforce" ? ["--enforce-dns-checkpointing"] : []),
           ...(dnsCheckpoints === "skip" ? ["--disable-dns-checkpoints"] : []),

@@ -1,4 +1,5 @@
 import type { FullConfig } from "./config-schema";
+import { MONEROD_BAN_LIST_PATH } from "./constants";
 
 export type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends object
@@ -57,7 +58,7 @@ const defaultFullConfig = (): FullConfig => ({
     padTransactions: false,
     anonymousInbound: "",
     txProxyDisableNoise: false,
-    banList: "",
+    banList: MONEROD_BAN_LIST_PATH,
     enableDnsBlocklist: false,
     dnsCheckpoints: "default",
     seedNode: "",

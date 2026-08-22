@@ -43,7 +43,7 @@ const NetworkSecuritySection = () => {
           label={
             <ExplainingLabel
               label="Custom Ban List"
-              explanation="Path to a text file with IP addresses to ban (one per line). The default Monero image already includes a community ban list, so you typically don't need to set this."
+              explanation="Path to a text file with IP addresses to ban (one per line). Compose replaces the image command, so this is set explicitly to the community list the Monero image ships at /home/monero/ban_list.txt. Clear the field to disable it, or point it at your own file."
             />
           }
           value={banList}
