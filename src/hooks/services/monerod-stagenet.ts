@@ -1,6 +1,4 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
-import { Service, NetworkMode, torProxyModes, TorProxyMode } from "./types";
-import { createMonerodStagenetService } from "@/lib/service-generators/monerod-stagenet";
 
 export const useMonerodStagenetService = () => {
   const [isStagenetNode, setIsStagenetNode] = useQueryState(
@@ -26,28 +24,8 @@ export const useMonerodStagenetService = () => {
     "stagenetNodeDomain",
     parseAsString.withDefault("stagenet.example.com")
   );
-  const [moneroNodeNoLogs] = useQueryState(
-    "moneroNodeNoLogs",
-    parseAsBoolean.withDefault(false)
-  );
-
-  const getMonerodStagenetService = (
-    networkMode: NetworkMode,
-    isTraefik: boolean,
-    certResolverName: string = "monerosuite",
-    torProxyMode: TorProxyMode = torProxyModes.none
-  ): Service =>
-    createMonerodStagenetService(
-      { isStagenetNode, isStagenetNodePublic, isMoneroStagenetCustomLocation, moneroStagenetBlockchainLocation, stagenetNodeDomain },
-      moneroNodeNoLogs,
-      networkMode,
-      isTraefik,
-      certResolverName,
-      torProxyMode
-    );
 
   return {
-    getMonerodStagenetService,
     stateFunctions: {
       isStagenetNode,
       setIsStagenetNode,

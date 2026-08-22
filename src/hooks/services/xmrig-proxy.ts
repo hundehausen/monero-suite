@@ -1,12 +1,4 @@
 import { useQueryState, parseAsBoolean } from "nuqs";
-import {
-  Service,
-  NetworkMode,
-  P2PoolMode,
-  TorProxyMode,
-  torProxyModes,
-} from "./types";
-import { createXmrigProxyService } from "@/lib/service-generators/xmrig-proxy";
 
 export const useXmrigProxyService = () => {
   const [isXmrigProxy, setIsXmrigProxy] = useQueryState(
@@ -18,22 +10,7 @@ export const useXmrigProxyService = () => {
     parseAsBoolean.withDefault(false)
   );
 
-  const getXmrigProxyService = (
-    p2PoolMode: P2PoolMode,
-    networkMode: NetworkMode,
-    torProxyMode: TorProxyMode = torProxyModes.none,
-    isXmrigProxyEnabled = isXmrigProxy
-  ): Service =>
-    createXmrigProxyService(
-      isXmrigProxyEnabled,
-      p2PoolMode,
-      networkMode,
-      isXmrigProxyPublic,
-      torProxyMode
-    );
-
   return {
-    getXmrigProxyService,
     stateFunctions: {
       isXmrigProxy,
       setIsXmrigProxy,

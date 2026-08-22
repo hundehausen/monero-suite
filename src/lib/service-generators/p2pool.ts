@@ -5,22 +5,14 @@ import {
   p2poolModes,
   P2PoolMode,
   minigModes,
-  MiningMode,
   torProxyModes,
-  TorProxyMode,
-  NetworkMode,
-} from "@/hooks/services/types";
+} from "@/lib/service-types";
 import { P2POOL_IP, MONEROD_IP } from "@/lib/service-constants";
 import { safeParse, moneroAddressSchema } from "@/lib/schemas";
 import { DOCKER_IMAGES, P2POOL_PORTS, MONEROD_PORTS } from "@/lib/constants";
 import { getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
-
-interface P2PoolDataConfig {
-  p2PoolMode: P2PoolMode;
-  p2PoolPayoutAddress: string;
-  p2PoolMiningThreads: number;
-  isP2PoolStratumPublic: boolean;
-}
+import type { FullConfig } from "@/lib/config-schema";
+import type { GenerationCtx } from "./ctx";
 
 export function getP2PoolContainerName(p2PoolMode: P2PoolMode): string {
   if (p2PoolMode === p2poolModes.mini) return "p2pool-mini";
@@ -29,13 +21,14 @@ export function getP2PoolContainerName(p2PoolMode: P2PoolMode): string {
 }
 
 export const createP2PoolService = (
-  state: P2PoolDataConfig,
-  miningMode: MiningMode,
-  torProxyMode: TorProxyMode,
-  networkMode: NetworkMode = networkModes.local,
-  zmqPubPort: number
+  config: FullConfig,
+  ctx: GenerationCtx
 ): Service => {
-  const { p2PoolMode, p2PoolPayoutAddress, p2PoolMiningThreads, isP2PoolStratumPublic } = state;
+  const { p2PoolMode, p2PoolPayoutAddress, p2PoolMiningThreads, isP2PoolStratumPublic } = config.p2pool;
+  const miningMode = config.mining.miningMode;
+  const torProxyMode = config.tor.torProxyMode;
+  const networkMode = config.networkMode;
+  const zmqPubPort = ctx.zmqPubPort ?? MONEROD_PORTS.zmqPub;
   const sPayoutAddress = safeParse(moneroAddressSchema, p2PoolPayoutAddress, "");
   const p2PoolContainerName = getP2PoolContainerName(p2PoolMode);
   const p2pPort =

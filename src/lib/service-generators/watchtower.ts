@@ -1,13 +1,14 @@
-import { Service, architectures } from "@/hooks/services/types";
+import { Service, architectures } from "@/lib/service-types";
 import { DOCKER_IMAGES } from "@/lib/constants";
+import type { FullConfig } from "@/lib/config-schema";
 
 export const createWatchtowerService = (
-  isWatchtower: boolean
+  config: FullConfig
 ): Service => ({
   name: "Watchtower",
   description:
     "Automatically updates your Docker containers when new image versions are available. Keeps your Monero software up-to-date without manual intervention.",
-  checked: isWatchtower,
+  checked: config.services.isWatchtower,
   required: false,
   architecture: [architectures.linuxAmd, architectures.linuxArm],
   code: {

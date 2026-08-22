@@ -9,5 +9,4 @@ export * from './zmq-rpc-config';
 export * from './txpool-config';
 export * from './mining-config';
 export * from './notifications-config';
-export { createMonerodService, getZmqPubPort, getMonerodP2pPortCollisions } from "@/lib/service-generators/monerod";
 export * from './types';

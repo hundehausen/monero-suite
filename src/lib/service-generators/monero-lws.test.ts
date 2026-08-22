@@ -1,17 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { createMoneroLwsService } from "./monero-lws";
-import { networkModes, torProxyModes } from "@/hooks/services/types";
+import { generationCtx } from "./index";
 import { DOCKER_IMAGES, MONEROD_PORTS, SERVICE_PORTS } from "@/lib/constants";
+import { makeFullConfig } from "@/lib/make-full-config";
 
-const run = (on: boolean, zmq: number = MONEROD_PORTS.zmqPub) =>
-  createMoneroLwsService(
-    { isMoneroLws: on, lwsDomain: "lws.example.com" },
-    networkModes.local,
-    false,
-    "monerosuite",
-    torProxyModes.none,
-    zmq
-  );
+const run = (on: boolean, zmqPubBindPort: string = String(MONEROD_PORTS.zmqPub)) => {
+  const config = makeFullConfig({
+    services: { isMoneroLws: on, lwsDomain: "lws.example.com" },
+    monerod: { zmqPubEnabled: true, zmqPubBindPort },
+  });
+  return createMoneroLwsService(config, generationCtx(config));
+};
 
 describe("createMoneroLwsService", () => {
   it("is unchecked when disabled", () => {
@@ -19,7 +18,7 @@ describe("createMoneroLwsService", () => {
   });
 
   it("points --daemon at monerod ZMQ RPC and --sub at the live pub port", () => {
-    const c = run(true, 18090).code["monero-lws"] as {
+    const c = run(true, "18090").code["monero-lws"] as {
       image: string;
       command: string[];
       ports: string[];
@@ -29,6 +28,8 @@ describe("createMoneroLwsService", () => {
     expect(c.command).toContain("--sub=tcp://monerod:18090");
     expect(c.command).toContain(`--rest-server=http://0.0.0.0:${SERVICE_PORTS.moneroLws}`);
     expect(c.command).toContain(`--admin-rest-server=http://0.0.0.0:${SERVICE_PORTS.moneroLwsAdmin}`);
+    // 0.0.0.0 is an external bind; without this flag monero-lws exits on start.
+    expect(c.command).toContain("--confirm-external-bind");
     expect(c.command).toContain("--max-subaddresses=50");
     expect(c.ports).toContain(`${SERVICE_PORTS.moneroLws}:${SERVICE_PORTS.moneroLws}`);
     expect(c.ports).toContain(`${SERVICE_PORTS.moneroLwsAdmin}:${SERVICE_PORTS.moneroLwsAdmin}`);

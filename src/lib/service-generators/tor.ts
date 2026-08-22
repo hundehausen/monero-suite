@@ -1,30 +1,13 @@
-import { Service, architectures, torProxyModes, TorProxyMode, NetworkMode, p2poolModes, P2PoolMode } from "@/hooks/services/types";
+import { Service, architectures, torProxyModes, p2poolModes } from "@/lib/service-types";
 import { TOR_IP } from "@/lib/service-constants";
 import { DOCKER_NETWORK, DOCKER_IMAGES, SERVICE_PORTS, P2POOL_PORTS, MONEROD_PORTS, MONEROD_STAGENET_PORTS } from "@/lib/constants";
 import { getPortBinding } from "@/lib/docker-helpers";
-
-interface TorDataConfig {
-  torProxyMode: TorProxyMode;
-  hsMonerod: boolean;
-  hsMonerodP2P: boolean;
-  hsStagenet: boolean;
-  hsP2Pool: boolean;
-  hsGrafana: boolean;
-  hsLws: boolean;
-  hsMoneroPay: boolean;
-  hsXmrigProxy: boolean;
-  isGlobalTorProxy: boolean;
-}
+import type { FullConfig } from "@/lib/config-schema";
+import type { GenerationCtx } from "./ctx";
 
 export const createTorService = (
-  state: TorDataConfig,
-  networkMode: NetworkMode,
-  isStagenetNode: boolean = false,
-  p2PoolMode: P2PoolMode = p2poolModes.none,
-  isMonitoring: boolean = false,
-  isMoneroLws: boolean = false,
-  isMoneroPay: boolean = false,
-  isXmrigProxy: boolean = false
+  config: FullConfig,
+  ctx: GenerationCtx
 ): Service => {
   const {
     torProxyMode,
@@ -37,9 +20,16 @@ export const createTorService = (
     hsMoneroPay,
     hsXmrigProxy,
     isGlobalTorProxy,
-  } = state;
+  } = config.tor;
+  const networkMode = config.networkMode;
+  const isStagenetNode = config.stagenet.isStagenetNode;
+  const p2PoolMode = config.p2pool.p2PoolMode;
+  const isMonitoring = config.services.isMonitoring;
+  const isMoneroLws = config.services.isMoneroLws;
+  const isMoneroPay = config.services.isMoneroPay;
+  const isXmrigProxy = ctx.isXmrigProxyOn;
 
-  const isHiddenServices = hsMonerod || hsMonerodP2P || hsStagenet || hsP2Pool || hsGrafana || hsLws || hsMoneroPay || hsXmrigProxy;
+  const isHiddenServices = ctx.anyHiddenService;
   const isTorEnabled = torProxyMode !== torProxyModes.none || isHiddenServices;
   const isProxyEnabled = torProxyMode !== torProxyModes.none;
 

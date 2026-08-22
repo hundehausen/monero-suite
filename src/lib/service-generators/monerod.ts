@@ -1,4 +1,4 @@
-import { Service, architectures, networkModes, torProxyModes, NetworkMode, TorProxyMode, P2PoolMode } from "@/hooks/services/types";
+import { Service, architectures, networkModes, torProxyModes, P2PoolMode } from "@/lib/service-types";
 import { TOR_IP, MONEROD_IP } from "@/lib/service-constants";
 import {
   safeParse,
@@ -14,6 +14,9 @@ import {
 import { DOCKER_IMAGES, MONEROD_PORTS } from "@/lib/constants";
 import { getTraefikConfig, getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
 import { stackNeedsZmq } from "@/lib/stack-needs-zmq";
+import type { FullConfig } from "@/lib/config-schema";
+import type { GenerationCtx } from "./ctx";
+import { CERT_RESOLVER_NAME } from "./traefik";
 
 /**
  * The port monerod actually binds ZMQ pub to — the single source of truth that
@@ -126,69 +129,15 @@ export const getMonerodCollisionRoleLabel = (
   return colliding === "zmq" ? "P2P" : "ZMQ publisher";
 };
 
-interface MonerodDataConfig {
-  isMoneroPublicNode: boolean;
-  moneroNodeNoLogs: boolean;
-  moneroNodeDomain: string;
-  isPrunedNode: boolean;
-  isSyncPrunedBlocks: boolean;
-  isMoneroMainnetVolume: boolean;
-  moneroMainnetBlockchainLocation: string;
-  logLevel: string;
-  maxLogFileSize: string;
-  maxLogFiles: string;
-  p2pBindPort: string;
-  outPeers: string;
-  inPeers: string;
-  limitRateUp: string;
-  limitRateDown: string;
-  hidePort: boolean;
-  allowLocalIp: boolean;
-  maxConnectionsPerIp: string;
-  p2pExternalPort: string;
-  offlineMode: boolean;
-  padTransactions: boolean;
-  anonymousInbound: string;
-  txProxyDisableNoise: boolean;
-  banList: string;
-  enableDnsBlocklist: boolean;
-  dnsCheckpoints: "default" | "skip" | "enforce";
-  seedNode: string;
-  addPeer: string;
-  addPriorityNode: string;
-  addExclusiveNode: string;
-  dbSyncMode: string;
-  blockSyncSize: string;
-  fastBlockSync: boolean;
-  preparationThreads: string;
-  maxConcurrency: string;
-  bootstrapDaemonAddress: string;
-  bootstrapDaemonLogin: string;
-  zmqPubEnabled: boolean;
-  zmqPubBindPort: string;
-  rpcLogin: string;
-  disableRpcBan: boolean;
-  maxTxpoolWeight: string;
-  startMining: string;
-  miningThreads: string;
-  bgMiningEnable: boolean;
-  bgMiningIgnoreBattery: boolean;
-  blockNotify: string;
-  reorgNotify: string;
-  blockRateNotify: string;
-}
-
 export const createMonerodService = (
-  state: MonerodDataConfig,
-  networkMode: NetworkMode,
-  p2PoolMode: P2PoolMode,
-  torProxyMode: TorProxyMode,
-  isMonitoring: boolean,
-  isMoneroLws: boolean = false,
-  isHiddenServices: boolean,
-  isTraefik: boolean,
-  certResolverName: string = "monerosuite"
+  config: FullConfig,
+  ctx: GenerationCtx
 ): Service => {
+  const networkMode = config.networkMode;
+  const torProxyMode = config.tor.torProxyMode;
+  const isMoneroLws = config.services.isMoneroLws;
+  const isHiddenServices = ctx.anyHiddenService;
+  const isTraefik = config.services.isTraefik && config.services.isTraefikMonerod;
   const {
     isMoneroPublicNode,
     moneroNodeNoLogs,
@@ -227,8 +176,6 @@ export const createMonerodService = (
     maxConcurrency,
     bootstrapDaemonAddress,
     bootstrapDaemonLogin,
-    zmqPubEnabled,
-    zmqPubBindPort,
     rpcLogin,
     disableRpcBan,
     maxTxpoolWeight,
@@ -239,9 +186,9 @@ export const createMonerodService = (
     blockNotify,
     reorgNotify,
     blockRateNotify,
-  } = state;
+  } = config.monerod;
 
-  const { labels } = getTraefikConfig(isTraefik, "monerod", moneroNodeDomain, "18089", certResolverName);
+  const { labels } = getTraefikConfig(isTraefik, "monerod", moneroNodeDomain, "18089", CERT_RESOLVER_NAME);
   const sPath = safeParse(pathSchema, moneroMainnetBlockchainLocation, "/home/monero/.bitmonero");
   const sBanList = safeParse(commandValueSchema, banList, "");
   const sAnonymousInbound = safeParse(commandValueSchema, anonymousInbound, "");
@@ -273,11 +220,7 @@ export const createMonerodService = (
   const sMaxConcurrency = safeParse(numericStringSchema, maxConcurrency, "0");
   const sMiningThreads = safeParse(numericStringSchema, miningThreads, "1");
 
-  const zmqPubPort = getZmqPubPort(
-    zmqPubEnabled,
-    zmqPubBindPort,
-    stackNeedsZmq(p2PoolMode, isMonitoring, isMoneroLws)
-  );
+  const zmqPubPort = ctx.zmqPubPort;
 
   return {
     name: "Monero Node",

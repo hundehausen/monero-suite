@@ -1,4 +1,4 @@
-import { networkModes, NetworkMode, torProxyModes, TorProxyMode } from "@/hooks/services/types";
+import { networkModes, NetworkMode, torProxyModes, TorProxyMode } from "@/lib/service-types";
 import { safeParse, domainSchema } from "@/lib/schemas";
 import { DOCKER_NETWORK } from "@/lib/constants";
 

@@ -1,26 +1,20 @@
-import { Service, architectures, networkModes, torProxyModes, NetworkMode, TorProxyMode } from "@/hooks/services/types";
+import { Service, architectures, networkModes, torProxyModes } from "@/lib/service-types";
 import { TOR_IP, MONEROD_STAGENET_IP } from "@/lib/service-constants";
 import { safeParse, pathSchema } from "@/lib/schemas";
 import { DOCKER_IMAGES, MONEROD_STAGENET_PORTS } from "@/lib/constants";
 import { getTraefikConfig, getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
-
-interface StagenetDataConfig {
-  isStagenetNode: boolean;
-  isStagenetNodePublic: boolean;
-  isMoneroStagenetCustomLocation: boolean;
-  moneroStagenetBlockchainLocation: string;
-  stagenetNodeDomain: string;
-}
+import type { FullConfig } from "@/lib/config-schema";
+import { CERT_RESOLVER_NAME } from "./traefik";
 
 export const createMonerodStagenetService = (
-  state: StagenetDataConfig,
-  moneroNodeNoLogs: boolean,
-  networkMode: NetworkMode,
-  isTraefik: boolean,
-  certResolverName: string = "monerosuite",
-  torProxyMode: TorProxyMode = torProxyModes.none
+  config: FullConfig
 ): Service => {
-  const { labels } = getTraefikConfig(isTraefik, "monerod-stagenet", state.stagenetNodeDomain, MONEROD_STAGENET_PORTS.rpcRestricted.toString(), certResolverName);
+  const state = config.stagenet;
+  const moneroNodeNoLogs = config.monerod.moneroNodeNoLogs;
+  const networkMode = config.networkMode;
+  const isTraefik = config.services.isTraefik && config.services.isTraefikStagenet;
+  const torProxyMode = config.tor.torProxyMode;
+  const { labels } = getTraefikConfig(isTraefik, "monerod-stagenet", state.stagenetNodeDomain, MONEROD_STAGENET_PORTS.rpcRestricted.toString(), CERT_RESOLVER_NAME);
   const sPath = safeParse(pathSchema, state.moneroStagenetBlockchainLocation, "~/.bitmonero");
   return ({
     name: "Monero Stagenet Node",

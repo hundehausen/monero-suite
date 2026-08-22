@@ -24,22 +24,6 @@ mkdir -p cuprate
 # Download Cuprated.toml (enables restricted RPC on 0.0.0.0:18089, required for the healthcheck)
 curl -fsSL -o cuprate/Cuprated.toml https://raw.githubusercontent.com/hundehausen/cuprate-docker/main/config/Cuprated.toml`;
 
-export interface EnabledBashServices {
-  monitoring: boolean;
-  cuprate: boolean;
-}
-
-export function generateBashCommands(services: EnabledBashServices): string {
-  let commands = "";
-  if (services.monitoring) {
-    commands += MONITORING_BASH_COMMANDS;
-  }
-  if (services.cuprate) {
-    commands += CUPRATE_BASH_COMMANDS;
-  }
-  return commands;
-}
-
 function getSpinnerMessage(cmd: string, fallback: string): string {
   // Extract filepath from curl -o <path> for a meaningful message
   const curlMatch = cmd.match(/curl\s.*-o\s+(\S+)/);

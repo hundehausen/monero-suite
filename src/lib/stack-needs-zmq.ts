@@ -1,4 +1,4 @@
-import { p2poolModes, type P2PoolMode } from "@/hooks/services/types";
+import { p2poolModes, type P2PoolMode } from "@/lib/service-types";
 
 /** True when monerod must bind ZMQ pub (and must not pass --no-zmq). */
 export function stackNeedsZmq(

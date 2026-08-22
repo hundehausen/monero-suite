@@ -1,5 +1,3 @@
-import { Service, NetworkMode, P2PoolMode, TorProxyMode } from "../types";
-
 export type DnsCheckpointsMode = "default" | "skip" | "enforce";
 
 export interface MonerodState {
@@ -125,15 +123,5 @@ export interface MonerodState {
 }
 
 export interface MonerodServiceHook {
-  getMonerodService: (
-    networkMode: NetworkMode,
-    p2PoolMode: P2PoolMode,
-    torProxyMode: TorProxyMode,
-    isMonitoring: boolean,
-    isMoneroLws: boolean,
-    isHiddenServices: boolean,
-    isTraefik: boolean,
-    certResolverName?: string
-  ) => Service;
   stateFunctions: MonerodState;
 }

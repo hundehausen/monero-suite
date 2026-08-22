@@ -1,8 +1,4 @@
 import { useQueryState, parseAsBoolean } from "nuqs";
-import { Service, TorProxyMode, torProxyModes } from "./types";
-import { createTraefikService, CERT_RESOLVER_NAME as _CERT_RESOLVER_NAME } from "@/lib/service-generators/traefik";
-
-export const CERT_RESOLVER_NAME = _CERT_RESOLVER_NAME;
 
 export const useTraefikService = () => {
   const [isTraefik, setIsTraefik] = useQueryState(
@@ -34,12 +30,7 @@ export const useTraefikService = () => {
     parseAsBoolean.withDefault(true)
   );
 
-  const getTraefikService = (
-    torProxyMode: TorProxyMode = torProxyModes.none
-  ): Service => createTraefikService(isTraefik, torProxyMode);
-
   return {
-    getTraefikService,
     stateFunctions: {
       isTraefik,
       setIsTraefik,

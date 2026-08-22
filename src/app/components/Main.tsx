@@ -21,12 +21,11 @@ import { generateInstallationScript } from "@/lib/script-generator";
 import { stringify } from "yaml";
 import { useInstallScript } from "@/hooks/use-install-script";
 import InstallScriptPanel from "./InstallScriptPanel";
-import type { FullConfig } from "@/lib/config-schema";
 import { getMonerodP2pPortCollisions, getMonerodZmqPortCollisions } from "@/lib/service-generators/monerod";
 import { isValidP2PoolPayoutAddress } from "@/lib/schemas";
 
 export default function Main() {
-  const { services, stateFunctions } = useServicesContext();
+  const { services, stateFunctions, config } = useServicesContext();
   const [activeTab, setActiveTab] = useState<string | null>("docker-compose");
 
   const checkedServices = useMemo(
@@ -102,122 +101,6 @@ export default function Main() {
     () => generateScriptSummary(checkedServices, envString, isExposed, firewallPorts),
     [checkedServices, envString, isExposed, firewallPorts]
   );
-
-  const enabledBashServices = useMemo(
-    () => ({
-      monitoring: checkedServices.some((s) => s.name === "Monitoring"),
-      cuprate: checkedServices.some((s) => s.name === "Cuprate (Experimental)"),
-    }),
-    [checkedServices]
-  );
-
-  const config: FullConfig = useMemo(() => ({
-    architecture: stateFunctions.architecture,
-    networkMode: stateFunctions.networkMode,
-    monerod: {
-      isMoneroPublicNode: stateFunctions.isMoneroPublicNode,
-      moneroNodeNoLogs: stateFunctions.moneroNodeNoLogs,
-      moneroNodeDomain: stateFunctions.moneroNodeDomain,
-      isPrunedNode: stateFunctions.isPrunedNode,
-      isSyncPrunedBlocks: stateFunctions.isSyncPrunedBlocks,
-      isMoneroMainnetVolume: stateFunctions.isMoneroMainnetVolume,
-      moneroMainnetBlockchainLocation: stateFunctions.moneroMainnetBlockchainLocation,
-      logLevel: stateFunctions.logLevel,
-      maxLogFileSize: stateFunctions.maxLogFileSize,
-      maxLogFiles: stateFunctions.maxLogFiles,
-      p2pBindPort: stateFunctions.p2pBindPort,
-      outPeers: stateFunctions.outPeers,
-      inPeers: stateFunctions.inPeers,
-      limitRateUp: stateFunctions.limitRateUp,
-      limitRateDown: stateFunctions.limitRateDown,
-      hidePort: stateFunctions.hidePort,
-      allowLocalIp: stateFunctions.allowLocalIp,
-      maxConnectionsPerIp: stateFunctions.maxConnectionsPerIp,
-      p2pExternalPort: stateFunctions.p2pExternalPort,
-      offlineMode: stateFunctions.offlineMode,
-      padTransactions: stateFunctions.padTransactions,
-      anonymousInbound: stateFunctions.anonymousInbound,
-      txProxyDisableNoise: stateFunctions.txProxyDisableNoise,
-      banList: stateFunctions.banList,
-      enableDnsBlocklist: stateFunctions.enableDnsBlocklist,
-      dnsCheckpoints: stateFunctions.dnsCheckpoints,
-      seedNode: stateFunctions.seedNode,
-      addPeer: stateFunctions.addPeer,
-      addPriorityNode: stateFunctions.addPriorityNode,
-      addExclusiveNode: stateFunctions.addExclusiveNode,
-      dbSyncMode: stateFunctions.dbSyncMode,
-      blockSyncSize: stateFunctions.blockSyncSize,
-      fastBlockSync: stateFunctions.fastBlockSync,
-      preparationThreads: stateFunctions.preparationThreads,
-      maxConcurrency: stateFunctions.maxConcurrency,
-      bootstrapDaemonAddress: stateFunctions.bootstrapDaemonAddress,
-      bootstrapDaemonLogin: stateFunctions.bootstrapDaemonLogin,
-      zmqPubEnabled: stateFunctions.zmqPubEnabled,
-      zmqPubBindPort: stateFunctions.zmqPubBindPort,
-      rpcLogin: stateFunctions.rpcLogin,
-      disableRpcBan: stateFunctions.disableRpcBan,
-      maxTxpoolWeight: stateFunctions.maxTxpoolWeight,
-      startMining: stateFunctions.startMining,
-      miningThreads: stateFunctions.miningThreads,
-      bgMiningEnable: stateFunctions.bgMiningEnable,
-      bgMiningIgnoreBattery: stateFunctions.bgMiningIgnoreBattery,
-      blockNotify: stateFunctions.blockNotify,
-      reorgNotify: stateFunctions.reorgNotify,
-      blockRateNotify: stateFunctions.blockRateNotify,
-    },
-    stagenet: {
-      isStagenetNode: stateFunctions.isStagenetNode,
-      isStagenetNodePublic: stateFunctions.isStagenetNodePublic,
-      isMoneroStagenetCustomLocation: stateFunctions.isMoneroStagenetCustomLocation,
-      moneroStagenetBlockchainLocation: stateFunctions.moneroStagenetBlockchainLocation,
-      stagenetNodeDomain: stateFunctions.stagenetNodeDomain,
-    },
-    p2pool: {
-      p2PoolMode: stateFunctions.p2PoolMode,
-      p2PoolPayoutAddress: stateFunctions.p2PoolPayoutAddress,
-      p2PoolMiningThreads: stateFunctions.p2PoolMiningThreads,
-      isP2PoolStratumPublic: stateFunctions.isP2PoolStratumPublic,
-    },
-    mining: {
-      miningMode: stateFunctions.miningMode,
-      xmrigDonateLevel: stateFunctions.xmrigDonateLevel,
-    },
-    tor: {
-      torProxyMode: stateFunctions.torProxyMode,
-      hsMonerod: stateFunctions.hsMonerod,
-      hsMonerodP2P: stateFunctions.hsMonerodP2P,
-      hsStagenet: stateFunctions.hsStagenet,
-      hsP2Pool: stateFunctions.hsP2Pool,
-      hsGrafana: stateFunctions.hsGrafana,
-      hsLws: stateFunctions.hsLws,
-      hsMoneroPay: stateFunctions.hsMoneroPay,
-      hsXmrigProxy: stateFunctions.hsXmrigProxy,
-      isGlobalTorProxy: stateFunctions.isGlobalTorProxy,
-    },
-    services: {
-      isMoneroWalletRpc: stateFunctions.isMoneroWalletRpc,
-      isWatchtower: stateFunctions.isWatchtower,
-      isMonitoring: stateFunctions.isMonitoring,
-      grafanaDomain: stateFunctions.grafanaDomain,
-      isTraefik: stateFunctions.isTraefik,
-      isTraefikMonerod: stateFunctions.isTraefikMonerod,
-      isTraefikStagenet: stateFunctions.isTraefikStagenet,
-      isTraefikGrafana: stateFunctions.isTraefikGrafana,
-      isTraefikPortainer: stateFunctions.isTraefikPortainer,
-      isPortainer: stateFunctions.isPortainer,
-      portainerDomain: stateFunctions.portainerDomain,
-      isCuprateEnabled: stateFunctions.isCuprateEnabled,
-      isMoneroLws: stateFunctions.isMoneroLws,
-      isMoneroPay: stateFunctions.isMoneroPay,
-      isXmrigProxy: stateFunctions.isXmrigProxy,
-      isXmrigProxyPublic: stateFunctions.isXmrigProxyPublic,
-      isTraefikLws: stateFunctions.isTraefikLws,
-      isTraefikMoneroPay: stateFunctions.isTraefikMoneroPay,
-      lwsDomain: stateFunctions.lwsDomain,
-      moneroPayDomain: stateFunctions.moneroPayDomain,
-    },
-    enabledBashServices,
-  }), [stateFunctions, enabledBashServices]);
 
   const { installationCommand, isUploading, currentConfigIsUploaded, handleScriptGeneration } =
     useInstallScript({ config });

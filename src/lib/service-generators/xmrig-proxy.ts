@@ -2,15 +2,14 @@ import {
   Service,
   Architecture,
   architectures,
-  NetworkMode,
   P2PoolMode,
-  TorProxyMode,
-  torProxyModes,
   networkModes,
-} from "@/hooks/services/types";
+} from "@/lib/service-types";
 import { DOCKER_IMAGES, P2POOL_PORTS, SERVICE_PORTS } from "@/lib/constants";
 import { getPortBinding, getTorClientNetworkConfig } from "@/lib/docker-helpers";
 import { getP2PoolContainerName } from "@/lib/service-generators/p2pool";
+import type { FullConfig } from "@/lib/config-schema";
+import type { GenerationCtx } from "./ctx";
 
 /** True only when the proxy container can actually run (P2Pool + amd64). */
 export function isXmrigProxyEffective(
@@ -26,15 +25,14 @@ export function isXmrigProxyEffective(
 }
 
 export const createXmrigProxyService = (
-  isXmrigProxy: boolean,
-  p2PoolMode: P2PoolMode,
-  networkMode: NetworkMode,
-  isXmrigProxyPublic: boolean,
-  torProxyMode: TorProxyMode = torProxyModes.none
+  config: FullConfig,
+  ctx: GenerationCtx
 ): Service => {
+  const p2PoolMode = config.p2pool.p2PoolMode;
+  const networkMode = config.networkMode;
+  const isXmrigProxyPublic = config.services.isXmrigProxyPublic;
   const p2poolHost = getP2PoolContainerName(p2PoolMode);
-  // Uploaded configs can keep the raw flag after P2Pool is turned off.
-  const proxyOn = isXmrigProxy && p2PoolMode !== "none";
+  const proxyOn = ctx.isXmrigProxyOn;
   return {
     name: "XMRig Proxy",
     description:
@@ -61,7 +59,7 @@ export const createXmrigProxyService = (
             : getPortBinding(networkMode, SERVICE_PORTS.xmrigProxy),
         ],
         depends_on: { [p2poolHost]: { condition: "service_started" } },
-        ...getTorClientNetworkConfig(torProxyMode),
+        ...getTorClientNetworkConfig(config.tor.torProxyMode),
         command: [
           "-o",
           `${p2poolHost}:${P2POOL_PORTS.stratum}`,

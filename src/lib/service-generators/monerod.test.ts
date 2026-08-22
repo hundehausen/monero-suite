@@ -5,9 +5,12 @@ import {
   getMonerodZmqPortCollisions,
   getZmqPubPort,
 } from "@/lib/service-generators/monerod";
+import { generationCtx } from "@/lib/service-generators";
 import { MONEROD_PORTS } from "@/lib/constants";
-import { networkModes, p2poolModes } from "@/hooks/services/types";
-import { Service } from "@/hooks/services/types";
+import { networkModes } from "@/lib/service-types";
+import { Service } from "@/lib/service-types";
+import { makeFullConfig, type DeepPartial } from "@/lib/make-full-config";
+import type { FullConfig } from "@/lib/config-schema";
 
 /**
  * monerod omits peer/rate flags set to -1 so monerod's own defaults apply
@@ -19,92 +22,31 @@ type Container = { command?: string[]; ports?: string[] };
 
 const cmd = (c: Container): string[] => c.command ?? [];
 
-const baseState = {
-  // Basic
-  isMoneroPublicNode: false,
-  moneroNodeNoLogs: false,
-  moneroNodeDomain: "node.example.com",
-  isPrunedNode: false,
-  isSyncPrunedBlocks: false,
-  isMoneroMainnetVolume: true,
-  moneroMainnetBlockchainLocation: "",
-  // Logging
-  logLevel: "0",
-  maxLogFileSize: "104850000",
-  maxLogFiles: "50",
-  // P2P
-  p2pBindPort: "18080",
-  hidePort: false,
-  allowLocalIp: false,
-  maxConnectionsPerIp: "1",
-  p2pExternalPort: "0",
-  offlineMode: false,
-  // Peers
-  outPeers: "64",
-  inPeers: "32",
-  limitRateUp: "1048576",
-  limitRateDown: "2048",
-  // Tor/I2P
-  padTransactions: false,
-  anonymousInbound: "",
-  txProxyDisableNoise: false,
-  // Network security
-  banList: "",
-  enableDnsBlocklist: false,
-  dnsCheckpoints: "default",
-  // Peers
-  seedNode: "",
-  addPeer: "",
-  addPriorityNode: "",
-  addExclusiveNode: "",
-  // Performance
-  dbSyncMode: "",
-  blockSyncSize: "0",
-  fastBlockSync: true,
-  preparationThreads: "4",
-  maxConcurrency: "0",
-  bootstrapDaemonAddress: "",
-  bootstrapDaemonLogin: "",
-  // ZMQ/RPC
-  zmqPubEnabled: false,
-  zmqPubBindPort: "18083",
-  rpcLogin: "",
-  disableRpcBan: false,
-  // Tx pool
-  maxTxpoolWeight: "0",
-  // Mining
-  startMining: "",
-  miningThreads: "1",
-  bgMiningEnable: false,
-  bgMiningIgnoreBattery: false,
-  // Notifications
-  blockNotify: "",
-  reorgNotify: "",
-  blockRateNotify: "",
+const runFull = (
+  monerod: DeepPartial<FullConfig["monerod"]> = {},
+  opts: {
+    networkMode?: FullConfig["networkMode"];
+    p2PoolMode?: FullConfig["p2pool"]["p2PoolMode"];
+    isMonitoring?: boolean;
+    isMoneroLws?: boolean;
+  } = {}
+): Service => {
+  const config = makeFullConfig({
+    monerod,
+    networkMode: opts.networkMode,
+    p2pool: opts.p2PoolMode !== undefined ? { p2PoolMode: opts.p2PoolMode } : undefined,
+    services: {
+      isMonitoring: opts.isMonitoring,
+      isMoneroLws: opts.isMoneroLws,
+    },
+  });
+  return createMonerodService(config, generationCtx(config));
 };
 
-type PeerOverrides = Partial<typeof baseState> & {
-  outPeers?: string;
-  inPeers?: string;
-  limitRateUp?: string;
-  limitRateDown?: string;
-};
-
-const run = (overrides: PeerOverrides = {}): string[] =>
-  cmd(
-    (
-      createMonerodService(
-        { ...baseState, ...overrides } as Parameters<typeof createMonerodService>[0],
-        networkModes.local,
-        "none",
-        "none",
-        false,
-        false,
-        false,
-        false
-      ) as Service
-    ).code.monerod as Container
-  );
+const run = (
+  monerod: DeepPartial<FullConfig["monerod"]> = {},
+  opts: Parameters<typeof runFull>[1] = {}
+): string[] => cmd(runFull(monerod, opts).code.monerod as Container);
 
 const peerFlags = (c: string[]) =>
   c.filter(
@@ -201,26 +143,6 @@ describe("getZmqPubPort", () => {
     expect(getZmqPubPort(false, "18083", false)).toBeNull();
   });
 });
-
-const runFull = (
-  overrides: Partial<typeof baseState> = {},
-  opts: {
-    networkMode?: (typeof networkModes)[keyof typeof networkModes];
-    p2PoolMode?: (typeof p2poolModes)[keyof typeof p2poolModes];
-    isMonitoring?: boolean;
-    isMoneroLws?: boolean;
-  } = {}
-): Service =>
-  createMonerodService(
-    { ...baseState, ...overrides } as Parameters<typeof createMonerodService>[0],
-    opts.networkMode ?? networkModes.local,
-    opts.p2PoolMode ?? p2poolModes.none,
-    "none",
-    opts.isMonitoring ?? false,
-    opts.isMoneroLws ?? false,
-    false,
-    false
-  ) as Service;
 
 describe("monerod P2P bind port propagation", () => {
   it("publishes a custom P2P bind port on the host (host = container = selected port)", () => {

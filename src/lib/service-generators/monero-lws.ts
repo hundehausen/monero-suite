@@ -1,36 +1,29 @@
 import {
   Service,
   architectures,
-  NetworkMode,
-  TorProxyMode,
-  torProxyModes,
-} from "@/hooks/services/types";
+} from "@/lib/service-types";
 import { DOCKER_IMAGES, SERVICE_PORTS, MONEROD_PORTS } from "@/lib/constants";
 import {
   getTraefikConfig,
   getPortBinding,
   getTorClientNetworkConfig,
 } from "@/lib/docker-helpers";
-
-export interface MoneroLwsState {
-  isMoneroLws: boolean;
-  lwsDomain: string;
-}
+import type { FullConfig } from "@/lib/config-schema";
+import type { GenerationCtx } from "./ctx";
+import { CERT_RESOLVER_NAME } from "./traefik";
 
 export const createMoneroLwsService = (
-  state: MoneroLwsState,
-  networkMode: NetworkMode,
-  isTraefik: boolean,
-  certResolverName: string,
-  torProxyMode: TorProxyMode = torProxyModes.none,
-  zmqPubPort: number = MONEROD_PORTS.zmqPub
+  config: FullConfig,
+  ctx: GenerationCtx
 ): Service => {
+  const isTraefik = config.services.isTraefik && config.services.isTraefikLws;
+  const zmqPubPort = ctx.zmqPubPort ?? MONEROD_PORTS.zmqPub;
   const { domain, labels } = getTraefikConfig(
     isTraefik,
     "monero-lws",
-    state.lwsDomain,
+    config.services.lwsDomain,
     String(SERVICE_PORTS.moneroLws),
-    certResolverName
+    CERT_RESOLVER_NAME
   );
   return {
     name: "Monero Light Wallet Server",
@@ -40,7 +33,7 @@ export const createMoneroLwsService = (
       ". Access at " +
       (isTraefik ? domain : `http://localhost:${SERVICE_PORTS.moneroLws}`) +
       ".",
-    checked: state.isMoneroLws,
+    checked: config.services.isMoneroLws,
     required: false,
     architecture: [architectures.linuxAmd, architectures.linuxArm],
     volumes: { "monero-lws-data": {} },
@@ -50,20 +43,21 @@ export const createMoneroLwsService = (
         restart: "unless-stopped",
         container_name: "monero-lws",
         ports: [
-          getPortBinding(networkMode, SERVICE_PORTS.moneroLws),
-          getPortBinding(networkMode, SERVICE_PORTS.moneroLwsAdmin),
+          getPortBinding(config.networkMode, SERVICE_PORTS.moneroLws),
+          getPortBinding(config.networkMode, SERVICE_PORTS.moneroLwsAdmin),
         ],
         volumes: [
           "monero-lws-data:/home/monero-lws/.bitmonero/light_wallet_server",
         ],
         depends_on: { monerod: { condition: "service_started" } },
-        ...getTorClientNetworkConfig(torProxyMode),
+        ...getTorClientNetworkConfig(config.tor.torProxyMode),
         labels,
         command: [
           `--daemon=tcp://monerod:${MONEROD_PORTS.zmqRpc}`,
           `--sub=tcp://monerod:${zmqPubPort}`,
           `--rest-server=http://0.0.0.0:${SERVICE_PORTS.moneroLws}`,
           `--admin-rest-server=http://0.0.0.0:${SERVICE_PORTS.moneroLwsAdmin}`,
+          "--confirm-external-bind",
           "--max-subaddresses=50",
           "--log-level=1",
         ],
