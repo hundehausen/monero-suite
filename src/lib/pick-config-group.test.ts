@@ -17,7 +17,7 @@ describe("pickConfigGroup", () => {
 
   it("rejects a source missing a schema key", () => {
     const monerod = makeFullConfig().monerod;
-    const missing = { ...monerod };
+    const missing = { ...monerod } as Omit<typeof monerod, "p2pBindPort">;
     delete (missing as { p2pBindPort?: string }).p2pBindPort;
     // @ts-expect-error source must include every schema key
     pickConfigGroup(missing, monerodConfigSchema);
