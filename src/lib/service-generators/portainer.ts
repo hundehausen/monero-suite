@@ -1,18 +1,23 @@
-import { Service, architectures, NetworkMode } from "@/lib/service-types";
+import { Service, architectures } from "@/lib/service-types";
 import { DOCKER_IMAGES, SERVICE_PORTS } from "@/lib/constants";
 import { getTraefikConfig, getPortBinding } from "@/lib/docker-helpers";
+import type { FullConfig } from "@/lib/config-schema";
+import { CERT_RESOLVER_NAME } from "./traefik";
 
 export const createPortainerService = (
-  isPortainer: boolean,
-  portainerDomain: string,
-  networkMode: NetworkMode,
-  isTraefik: boolean,
-  certResolverName: string = "monerosuite"
+  config: FullConfig
 ): Service => {
-  const { domain, labels } = getTraefikConfig(isTraefik, "portainer", portainerDomain, SERVICE_PORTS.portainer.toString(), certResolverName);
+  const isTraefik = config.services.isTraefik && config.services.isTraefikPortainer;
+  const { domain, labels } = getTraefikConfig(
+    isTraefik,
+    "portainer",
+    config.services.portainerDomain,
+    SERVICE_PORTS.portainer.toString(),
+    CERT_RESOLVER_NAME
+  );
   return ({
     architecture: [architectures.linuxAmd, architectures.linuxArm],
-    checked: isPortainer,
+    checked: config.services.isPortainer,
     name: "Portainer",
     required: false,
     description:
@@ -25,7 +30,7 @@ export const createPortainerService = (
         image: DOCKER_IMAGES.portainer,
         restart: "unless-stopped",
         container_name: "portainer",
-        ports: [getPortBinding(networkMode, 9443)],
+        ports: [getPortBinding(config.networkMode, 9443)],
         volumes: [
           "portainer_data:/data",
           "/var/run/docker.sock:/var/run/docker.sock",

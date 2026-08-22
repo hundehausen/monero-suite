@@ -13,10 +13,6 @@ import {
   MonerodServiceHook
 } from "./monerod/index";
 
-/**
- * Hook for Monero daemon service configuration
- * This combines all the individual configuration hooks into a single service
- */
 export const useMonerodService = (): MonerodServiceHook => {
   const basicConfig = useBasicConfig();
   const loggingConfig = useLoggingConfig();

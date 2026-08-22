@@ -19,10 +19,6 @@ vi.mock("nuqs", async () => {
   };
 });
 
-vi.mock("@/lib/to-full-config", () => ({
-  toFullConfig: () => ({}),
-}));
-
 vi.mock("@/lib/service-generators", () => ({
   generateAllServices: () => ({}),
   filterServicesByArchitecture: (services: unknown) => services,
@@ -68,7 +64,6 @@ vi.mock("./services", async () => {
     p2poolModes: { none: "none", mini: "mini", full: "full", nano: "nano" },
     minigModes: { none: "none", xmrig: "xmrig", p2pool: "p2pool" },
     torProxyModes: { none: "none", txonly: "tx-only", full: "full" },
-    CERT_RESOLVER_NAME: "monerosuite",
     useMonerodService,
     useMonerodStagenetService: () => ({
       stateFunctions: { isStagenetNode: false },

@@ -24,7 +24,16 @@ import {
   useMoneroPayService,
 } from "./services";
 import { nextGrafanaDomain } from "@/lib/grafana-domain";
-import { toFullConfig } from "@/lib/to-full-config";
+import {
+  monerodConfigSchema,
+  stagenetConfigSchema,
+  p2poolConfigSchema,
+  miningConfigSchema,
+  torConfigSchema,
+  serviceToggleSchema,
+  type FullConfig,
+} from "@/lib/config-schema";
+import { pickConfigGroup } from "@/lib/pick-config-group";
 import {
   filterServicesByArchitecture,
   generateAllServices,
@@ -162,13 +171,38 @@ export const useServices = () => {
     ...moneroPayService.stateFunctions,
   };
 
+  const config = {
+    architecture,
+    networkMode,
+    monerod: pickConfigGroup(monerodService.stateFunctions, monerodConfigSchema),
+    stagenet: pickConfigGroup(monerodStagenetService.stateFunctions, stagenetConfigSchema),
+    p2pool: pickConfigGroup(p2PoolService.stateFunctions, p2poolConfigSchema),
+    mining: pickConfigGroup(xmrigService.stateFunctions, miningConfigSchema),
+    tor: pickConfigGroup(torService.stateFunctions, torConfigSchema),
+    services: pickConfigGroup(
+      {
+        ...moneroWalletRpcService.stateFunctions,
+        ...watchtowerService.stateFunctions,
+        ...monitoringService.stateFunctions,
+        ...traefikService.stateFunctions,
+        ...portainerService.stateFunctions,
+        ...cuprateService.stateFunctions,
+        ...moneroLwsService.stateFunctions,
+        ...moneroPayService.stateFunctions,
+        ...xmrigProxyService.stateFunctions,
+      },
+      serviceToggleSchema
+    ),
+  } satisfies FullConfig;
+
   const services = filterServicesByArchitecture(
-    generateAllServices(toFullConfig(stateFunctions)),
+    generateAllServices(config),
     architecture
   );
 
   return {
     services,
+    config,
     stateFunctions,
   };
 };

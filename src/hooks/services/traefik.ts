@@ -1,7 +1,4 @@
 import { useQueryState, parseAsBoolean } from "nuqs";
-import { CERT_RESOLVER_NAME as _CERT_RESOLVER_NAME } from "@/lib/service-generators/traefik";
-
-export const CERT_RESOLVER_NAME = _CERT_RESOLVER_NAME;
 
 export const useTraefikService = () => {
   const [isTraefik, setIsTraefik] = useQueryState(

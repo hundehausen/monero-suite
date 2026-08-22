@@ -1,9 +1,6 @@
 import {
   Service,
   architectures,
-  NetworkMode,
-  TorProxyMode,
-  torProxyModes,
 } from "@/lib/service-types";
 import { DOCKER_IMAGES, SERVICE_PORTS } from "@/lib/constants";
 import {
@@ -11,31 +8,25 @@ import {
   getPortBinding,
   getTorClientNetworkConfig,
 } from "@/lib/docker-helpers";
-
-export interface MoneroPayState {
-  isMoneroPay: boolean;
-  moneroPayDomain: string;
-}
+import type { FullConfig } from "@/lib/config-schema";
+import { CERT_RESOLVER_NAME } from "./traefik";
 
 export const createMoneroPayService = (
-  state: MoneroPayState,
-  networkMode: NetworkMode,
-  isTraefik: boolean,
-  certResolverName: string,
-  torProxyMode: TorProxyMode = torProxyModes.none
+  config: FullConfig
 ): Service => {
+  const isTraefik = config.services.isTraefik && config.services.isTraefikMoneroPay;
   const { labels } = getTraefikConfig(
     isTraefik,
     "moneropay",
-    state.moneroPayDomain,
+    config.services.moneroPayDomain,
     String(SERVICE_PORTS.moneroPay),
-    certResolverName
+    CERT_RESOLVER_NAME
   );
   return {
     name: "MoneroPay",
     description:
       "HTTP API for receiving Monero payments. Creates a hot wallet named “wallet” on your wallet-rpc and tracks incoming transfers (including 0-conf). Persist data in the moneropay-data volume.",
-    checked: state.isMoneroPay,
+    checked: config.services.isMoneroPay,
     required: false,
     architecture: [architectures.linuxAmd, architectures.linuxArm],
     volumes: { "moneropay-data": {} },
@@ -44,7 +35,7 @@ export const createMoneroPayService = (
         image: DOCKER_IMAGES.moneroPay,
         restart: "unless-stopped",
         container_name: "moneropay",
-        ports: [getPortBinding(networkMode, SERVICE_PORTS.moneroPay)],
+        ports: [getPortBinding(config.networkMode, SERVICE_PORTS.moneroPay)],
         volumes: ["moneropay-data:/app/sqlite"],
         environment: {
           RPC_ADDRESS: `http://monero-wallet-rpc:${SERVICE_PORTS.moneroWalletRpc}/json_rpc`,
@@ -55,7 +46,7 @@ export const createMoneroPayService = (
           ZERO_CONF: "true",
         },
         depends_on: { "monero-wallet-rpc": { condition: "service_healthy" } },
-        ...getTorClientNetworkConfig(torProxyMode),
+        ...getTorClientNetworkConfig(config.tor.torProxyMode),
         labels,
       },
     },

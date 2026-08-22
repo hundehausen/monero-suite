@@ -1,14 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { createMoneroPayService } from "./moneropay";
-import { networkModes, torProxyModes } from "@/lib/service-types";
 import { DOCKER_IMAGES, SERVICE_PORTS } from "@/lib/constants";
+import { makeFullConfig } from "@/lib/make-full-config";
 
 const pay = createMoneroPayService(
-  { isMoneroPay: true, moneroPayDomain: "pay.example.com" },
-  networkModes.local,
-  false,
-  "monerosuite",
-  torProxyModes.none
+  makeFullConfig({
+    services: { isMoneroPay: true, moneroPayDomain: "pay.example.com" },
+  })
 );
 
 describe("createMoneroPayService", () => {

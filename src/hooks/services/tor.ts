@@ -8,6 +8,7 @@ import {
   NetworkMode,
 } from "./types";
 import { useEffect } from "react";
+import { anyHiddenService } from "@/lib/service-generators/ctx";
 
 export { TOR_IP, MONEROD_IP, MONEROD_STAGENET_IP, P2POOL_IP, GRAFANA_IP } from "@/lib/service-constants";
 
@@ -28,12 +29,23 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
   const [hsMoneroPay, setHsMoneroPay] = useQueryState("hsMoneroPay", parseAsBoolean.withDefault(false));
   const [hsXmrigProxy, setHsXmrigProxy] = useQueryState("hsXmrigProxy", parseAsBoolean.withDefault(false));
 
-  const isHiddenServices = hsMonerod || hsMonerodP2P || hsStagenet || hsP2Pool || hsGrafana || hsLws || hsMoneroPay || hsXmrigProxy;
-
   const [isGlobalTorProxy, setIsGlobalTorProxy] = useQueryState(
     "isGlobalTorProxy",
     parseAsBoolean.withDefault(false)
   );
+
+  const isHiddenServices = anyHiddenService({
+    torProxyMode,
+    hsMonerod,
+    hsMonerodP2P,
+    hsStagenet,
+    hsP2Pool,
+    hsGrafana,
+    hsLws,
+    hsMoneroPay,
+    hsXmrigProxy,
+    isGlobalTorProxy,
+  });
 
   useEffect(() => {
     if (networkMode === networkModes.exposed) {

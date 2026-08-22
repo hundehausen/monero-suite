@@ -1,37 +1,38 @@
 import { describe, expect, it } from "vitest";
 import { createP2PoolService, getP2PoolContainerName } from "./p2pool";
+import { generationCtx } from "./index";
 import {
   networkModes,
   p2poolModes,
-  torProxyModes,
   P2PoolMode,
   NetworkMode,
 } from "@/lib/service-types";
 import { P2POOL_PORTS } from "@/lib/constants";
+import { makeFullConfig } from "@/lib/make-full-config";
 
 const VALID_ADDRESS =
   "48oc8c65B9JPv6FBZBg7UN9xUYmxux6WfEh61WBoKca7Amh7r7bnCZ7JJicLw7UN3DEgEADwqrhwxGBJazPZ14PJGbmMyXX";
 
-const baseState = {
-  p2PoolMode: p2poolModes.full as P2PoolMode,
-  p2PoolPayoutAddress: VALID_ADDRESS,
-  p2PoolMiningThreads: 4,
-  isP2PoolStratumPublic: false,
-};
-
 type Container = { ports?: string[] };
 
 const run = (
-  stateOverrides: Partial<typeof baseState> = {},
+  stateOverrides: {
+    p2PoolMode?: P2PoolMode;
+    isP2PoolStratumPublic?: boolean;
+  } = {},
   networkMode: NetworkMode = networkModes.local
-) =>
-  createP2PoolService(
-    { ...baseState, ...stateOverrides } as Parameters<typeof createP2PoolService>[0],
-    "none",
-    torProxyModes.none,
+) => {
+  const config = makeFullConfig({
     networkMode,
-    18083
-  );
+    p2pool: {
+      p2PoolMode: stateOverrides.p2PoolMode ?? p2poolModes.full,
+      p2PoolPayoutAddress: VALID_ADDRESS,
+      p2PoolMiningThreads: 4,
+      isP2PoolStratumPublic: stateOverrides.isP2PoolStratumPublic,
+    },
+  });
+  return createP2PoolService(config, generationCtx(config));
+};
 
 const container = (
   p2PoolMode: P2PoolMode,

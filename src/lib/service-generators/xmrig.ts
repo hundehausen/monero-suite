@@ -1,17 +1,17 @@
-import { Service, architectures, minigModes, MiningMode, TorProxyMode, torProxyModes, P2PoolMode, p2poolModes } from "@/lib/service-types";
+import { Service, architectures, minigModes } from "@/lib/service-types";
 import { DOCKER_IMAGES, P2POOL_PORTS, SERVICE_PORTS } from "@/lib/constants";
 import { getTorClientNetworkConfig } from "@/lib/docker-helpers";
 import { getP2PoolContainerName } from "@/lib/service-generators/p2pool";
+import type { FullConfig } from "@/lib/config-schema";
+import type { GenerationCtx } from "./ctx";
 
 export const createXmrigService = (
-  miningMode: MiningMode,
-  xmrigDonateLevel: number,
-  torProxyMode: TorProxyMode = torProxyModes.none,
-  p2PoolMode: P2PoolMode = p2poolModes.full,
-  isXmrigProxy = false
+  config: FullConfig,
+  ctx: GenerationCtx
 ): Service => {
-  const p2poolHost = getP2PoolContainerName(p2PoolMode);
-  const poolUrl = isXmrigProxy
+  const { miningMode, xmrigDonateLevel } = config.mining;
+  const p2poolHost = getP2PoolContainerName(config.p2pool.p2PoolMode);
+  const poolUrl = ctx.isXmrigProxyOn
     ? `xmrig-proxy:${SERVICE_PORTS.xmrigProxy}`
     : `${p2poolHost}:${P2POOL_PORTS.stratum}`;
 
@@ -30,14 +30,14 @@ export const createXmrigService = (
         cap_add: ["SYS_ADMIN", "SYS_RAWIO"],
         devices: ["/dev/cpu", "/dev/mem"],
         volumes: ["/lib/modules:/lib/modules"],
-        ...getTorClientNetworkConfig(torProxyMode),
+        ...getTorClientNetworkConfig(config.tor.torProxyMode),
         environment: {
           POOL_URL: poolUrl,
           POOL_USER: "xmrig",
           POOL_PASS: "",
           DONATE_LEVEL: xmrigDonateLevel,
         },
-        ...(isXmrigProxy
+        ...(ctx.isXmrigProxyOn
           ? { depends_on: { "xmrig-proxy": { condition: "service_started" } } }
           : {}),
       },

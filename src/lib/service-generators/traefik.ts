@@ -1,17 +1,17 @@
-import { Service, architectures, TorProxyMode, torProxyModes } from "@/lib/service-types";
+import { Service, architectures } from "@/lib/service-types";
 import { DOCKER_IMAGES } from "@/lib/constants";
 import { getTorClientNetworkConfig } from "@/lib/docker-helpers";
+import type { FullConfig } from "@/lib/config-schema";
 
 export const CERT_RESOLVER_NAME = "monerosuite";
 
 export const createTraefikService = (
-  isTraefik: boolean,
-  torProxyMode: TorProxyMode = torProxyModes.none
+  config: FullConfig
 ): Service => ({
   name: "Traefik",
   description:
     "A reverse proxy that automatically handles HTTPS certificates and routes traffic to your services. Required for exposing services on custom domains.",
-  checked: isTraefik,
+  checked: config.services.isTraefik,
   required: false,
   architecture: [architectures.linuxAmd, architectures.linuxArm],
   volumes: {
@@ -37,7 +37,7 @@ export const createTraefikService = (
         "/var/run/docker.sock:/var/run/docker.sock",
         "letsencrypt:/letsencrypt",
       ],
-      ...getTorClientNetworkConfig(torProxyMode),
+      ...getTorClientNetworkConfig(config.tor.torProxyMode),
     },
   },
   ufw: ["443/tcp", "80/tcp"],

@@ -11,13 +11,10 @@ import {
 import {
   generateDockerComposeFile,
   generateEnvFile,
+  generateBashScriptFile,
   getFirewallPorts,
 } from "@/app/utils";
-import {
-  generateInstallationScript,
-  generateBashCommands,
-  bashServicesFromConfig,
-} from "@/lib/script-generator";
+import { generateInstallationScript } from "@/lib/script-generator";
 
 export async function uploadInstallScript(
   config: FullConfig
@@ -34,16 +31,14 @@ export async function uploadInstallScript(
 
   const envString = generateEnvFile(checkedServices);
 
-  const monitoringBashCommands = generateBashCommands(
-    bashServicesFromConfig(parsed)
-  );
+  const bashCommands = generateBashScriptFile(checkedServices);
 
   const isExposed = parsed.networkMode === "exposed";
   const firewallPorts = getFirewallPorts(checkedServices);
 
   const script = generateInstallationScript(
     dockerComposeYaml,
-    monitoringBashCommands,
+    bashCommands,
     envString || undefined,
     isExposed,
     firewallPorts

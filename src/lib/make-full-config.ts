@@ -1,8 +1,36 @@
-import { describe, expect, it } from "vitest";
-import { fullConfigSchema, type FullConfig } from "./config-schema";
-import { toFullConfig, type FlatConfigState } from "./to-full-config";
+import type { FullConfig } from "./config-schema";
 
-const nested = (): FullConfig => ({
+export type DeepPartial<T> = {
+  [K in keyof T]?: T[K] extends object
+    ? T[K] extends unknown[]
+      ? T[K]
+      : DeepPartial<T[K]>
+    : T[K];
+};
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export function deepMerge<T>(base: T, override?: DeepPartial<T>): T {
+  if (override === undefined) return base;
+  if (!isPlainObject(base) || !isPlainObject(override)) {
+    return override as T;
+  }
+  const result = { ...base } as T;
+  for (const key of Object.keys(override) as (keyof T)[]) {
+    const next = override[key];
+    if (next === undefined) continue;
+    const current = (base as Record<string, unknown>)[key as string];
+    (result as Record<string, unknown>)[key as string] =
+      isPlainObject(current) && isPlainObject(next)
+        ? deepMerge(current, next)
+        : next;
+  }
+  return result;
+}
+
+const defaultFullConfig = (): FullConfig => ({
   architecture: "linux/amd64",
   networkMode: "local",
   monerod: {
@@ -104,45 +132,13 @@ const nested = (): FullConfig => ({
     lwsDomain: "lws.example.com",
     moneroPayDomain: "pay.example.com",
   },
-  enabledBashServices: { monitoring: false, cuprate: false },
 });
 
-function flatten(config: FullConfig): FlatConfigState {
-  return {
-    architecture: config.architecture,
-    networkMode: config.networkMode,
-    ...config.monerod,
-    ...config.stagenet,
-    ...config.p2pool,
-    ...config.mining,
-    ...config.tor,
-    ...config.services,
-  };
+export function makeFullConfig(
+  ...overrides: Array<DeepPartial<FullConfig> | undefined>
+): FullConfig {
+  return overrides.reduce<FullConfig>(
+    (config, override) => deepMerge(config, override),
+    defaultFullConfig()
+  );
 }
-
-describe("toFullConfig", () => {
-  it("rebuilds a FullConfig that passes the schema", () => {
-    const source = nested();
-    const result = toFullConfig(flatten(source));
-    expect(fullConfigSchema.safeParse(result).success).toBe(true);
-    expect(result.monerod).toEqual(source.monerod);
-    expect(result.stagenet).toEqual(source.stagenet);
-    expect(result.p2pool).toEqual(source.p2pool);
-    expect(result.mining).toEqual(source.mining);
-    expect(result.tor).toEqual(source.tor);
-    expect(result.services).toEqual(source.services);
-    expect(result.architecture).toBe(source.architecture);
-    expect(result.networkMode).toBe(source.networkMode);
-  });
-
-  it("sets enabledBashServices from the service flags", () => {
-    const source = nested();
-    source.services.isMonitoring = true;
-    source.services.isCuprateEnabled = true;
-    const result = toFullConfig(flatten(source));
-    expect(result.enabledBashServices).toEqual({
-      monitoring: true,
-      cuprate: true,
-    });
-  });
-});

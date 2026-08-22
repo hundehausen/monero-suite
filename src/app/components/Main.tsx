@@ -23,10 +23,9 @@ import { useInstallScript } from "@/hooks/use-install-script";
 import InstallScriptPanel from "./InstallScriptPanel";
 import { getMonerodP2pPortCollisions, getMonerodZmqPortCollisions } from "@/lib/service-generators/monerod";
 import { isValidP2PoolPayoutAddress } from "@/lib/schemas";
-import { toFullConfig } from "@/lib/to-full-config";
 
 export default function Main() {
-  const { services, stateFunctions } = useServicesContext();
+  const { services, stateFunctions, config } = useServicesContext();
   const [activeTab, setActiveTab] = useState<string | null>("docker-compose");
 
   const checkedServices = useMemo(
@@ -102,8 +101,6 @@ export default function Main() {
     () => generateScriptSummary(checkedServices, envString, isExposed, firewallPorts),
     [checkedServices, envString, isExposed, firewallPorts]
   );
-
-  const config = useMemo(() => toFullConfig(stateFunctions), [stateFunctions]);
 
   const { installationCommand, isUploading, currentConfigIsUploaded, handleScriptGeneration } =
     useInstallScript({ config });

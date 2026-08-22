@@ -25,7 +25,7 @@ const miningModeSchema = z.enum(["none", "xmrig", "p2pool"]);
 const torProxyModeSchema = z.enum(["none", "tx-only", "full"]);
 const dnsCheckpointsSchema = z.enum(["default", "skip", "enforce"]);
 
-const monerodConfigSchema = z.object({
+export const monerodConfigSchema = z.object({
   isMoneroPublicNode: z.boolean(),
   moneroNodeNoLogs: z.boolean(),
   moneroNodeDomain: domainSchema,
@@ -77,7 +77,7 @@ const monerodConfigSchema = z.object({
   blockRateNotify: commandValueSchema,
 });
 
-const stagenetConfigSchema = z.object({
+export const stagenetConfigSchema = z.object({
   isStagenetNode: z.boolean(),
   isStagenetNodePublic: z.boolean(),
   isMoneroStagenetCustomLocation: z.boolean(),
@@ -85,19 +85,19 @@ const stagenetConfigSchema = z.object({
   stagenetNodeDomain: domainSchema,
 });
 
-const p2poolConfigSchema = z.object({
+export const p2poolConfigSchema = z.object({
   p2PoolMode: p2PoolModeSchema,
   p2PoolPayoutAddress: p2PoolPayoutAddressSchema,
   p2PoolMiningThreads: z.number().int().min(1).max(256),
   isP2PoolStratumPublic: z.boolean(),
 });
 
-const miningConfigSchema = z.object({
+export const miningConfigSchema = z.object({
   miningMode: miningModeSchema,
   xmrigDonateLevel: z.number().int().min(0).max(100),
 });
 
-const torConfigSchema = z.object({
+export const torConfigSchema = z.object({
   torProxyMode: torProxyModeSchema,
   hsMonerod: z.boolean(),
   hsMonerodP2P: z.boolean(),
@@ -110,7 +110,7 @@ const torConfigSchema = z.object({
   isGlobalTorProxy: z.boolean(),
 });
 
-const serviceToggleSchema = z.object({
+export const serviceToggleSchema = z.object({
   isMoneroWalletRpc: z.boolean(),
   isWatchtower: z.boolean(),
   isMonitoring: z.boolean(),
@@ -143,10 +143,6 @@ export const fullConfigSchema = z
     mining: miningConfigSchema,
     tor: torConfigSchema,
     services: serviceToggleSchema,
-    enabledBashServices: z.object({
-      monitoring: z.boolean(),
-      cuprate: z.boolean(),
-    }),
   })
   .superRefine((config, ctx) => {
     // The P2P bind port must not collide with the ports monerod binds inside

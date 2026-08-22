@@ -4,7 +4,6 @@ import {
   ENV_FILE_TEMPLATE,
   COMPLETION_TEMPLATE,
 } from "./bash-templates";
-import type { FullConfig } from "./config-schema";
 
 export const MONITORING_BASH_COMMANDS = `
 # Set up monitoring configuration
@@ -24,29 +23,6 @@ cd ~/monero-suite
 mkdir -p cuprate
 # Download Cuprated.toml (enables restricted RPC on 0.0.0.0:18089, required for the healthcheck)
 curl -fsSL -o cuprate/Cuprated.toml https://raw.githubusercontent.com/hundehausen/cuprate-docker/main/config/Cuprated.toml`;
-
-export interface EnabledBashServices {
-  monitoring: boolean;
-  cuprate: boolean;
-}
-
-export function bashServicesFromConfig(config: FullConfig): EnabledBashServices {
-  return {
-    monitoring: config.services.isMonitoring,
-    cuprate: config.services.isCuprateEnabled,
-  };
-}
-
-export function generateBashCommands(services: EnabledBashServices): string {
-  let commands = "";
-  if (services.monitoring) {
-    commands += MONITORING_BASH_COMMANDS;
-  }
-  if (services.cuprate) {
-    commands += CUPRATE_BASH_COMMANDS;
-  }
-  return commands;
-}
 
 function getSpinnerMessage(cmd: string, fallback: string): string {
   // Extract filepath from curl -o <path> for a meaningful message

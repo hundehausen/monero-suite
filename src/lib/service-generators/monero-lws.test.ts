@@ -1,17 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { createMoneroLwsService } from "./monero-lws";
-import { networkModes, torProxyModes } from "@/lib/service-types";
+import { generationCtx } from "./index";
 import { DOCKER_IMAGES, MONEROD_PORTS, SERVICE_PORTS } from "@/lib/constants";
+import { makeFullConfig } from "@/lib/make-full-config";
 
-const run = (on: boolean, zmq: number = MONEROD_PORTS.zmqPub) =>
-  createMoneroLwsService(
-    { isMoneroLws: on, lwsDomain: "lws.example.com" },
-    networkModes.local,
-    false,
-    "monerosuite",
-    torProxyModes.none,
-    zmq
-  );
+const run = (on: boolean, zmqPubBindPort: string = String(MONEROD_PORTS.zmqPub)) => {
+  const config = makeFullConfig({
+    services: { isMoneroLws: on, lwsDomain: "lws.example.com" },
+    monerod: { zmqPubEnabled: true, zmqPubBindPort },
+  });
+  return createMoneroLwsService(config, generationCtx(config));
+};
 
 describe("createMoneroLwsService", () => {
   it("is unchecked when disabled", () => {
@@ -19,7 +18,7 @@ describe("createMoneroLwsService", () => {
   });
 
   it("points --daemon at monerod ZMQ RPC and --sub at the live pub port", () => {
-    const c = run(true, 18090).code["monero-lws"] as {
+    const c = run(true, "18090").code["monero-lws"] as {
       image: string;
       command: string[];
       ports: string[];

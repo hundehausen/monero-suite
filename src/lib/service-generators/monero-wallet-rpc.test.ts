@@ -1,12 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { createMoneroWalletRpcService } from "./monero-wallet-rpc";
-import { networkModes, torProxyModes } from "@/lib/service-types";
 import { generateEnvFile } from "@/app/utils";
+import { makeFullConfig } from "@/lib/make-full-config";
 
 const svc = createMoneroWalletRpcService(
-  true,
-  networkModes.local,
-  torProxyModes.none
+  makeFullConfig({ services: { isMoneroWalletRpc: true } })
 );
 
 describe("createMoneroWalletRpcService", () => {
