@@ -3,13 +3,23 @@ import Link from "next/link";
 import Image from "next/image";
 import { FaDocker, FaGithub } from "react-icons/fa";
 import Logo from "../../../public/monero-suite-logo-transparent.png";
+import Hundehausen from "../../../public/hundehausen.png";
+import Seth from "../../../public/seth.png";
 import DarkModeToggle from "./DarkModeToggle";
 
 const Header = () => {
   return (
     <Flex justify="space-between" align="center" w={"100%"}>
       <Flex align="center" gap={16}>
-        <Image src={Logo} alt="Monero Suite logo" width={40} height={40} />
+        <Image
+          src={Logo}
+          alt="Monero Suite logo"
+          width={40}
+          height={40}
+          fetchPriority="high"
+          loading="eager"
+          placeholder="blur"
+        />
         <Title order={1}>Monero Suite</Title>
       </Flex>
       <Text lineClamp={1} display={{ base: "none", md: "initial" }}>
@@ -30,11 +40,12 @@ const Header = () => {
           style={{ color: "inherit", textDecoration: "none", height: 32 }}
         >
           <Image
-            src="/hundehausen.png"
+            src={Hundehausen}
             alt="hundehausen's profile on x.com"
             style={{ borderRadius: "50%" }}
             width={32}
             height={32}
+            placeholder="blur"
           />
         </Link>
         <Link
@@ -44,11 +55,12 @@ const Header = () => {
           style={{ color: "inherit", textDecoration: "none", height: 32 }}
         >
           <Image
-            src="/seth.png"
+            src={Seth}
             alt="Monero related guides from sethforprivacy.com"
             style={{ borderRadius: "50%" }}
             width={32}
             height={32}
+            placeholder="blur"
           />
         </Link>
         <Link
