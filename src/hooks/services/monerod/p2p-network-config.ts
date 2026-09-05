@@ -1,8 +1,5 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
 
-/**
- * Hook for Monero daemon P2P network configuration settings
- */
 export const useP2PNetworkConfig = () => {
   const [p2pBindPort, setP2pBindPort] = useQueryState(
     "p2pBindPort", 

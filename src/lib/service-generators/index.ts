@@ -17,8 +17,7 @@ import { createMoneroLwsService } from "./monero-lws";
 import { createMoneroPayService } from "./moneropay";
 import { anyHiddenService, type GenerationCtx } from "./ctx";
 
-export { CERT_RESOLVER_NAME } from "./traefik";
-export { anyHiddenService, type GenerationCtx } from "./ctx";
+export { anyHiddenService };
 
 export function generationCtx(config: FullConfig): GenerationCtx {
   return {

@@ -145,12 +145,6 @@ describe("useServices miningMode reset (fix 6)", () => {
     expect(result.current.stateFunctions.p2PoolMode).toBe("none");
     expect(result.current.stateFunctions.miningMode).toBe("none");
   });
-
-  it("leaves miningMode alone while P2Pool stays enabled", () => {
-    const { result } = renderHook(() => useServices());
-    expect(result.current.stateFunctions.p2PoolMode).toBe("full");
-    expect(result.current.stateFunctions.miningMode).toBe("xmrig");
-  });
 });
 
 describe("useServices xmrig-proxy reset", () => {

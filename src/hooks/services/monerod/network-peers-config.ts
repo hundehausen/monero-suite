@@ -1,8 +1,5 @@
 import { useQueryState, parseAsString } from "nuqs";
 
-/**
- * Hook for Monero daemon network peers configuration settings
- */
 export const useNetworkPeersConfig = () => {
   const [seedNode, setSeedNode] = useQueryState(
     "seedNode",

@@ -1,6 +1,5 @@
 import { Service, architectures, torProxyModes, p2poolModes } from "@/lib/service-types";
-import { TOR_IP } from "@/lib/service-constants";
-import { DOCKER_NETWORK, DOCKER_IMAGES, SERVICE_PORTS, P2POOL_PORTS, MONEROD_PORTS, MONEROD_STAGENET_PORTS } from "@/lib/constants";
+import { DOCKER_NETWORK, DOCKER_IMAGES, SERVICE_PORTS, P2POOL_PORTS, MONEROD_PORTS, MONEROD_STAGENET_PORTS, SERVICE_IPS } from "@/lib/constants";
 import { getPortBinding } from "@/lib/docker-helpers";
 import type { FullConfig } from "@/lib/config-schema";
 import type { GenerationCtx } from "./ctx";
@@ -55,7 +54,7 @@ export const createTorService = (
     service.code.tor.networks = {
       default: {},
       [DOCKER_NETWORK.name]: {
-        ipv4_address: TOR_IP,
+        ipv4_address: SERVICE_IPS.tor,
         aliases: ["tor"],
       },
     };

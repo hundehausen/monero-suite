@@ -1,8 +1,5 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
 
-/**
- * Hook for basic Monero daemon configuration settings
- */
 export const useBasicConfig = () => {
   const [isMoneroPublicNode, setIsMoneroPublicNode] = useQueryState(
     "isMoneroPublicNode",

@@ -13,7 +13,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-export function deepMerge<T>(base: T, override?: DeepPartial<T>): T {
+function deepMerge<T>(base: T, override?: DeepPartial<T>): T {
   if (override === undefined) return base;
   if (!isPlainObject(base) || !isPlainObject(override)) {
     return override as T;

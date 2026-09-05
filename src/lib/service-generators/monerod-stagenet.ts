@@ -1,7 +1,6 @@
 import { Service, architectures, networkModes, torProxyModes } from "@/lib/service-types";
-import { TOR_IP, MONEROD_STAGENET_IP } from "@/lib/service-constants";
 import { safeParse, pathSchema } from "@/lib/schemas";
-import { DOCKER_IMAGES, MONEROD_BAN_LIST_PATH, MONEROD_STAGENET_PORTS } from "@/lib/constants";
+import { DOCKER_IMAGES, MONEROD_BAN_LIST_PATH, MONEROD_STAGENET_PORTS, SERVICE_IPS } from "@/lib/constants";
 import { getTraefikConfig, getPortBinding, getP2pPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
 import type { FullConfig } from "@/lib/config-schema";
 import { CERT_RESOLVER_NAME } from "./traefik";
@@ -56,7 +55,7 @@ export const createMonerodStagenetService = (
                 },
               }
             : undefined,
-        ...getTorNetworkConfig(torProxyMode, MONEROD_STAGENET_IP),
+        ...getTorNetworkConfig(torProxyMode, SERVICE_IPS.monerodStagenet),
         command: [
           "--stagenet",
           "--rpc-restricted-bind-ip=0.0.0.0",
@@ -74,10 +73,10 @@ export const createMonerodStagenetService = (
           "--limit-rate-down=1048576",
           ...(state.isStagenetNodePublic ? ["--public-node"] : []),
           ...(torProxyMode === torProxyModes.full
-            ? [`--proxy=${TOR_IP}:9050`]
+            ? [`--proxy=${SERVICE_IPS.tor}:9050`]
             : []),
           ...(torProxyMode !== torProxyModes.none
-            ? [`--tx-proxy=tor,${TOR_IP}:9050,32`]
+            ? [`--tx-proxy=tor,${SERVICE_IPS.tor}:9050,32`]
             : []),
         ],
         logging: moneroNodeNoLogs ? { driver: "none" } : undefined,

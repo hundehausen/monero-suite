@@ -1,8 +1,5 @@
 import { useQueryState, parseAsString } from "nuqs";
 
-/**
- * Hook for Monero daemon notifications configuration settings
- */
 export const useNotificationsConfig = () => {
   const [blockNotify, setBlockNotify] = useQueryState(
     "blockNotify",

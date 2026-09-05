@@ -10,8 +10,6 @@ import {
 import { useEffect } from "react";
 import { anyHiddenService } from "@/lib/service-generators/ctx";
 
-export { TOR_IP, MONEROD_IP, MONEROD_STAGENET_IP, P2POOL_IP, GRAFANA_IP } from "@/lib/service-constants";
-
 export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => {
   const [torProxyMode, setTorProxyMode] = useQueryState<TorProxyMode>(
     "torProxyMode",

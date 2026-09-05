@@ -1,8 +1,5 @@
 import { useQueryState, parseAsString } from "nuqs";
 
-/**
- * Hook for Monero daemon logging configuration settings
- */
 export const useLoggingConfig = () => {
   const [logLevel, setLogLevel] = useQueryState(
     "logLevel", 

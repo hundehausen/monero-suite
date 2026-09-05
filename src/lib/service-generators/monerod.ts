@@ -1,5 +1,4 @@
 import { Service, architectures, networkModes, torProxyModes, P2PoolMode } from "@/lib/service-types";
-import { TOR_IP, MONEROD_IP } from "@/lib/service-constants";
 import {
   safeParse,
   hostListSchema,
@@ -11,7 +10,7 @@ import {
   rpcLoginSchema,
   moneroAddressSchema,
 } from "@/lib/schemas";
-import { DOCKER_IMAGES, MONEROD_BAN_LIST_PATH, MONEROD_PORTS } from "@/lib/constants";
+import { DOCKER_IMAGES, MONEROD_BAN_LIST_PATH, MONEROD_PORTS, SERVICE_IPS } from "@/lib/constants";
 import { getTraefikConfig, getPortBinding, getP2pPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
 import { stackNeedsZmq } from "@/lib/stack-needs-zmq";
 import type { FullConfig } from "@/lib/config-schema";
@@ -263,7 +262,7 @@ export const createMonerodService = (
         // No healthcheck override: rely on the image's built-in HEALTHCHECK
         // (/healthcheck.sh), which reads --rpc-bind-port and --rpc-login from
         // the daemon's own cmdline and validates the get_height response body.
-        ...getTorNetworkConfig(torProxyMode, MONEROD_IP),
+        ...getTorNetworkConfig(torProxyMode, SERVICE_IPS.monerod),
         command: [
           "--rpc-restricted-bind-ip=0.0.0.0",
           "--rpc-restricted-bind-port=18089",
@@ -324,11 +323,11 @@ export const createMonerodService = (
           ...(sReorgNotify ? [`--reorg-notify=${sReorgNotify}`] : []),
           ...(sBlockRateNotify ? [`--block-rate-notify=${sBlockRateNotify}`] : []),
           ...(torProxyMode === torProxyModes.full
-            ? [`--proxy=${TOR_IP}:9050`]
+            ? [`--proxy=${SERVICE_IPS.tor}:9050`]
             : []),
           ...(torProxyMode !== torProxyModes.none
             ? [
-              `--tx-proxy=tor,${TOR_IP}:9050,16${txProxyDisableNoise ? ",disable_noise" : ""}`,
+              `--tx-proxy=tor,${SERVICE_IPS.tor}:9050,16${txProxyDisableNoise ? ",disable_noise" : ""}`,
               "--add-priority-node=monsterxzzefbr6jq3n2tu4xvlumnunlhbrhqny6naxpn6le3upke2yd.onion:18084",
               "--add-priority-node=doggettffpqokvkukhwquchg6bxwwtgj4pckygqylc7qkhim3ruxncid.onion:18084",
               "--add-priority-node=doggettavnnnctrwm5dv6k42zmtl5f7j2n7sadfmibmnel4cantlf2id.onion:18084",

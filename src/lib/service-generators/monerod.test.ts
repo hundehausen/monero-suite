@@ -7,8 +7,7 @@ import {
 } from "@/lib/service-generators/monerod";
 import { generationCtx } from "@/lib/service-generators";
 import { MONEROD_PORTS } from "@/lib/constants";
-import { networkModes } from "@/lib/service-types";
-import { Service } from "@/lib/service-types";
+import { networkModes, Service } from "@/lib/service-types";
 import { makeFullConfig, type DeepPartial } from "@/lib/make-full-config";
 import type { FullConfig } from "@/lib/config-schema";
 

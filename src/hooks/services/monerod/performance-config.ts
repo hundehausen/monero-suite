@@ -1,8 +1,5 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
 
-/**
- * Hook for Monero daemon performance configuration settings
- */
 export const usePerformanceConfig = () => {
   const [dbSyncMode, setDbSyncMode] = useQueryState(
     "dbSyncMode", 

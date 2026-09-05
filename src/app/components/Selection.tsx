@@ -33,7 +33,6 @@ const Selection = () => {
       value={accordionItems}
       variant="separated"
       onChange={setAccordionItems}
-      defaultValue={["mainnet-node"]}
       styles={{
         panel: {
           paddingTop: "8px",

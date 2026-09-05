@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { nextGrafanaDomain, isGrafanaLocalDomain } from "./grafana-domain";
+import { nextGrafanaDomain } from "./grafana-domain";
 import { GRAFANA_LOCAL_DOMAIN, GRAFANA_TRAEFIK_DEFAULT_DOMAIN } from "./constants";
 
 describe("nextGrafanaDomain", () => {
@@ -22,6 +22,9 @@ describe("nextGrafanaDomain", () => {
     expect(nextGrafanaDomain(true, true, "localhost")).toBe(
       GRAFANA_TRAEFIK_DEFAULT_DOMAIN
     );
+    expect(nextGrafanaDomain(true, true, "127.0.0.1")).toBe(
+      GRAFANA_TRAEFIK_DEFAULT_DOMAIN
+    );
   });
 
   it("does not overwrite a user-set real domain when Traefik is on", () => {
@@ -30,13 +33,5 @@ describe("nextGrafanaDomain", () => {
 
   it("returns null when already on the correct local default", () => {
     expect(nextGrafanaDomain(false, true, GRAFANA_LOCAL_DOMAIN)).toBeNull();
-  });
-});
-
-describe("isGrafanaLocalDomain", () => {
-  it("detects localhost forms", () => {
-    expect(isGrafanaLocalDomain("localhost:3000")).toBe(true);
-    expect(isGrafanaLocalDomain("127.0.0.1")).toBe(true);
-    expect(isGrafanaLocalDomain("monitor.example.com")).toBe(false);
   });
 });

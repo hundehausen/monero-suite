@@ -14,7 +14,7 @@ export function isValidP2PoolPayoutAddress(addr: string): boolean {
   );
 }
 
-export const MONERO_ADDRESS_INVALID_CHARACTERS_MESSAGE =
+const MONERO_ADDRESS_INVALID_CHARACTERS_MESSAGE =
   "contains invalid characters — 0, O, I and l are not valid in Monero addresses";
 
 const validPort = (portStr: string) => {

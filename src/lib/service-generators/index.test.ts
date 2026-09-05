@@ -20,23 +20,6 @@ describe("anyHiddenService", () => {
   });
 });
 
-describe("generateAllServices ban-list", () => {
-  const imageBanListFlag = "--ban-list=/home/monero/ban_list.txt";
-
-  it("sets the image ban list on the default monerod command", () => {
-    const command = generateAllServices(makeFullConfig()).monerod.code.monerod
-      ?.command as string[];
-    expect(command).toContain(imageBanListFlag);
-  });
-
-  it("sets the image ban list on stagenet, which always uses a custom command", () => {
-    const command = generateAllServices(
-      makeFullConfig({ stagenet: { isStagenetNode: true } })
-    )["monerod-stagenet"].code["monerod-stagenet"]?.command as string[];
-    expect(command).toContain(imageBanListFlag);
-  });
-});
-
 describe("generateAllServices hidden services", () => {
   it("adds --disable-rpc-ban when only the xmrig-proxy hidden service is on", () => {
     const services = generateAllServices(

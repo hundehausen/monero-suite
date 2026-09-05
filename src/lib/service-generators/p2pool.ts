@@ -7,9 +7,8 @@ import {
   minigModes,
   torProxyModes,
 } from "@/lib/service-types";
-import { P2POOL_IP, MONEROD_IP } from "@/lib/service-constants";
 import { safeParse, moneroAddressSchema } from "@/lib/schemas";
-import { DOCKER_IMAGES, P2POOL_PORTS, MONEROD_PORTS } from "@/lib/constants";
+import { DOCKER_IMAGES, P2POOL_PORTS, MONEROD_PORTS, SERVICE_IPS } from "@/lib/constants";
 import { getPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
 import type { FullConfig } from "@/lib/config-schema";
 import type { GenerationCtx } from "./ctx";
@@ -73,7 +72,7 @@ export const createP2PoolService = (
             : getPortBinding(networkMode, P2POOL_PORTS.stratum),
           `${p2pPort}:${p2pPort}`,
         ],
-        ...getTorNetworkConfig(torProxyMode, P2POOL_IP, [p2PoolContainerName]),
+        ...getTorNetworkConfig(torProxyMode, SERVICE_IPS.p2pool, [p2PoolContainerName]),
         depends_on: {
           monerod: {
             condition: "service_started",
@@ -91,7 +90,7 @@ export const createP2PoolService = (
           "--zmq-port",
           `${zmqPubPort}`,
           ...(torProxyMode !== torProxyModes.none
-            ? ["--host", `${MONEROD_IP}`, "--no-dns"]
+            ? ["--host", `${SERVICE_IPS.monerod}`, "--no-dns"]
             : ["--host", "monerod"]),
           ...(miningMode === minigModes.p2pool
             ? ["--start-mining", `${p2PoolMiningThreads}`]

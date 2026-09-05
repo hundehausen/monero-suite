@@ -1,8 +1,5 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
 
-/**
- * Hook for Monero daemon mining configuration settings
- */
 export const useMiningConfig = () => {
   const [startMining, setStartMining] = useQueryState(
     "startMining",

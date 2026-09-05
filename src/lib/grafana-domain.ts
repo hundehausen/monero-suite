@@ -1,7 +1,7 @@
 import { GRAFANA_LOCAL_DOMAIN, GRAFANA_TRAEFIK_DEFAULT_DOMAIN } from "@/lib/constants";
 
 /** True when domain is localhost or localhost:port (case-insensitive). */
-export function isGrafanaLocalDomain(domain: string): boolean {
+function isGrafanaLocalDomain(domain: string): boolean {
   const host = domain.trim().toLowerCase().split(":")[0] ?? "";
   return host === "localhost" || host === "127.0.0.1";
 }
