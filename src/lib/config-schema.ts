@@ -24,6 +24,8 @@ const p2PoolModeSchema = z.enum(["none", "mini", "full", "nano"]);
 const miningModeSchema = z.enum(["none", "xmrig", "p2pool"]);
 const torProxyModeSchema = z.enum(["none", "tx-only", "full"]);
 const dnsCheckpointsSchema = z.enum(["default", "skip", "enforce"]);
+const watchtowerUpdateFrequencySchema = z.enum(["hourly", "daily", "weekly"]);
+const watchtowerCooldownDelaySchema = z.enum(["none", "12h", "24h", "3d", "7d"]);
 
 export const monerodConfigSchema = z.object({
   isMoneroPublicNode: z.boolean(),
@@ -113,6 +115,8 @@ export const torConfigSchema = z.object({
 export const serviceToggleSchema = z.object({
   isMoneroWalletRpc: z.boolean(),
   isWatchtower: z.boolean(),
+  watchtowerUpdateFrequency: watchtowerUpdateFrequencySchema,
+  watchtowerCooldownDelay: watchtowerCooldownDelaySchema,
   isMonitoring: z.boolean(),
   grafanaDomain: domainSchema,
   isTraefik: z.boolean(),

@@ -62,3 +62,23 @@ export const networkModes = {
 } as const;
 
 export type NetworkMode = (typeof networkModes)[keyof typeof networkModes];
+
+export const watchtowerUpdateFrequencies = {
+  hourly: "hourly",
+  daily: "daily",
+  weekly: "weekly",
+} as const;
+
+export type WatchtowerUpdateFrequency =
+  (typeof watchtowerUpdateFrequencies)[keyof typeof watchtowerUpdateFrequencies];
+
+export const watchtowerCooldownDelays = {
+  none: "none",
+  "12h": "12h",
+  "24h": "24h",
+  "3d": "3d",
+  "7d": "7d",
+} as const;
+
+export type WatchtowerCooldownDelay =
+  (typeof watchtowerCooldownDelays)[keyof typeof watchtowerCooldownDelays];

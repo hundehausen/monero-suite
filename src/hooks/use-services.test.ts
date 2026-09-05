@@ -89,7 +89,11 @@ vi.mock("./services", async () => {
       };
     },
     useWatchtowerService: () => ({
-      stateFunctions: { isWatchtower: false },
+      stateFunctions: {
+        isWatchtower: false,
+        watchtowerUpdateFrequency: "hourly",
+        watchtowerCooldownDelay: "24h",
+      },
     }),
     useMonitoringService,
     useXmrigService,

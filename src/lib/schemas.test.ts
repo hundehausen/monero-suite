@@ -343,6 +343,40 @@ describe("monerod ZMQ publisher port collision validation", () => {
   });
 });
 
+describe("watchtower update frequency server-side validation", () => {
+  it("accepts hourly, daily, and weekly", () => {
+    for (const frequency of ["hourly", "daily", "weekly"] as const) {
+      const config = baseConfig();
+      config.services.watchtowerUpdateFrequency = frequency;
+      expect(fullConfigSchema.safeParse(config).success, frequency).toBe(true);
+    }
+  });
+
+  it("rejects anything else", () => {
+    const config = baseConfig();
+    config.services.watchtowerUpdateFrequency =
+      "monthly" as FullConfig["services"]["watchtowerUpdateFrequency"];
+    expect(fullConfigSchema.safeParse(config).success).toBe(false);
+  });
+});
+
+describe("watchtower cooldown delay server-side validation", () => {
+  it("accepts none, 12h, 24h, 3d, and 7d", () => {
+    for (const delay of ["none", "12h", "24h", "3d", "7d"] as const) {
+      const config = baseConfig();
+      config.services.watchtowerCooldownDelay = delay;
+      expect(fullConfigSchema.safeParse(config).success, delay).toBe(true);
+    }
+  });
+
+  it("rejects anything else", () => {
+    const config = baseConfig();
+    config.services.watchtowerCooldownDelay =
+      "1h" as FullConfig["services"]["watchtowerCooldownDelay"];
+    expect(fullConfigSchema.safeParse(config).success).toBe(false);
+  });
+});
+
 describe("p2pool payout address server-side validation", () => {
   it("rejects an 8-prefixed subaddress payout address", () => {
     const config = baseConfig();

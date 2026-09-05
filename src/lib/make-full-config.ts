@@ -114,6 +114,8 @@ const defaultFullConfig = (): FullConfig => ({
   services: {
     isMoneroWalletRpc: false,
     isWatchtower: false,
+    watchtowerUpdateFrequency: "hourly",
+    watchtowerCooldownDelay: "24h",
     isMonitoring: false,
     grafanaDomain: "grafana.example.com",
     isTraefik: false,

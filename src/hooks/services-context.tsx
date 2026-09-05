@@ -119,7 +119,14 @@ export function useTorState(): TorState {
 
 export function useWatchtowerState(): WatchtowerState {
   const { stateFunctions: s } = useServicesContext();
-  return { isWatchtower: s.isWatchtower, setIsWatchtower: s.setIsWatchtower };
+  return {
+    isWatchtower: s.isWatchtower,
+    setIsWatchtower: s.setIsWatchtower,
+    watchtowerUpdateFrequency: s.watchtowerUpdateFrequency,
+    setWatchtowerUpdateFrequency: s.setWatchtowerUpdateFrequency,
+    watchtowerCooldownDelay: s.watchtowerCooldownDelay,
+    setWatchtowerCooldownDelay: s.setWatchtowerCooldownDelay,
+  };
 }
 
 export function useMonitoringState(): MonitoringState {
