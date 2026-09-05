@@ -2,7 +2,7 @@ import { Flex, Title, Text } from "@mantine/core";
 import Link from "next/link";
 import Image from "next/image";
 import { FaDocker, FaGithub } from "react-icons/fa";
-import Logo from "../../../public/monero-suite-logo-transparent.png";
+import Logo from "../../../public/monero-suite-logo.png";
 import Hundehausen from "../../../public/hundehausen.png";
 import Seth from "../../../public/seth.png";
 import DarkModeToggle from "./DarkModeToggle";

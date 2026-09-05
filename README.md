@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/monero-suite-logo-transparent-small.png" alt="Monero Suite logo">
+  <img src="public/monero-suite-logo-small.png" alt="Monero Suite logo" width="180">
 </p>
 
 <h1 align="center">Monero Suite</h1>
