@@ -6,13 +6,22 @@ import {
   Switch,
   Text,
 } from "@mantine/core";
-import { useDisclosure } from '@mantine/hooks';
 import { useServicesContext, useMonerodState } from "@/hooks/services-context";
 import ExplainingLabel from "../ExplainingLabel";
 import AdvancedConfigModal from "./MoneroNode/AdvancedConfigModal";
 import AccordionItemComponent from "./AccordionItemComponent";
 
-const MoneroNodeSection = () => {
+interface MoneroNodeSectionProps {
+  advancedOpened: boolean;
+  onOpenAdvanced: () => void;
+  onCloseAdvanced: () => void;
+}
+
+const MoneroNodeSection = ({
+  advancedOpened,
+  onOpenAdvanced,
+  onCloseAdvanced,
+}: MoneroNodeSectionProps) => {
   const { services } = useServicesContext();
   const {
     isMoneroPublicNode,
@@ -21,14 +30,11 @@ const MoneroNodeSection = () => {
     setIsPrunedNode,
   } = useMonerodState();
 
-  // State for modal
-  const [opened, { open, close }] = useDisclosure(false);
-
   return (
     <AccordionItemComponent
       value="mainnet-node"
       title="Monero Node"
-      checked
+      alwaysOn
     >
       <Text size="sm">{services["monerod"].description}</Text>
       <Switch
@@ -67,15 +73,13 @@ const MoneroNodeSection = () => {
         }}
       />
 
-      {/* Advanced Configuration Button */}
       <Group mt="md">
-        <Button onClick={open} variant="outline">Advanced Configuration</Button>
+        <Button onClick={onOpenAdvanced} variant="outline">Advanced Configuration</Button>
       </Group>
 
-      {/* Advanced Configuration Modal */}
       <AdvancedConfigModal
-        opened={opened}
-        onClose={close}
+        opened={advancedOpened}
+        onClose={onCloseAdvanced}
       />
     </AccordionItemComponent>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import { Accordion } from "@mantine/core";
-import { useState } from "react";
 import {
   ArchitectureSection,
   NetworkModeSection,
@@ -19,42 +18,54 @@ import {
   WatchtowerSection,
   CuprateSection,
 } from "./services";
+import JumpToSection from "./JumpToSection";
+import { useSectionFocus } from "./section-focus";
 
 const Selection = () => {
-  const [accordionItems, setAccordionItems] = useState([
-    "architecture",
-    "exposed",
-    "mainnet-node",
-  ]);
+  const {
+    accordionItems,
+    setAccordionItems,
+    advancedOpened,
+    openAdvanced,
+    closeAdvanced,
+  } = useSectionFocus();
 
   return (
-    <Accordion
-      multiple
-      value={accordionItems}
-      variant="separated"
-      onChange={setAccordionItems}
-      styles={{
-        panel: {
-          paddingTop: "8px",
-        },
-      }}
-    >
-      <ArchitectureSection />
-      <NetworkModeSection />
-      <MoneroNodeSection />
-      <StagenetNodeSection />
-      <MoneroWalletRpcSection />
-      <MoneroLwsSection />
-      <MoneroPaySection />
-      <TraefikSection />
-      <P2PoolSection />
-      <XmrigProxySection />
-      <TorSection />
-      <MonitoringSection />
-      <PortainerSection />
-      <WatchtowerSection />
-      <CuprateSection />
-    </Accordion>
+    <>
+      <JumpToSection />
+      {/* Accordion `value`s must stay listed in SECTIONS (services/sections.ts). */}
+      <Accordion
+        multiple
+        value={accordionItems}
+        variant="separated"
+        onChange={setAccordionItems}
+        styles={{
+          panel: {
+            paddingTop: "8px",
+          },
+        }}
+      >
+        <ArchitectureSection />
+        <NetworkModeSection />
+        <MoneroNodeSection
+          advancedOpened={advancedOpened}
+          onOpenAdvanced={openAdvanced}
+          onCloseAdvanced={closeAdvanced}
+        />
+        <StagenetNodeSection />
+        <MoneroWalletRpcSection />
+        <MoneroLwsSection />
+        <MoneroPaySection />
+        <TraefikSection />
+        <P2PoolSection />
+        <XmrigProxySection />
+        <TorSection />
+        <MonitoringSection />
+        <PortainerSection />
+        <WatchtowerSection />
+        <CuprateSection />
+      </Accordion>
+    </>
   );
 };
 

@@ -1,13 +1,15 @@
 "use client";
 
-import { MiningMode, P2PoolMode } from "@/hooks/use-services";
+import { MiningMode, P2PoolMode, p2poolModes } from "@/hooks/use-services";
 import {
   Alert,
   Box,
   Checkbox,
   Input,
+  Radio,
   SegmentedControl,
   Slider,
+  Stack,
   Text,
   Tooltip,
 } from "@mantine/core";
@@ -15,6 +17,12 @@ import { useServicesContext, useP2PoolState, useXmrigState, useArchitectureState
 import ExplainingLabel from "../ExplainingLabel";
 import AccordionItemComponent from "./AccordionItemComponent";
 import { MONERO_ADDRESS_BASE58, MONERO_PRIMARY_ADDRESS_PREFIX } from "@/lib/schemas";
+
+const isP2PoolMode = (value: string): value is P2PoolMode =>
+  value === p2poolModes.none ||
+  value === p2poolModes.nano ||
+  value === p2poolModes.mini ||
+  value === p2poolModes.full;
 
 const P2PoolSection = () => {
   const { services } = useServicesContext();
@@ -49,48 +57,44 @@ const P2PoolSection = () => {
       checked={p2PoolMode !== "none"}
     >
       <Text size="sm">{services["p2pool"].description}</Text>
-      <SegmentedControl
+      <Radio.Group
         value={p2PoolMode}
-        onChange={(value) => setP2PoolMode(value as P2PoolMode)}
-        styles={{
-          label: {
-            fontSize: "16px",
-          },
+        onChange={(value) => {
+          if (isP2PoolMode(value)) setP2PoolMode(value);
         }}
-        data={[
-          {
-            label: "None",
-            value: "none",
-          },
-          {
-            label: (
+        label="P2Pool network"
+      >
+        <Stack gap="xs" mt="xs">
+          <Radio value={p2poolModes.none} label="None" />
+          <Radio
+            value={p2poolModes.nano}
+            label={
               <ExplainingLabel
                 label="P2Pool nano"
                 explanation="Smallest P2Pool network — best for low-power devices and very low hashrate miners."
               />
-            ),
-            value: "nano",
-          },
-          {
-            label: (
+            }
+          />
+          <Radio
+            value={p2poolModes.mini}
+            label={
               <ExplainingLabel
                 label="P2Pool mini"
                 explanation="Smaller pool with lower variance — a good starting point for most home miners."
               />
-            ),
-            value: "mini",
-          },
-          {
-            label: (
+            }
+          />
+          <Radio
+            value={p2poolModes.full}
+            label={
               <ExplainingLabel
                 label="P2Pool full"
                 explanation="Main P2Pool network — best suited for miners with higher hashrate."
               />
-            ),
-            value: "full",
-          },
-        ]}
-      />
+            }
+          />
+        </Stack>
+      </Radio.Group>
       {p2PoolMode !== "none" && (
         <>
           {p2PoolPayoutAddress.length === 0 && (

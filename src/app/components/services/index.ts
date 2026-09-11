@@ -14,3 +14,4 @@ export { default as CuprateSection } from "./CuprateSection";
 export { default as MoneroLwsSection } from "./MoneroLwsSection";
 export { default as MoneroPaySection } from "./MoneroPaySection";
 export * from "./types";
+export * from "./sections";

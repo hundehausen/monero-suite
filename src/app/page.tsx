@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import Main from "./components/Main";
 import { Suspense } from "react";
 import { ServicesProvider } from "@/hooks/services-context";
+import { SectionFocusProvider } from "./components/section-focus";
 
 export default function Home() {
   return (
@@ -32,7 +33,9 @@ export default function Home() {
       <AppShell.Main>
         <Suspense fallback={<div>Loading Monero Suite...</div>}>
           <ServicesProvider>
-            <Main />
+            <SectionFocusProvider>
+              <Main />
+            </SectionFocusProvider>
           </ServicesProvider>
         </Suspense>
       </AppShell.Main>
