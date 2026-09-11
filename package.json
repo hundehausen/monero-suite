@@ -18,10 +18,10 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@mantine/code-highlight": "9.5.0",
-    "@mantine/core": "9.5.0",
-    "@mantine/hooks": "9.5.0",
-    "@mantine/notifications": "9.5.0",
+    "@mantine/code-highlight": "9.6.1",
+    "@mantine/core": "9.6.1",
+    "@mantine/hooks": "9.6.1",
+    "@mantine/notifications": "9.6.1",
     "@vercel/blob": "2.6.1",
     "compose-spec-schema": "1.0.0",
     "date-fns": "4.4.0",
