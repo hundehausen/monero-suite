@@ -45,7 +45,6 @@ const Header = () => {
             style={{ borderRadius: "50%" }}
             width={32}
             height={32}
-            placeholder="blur"
           />
         </Link>
         <Link
@@ -60,7 +59,6 @@ const Header = () => {
             style={{ borderRadius: "50%" }}
             width={32}
             height={32}
-            placeholder="blur"
           />
         </Link>
         <Link
