@@ -8,5 +8,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-For monerod configs check docs first: https://github.com/monero-project/monero-docs/raw/refs/heads/master/docs/en/interacting/monerod-reference.md
-For monero-wallet-rpc configs check docs: https://github.com/monero-project/monero-docs/raw/refs/heads/master/docs/en/interacting/monero-wallet-rpc-reference.md
+For monerod configs check docs first: 
+https://github.com/monero-project/monero-docs/raw/refs/heads/master/docs/en/interacting/monerod-reference.md
+
+For monero-wallet-rpc configs check docs: 
+https://github.com/monero-project/monero-docs/raw/refs/heads/master/docs/en/interacting/monero-wallet-rpc-reference.md
+
+Mantine documentation URL: https://mantine.dev/llms.txt
