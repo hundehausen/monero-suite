@@ -48,7 +48,7 @@ Supported distros: Debian/Ubuntu and derivatives (Mint, Pop!_OS, Raspberry Pi OS
 3. Click **Generate Install Script** — review the full script via the preview button
 4. Copy the generated command and run it on your server
 
-The script installs Docker (if needed), configures your firewall, and starts all selected services. Generated configs are automatically deleted from our servers within 24 hours.
+The command is `curl … | bash` (not `sudo bash`). If you are not root, sudo may prompt on the terminal — that is expected. The script installs Docker (if needed), configures your firewall, and starts all selected services. Generated configs are automatically deleted from our servers within 24 hours.
 
 ## Manual Installation
 
@@ -99,7 +99,7 @@ All user-generated content is validated server-side before upload:
 
 The generated bash script includes several runtime protections:
 
-- **Privilege checks** — Verifies root or sudo access before modifying the system
+- **Privilege checks** — Verifies root or sudo access before modifying the system. Passworded sudo is prompted on the terminal (`/dev/tty`) so `curl | bash` does not consume the rest of the script as the password.
 - **OS detection** — Identifies the distro and exits cleanly on unsupported systems
 - **Network mode validation** — Warns if you're running an exposed (Traefik) config on a NAT network or vice versa
 - **Firewall setup** — Auto-detects ufw vs firewalld. SSH ports come from the live session, listening sockets, `sshd -T`, systemd sockets, and sshd config. Detected SSH is always allowed. Default-deny is skipped when SSH cannot be confirmed, so the installer will not lock you out.

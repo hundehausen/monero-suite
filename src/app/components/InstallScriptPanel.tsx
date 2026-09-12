@@ -68,7 +68,8 @@ export default function InstallScriptPanel({
         Every command is visible below — review it before running. Supported
         distros: Debian/Ubuntu and derivatives (Mint, Pop!_OS, Raspberry Pi OS),
         Fedora, CentOS Stream, Rocky Linux, AlmaLinux, and RHEL. Pass{" "}
-        <strong>--verbose</strong> for full command output.
+        <strong>--verbose</strong> for full command output. If you are not
+        root, the script may ask for your sudo password on the terminal.
       </Text>
 
       <Card shadow="sm" padding="md" radius="md" withBorder>

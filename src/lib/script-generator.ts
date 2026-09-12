@@ -10,7 +10,7 @@ import {
 
 export const MONITORING_BASH_COMMANDS = `
 # Set up monitoring configuration
-cd ~/monero-suite
+cd "$INSTALL_DIR"
 mkdir -p monitoring/grafana/dashboards monitoring/grafana/provisioning/{dashboards,datasources,plugins,alerting} monitoring/prometheus
 # Download Prometheus and Grafana configs
 curl -fsSL -o monitoring/prometheus/config.yaml https://raw.githubusercontent.com/lalanza808/docker-monero-node/master/files/prometheus/config.yaml
@@ -22,7 +22,7 @@ curl -fsSL -o monitoring/grafana/provisioning/datasources/all.yaml https://raw.g
 
 export const CUPRATE_BASH_COMMANDS = `
 # Set up Cuprate configuration
-cd ~/monero-suite
+cd "$INSTALL_DIR"
 mkdir -p cuprate
 # Download Cuprated.toml (enables restricted RPC on 0.0.0.0:18089, required for the healthcheck)
 curl -fsSL -o cuprate/Cuprated.toml https://raw.githubusercontent.com/hundehausen/cuprate-docker/main/config/Cuprated.toml`;

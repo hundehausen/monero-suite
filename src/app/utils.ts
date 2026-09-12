@@ -107,7 +107,7 @@ export function generateScriptSummary(
 ): string[] {
   const steps: string[] = [];
 
-  steps.push("Check for root/sudo privileges");
+  steps.push("Authenticate sudo (prompt on the terminal if needed)");
   steps.push("Detect OS and package manager");
   steps.push("Validate network environment");
   steps.push("Refresh package indexes");

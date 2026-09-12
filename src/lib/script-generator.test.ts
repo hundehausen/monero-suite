@@ -1,6 +1,10 @@
 import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
-import { generateInstallationScript } from "./script-generator";
+import {
+  CUPRATE_BASH_COMMANDS,
+  generateInstallationScript,
+  MONITORING_BASH_COMMANDS,
+} from "./script-generator";
 
 function sampleScript() {
   return generateInstallationScript(
@@ -68,16 +72,44 @@ describe("generateInstallationScript SELinux bind mounts", () => {
   });
 });
 
-describe("generateInstallationScript home path expansion", () => {
-  it("expands ~/ bind-mount sources using SUDO_USER home before starting services", () => {
+describe("generateInstallationScript privileges and install dir", () => {
+  it("authenticates sudo on a TTY and detaches run_cmd from stdin", () => {
     const script = sampleScript();
 
-    expect(script).toContain("INSTALL_USER_HOME");
-    expect(script).toContain("SUDO_USER");
+    expect(script).toContain("$SUDO -n true");
+    expect(script).toContain("$SUDO -v");
+    expect(script).toContain('SUDO_TTY:-/dev/tty');
+    expect(script).toContain("</dev/null");
+    expect(script).toContain("check_privileges");
+    expect(script).toContain("resolve_install_dir");
+  });
+
+  it("expands ~/ bind-mount sources using INSTALL_HOME, not SUDO_USER", () => {
+    const script = sampleScript();
+
+    expect(script).toContain("INSTALL_HOME");
+    expect(script).toContain("INSTALL_DIR");
+    expect(script).toMatch(/id -un/);
     expect(script).toMatch(/getent passwd/);
-    // sed expands ~/ after a colon or whitespace
     expect(script).toMatch(/sed /);
-    expect(script).toContain("docker-compose.yml");
+    expect(script).toContain('cd "$INSTALL_DIR"');
+    expect(script).not.toMatch(/getent passwd "\$\{SUDO_USER/);
+  });
+
+  it("points monitoring and cuprate setup at INSTALL_DIR", () => {
+    expect(MONITORING_BASH_COMMANDS).toContain('cd "$INSTALL_DIR"');
+    expect(MONITORING_BASH_COMMANDS).not.toContain("cd ~/monero-suite");
+    expect(CUPRATE_BASH_COMMANDS).toContain('cd "$INSTALL_DIR"');
+    expect(CUPRATE_BASH_COMMANDS).not.toContain("cd ~/monero-suite");
+
+    const script = generateInstallationScript(
+      "services: {}\n",
+      MONITORING_BASH_COMMANDS + CUPRATE_BASH_COMMANDS
+    );
+    expect(script).toContain('cd "$INSTALL_DIR"');
+    expect(script).not.toContain("cd ~/monero-suite");
+    const bashN = spawnSync("bash", ["-n"], { input: script, encoding: "utf8" });
+    expect(bashN.status, bashN.stderr || bashN.stdout).toBe(0);
   });
 });
 

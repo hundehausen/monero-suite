@@ -1,11 +1,55 @@
-const installationPath = "~/monero-suite";
-
 export const APT_UPGRADE_ENV =
   "DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l";
 export const APT_UPGRADE_BIN =
   "apt-get upgrade -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold";
 export const DNF_UPGRADE_BIN = "dnf upgrade -y";
 export const YUM_UPGRADE_BIN = "yum update -y";
+
+/** Root/sudo gate. Prompts on /dev/tty so curl|bash stdin is not consumed. Shared with tests. */
+export const CHECK_PRIVILEGES_FN = `check_privileges() {
+    local euid="\${CHECK_EUID:-\$EUID}"
+    if [ "$euid" -eq 0 ]; then
+        SUDO=""
+        echo -e "\${GREEN}[✓]\${NC} Running as root"
+        return 0
+    fi
+    if ! command -v sudo >/dev/null 2>&1; then
+        echo -e "\${RED}Error: This script requires root privileges. Please run as root or install sudo.\${NC}"
+        exit 1
+    fi
+    SUDO="sudo"
+    if $SUDO -n true >/dev/null 2>&1; then
+        echo -e "\${GREEN}[✓]\${NC} sudo is available"
+        return 0
+    fi
+    local tty="\${SUDO_TTY:-/dev/tty}"
+    if [ ! -e "$tty" ] || [ ! -r "$tty" ] || [ ! -w "$tty" ]; then
+        echo -e "\${RED}Error: sudo needs a password, but no terminal is available to prompt. Run as root, or from a real terminal so sudo can ask for a password.\${NC}"
+        exit 1
+    fi
+    echo -e "\${YELLOW}sudo password required\${NC}"
+    if ! $SUDO -v <"$tty" >"$tty" 2>"$tty"; then
+        echo -e "\${RED}Error: sudo authentication failed.\${NC}"
+        exit 1
+    fi
+    echo -e "\${GREEN}[✓]\${NC} sudo is available"
+}`
+
+/** Install tree under the effective-uid home, never SUDO_USER. Shared with tests. */
+export const RESOLVE_INSTALL_DIR_FN = `resolve_install_dir() {
+    INSTALL_USER=$(id -un 2>/dev/null || true)
+    INSTALL_HOME=""
+    if [ -n "$INSTALL_USER" ]; then
+        INSTALL_HOME=$(getent passwd "$INSTALL_USER" 2>/dev/null | cut -d: -f6 || true)
+    fi
+    INSTALL_HOME=\${INSTALL_HOME:-\$HOME}
+    if [ -z "$INSTALL_HOME" ]; then
+        echo -e "\${RED}Error: Could not determine home directory for install.\${NC}"
+        exit 1
+    fi
+    INSTALL_DIR="$INSTALL_HOME/monero-suite"
+    echo -e "\${GREEN}[✓]\${NC} Install directory: $INSTALL_DIR"
+}`
 
 /** Maps os-release ID + ID_LIKE to apt, dnf, or yum. Shared with tests. */
 export const RESOLVE_PKG_MANAGER_FN = `pick_rpm_pkg_manager() {
@@ -292,12 +336,13 @@ BANNER="
 # Progress animation characters
 SPINNER="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
 
-# Run a command, suppressing output unless verbose mode is enabled
+# Run a command, suppressing output unless verbose mode is enabled.
+# stdin is /dev/null so piped curl|bash is never consumed by sudo/apt.
 run_cmd() {
     if [ "$VERBOSE" = true ]; then
-        "$@"
+        "$@" </dev/null
     else
-        "$@" > /dev/null 2>&1
+        "$@" > /dev/null 2>&1 </dev/null
     fi
 }
 
@@ -341,20 +386,9 @@ section() {
     echo -e "\n\${BLUE}--- $1 ---\${NC}\n"
 }
 
-# Function to check if running as root or with sudo
-check_privileges() {
-    if [ "$EUID" -ne 0 ]; then
-        if ! command -v sudo &> /dev/null; then
-            echo -e "\${RED}Error: This script requires root privileges. Please run as root or install sudo.\${NC}"
-            exit 1
-        fi
-        SUDO="sudo"
-        echo -e "\${GREEN}[✓]\${NC} sudo is available"
-    else
-        SUDO=""
-        echo -e "\${GREEN}[✓]\${NC} Running as root"
-    fi
-}
+${CHECK_PRIVILEGES_FN}
+
+${RESOLVE_INSTALL_DIR_FN}
 
 ${RESOLVE_PKG_MANAGER_FN}
 
@@ -673,6 +707,7 @@ UPGRADE_SYSTEM_PACKAGES="\${UPGRADE_SYSTEM_PACKAGES_PLACEHOLDER}"
 
 section "System Checks"
 check_privileges
+resolve_install_dir
 detect_os
 validate_network
 
@@ -694,30 +729,28 @@ export const SETUP_TEMPLATE = `
 # Function to setup Monero Suite
 setup_monero_suite() {
     section "Monero Suite Setup"
-    echo -e "Installing to \${BLUE}${installationPath}\${NC}\n"
+    echo -e "Installing to \${BLUE}$INSTALL_DIR\${NC}\\n"
 
     # Create installation directory
-    mkdir -p ${installationPath} > /dev/null 2>&1 &
-    show_spinner $! "Creating directory ${installationPath}"
+    mkdir -p "$INSTALL_DIR" > /dev/null 2>&1 &
+    show_spinner $! "Creating directory $INSTALL_DIR"
 
     # Write Docker Compose file
-    cat > ${installationPath}/docker-compose.yml << 'MONERO_COMPOSE_EOF'
+    cat > "$INSTALL_DIR"/docker-compose.yml << 'MONERO_COMPOSE_EOF'
 \${DOCKER_COMPOSE_CONTENT}
 MONERO_COMPOSE_EOF
     echo -e "\${GREEN}[✓]\${NC} Writing docker-compose.yml"
 
-    # Expand ~/ in bind-mount sources to the installing user's home
-    # (not root's home when compose later runs under $SUDO)
-    INSTALL_USER_HOME=$(getent passwd "\${SUDO_USER:-\$USER}" 2>/dev/null | cut -d: -f6)
-    INSTALL_USER_HOME=\${INSTALL_USER_HOME:-\$HOME}
-    if [ -n "\$INSTALL_USER_HOME" ] && [ -f ${installationPath}/docker-compose.yml ]; then
-        sed -i.bak -E "s|([:[:space:]])~/|\\1\${INSTALL_USER_HOME}/|g" ${installationPath}/docker-compose.yml
-        rm -f ${installationPath}/docker-compose.yml.bak
+    # Expand ~/ in bind-mount sources to the install home (effective uid).
+    # Compose later runs under $SUDO, which would otherwise resolve ~ to /root.
+    if [ -n "$INSTALL_HOME" ] && [ -f "$INSTALL_DIR"/docker-compose.yml ]; then
+        sed -i.bak -E "s|([:[:space:]])~/|\\1\${INSTALL_HOME}/|g" "$INSTALL_DIR"/docker-compose.yml
+        rm -f "$INSTALL_DIR"/docker-compose.yml.bak
         echo -e "\${GREEN}[✓]\${NC} Expanding ~/ paths in docker-compose.yml"
     fi
 
     if selinux_is_enforcing; then
-        add_selinux_z_to_bind_mounts ${installationPath}/docker-compose.yml
+        add_selinux_z_to_bind_mounts "$INSTALL_DIR"/docker-compose.yml
         echo -e "\${GREEN}[✓]\${NC} Labeling host bind mounts for SELinux"
     fi
 `;
@@ -725,7 +758,7 @@ MONERO_COMPOSE_EOF
 
 export const ENV_FILE_TEMPLATE = `
     # Write environment file
-    cat > ${installationPath}/.env << 'MONERO_ENV_EOF'
+    cat > "$INSTALL_DIR"/.env << 'MONERO_ENV_EOF'
 \${ENV_CONTENT}
 MONERO_ENV_EOF
     echo -e "\${GREEN}[✓]\${NC} Writing .env configuration"
@@ -739,7 +772,7 @@ export const COMPLETION_TEMPLATE = `
     fi
 
     section "Starting Services"
-    cd ${installationPath}
+    cd "$INSTALL_DIR"
 
     run_cmd $SUDO docker compose pull &
     show_spinner $! "Pulling container images" nofail
@@ -747,9 +780,9 @@ export const COMPLETION_TEMPLATE = `
     run_cmd $SUDO docker compose up -d &
     show_spinner $! "Starting Monero Suite containers"
 
-    echo -e "\\n\${GREEN}Monero Suite installation completed successfully!\${NC}\n"
+    echo -e "\\n\${GREEN}Monero Suite installation completed successfully!\${NC}\\n"
     echo -e "\${BLUE}Useful commands:\${NC}"
-    echo -e "  \${YELLOW}cd ${installationPath}\${NC}         — Change to the installation directory"
+    echo -e "  \${YELLOW}cd $INSTALL_DIR\${NC}         — Change to the installation directory"
     echo -e "  \${YELLOW}docker compose ps\${NC}        — Check the status of the containers"
     echo -e "  \${YELLOW}docker compose logs -f\${NC}   — View container logs (exit with Ctrl+C)"
 }

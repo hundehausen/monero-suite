@@ -110,8 +110,8 @@ printf 'SOURCES=%s\\n' "$SSH_SOURCES"
     {
       encoding: "utf8",
       env: {
+        ...process.env,
         PATH: `${binDir}${path.delimiter}${process.env.PATH ?? "/usr/bin:/bin"}`,
-        HOME: process.env.HOME,
         LANG: "C",
         SSH_CONNECTION: opts.sshConnection ?? "",
       },
