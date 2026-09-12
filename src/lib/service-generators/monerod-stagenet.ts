@@ -1,7 +1,7 @@
 import { Service, architectures, networkModes, torProxyModes } from "@/lib/service-types";
 import { safeParse, pathSchema } from "@/lib/schemas";
 import { DOCKER_IMAGES, MONEROD_BAN_LIST_PATH, MONEROD_STAGENET_PORTS, SERVICE_IPS } from "@/lib/constants";
-import { getTraefikConfig, getPortBinding, getP2pPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
+import { getTraefikConfig, getPortBinding, getP2pPortBinding, getTorNetworkConfig, hostBind } from "@/lib/docker-helpers";
 import type { FullConfig } from "@/lib/config-schema";
 import { CERT_RESOLVER_NAME } from "./traefik";
 
@@ -39,9 +39,7 @@ export const createMonerodStagenetService = (
         volumes: [
           ...(!state.isMoneroStagenetCustomLocation
             ? ["bitmonero-stagenet:/home/monero/.bitmonero"]
-            : [
-                `${sPath}:/home/monero/.bitmonero`,
-              ]),
+            : [hostBind(sPath, "/home/monero/.bitmonero")]),
         ],
         ports: [
           ...getP2pPortBinding(state.isStagenetNodePublic, networkMode, MONEROD_STAGENET_PORTS.p2p),

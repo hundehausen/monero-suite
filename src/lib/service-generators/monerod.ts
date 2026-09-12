@@ -11,7 +11,7 @@ import {
   moneroAddressSchema,
 } from "@/lib/schemas";
 import { DOCKER_IMAGES, MONEROD_BAN_LIST_PATH, MONEROD_PORTS, SERVICE_IPS } from "@/lib/constants";
-import { getTraefikConfig, getPortBinding, getP2pPortBinding, getTorNetworkConfig } from "@/lib/docker-helpers";
+import { getTraefikConfig, getPortBinding, getP2pPortBinding, getTorNetworkConfig, hostBind } from "@/lib/docker-helpers";
 import { stackNeedsZmq } from "@/lib/stack-needs-zmq";
 import type { FullConfig } from "@/lib/config-schema";
 import type { GenerationCtx } from "./ctx";
@@ -245,7 +245,7 @@ export const createMonerodService = (
         volumes: [
           ...(isMoneroMainnetVolume
             ? ["bitmonero:/home/monero/.bitmonero"]
-            : [`${sPath}:/home/monero/.bitmonero`]),
+            : [hostBind(sPath, "/home/monero/.bitmonero")]),
         ],
         ports: [
           ...getP2pPortBinding(isMoneroPublicNode, networkMode, sP2pBindPort),

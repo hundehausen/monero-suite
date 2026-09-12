@@ -16,6 +16,25 @@ describe("createMonitoringService", () => {
     ]);
   });
 
+  it("bind-mounts monitoring configs without an SELinux suffix", () => {
+    const service = createMonitoringService(
+      makeFullConfig({ services: { isMonitoring: true } })
+    );
+    const prometheus = service.code.prometheus as { volumes: string[] };
+    const grafana = service.code.grafana as { volumes: string[] };
+
+    expect(prometheus.volumes).toContain(
+      "./monitoring/prometheus/config.yaml:/etc/prometheus/config.yaml:ro"
+    );
+    expect(grafana.volumes).toEqual(
+      expect.arrayContaining([
+        "./monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini:ro",
+        "./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro",
+        "./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro",
+      ])
+    );
+  });
+
   it("writes the configured Grafana credentials into service.env", () => {
     const service = createMonitoringService(
       makeFullConfig({

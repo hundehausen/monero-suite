@@ -1,6 +1,6 @@
 import { Service, architectures } from "@/lib/service-types";
 import { DOCKER_IMAGES, SERVICE_PORTS } from "@/lib/constants";
-import { getPortBinding } from "@/lib/docker-helpers";
+import { getPortBinding, hostBind } from "@/lib/docker-helpers";
 import { CUPRATE_BASH_COMMANDS } from "@/lib/script-generator";
 import type { FullConfig } from "@/lib/config-schema";
 
@@ -30,7 +30,7 @@ export const createCuprateService = (
         // Downloaded by the install script from hundehausen/cuprate-docker.
         // The image ships an empty config dir; without this mount cuprated
         // disables RPC and its own healthcheck fails.
-        "./cuprate/Cuprated.toml:/home/cuprate/.config/cuprate/Cuprated.toml:ro",
+        hostBind("./cuprate/Cuprated.toml", "/home/cuprate/.config/cuprate/Cuprated.toml", "ro"),
       ],
       ports: [getPortBinding(config.networkMode, SERVICE_PORTS.cuprateRpc, CUPRATE_CONTAINER_RPC_PORT)],
     },

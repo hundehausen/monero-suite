@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getTraefikLabels, isPlaceholderDomain, getP2pPortBinding } from "./docker-helpers";
+import { getTraefikLabels, isPlaceholderDomain, getP2pPortBinding, hostBind } from "./docker-helpers";
 import { networkModes } from "./service-types";
 
 describe("isPlaceholderDomain", () => {
@@ -24,6 +24,24 @@ describe("isPlaceholderDomain", () => {
     "monitor.real-domain.net",
   ])("treats %j as real", (domain) => {
     expect(isPlaceholderDomain(domain)).toBe(false);
+  });
+});
+
+describe("hostBind", () => {
+  it("formats a read-only bind without an SELinux suffix", () => {
+    expect(
+      hostBind(
+        "./cuprate/Cuprated.toml",
+        "/home/cuprate/.config/cuprate/Cuprated.toml",
+        "ro"
+      )
+    ).toBe("./cuprate/Cuprated.toml:/home/cuprate/.config/cuprate/Cuprated.toml:ro");
+  });
+
+  it("omits mode when none is given", () => {
+    expect(hostBind("/mnt/data/monero", "/home/monero/.bitmonero")).toBe(
+      "/mnt/data/monero:/home/monero/.bitmonero"
+    );
   });
 });
 

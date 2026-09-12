@@ -46,6 +46,28 @@ describe("generateInstallationScript docker compose", () => {
   });
 });
 
+describe("generateInstallationScript SELinux bind mounts", () => {
+  it("relabels host binds on enforcing hosts and leaves the embedded compose unlabeled", () => {
+    const script = generateInstallationScript(
+      "      - ./monitoring/prometheus/config.yaml:/etc/prometheus/config.yaml:ro\n",
+      "",
+      undefined,
+      false,
+      ""
+    );
+
+    expect(script).toContain("selinux_is_enforcing");
+    expect(script).toContain("add_selinux_z_to_bind_mounts");
+    expect(script).toContain("Labeling host bind mounts for SELinux");
+    expect(script).toContain(
+      "./monitoring/prometheus/config.yaml:/etc/prometheus/config.yaml:ro\n"
+    );
+    expect(script).not.toContain(
+      "./monitoring/prometheus/config.yaml:/etc/prometheus/config.yaml:ro,z"
+    );
+  });
+});
+
 describe("generateInstallationScript home path expansion", () => {
   it("expands ~/ bind-mount sources using SUDO_USER home before starting services", () => {
     const script = sampleScript();

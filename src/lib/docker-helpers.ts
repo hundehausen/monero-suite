@@ -54,6 +54,19 @@ export function getTraefikConfig(
 }
 
 /**
+ * Host bind mount (`source:target` or `source:target:ro`).
+ * SELinux `:z` is applied by the install script on enforcing hosts, not here,
+ * so the compose preview stays the same for every distro.
+ */
+export function hostBind(
+  source: string,
+  target: string,
+  mode?: "ro" | "rw"
+): string {
+  return mode ? `${source}:${target}:${mode}` : `${source}:${target}`;
+}
+
+/**
  * Generate a port binding string that binds to localhost in exposed mode
  * and all interfaces in local mode.
  */

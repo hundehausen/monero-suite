@@ -1,6 +1,6 @@
 import { Service, architectures } from "@/lib/service-types";
 import { DOCKER_IMAGES, SERVICE_PORTS, MONEROD_PORTS } from "@/lib/constants";
-import { getTraefikConfig, getPortBinding, getTorClientNetworkConfig } from "@/lib/docker-helpers";
+import { getTraefikConfig, getPortBinding, getTorClientNetworkConfig, hostBind } from "@/lib/docker-helpers";
 import { MONITORING_BASH_COMMANDS } from "@/lib/script-generator";
 import type { FullConfig } from "@/lib/config-schema";
 import { CERT_RESOLVER_NAME } from "./traefik";
@@ -49,7 +49,7 @@ export const createMonitoringService = (
         ],
         volumes: [
           "prometheus:/prometheus",
-          "./monitoring/prometheus/config.yaml:/etc/prometheus/config.yaml:ro",
+          hostBind("./monitoring/prometheus/config.yaml", "/etc/prometheus/config.yaml", "ro"),
         ],
         depends_on: {
           exporter: {
@@ -94,9 +94,9 @@ export const createMonitoringService = (
         ports: [getPortBinding(networkMode, 3000)],
         volumes: [
           "grafana:/var/lib/grafana",
-          "./monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini:ro",
-          "./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro",
-          "./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro",
+          hostBind("./monitoring/grafana/grafana.ini", "/etc/grafana/grafana.ini", "ro"),
+          hostBind("./monitoring/grafana/provisioning", "/etc/grafana/provisioning", "ro"),
+          hostBind("./monitoring/grafana/dashboards", "/var/lib/grafana/dashboards", "ro"),
         ],
         labels,
         environment: {

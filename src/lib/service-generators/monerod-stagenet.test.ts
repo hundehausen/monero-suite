@@ -87,3 +87,14 @@ describe("createMonerodStagenetService host port publishing", () => {
     expect(monerodStagenet.command).toContain("--ban-list=/home/monero/ban_list.txt");
   });
 });
+
+describe("createMonerodStagenetService custom blockchain bind mount", () => {
+  it("bind-mounts a custom host path without an SELinux suffix", () => {
+    const service = run({
+      isMoneroStagenetCustomLocation: true,
+      moneroStagenetBlockchainLocation: "/mnt/data/stagenet",
+    });
+    const volumes = service.code["monerod-stagenet"].volumes as string[];
+    expect(volumes).toContain("/mnt/data/stagenet:/home/monero/.bitmonero");
+  });
+});

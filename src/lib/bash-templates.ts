@@ -53,6 +53,58 @@ resolve_pkg_manager() {
     esac
 }`;
 
+/**
+ * Relabel host bind mounts with Docker's shared SELinux `:z` on enforcing
+ * hosts. Named volumes, devices, and the docker socket are left alone.
+ * Shared with tests. Preview/download compose stays unlabeled.
+ */
+export const SELINUX_BIND_MOUNTS_FN = String.raw`selinux_is_enforcing() {
+    [ "$(cat /sys/fs/selinux/enforce 2>/dev/null)" = "1" ]
+}
+
+add_selinux_z_to_bind_mounts() {
+    local compose="$1"
+    [ -f "$compose" ] || return 1
+    local tmp
+    tmp=$(mktemp) || return 1
+    if awk '
+        function skip_src(s) {
+            return (s ~ /^\/dev(\/|$)/) || (s ~ /^\/proc(\/|$)/) || (s ~ /^\/sys(\/|$)/) || (s ~ /^\/lib(64)?(\/|$)/) || (s == "/var/run/docker.sock") || (s == "/run/docker.sock")
+        }
+        function has_z(o) {
+            return (o ~ /(^|,)[zZ]($|,)/)
+        }
+        {
+            if ($0 !~ /^[[:space:]]+-[[:space:]]+/) { print; next }
+            vol = $0
+            sub(/^[[:space:]]+-[[:space:]]+/, "", vol)
+            prefix = substr($0, 1, length($0) - length(vol))
+            n = split(vol, p, ":")
+            if (n < 2) { print; next }
+            src = p[1]
+            if (src !~ /^(\.\/|\.\.\/|\/|~\/)/ && src != "~") { print; next }
+            if (skip_src(src)) { print; next }
+            if (n == 2) {
+                print prefix vol ":z"
+                next
+            }
+            opts = p[3]
+            i = 4
+            while (i <= n) {
+                opts = opts ":" p[i]
+                i++
+            }
+            if (has_z(opts)) { print; next }
+            print prefix p[1] ":" p[2] ":" opts ",z"
+        }
+    ' "$compose" > "$tmp"; then
+        mv "$tmp" "$compose"
+    else
+        rm -f "$tmp"
+        return 1
+    fi
+}`
+
 /** Collect SSH listen ports from session, sockets, sshd -T, systemd, and config. Shared with tests. */
 export const DETECT_SSH_PORTS_FN = `add_ssh_port() {
     local port="$1"
@@ -305,6 +357,8 @@ check_privileges() {
 }
 
 ${RESOLVE_PKG_MANAGER_FN}
+
+${SELINUX_BIND_MOUNTS_FN}
 
 # Function to detect OS and package manager
 detect_os() {
@@ -660,6 +714,11 @@ MONERO_COMPOSE_EOF
         sed -i.bak -E "s|([:[:space:]])~/|\\1\${INSTALL_USER_HOME}/|g" ${installationPath}/docker-compose.yml
         rm -f ${installationPath}/docker-compose.yml.bak
         echo -e "\${GREEN}[✓]\${NC} Expanding ~/ paths in docker-compose.yml"
+    fi
+
+    if selinux_is_enforcing; then
+        add_selinux_z_to_bind_mounts ${installationPath}/docker-compose.yml
+        echo -e "\${GREEN}[✓]\${NC} Labeling host bind mounts for SELinux"
     fi
 `;
 

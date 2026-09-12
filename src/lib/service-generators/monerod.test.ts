@@ -239,6 +239,23 @@ describe("getMonerodP2pPortCollisions", () => {
   });
 });
 
+describe("monerod custom blockchain bind mount", () => {
+  it("bind-mounts a custom host path without an SELinux suffix", () => {
+    const monerod = runFull({
+      isMoneroMainnetVolume: false,
+      moneroMainnetBlockchainLocation: "/mnt/data/monero",
+    }).code.monerod as { volumes?: string[] };
+    expect(monerod.volumes).toContain("/mnt/data/monero:/home/monero/.bitmonero");
+  });
+
+  it("keeps the named volume unlabeled when using the default data dir", () => {
+    const monerod = runFull({ isMoneroMainnetVolume: true }).code.monerod as {
+      volumes?: string[];
+    };
+    expect(monerod.volumes).toContain("bitmonero:/home/monero/.bitmonero");
+  });
+});
+
 describe("monerod ZMQ when monero-lws is enabled", () => {
   it("binds ZMQ RPC and enables ZMQ pub (not --no-zmq)", () => {
     const monerod = runFull({}, { isMoneroLws: true }).code.monerod as Container;

@@ -491,9 +491,9 @@ describe("cuprate service", () => {
     const cuprate = cuprateService.code.cuprate as ContainerSpec;
 
     expect(cuprate.volumes).toContain("cuprate-data:/home/cuprate/.local/share/cuprate");
-    expect(
-      cuprate.volumes?.some((v) => v.endsWith(":/home/cuprate/.config/cuprate/Cuprated.toml:ro"))
-    ).toBe(true);
+    expect(cuprate.volumes).toContain(
+      "./cuprate/Cuprated.toml:/home/cuprate/.config/cuprate/Cuprated.toml:ro"
+    );
     // the install script must download that config from the image maintainer's repo
     expect(cuprateService.bash).toContain("Cuprated.toml");
     expect(cuprateService.bash).toContain("hundehausen/cuprate-docker");
@@ -543,6 +543,21 @@ describe("compose-wide invariants (all services enabled)", () => {
     const allowed = new Set<string>(Object.values(DOCKER_IMAGES));
     for (const spec of Object.values(compose.services ?? {})) {
       expect(allowed.has((spec as ContainerSpec).image ?? "")).toBe(true);
+    }
+  });
+
+  it("project-relative bind mounts omit SELinux :z so the compose preview is distro-neutral", () => {
+    const compose = generateDockerComposeFile(checkedServicesOf(makeConfig()));
+    const binds: string[] = [];
+    for (const spec of Object.values(compose.services ?? {})) {
+      for (const vol of (spec as ContainerSpec).volumes ?? []) {
+        if (vol.startsWith("./")) binds.push(vol);
+      }
+    }
+    expect(binds.length).toBeGreaterThan(0);
+    for (const vol of binds) {
+      const options = vol.slice(vol.lastIndexOf(":") + 1);
+      expect(options, vol).not.toMatch(/(?:^|,)[zZ](?:$|,)/);
     }
   });
 });
