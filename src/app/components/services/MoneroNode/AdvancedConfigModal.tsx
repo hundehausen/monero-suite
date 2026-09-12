@@ -10,6 +10,7 @@ import {
   ScrollArea,
   Text,
 } from "@mantine/core";
+import { TbExternalLink } from "react-icons/tb";
 import LoggingSection from "./LoggingSection";
 import StorageSection from "./StorageSection";
 import NetworkSecuritySection from "./NetworkSecuritySection";
@@ -32,10 +33,15 @@ const title = (
     <Anchor
       href="https://docs.getmonero.org/interacting/monerod-reference/"
       target="_blank"
+      rel="noopener noreferrer"
       fw={400}
       fz="sm"
+      display="inline-flex"
+      style={{ alignItems: "center", gap: 4 }}
+      title="Opens in a new tab"
     >
       All monerod options explained
+      <TbExternalLink size={14} aria-hidden />
     </Anchor>
   </Group>
 );
