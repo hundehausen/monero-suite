@@ -61,6 +61,11 @@ export const SERVICE_PORTS = {
 export const GRAFANA_LOCAL_DOMAIN = `localhost:${SERVICE_PORTS.grafana}` as const;
 export const GRAFANA_TRAEFIK_DEFAULT_DOMAIN = "monitor.example.com" as const;
 
+export const DEFAULT_GRAFANA_ADMIN_USER = "admin";
+export const DEFAULT_GRAFANA_ADMIN_PASSWORD = "admin";
+export const DEFAULT_WALLET_RPC_USER = "monero";
+export const DEFAULT_WALLET_RPC_PASSWORD = "changeme";
+
 // Path the sethforprivacy simple-monerod image copies Boog900's list to
 // (WORKDIR /home/monero, COPY .../ban_list.txt ./ban_list.txt). Compose
 // `command` replaces the image CMD, so generators must pass this path

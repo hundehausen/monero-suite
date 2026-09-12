@@ -33,8 +33,8 @@ export const createMonitoringService = (
       GF_AUTH_ANONYMOUS_ENABLED: true,
       GF_AUTH_BASIC_ENABLED: false,
       GF_AUTH_DISABLE_LOGIN_FORM: true,
-      GF_SECURITY_ADMIN_PASSWORD: "admin",
-      GF_SECURITY_ADMIN_USER: "admin",
+      GF_SECURITY_ADMIN_PASSWORD: config.services.grafanaAdminPassword,
+      GF_SECURITY_ADMIN_USER: config.services.grafanaAdminUser,
     },
     bash: MONITORING_BASH_COMMANDS,
     code: {

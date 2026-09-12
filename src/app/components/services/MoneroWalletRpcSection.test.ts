@@ -3,7 +3,7 @@ import { createElement } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import { Accordion, MantineProvider } from "@mantine/core";
-import MonitoringSection from "./MonitoringSection";
+import MoneroWalletRpcSection from "./MoneroWalletRpcSection";
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,
@@ -29,27 +29,25 @@ Object.defineProperty(window, "ResizeObserver", {
   value: ResizeObserverStub,
 });
 
-const monitoringState = {
-  isMonitoring: false,
-  setIsMonitoring: () => {},
-  grafanaDomain: "localhost:3000",
-  setGrafanaDomain: () => {},
-  grafanaAdminUser: "admin",
-  setGrafanaAdminUser: () => {},
-  grafanaAdminPassword: "admin",
-  setGrafanaAdminPassword: () => {},
+const walletRpcState = {
+  isMoneroWalletRpc: false,
+  setIsMoneroWalletRpc: () => {},
+  walletRpcUser: "monero",
+  setWalletRpcUser: () => {},
+  walletRpcPassword: "changeme",
+  setWalletRpcPassword: () => {},
 };
 
 vi.mock("@/hooks/services-context", () => ({
   useServicesContext: () => ({
     services: {
-      monitoring: {
+      "monero-wallet-rpc": {
         description:
-          "Visualize your node's performance with Grafana dashboards.",
+          "Connect external wallets and applications to your node via the Wallet RPC interface.",
       },
     },
   }),
-  useMonitoringState: () => monitoringState,
+  useMoneroWalletRpcState: () => walletRpcState,
 }));
 
 const renderSection = () =>
@@ -59,46 +57,37 @@ const renderSection = () =>
       null,
       createElement(
         Accordion,
-        { defaultValue: "monitoring" },
-        createElement(MonitoringSection)
+        { defaultValue: "monero-wallet-rpc" },
+        createElement(MoneroWalletRpcSection)
       )
     )
   );
 
-describe("MonitoringSection", () => {
+describe("MoneroWalletRpcSection", () => {
   afterEach(() => {
     cleanup();
   });
 
-  it("shows the enable checkbox and does not claim amd64-only", () => {
-    monitoringState.isMonitoring = false;
+  it("hides credential fields while wallet-rpc is off", () => {
+    walletRpcState.isMoneroWalletRpc = false;
     renderSection();
 
     expect(
-      screen.getByRole("checkbox", { name: "Enable Monitoring" })
+      screen.getByRole("checkbox", { name: "Monero Wallet RPC" })
     ).toBeTruthy();
-    expect(screen.queryByText(/only available on/i)).toBeNull();
     expect(document.querySelector('input[type="password"]')).toBeNull();
   });
 
-  it("shows credential fields and a shipped-default warning when monitoring is on", () => {
-    monitoringState.isMonitoring = true;
-    monitoringState.grafanaAdminPassword = "admin";
+  it("shows credential fields and a shipped-default warning when wallet-rpc is on", () => {
+    walletRpcState.isMoneroWalletRpc = true;
+    walletRpcState.walletRpcPassword = "changeme";
     renderSection();
 
     const password = document.querySelector('input[type="password"]');
     expect(password).toBeInstanceOf(HTMLInputElement);
     if (password instanceof HTMLInputElement) {
-      expect(password.value).toBe("admin");
+      expect(password.value).toBe("changeme");
     }
     expect(screen.getByText("Shipped default password")).toBeTruthy();
-  });
-
-  it("hides the shipped-default warning after the Grafana password is changed", () => {
-    monitoringState.isMonitoring = true;
-    monitoringState.grafanaAdminPassword = "not-admin";
-    renderSection();
-
-    expect(screen.queryByText("Shipped default password")).toBeNull();
   });
 });

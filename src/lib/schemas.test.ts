@@ -7,6 +7,9 @@ import {
   signedNumericStringSchema,
   moneroAddressSchema,
   p2PoolPayoutAddressSchema,
+  envCredentialSchema,
+  envCredentialError,
+  rpcLoginError,
   MONERO_ADDRESS_BASE58,
   MONERO_ADDRESS_REGEX,
   MONERO_PRIMARY_ADDRESS_PREFIX,
@@ -175,6 +178,35 @@ describe("p2PoolPayoutAddressSchema", () => {
 });
 
 const baseConfig = (): FullConfig => makeFullConfig();
+
+describe("envCredentialSchema", () => {
+  it("accepts the shipped Grafana and wallet-rpc defaults", () => {
+    expect(envCredentialSchema.safeParse("admin").success).toBe(true);
+    expect(envCredentialSchema.safeParse("changeme").success).toBe(true);
+    expect(envCredentialSchema.safeParse("monero").success).toBe(true);
+  });
+
+  it("rejects empty, whitespace, and .env-breaking characters", () => {
+    expect(envCredentialSchema.safeParse("").success).toBe(false);
+    expect(envCredentialSchema.safeParse("   ").success).toBe(false);
+    expect(envCredentialSchema.safeParse("has space").success).toBe(false);
+    expect(envCredentialSchema.safeParse("foo$bar").success).toBe(false);
+    expect(envCredentialSchema.safeParse("foo#bar").success).toBe(false);
+    expect(envCredentialSchema.safeParse("foo;bar").success).toBe(false);
+  });
+
+  it("envCredentialError distinguishes empty from illegal characters", () => {
+    expect(envCredentialError("admin")).toBeNull();
+    expect(envCredentialError("")).toBe("Required");
+    expect(envCredentialError("bad$")).toContain("generated .env");
+  });
+
+  it("rpcLoginError is silent for empty or a valid username:password", () => {
+    expect(rpcLoginError("")).toBeNull();
+    expect(rpcLoginError("user:secret")).toBeNull();
+    expect(rpcLoginError("nocolon")).toBe("Format: username:password");
+  });
+});
 
 describe("full config server-side validation", () => {
   it("accepts host:port for seed node and bootstrap daemon (fix 1)", () => {
@@ -400,5 +432,29 @@ describe("p2pool payout address server-side validation", () => {
     const config = baseConfig();
     config.p2pool.p2PoolPayoutAddress = "";
     expect(fullConfigSchema.safeParse(config).success).toBe(true);
+  });
+});
+
+describe("grafana and wallet-rpc credential server-side validation", () => {
+  it("accepts custom credentials that are safe for an unquoted .env", () => {
+    const config = baseConfig();
+    config.services.grafanaAdminUser = "ops";
+    config.services.grafanaAdminPassword = "s3cret!";
+    config.services.walletRpcUser = "pay";
+    config.services.walletRpcPassword = "not-changeme";
+    expect(fullConfigSchema.safeParse(config).success).toBe(true);
+  });
+
+  it("rejects a Grafana password that would interpolate in compose", () => {
+    const config = baseConfig();
+    config.services.grafanaAdminPassword = "foo$bar";
+    const result = fullConfigSchema.safeParse(config);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].path).toEqual([
+        "services",
+        "grafanaAdminPassword",
+      ]);
+    }
   });
 });

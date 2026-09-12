@@ -97,7 +97,11 @@ export function useP2PoolState(): P2PoolState {
 
 export function useMoneroWalletRpcState(): MoneroWalletRpcState {
   const { stateFunctions: s } = useServicesContext();
-  return { isMoneroWalletRpc: s.isMoneroWalletRpc, setIsMoneroWalletRpc: s.setIsMoneroWalletRpc };
+  return {
+    isMoneroWalletRpc: s.isMoneroWalletRpc, setIsMoneroWalletRpc: s.setIsMoneroWalletRpc,
+    walletRpcUser: s.walletRpcUser, setWalletRpcUser: s.setWalletRpcUser,
+    walletRpcPassword: s.walletRpcPassword, setWalletRpcPassword: s.setWalletRpcPassword,
+  };
 }
 
 export function useTorState(): TorState {
@@ -134,6 +138,8 @@ export function useMonitoringState(): MonitoringState {
   return {
     isMonitoring: s.isMonitoring, setIsMonitoring: s.setIsMonitoring,
     grafanaDomain: s.grafanaDomain, setGrafanaDomain: s.setGrafanaDomain,
+    grafanaAdminUser: s.grafanaAdminUser, setGrafanaAdminUser: s.setGrafanaAdminUser,
+    grafanaAdminPassword: s.grafanaAdminPassword, setGrafanaAdminPassword: s.setGrafanaAdminPassword,
   };
 }
 

@@ -1,4 +1,5 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
+import { useSecretState } from "@/hooks/use-secret-state";
 
 export const usePerformanceConfig = () => {
   const [dbSyncMode, setDbSyncMode] = useQueryState(
@@ -31,9 +32,9 @@ export const usePerformanceConfig = () => {
     parseAsString.withDefault("")
   );
   
-  const [bootstrapDaemonLogin, setBootstrapDaemonLogin] = useQueryState(
+  const [bootstrapDaemonLogin, setBootstrapDaemonLogin] = useSecretState(
     "bootstrapDaemonLogin",
-    parseAsString.withDefault("")
+    ""
   );
 
   return {

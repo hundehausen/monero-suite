@@ -38,4 +38,21 @@ describe("createMoneroWalletRpcService", () => {
     expect(svc.code["wallet-rpc-vol-chown"]).toBeUndefined();
     expect(c.depends_on).toBeUndefined();
   });
+
+  it("writes a custom wallet-rpc login into service.env", () => {
+    const custom = createMoneroWalletRpcService(
+      makeFullConfig({
+        services: {
+          isMoneroWalletRpc: true,
+          walletRpcUser: "pay",
+          walletRpcPassword: "not-changeme",
+        },
+      })
+    );
+    expect(custom.env).toEqual({
+      WALLET_RPC_USER: "pay",
+      WALLET_RPC_PASSWORD: "not-changeme",
+    });
+    expect(generateEnvFile([custom])).toContain("WALLET_RPC_PASSWORD=not-changeme");
+  });
 });

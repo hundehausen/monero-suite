@@ -38,6 +38,7 @@ import {
   filterServicesByArchitecture,
   generateAllServices,
 } from "@/lib/service-generators";
+import { useStripSecretQueryParams } from "./use-secret-state";
 
 export * from "./services";
 
@@ -54,6 +55,8 @@ export const useServices = () => {
       networkModes.local
     )
   );
+
+  useStripSecretQueryParams();
 
   const monerodService = useMonerodService();
   const monerodStagenetService = useMonerodStagenetService();

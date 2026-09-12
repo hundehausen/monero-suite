@@ -3,6 +3,7 @@
 import { TbCheck, TbCopy, TbDownload } from "react-icons/tb";
 import {
   ActionIcon,
+  Alert,
   Button,
   Card,
   CopyButton,
@@ -23,6 +24,7 @@ interface InstallScriptPanelProps {
   hasDefaultDomain: boolean;
   hasP2PoolInvalidAddress: boolean;
   hasMonerodPortCollision: boolean;
+  defaultSecretWarnings: string[];
   installationCommand: string | undefined;
   currentConfigIsUploaded: boolean;
   isUploading: boolean;
@@ -35,6 +37,7 @@ export default function InstallScriptPanel({
   hasDefaultDomain,
   hasP2PoolInvalidAddress,
   hasMonerodPortCollision,
+  defaultSecretWarnings,
   installationCommand,
   currentConfigIsUploaded,
   isUploading,
@@ -118,6 +121,12 @@ export default function InstallScriptPanel({
           Monero Node section.
         </Text>
       )}
+
+      {defaultSecretWarnings.map((warning) => (
+        <Alert key={warning} variant="light" color="yellow">
+          {warning}
+        </Alert>
+      ))}
 
       <Tooltip
         label={

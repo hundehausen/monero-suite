@@ -1,5 +1,11 @@
 import type { FullConfig } from "./config-schema";
-import { MONEROD_BAN_LIST_PATH } from "./constants";
+import {
+  DEFAULT_GRAFANA_ADMIN_PASSWORD,
+  DEFAULT_GRAFANA_ADMIN_USER,
+  DEFAULT_WALLET_RPC_PASSWORD,
+  DEFAULT_WALLET_RPC_USER,
+  MONEROD_BAN_LIST_PATH,
+} from "./constants";
 
 export type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends object
@@ -113,11 +119,15 @@ const defaultFullConfig = (): FullConfig => ({
   },
   services: {
     isMoneroWalletRpc: false,
+    walletRpcUser: DEFAULT_WALLET_RPC_USER,
+    walletRpcPassword: DEFAULT_WALLET_RPC_PASSWORD,
     isWatchtower: false,
     watchtowerUpdateFrequency: "hourly",
     watchtowerCooldownDelay: "24h",
     isMonitoring: false,
     grafanaDomain: "grafana.example.com",
+    grafanaAdminUser: DEFAULT_GRAFANA_ADMIN_USER,
+    grafanaAdminPassword: DEFAULT_GRAFANA_ADMIN_PASSWORD,
     isTraefik: false,
     isTraefikMonerod: false,
     isTraefikStagenet: false,

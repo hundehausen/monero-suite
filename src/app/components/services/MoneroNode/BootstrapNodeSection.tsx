@@ -2,7 +2,9 @@
 
 import { SimpleGrid, TextInput, Title } from "@mantine/core";
 import { useMonerodState } from "@/hooks/services-context";
+import { rpcLoginError } from "@/lib/schemas";
 import ExplainingLabel from "../../ExplainingLabel";
+import SecretInput from "../../SecretInput";
 import AccordionItemComponent from "../AccordionItemComponent";
 
 const BootstrapNodeSection = () => {
@@ -41,16 +43,13 @@ const BootstrapNodeSection = () => {
           error={bootstrapAddressError()}
         />
         {bootstrapDaemonAddress && (
-          <TextInput
-            label={
-              <ExplainingLabel
-                label="Bootstrap Daemon Login"
-                explanation="Credentials for accessing the bootstrap daemon if it requires authentication. Format: username[:password]"
-              />
-            }
+          <SecretInput
+            label="Bootstrap Daemon Login"
+            explanation="Credentials for accessing the bootstrap daemon if it requires authentication. Format: username:password. Stored in this browser only, not in the shareable URL."
             value={bootstrapDaemonLogin}
-            onChange={(e) => setBootstrapDaemonLogin(e.currentTarget.value)}
+            onChange={setBootstrapDaemonLogin}
             placeholder="username:password"
+            error={rpcLoginError(bootstrapDaemonLogin)}
           />
         )}
       </SimpleGrid>

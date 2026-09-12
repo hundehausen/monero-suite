@@ -6,14 +6,20 @@ vi.mock("nuqs", async () => {
   const React = await import("react");
   return {
     parseAsStringEnum: () => ({ withDefault: () => ({}) }),
-    parseAsString: () => ({ withDefault: () => ({}) }),
+    parseAsString: Object.assign(() => ({ withDefault: () => ({}) }), {
+      withDefault: () => ({}),
+    }),
     parseAsBoolean: () => ({ withDefault: () => ({}) }),
     parseAsInteger: () => ({ withDefault: () => ({}) }),
     useQueryState: (key: string) => {
       // Always call the same hooks so rules-of-hooks is satisfied; pick by key.
       const architecture = React.useState("linux/amd64");
       const networkMode = React.useState("local");
+      const rpcLogin = React.useState(null);
+      const bootstrapDaemonLogin = React.useState(null);
       if (key === "networkMode") return networkMode;
+      if (key === "rpcLogin") return rpcLogin;
+      if (key === "bootstrapDaemonLogin") return bootstrapDaemonLogin;
       return architecture;
     },
   };
@@ -46,7 +52,16 @@ vi.mock("./services", async () => {
 
   const useMonitoringService = () => {
     return {
-      stateFunctions: { isMonitoring: false, setIsMonitoring: () => {}, grafanaDomain: "localhost:3000", setGrafanaDomain: () => {} },
+      stateFunctions: {
+        isMonitoring: false,
+        setIsMonitoring: () => {},
+        grafanaDomain: "localhost:3000",
+        setGrafanaDomain: () => {},
+        grafanaAdminUser: "admin",
+        setGrafanaAdminUser: () => {},
+        grafanaAdminPassword: "admin",
+        setGrafanaAdminPassword: () => {},
+      },
     };
   };
 
@@ -72,7 +87,14 @@ vi.mock("./services", async () => {
     useMoneroWalletRpcService: () => {
       const [isMoneroWalletRpc, setIsMoneroWalletRpc] = React.useState(false);
       return {
-        stateFunctions: { isMoneroWalletRpc, setIsMoneroWalletRpc },
+        stateFunctions: {
+          isMoneroWalletRpc,
+          setIsMoneroWalletRpc,
+          walletRpcUser: "monero",
+          setWalletRpcUser: () => {},
+          walletRpcPassword: "changeme",
+          setWalletRpcPassword: () => {},
+        },
       };
     },
     useTorService: () => {

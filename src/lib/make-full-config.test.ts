@@ -16,6 +16,8 @@ describe("makeFullConfig", () => {
     expect(config.services.isXmrigProxy).toBe(true);
     expect(config.services.isMonitoring).toBe(false);
     expect(config.services.grafanaDomain).toBe("grafana.example.com");
+    expect(config.services.grafanaAdminPassword).toBe("admin");
+    expect(config.services.walletRpcPassword).toBe("changeme");
     expect(config.monerod.p2pBindPort).toBe("18080");
   });
 

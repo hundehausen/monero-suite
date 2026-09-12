@@ -1,14 +1,16 @@
 "use client";
 
 import { useMemo } from "react";
-import { NumberInput, SimpleGrid, Switch, TextInput, Title } from "@mantine/core";
+import { NumberInput, SimpleGrid, Switch, Title } from "@mantine/core";
 import { useMonerodState, useServicesContext } from "@/hooks/services-context";
 import {
   getMonerodCollisionRoleLabel,
   getMonerodZmqPortCollisions,
 } from "@/lib/service-generators/monerod";
 import { stackNeedsZmq } from "@/lib/stack-needs-zmq";
+import { rpcLoginError } from "@/lib/schemas";
 import ExplainingLabel from "../../ExplainingLabel";
+import SecretInput from "../../SecretInput";
 import AccordionItemComponent from "../AccordionItemComponent";
 
 const RpcZmqSection = () => {
@@ -56,16 +58,13 @@ const RpcZmqSection = () => {
       title={<Title order={4}>RPC/ZMQ</Title>}
     >
       <SimpleGrid cols={1} spacing="md">
-        <TextInput
-          label={
-            <ExplainingLabel
-              label="RPC Login"
-              explanation="Require username:password authentication for the RPC server. All RPC clients must provide these credentials."
-            />
-          }
+        <SecretInput
+          label="RPC Login"
+          explanation="Require username:password authentication for the RPC server. All RPC clients must provide these credentials. Stored in this browser only, not in the shareable URL."
           value={rpcLogin}
-          onChange={(e) => setRpcLogin(e.currentTarget.value)}
+          onChange={setRpcLogin}
           placeholder="username:password"
+          error={rpcLoginError(rpcLogin)}
         />
         <Switch
           label={

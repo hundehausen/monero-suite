@@ -11,6 +11,7 @@ import {
   numericStringSchema,
   signedNumericStringSchema,
   rpcLoginSchema,
+  envCredentialSchema,
 } from "@/lib/schemas";
 import {
   getMonerodP2pPortCollisions,
@@ -114,11 +115,15 @@ export const torConfigSchema = z.object({
 
 export const serviceToggleSchema = z.object({
   isMoneroWalletRpc: z.boolean(),
+  walletRpcUser: envCredentialSchema,
+  walletRpcPassword: envCredentialSchema,
   isWatchtower: z.boolean(),
   watchtowerUpdateFrequency: watchtowerUpdateFrequencySchema,
   watchtowerCooldownDelay: watchtowerCooldownDelaySchema,
   isMonitoring: z.boolean(),
   grafanaDomain: domainSchema,
+  grafanaAdminUser: envCredentialSchema,
+  grafanaAdminPassword: envCredentialSchema,
   isTraefik: z.boolean(),
   isTraefikMonerod: z.boolean(),
   isTraefikStagenet: z.boolean(),

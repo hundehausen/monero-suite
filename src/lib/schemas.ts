@@ -147,6 +147,32 @@ export const rpcLoginSchema = z
   .regex(/^[a-zA-Z0-9_-]+:[a-zA-Z0-9_!@#$%^&*()-]+$/)
   .or(z.literal(""));
 
+/**
+ * Usernames and passwords written unquoted into the generated .env.
+ * Rejects whitespace, `$`, `#`, quotes, and shell metacharacters that would
+ * comment, interpolate, or break the file.
+ */
+export const envCredentialSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(128)
+  .regex(
+    /^[a-zA-Z0-9_!@%^*()+.=-]+$/,
+    "Contains characters that would break the generated .env"
+  );
+
+export function envCredentialError(value: string): string | null {
+  if (envCredentialSchema.safeParse(value).success) return null;
+  if (value.trim() === "") return "Required";
+  return "Use letters, numbers, and _!@%^*()+.=- so the generated .env stays valid";
+}
+
+export function rpcLoginError(value: string): string | null {
+  if (value === "" || rpcLoginSchema.safeParse(value).success) return null;
+  return "Format: username:password";
+}
+
 export function safeParse<T>(
   schema: z.ZodType<T>,
   value: unknown,

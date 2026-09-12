@@ -15,4 +15,18 @@ describe("createMonitoringService", () => {
       architectures.linuxArm,
     ]);
   });
+
+  it("writes the configured Grafana credentials into service.env", () => {
+    const service = createMonitoringService(
+      makeFullConfig({
+        services: {
+          isMonitoring: true,
+          grafanaAdminUser: "ops",
+          grafanaAdminPassword: "s3cret!",
+        },
+      })
+    );
+    expect(service.env?.GF_SECURITY_ADMIN_USER).toBe("ops");
+    expect(service.env?.GF_SECURITY_ADMIN_PASSWORD).toBe("s3cret!");
+  });
 });

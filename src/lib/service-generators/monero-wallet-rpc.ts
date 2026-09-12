@@ -13,8 +13,8 @@ export const createMoneroWalletRpcService = (
   required: false,
   architecture: [architectures.linuxAmd, architectures.linuxArm],
   env: {
-    WALLET_RPC_USER: "monero",
-    WALLET_RPC_PASSWORD: "changeme",
+    WALLET_RPC_USER: config.services.walletRpcUser,
+    WALLET_RPC_PASSWORD: config.services.walletRpcPassword,
   },
   code: {
     "monero-wallet-rpc": {

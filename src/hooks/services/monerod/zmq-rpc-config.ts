@@ -1,4 +1,5 @@
 import { useQueryState, parseAsBoolean, parseAsString } from "nuqs";
+import { useSecretState } from "@/hooks/use-secret-state";
 
 export const useZmqRpcConfig = () => {
   const [zmqPubEnabled, setZmqPubEnabled] = useQueryState(
@@ -11,10 +12,7 @@ export const useZmqRpcConfig = () => {
     parseAsString.withDefault("18083")
   );
 
-  const [rpcLogin, setRpcLogin] = useQueryState(
-    "rpcLogin",
-    parseAsString.withDefault("")
-  );
+  const [rpcLogin, setRpcLogin] = useSecretState("rpcLogin", "");
   
   const [disableRpcBan, setDisableRpcBan] = useQueryState(
     "disableRpcBan",

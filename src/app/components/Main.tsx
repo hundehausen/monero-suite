@@ -31,6 +31,7 @@ import { useInstallScript } from "@/hooks/use-install-script";
 import InstallScriptPanel from "./InstallScriptPanel";
 import { getMonerodP2pPortCollisions, getMonerodZmqPortCollisions } from "@/lib/service-generators/monerod";
 import { isValidP2PoolPayoutAddress } from "@/lib/schemas";
+import { getDefaultSecretWarnings } from "@/lib/default-secrets";
 
 function TabLabel({ full, short }: { full: string; short: string }) {
   return (
@@ -118,6 +119,11 @@ export default function Main() {
 
   const hasDefaultDomain = useHasDefaultDomain();
 
+  const defaultSecretWarnings = useMemo(
+    () => getDefaultSecretWarnings(config).map((warning) => warning.message),
+    [config]
+  );
+
   const dockerCompose = useMemo(() => generateDockerComposeFile(checkedServices), [checkedServices]);
   const bashCommands = useMemo(() => generateBashScriptFile(checkedServices), [checkedServices]);
   const hasBashCommands = useMemo(() => checkedServices.some((s) => s.bash), [checkedServices]);
@@ -200,6 +206,7 @@ export default function Main() {
                 hasDefaultDomain={hasDefaultDomain}
                 hasP2PoolInvalidAddress={hasP2PoolInvalidAddress}
                 hasMonerodPortCollision={hasMonerodPortCollision}
+                defaultSecretWarnings={defaultSecretWarnings}
                 installationCommand={installationCommand}
                 currentConfigIsUploaded={currentConfigIsUploaded}
                 isUploading={isUploading}
