@@ -71,8 +71,18 @@ const MoneroNodeSection = () => {
           variant="outline"
           aria-expanded={advancedOpened}
           aria-controls={ADVANCED_CONFIG_ID}
+          styles={{
+            root: {
+              height: "auto",
+              minHeight: "var(--button-height)",
+              maxWidth: "100%",
+            },
+            label: { whiteSpace: "normal" },
+          }}
         >
-          Advanced Configuration
+          {advancedOpened
+            ? "Close Advanced Configuration"
+            : "Advanced Configuration"}
         </Button>
       </Group>
     </AccordionItemComponent>

@@ -9,12 +9,20 @@ test.describe("advanced config desktop layout", () => {
 
     await expect(page.getByRole("separator")).toHaveCount(1);
 
-    await page.getByRole("button", { name: "Advanced Configuration" }).click();
+    await page
+      .getByRole("button", { name: "Advanced Configuration", exact: true })
+      .click();
 
     await expect(
       page.getByText("Advanced Monero Node Configuration")
     ).toBeVisible();
     await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(
+      page.getByRole("button", {
+        name: "Close Advanced Configuration",
+        exact: true,
+      })
+    ).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Download docker-compose.yml" })
     ).toBeVisible();
@@ -23,10 +31,18 @@ test.describe("advanced config desktop layout", () => {
     ).toBeVisible();
     await expect(page.getByRole("separator")).toHaveCount(2);
 
-    await page.getByRole("button", { name: "Advanced Configuration" }).click();
+    await page
+      .getByRole("button", {
+        name: "Close Advanced Configuration",
+        exact: true,
+      })
+      .click();
     await expect(
       page.getByText("Advanced Monero Node Configuration")
     ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Advanced Configuration", exact: true })
+    ).toBeVisible();
   });
 
   test("wide desktop closes Advanced on Escape", async ({ page }) => {
