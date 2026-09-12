@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import "@mantine/spotlight/styles.css";
+import "@mantine/code-highlight/styles.css";
 import "./hljs-adaptive.css";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 

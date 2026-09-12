@@ -16,7 +16,6 @@ import {
 } from "@mantine/core";
 import { SiGnubash } from "react-icons/si";
 import { CodeHighlightTabs } from "@mantine/code-highlight";
-import "@mantine/code-highlight/styles.css";
 
 interface InstallScriptPanelProps {
   fullScript: string;
@@ -91,11 +90,13 @@ export default function InstallScriptPanel({
             icon: <SiGnubash />,
           },
         ]}
+        withExpandButton
+        defaultExpanded={false}
+        maxCollapsedHeight={500}
         styles={{
           root: {
             overflow: "auto",
             borderRadius: "4px",
-            maxHeight: "500px",
           },
         }}
       />
