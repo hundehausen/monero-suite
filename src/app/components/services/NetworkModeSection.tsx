@@ -23,13 +23,24 @@ const NetworkModeSection = () => {
       <SegmentedControl
         value={networkMode}
         onChange={(value) => setNetworkMode(value as NetworkMode)}
+        fullWidth
         styles={{
           control: {
-            marginLeft: "auto",
-            marginRight: "auto",
+            minWidth: 0,
           },
           label: {
             fontSize: "12px",
+            whiteSpace: "normal",
+            lineHeight: 1.3,
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          },
+          innerLabel: {
+            whiteSpace: "normal",
+            textAlign: "center",
+            overflowWrap: "break-word",
           },
         }}
         data={[
