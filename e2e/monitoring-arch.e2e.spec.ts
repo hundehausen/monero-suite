@@ -8,8 +8,22 @@ const MONITORING_IMAGES = [
 ];
 
 async function composeYaml(page: Page): Promise<string> {
-  await page.getByRole("tab", { name: /Docker Compose/i }).click();
-  return page.locator("code").first().innerText();
+  const tab = page.getByRole("tab", { name: /Docker Compose/i });
+  await tab.click();
+  await expect(tab).toHaveAttribute("aria-selected", "true");
+  return page
+    .getByRole("tabpanel", { name: /Docker Compose/i })
+    .locator("code")
+    .innerText();
+}
+
+async function openServicesDrawer(page: Page) {
+  const burger = page.getByRole("button", { name: "Configure services" });
+  await expect(burger).toBeVisible();
+  await burger.click();
+  await expect(
+    page.getByRole("dialog", { name: "Configure services" })
+  ).toBeVisible();
 }
 
 async function openAccordion(page: Page, name: string) {
@@ -98,6 +112,7 @@ test.describe("monitoring architecture", () => {
   test("mobile ARM64 still shows Enable Monitoring", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/?architecture=linux%2Farm64");
+    await openServicesDrawer(page);
     await expect(page.getByRole("radio", { name: "Linux ARM64" })).toBeChecked();
 
     await openAccordion(page, "Monitoring");

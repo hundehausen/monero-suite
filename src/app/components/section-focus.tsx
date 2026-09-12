@@ -24,6 +24,10 @@ type SectionFocusContextValue = {
   advancedOpened: boolean;
   openAdvanced: () => void;
   closeAdvanced: () => void;
+  formOpened: boolean;
+  openForm: () => void;
+  closeForm: () => void;
+  toggleForm: () => void;
 };
 
 const SectionFocusContext = createContext<SectionFocusContextValue | null>(
@@ -43,11 +47,19 @@ export function SectionFocusProvider({ children }: { children: ReactNode }) {
   ]);
   const [advancedOpened, { open: openAdvanced, close: closeAdvanced }] =
     useDisclosure(false);
+  const [formOpened, { open: openForm, close: closeForm, toggle: toggleForm }] =
+    useDisclosure(false);
 
-  const focusSection = useCallback((value: string) => {
-    setAccordionItems((open) => ensureSectionOpen(open, value));
-    requestAnimationFrame(() => scrollToSection(value));
-  }, []);
+  const focusSection = useCallback(
+    (value: string) => {
+      if (!window.matchMedia("(min-width: 62em)").matches) {
+        openForm();
+      }
+      setAccordionItems((open) => ensureSectionOpen(open, value));
+      requestAnimationFrame(() => scrollToSection(value));
+    },
+    [openForm]
+  );
 
   const value = useMemo(
     (): SectionFocusContextValue => ({
@@ -57,6 +69,10 @@ export function SectionFocusProvider({ children }: { children: ReactNode }) {
       advancedOpened,
       openAdvanced,
       closeAdvanced,
+      formOpened,
+      openForm,
+      closeForm,
+      toggleForm,
     }),
     [
       accordionItems,
@@ -64,6 +80,10 @@ export function SectionFocusProvider({ children }: { children: ReactNode }) {
       advancedOpened,
       openAdvanced,
       closeAdvanced,
+      formOpened,
+      openForm,
+      closeForm,
+      toggleForm,
     ]
   );
 

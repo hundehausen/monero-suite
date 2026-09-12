@@ -2,14 +2,22 @@
 
 import ComposePreview from "./ComposePreview";
 import Selection from "./Selection";
-import { Card, Grid, Tabs } from "@mantine/core";
+import {
+  Box,
+  Card,
+  Drawer,
+  Grid,
+  ScrollArea,
+  Tabs,
+} from "@mantine/core";
 import BashPreview from "./BashPreview";
 import EnvPreview from "./EnvPreview";
 import { FaDocker, FaLinux } from "react-icons/fa";
 import { SiDotenv, SiGnubash } from "react-icons/si";
 import { useServicesContext, useHasDefaultDomain } from "@/hooks/services-context";
 import { networkModes } from "@/hooks/use-services";
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSectionFocus } from "./section-focus";
 import {
   generateDockerComposeFile,
   generateBashScriptFile,
@@ -24,9 +32,35 @@ import InstallScriptPanel from "./InstallScriptPanel";
 import { getMonerodP2pPortCollisions, getMonerodZmqPortCollisions } from "@/lib/service-generators/monerod";
 import { isValidP2PoolPayoutAddress } from "@/lib/schemas";
 
+function TabLabel({ full, short }: { full: string; short: string }) {
+  return (
+    <>
+      <Box component="span" visibleFrom="sm">
+        {full}
+      </Box>
+      <Box component="span" hiddenFrom="sm">
+        {short}
+      </Box>
+    </>
+  );
+}
+
+/** Same query as Mantine `md` / the Selection `visibleFrom="md"` column. */
+const MD_UP = "(min-width: 62em)";
+
 export default function Main() {
   const { services, stateFunctions, config } = useServicesContext();
+  const { formOpened, closeForm } = useSectionFocus();
   const [activeTab, setActiveTab] = useState<string | null>("docker-compose");
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(MD_UP);
+    const closeIfDesktop = () => {
+      if (mediaQuery.matches) closeForm();
+    };
+    mediaQuery.addEventListener("change", closeIfDesktop);
+    return () => mediaQuery.removeEventListener("change", closeIfDesktop);
+  }, [closeForm]);
 
   const checkedServices = useMemo(
     () => Object.values(services).filter(
@@ -108,39 +142,56 @@ export default function Main() {
   const effectiveTab = !envString && activeTab === "env" ? "docker-compose" : activeTab;
 
   return (
-    <Grid
-      gap="lg"
-      align="stretch"
-      styles={{
-        root: {
-          padding: "0 8px",
-        },
-      }}
-    >
-      <Grid.Col span={{ xs: 12, md: 5 }}>
-        <Selection />
-      </Grid.Col>
-      <Grid.Col span={{ xs: 12, md: 7 }}>
-        <Card withBorder padding={0} radius="md">
-          <Tabs value={effectiveTab} onChange={setActiveTab}>
-            <Tabs.List>
-              <Tabs.Tab value="docker-compose" leftSection={<FaDocker />}>
-                Docker Compose
-              </Tabs.Tab>
-              {hasBashCommands && (
-                <Tabs.Tab value="bash-script" leftSection={<SiGnubash />}>
-                  Bash Commands
+    <>
+      <Drawer
+        opened={formOpened}
+        onClose={closeForm}
+        title="Configure services"
+        position="left"
+        size="90%"
+        hiddenFrom="md"
+        padding="md"
+        closeButtonProps={{ "aria-label": "Close" }}
+        scrollAreaComponent={ScrollArea.Autosize}
+      >
+        {formOpened ? <Selection /> : null}
+      </Drawer>
+      <Grid
+        gap="lg"
+        align="stretch"
+        styles={{
+          root: {
+            padding: "0 8px",
+          },
+        }}
+      >
+        <Grid.Col span={5} visibleFrom="md">
+          {formOpened ? null : <Selection />}
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, md: 7 }}>
+          <Card withBorder padding={0} radius="md">
+            <Tabs value={effectiveTab} onChange={setActiveTab}>
+              <Tabs.List style={{ flexWrap: "nowrap", overflowX: "auto" }}>
+                <Tabs.Tab value="docker-compose" leftSection={<FaDocker />}>
+                  <TabLabel full="Docker Compose" short="Compose" />
                 </Tabs.Tab>
-              )}
-              {envString && (
-                <Tabs.Tab value="env" leftSection={<SiDotenv />}>
-                  Environment Variables
+                {hasBashCommands && (
+                  <Tabs.Tab value="bash-script" leftSection={<SiGnubash />}>
+                    <TabLabel full="Bash Commands" short="Bash" />
+                  </Tabs.Tab>
+                )}
+                {envString && (
+                  <Tabs.Tab value="env" leftSection={<SiDotenv />}>
+                    <TabLabel full="Environment Variables" short="Env" />
+                  </Tabs.Tab>
+                )}
+                <Tabs.Tab value="install-script" leftSection={<FaLinux />}>
+                  <TabLabel
+                    full="Install Script (optional)"
+                    short="Install"
+                  />
                 </Tabs.Tab>
-              )}
-              <Tabs.Tab value="install-script" leftSection={<FaLinux />}>
-                Install Script <small>(optional)</small>
-              </Tabs.Tab>
-            </Tabs.List>
+              </Tabs.List>
 
             <Tabs.Panel value="install-script" p="md">
               <InstallScriptPanel
@@ -175,5 +226,6 @@ export default function Main() {
         </Card>
       </Grid.Col>
     </Grid>
+    </>
   );
 }

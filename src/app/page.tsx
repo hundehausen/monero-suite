@@ -9,36 +9,30 @@ import { SectionFocusProvider } from "./components/section-focus";
 
 export default function Home() {
   return (
-    <AppShell
-      padding={"lg"}
-      header={{
-        height: {
-          base: 96,
-          xs: 48,
-        },
-      }}
-    >
-      <AppShell.Header
-        styles={{
-          header: {
-            padding: "0 24px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          },
-        }}
+    <SectionFocusProvider>
+      <AppShell
+        padding={{ base: "sm", md: "lg" }}
+        header={{ height: 56 }}
       >
-        <Header />
-      </AppShell.Header>
-      <AppShell.Main>
-        <Suspense fallback={<div>Loading Monero Suite...</div>}>
-          <ServicesProvider>
-            <SectionFocusProvider>
+        <AppShell.Header
+          px={{ base: "sm", md: "lg" }}
+          styles={{
+            header: {
+              display: "flex",
+              alignItems: "center",
+            },
+          }}
+        >
+          <Header />
+        </AppShell.Header>
+        <AppShell.Main>
+          <Suspense fallback={<div>Loading Monero Suite...</div>}>
+            <ServicesProvider>
               <Main />
-            </SectionFocusProvider>
-          </ServicesProvider>
-        </Suspense>
-      </AppShell.Main>
-    </AppShell>
+            </ServicesProvider>
+          </Suspense>
+        </AppShell.Main>
+      </AppShell>
+    </SectionFocusProvider>
   );
 }

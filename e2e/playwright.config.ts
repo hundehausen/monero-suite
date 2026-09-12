@@ -14,7 +14,7 @@ export default defineConfig({
   reporter: process.env.CI ? [["list"], ["github"]] : "list",
   outputDir: path.join(__dirname, "test-results"),
   use: {
-    baseURL: "http://127.0.0.1:3000",
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
     trace: "on-first-retry",
     ...devices["Desktop Chrome"],
   },
@@ -27,7 +27,7 @@ export default defineConfig({
   webServer: {
     command: "pnpm start",
     cwd: repoRoot,
-    url: "http://127.0.0.1:3000",
+    url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
