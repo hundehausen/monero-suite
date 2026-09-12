@@ -6,10 +6,11 @@ import {
   useXmrigProxyState,
   useP2PoolState,
   useArchitectureState,
+  useNetworkModeState,
 } from "@/hooks/services-context";
 import ExplainingLabel from "../ExplainingLabel";
 import AccordionItemComponent from "./AccordionItemComponent";
-import { architectures } from "@/hooks/services/types";
+import { architectures, networkModes } from "@/hooks/services/types";
 
 const XmrigProxySection = () => {
   const { services } = useServicesContext();
@@ -17,11 +18,13 @@ const XmrigProxySection = () => {
     useXmrigProxyState();
   const { p2PoolMode } = useP2PoolState();
   const { architecture } = useArchitectureState();
+  const { networkMode } = useNetworkModeState();
 
   const isAmd64 = architecture === architectures.linuxAmd;
   const hasP2Pool = p2PoolMode !== "none";
   const enabled = hasP2Pool && isAmd64;
   const proxyOn = isXmrigProxy && enabled;
+  const isExposed = networkMode === networkModes.exposed;
   const description =
     services["xmrig-proxy"]?.description ??
     "Stratum proxy in front of your P2Pool node. Point many miners at one connection.";
@@ -67,7 +70,7 @@ const XmrigProxySection = () => {
         size="lg"
       />
 
-      {proxyOn && (
+      {proxyOn && isExposed && (
         <Checkbox
           mt="md"
           checked={isXmrigProxyPublic}

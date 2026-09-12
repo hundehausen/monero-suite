@@ -1,6 +1,6 @@
 "use client";
 
-import { MiningMode, P2PoolMode, p2poolModes } from "@/hooks/use-services";
+import { MiningMode, P2PoolMode, networkModes, p2poolModes } from "@/hooks/use-services";
 import {
   Alert,
   Box,
@@ -13,7 +13,7 @@ import {
   Text,
   Tooltip,
 } from "@mantine/core";
-import { useServicesContext, useP2PoolState, useXmrigState, useArchitectureState } from "@/hooks/services-context";
+import { useServicesContext, useP2PoolState, useXmrigState, useArchitectureState, useNetworkModeState } from "@/hooks/services-context";
 import ExplainingLabel from "../ExplainingLabel";
 import AccordionItemComponent from "./AccordionItemComponent";
 import { MONERO_ADDRESS_BASE58, MONERO_PRIMARY_ADDRESS_PREFIX } from "@/lib/schemas";
@@ -38,6 +38,8 @@ const P2PoolSection = () => {
   } = useP2PoolState();
   const { miningMode, setMiningMode } = useXmrigState();
   const { architecture } = useArchitectureState();
+  const { networkMode } = useNetworkModeState();
+  const isExposed = networkMode === networkModes.exposed;
 
   const p2poolPayoutAddressError = () => {
     if (p2PoolPayoutAddress.length === 0) return null;
@@ -118,17 +120,19 @@ const P2PoolSection = () => {
               onChange={(e) => setP2PoolPayoutAddress(e.currentTarget.value)}
             />
           </Input.Wrapper>
-          <Checkbox
-            mt="md"
-            checked={isP2PoolStratumPublic}
-            label={
-              <ExplainingLabel
-                label="Allow external miners (expose stratum publicly)"
-                explanation="Anyone who can reach port 3333 on this host can point miners at your stratum. Only enable this if you want to let external miners connect. In-container miners (XMRig) and other devices on your local network reach the stratum without it."
-              />
-            }
-            onChange={(event) => setIsP2PoolStratumPublic(event.currentTarget.checked)}
-          />
+          {isExposed && (
+            <Checkbox
+              mt="md"
+              checked={isP2PoolStratumPublic}
+              label={
+                <ExplainingLabel
+                  label="Allow external miners (expose stratum publicly)"
+                  explanation="Anyone who can reach port 3333 on this host can point miners at your stratum. Only enable this if you want to let external miners connect. In-container miners (XMRig) and other devices on your local network reach the stratum without it."
+                />
+              }
+              onChange={(event) => setIsP2PoolStratumPublic(event.currentTarget.checked)}
+            />
+          )}
           <Text>CPU Mining</Text>
           <SegmentedControl
             value={miningMode}
