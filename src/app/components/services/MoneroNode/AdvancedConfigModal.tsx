@@ -1,6 +1,15 @@
 "use client";
 
-import { Button, Group, Modal, ScrollArea, Text, Anchor, Accordion, Badge } from "@mantine/core";
+import {
+  Accordion,
+  Anchor,
+  Badge,
+  Button,
+  Group,
+  Modal,
+  ScrollArea,
+  Text,
+} from "@mantine/core";
 import LoggingSection from "./LoggingSection";
 import StorageSection from "./StorageSection";
 import NetworkSecuritySection from "./NetworkSecuritySection";
@@ -13,47 +22,45 @@ import RpcZmqSection from "./RpcZmqSection";
 import NotificationsSection from "./NotificationsSection";
 import MiningSection from "./MiningSection";
 
-interface AdvancedConfigModalProps {
-  opened: boolean;
-  onClose: () => void;
-}
+export const ADVANCED_CONFIG_ID = "advanced-monero-config";
 
-const AdvancedConfigModal = ({ opened, onClose }: AdvancedConfigModalProps) => {
-  return (
-    <Modal
-      opened={opened}
-      onClose={onClose}
-      title={
-        <Group>
-          <Text fw="bold" fz="1.2rem">Advanced Monero Node Configuration</Text>
-          <Anchor
-            href="https://docs.getmonero.org/interacting/monerod-reference/"
-            target="_blank"
-            fw={400}
-            fz="sm"
-          >
-            All monerod options explained
-          </Anchor>
-        </Group>
-      }
-      size="xl"
-      scrollAreaComponent={ScrollArea.Autosize}
-      styles={{
-        title: {
-          fontWeight: 'bold',
-          fontSize: '1.2rem'
-        }
-      }}
+const title = (
+  <Group>
+    <Text fw="bold" fz="1.2rem">
+      Advanced Monero Node Configuration
+    </Text>
+    <Anchor
+      href="https://docs.getmonero.org/interacting/monerod-reference/"
+      target="_blank"
+      fw={400}
+      fz="sm"
     >
-      <Group mb="md" justify="space-between">
+      All monerod options explained
+    </Anchor>
+  </Group>
+);
+
+export function AdvancedConfigForm({
+  onClose,
+  showTitle = false,
+}: {
+  onClose: () => void;
+  showTitle?: boolean;
+}) {
+  return (
+    <div id={ADVANCED_CONFIG_ID}>
+      {showTitle ? title : null}
+      <Group mb="md" justify="space-between" mt={showTitle ? "md" : 0}>
         <Text>
           {`Configure advanced options for your Monero node. These settings provide fine-grained control
           over the node's behavior, performance, and resource usage.`}
         </Text>
-        <Badge variant="light" color="green" size="sm">Changes saved automatically</Badge>
+        <Badge variant="light" color="green" size="sm">
+          Changes saved automatically
+        </Badge>
       </Group>
 
-      <Accordion multiple defaultValue={['logging']}>
+      <Accordion multiple defaultValue={["logging"]}>
         <LoggingSection />
         <StorageSection />
         <NetworkSecuritySection />
@@ -70,6 +77,32 @@ const AdvancedConfigModal = ({ opened, onClose }: AdvancedConfigModalProps) => {
       <Group justify="flex-end" mt="xl" pr={20}>
         <Button onClick={onClose}>Close</Button>
       </Group>
+    </div>
+  );
+}
+
+const AdvancedConfigModal = ({
+  opened,
+  onClose,
+}: {
+  opened: boolean;
+  onClose: () => void;
+}) => {
+  return (
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      title={title}
+      size="xl"
+      scrollAreaComponent={ScrollArea.Autosize}
+      styles={{
+        title: {
+          fontWeight: "bold",
+          fontSize: "1.2rem",
+        },
+      }}
+    >
+      <AdvancedConfigForm onClose={onClose} />
     </Modal>
   );
 };

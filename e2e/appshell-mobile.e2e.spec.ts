@@ -13,6 +13,7 @@ test.describe("appshell mobile consume layout", () => {
     await expect(
       page.getByRole("button", { name: "CPU Architecture" })
     ).toHaveCount(0);
+    await expect(page.getByRole("separator")).toHaveCount(0);
 
     await page.getByRole("button", { name: "Configure services" }).click();
     const services = page.getByRole("dialog", { name: "Configure services" });
@@ -43,5 +44,6 @@ test.describe("appshell mobile consume layout", () => {
     await expect(
       page.getByRole("button", { name: "Download docker-compose.yml" })
     ).toBeVisible();
+    await expect(page.getByRole("separator")).toBeVisible();
   });
 });

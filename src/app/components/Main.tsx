@@ -6,17 +6,18 @@ import {
   Box,
   Card,
   Drawer,
-  Grid,
   ScrollArea,
+  Splitter,
   Tabs,
 } from "@mantine/core";
+import { useHotkeys } from "@mantine/hooks";
 import BashPreview from "./BashPreview";
 import EnvPreview from "./EnvPreview";
 import { FaDocker, FaLinux } from "react-icons/fa";
 import { SiDotenv, SiGnubash } from "react-icons/si";
 import { useServicesContext, useHasDefaultDomain } from "@/hooks/services-context";
 import { networkModes } from "@/hooks/use-services";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useSectionFocus } from "./section-focus";
 import {
   generateDockerComposeFile,
@@ -32,6 +33,14 @@ import InstallScriptPanel from "./InstallScriptPanel";
 import { getMonerodP2pPortCollisions, getMonerodZmqPortCollisions } from "@/lib/service-generators/monerod";
 import { isValidP2PoolPayoutAddress } from "@/lib/schemas";
 import { getDefaultSecretWarnings } from "@/lib/default-secrets";
+import { MD_UP, useLgUp, useMdUp } from "./shell-breakpoints";
+import { desktopShellKind, type DesktopShellKind } from "./desktop-shell";
+import AdvancedConfigModal, {
+  AdvancedConfigForm,
+} from "./services/MoneroNode/AdvancedConfigModal";
+
+const SPLITTER_HEIGHT =
+  "calc(100dvh - var(--app-shell-header-offset, 56px) - 2 * var(--app-shell-padding, 0px))";
 
 function TabLabel({ full, short }: { full: string; short: string }) {
   return (
@@ -46,13 +55,91 @@ function TabLabel({ full, short }: { full: string; short: string }) {
   );
 }
 
-/** Same query as Mantine `md` / the Selection `visibleFrom="md"` column. */
-const MD_UP = "(min-width: 62em)";
+const splitterChrome: {
+  h: string;
+  mx: number;
+  styles: { pane: { overflow: "hidden"; minWidth: number } };
+} = {
+  h: SPLITTER_HEIGHT,
+  mx: 8,
+  styles: { pane: { overflow: "hidden", minWidth: 0 } },
+};
+
+function DesktopShell({
+  kind,
+  preview,
+}: {
+  kind: DesktopShellKind;
+  preview: ReactNode;
+}) {
+  const { closeAdvanced, formOpened } = useSectionFocus();
+  const advancedPane = (
+    <ScrollArea h="100%" type="hover" offsetScrollbars>
+      <Box p="sm">
+        <AdvancedConfigForm onClose={closeAdvanced} showTitle />
+      </Box>
+    </ScrollArea>
+  );
+  const formPane = (
+    <ScrollArea h="100%" type="hover" offsetScrollbars>
+      <Box p="sm">{formOpened ? null : <Selection />}</Box>
+    </ScrollArea>
+  );
+
+  if (kind === "advanced-3") {
+    return (
+      <Splitter {...splitterChrome} key="advanced-3">
+        <Splitter.Pane defaultSize={25} min={15}>
+          {formPane}
+        </Splitter.Pane>
+        <Splitter.Pane defaultSize={35} min={20}>
+          {advancedPane}
+        </Splitter.Pane>
+        <Splitter.Pane defaultSize={40} min={25}>
+          {preview}
+        </Splitter.Pane>
+      </Splitter>
+    );
+  }
+
+  if (kind === "advanced-2") {
+    return (
+      <>
+        <Splitter {...splitterChrome} key="advanced-2">
+          <Splitter.Pane defaultSize={42} min={20}>
+            {advancedPane}
+          </Splitter.Pane>
+          <Splitter.Pane defaultSize={58} min={25}>
+            {preview}
+          </Splitter.Pane>
+        </Splitter>
+        <Box display="none">
+          <Selection />
+        </Box>
+      </>
+    );
+  }
+
+  return (
+    <Splitter {...splitterChrome} key="playground">
+      <Splitter.Pane defaultSize={42} min={15}>
+        {formPane}
+      </Splitter.Pane>
+      <Splitter.Pane defaultSize={58} min={25}>
+        {preview}
+      </Splitter.Pane>
+    </Splitter>
+  );
+}
 
 export default function Main() {
   const { services, stateFunctions, config } = useServicesContext();
-  const { formOpened, closeForm } = useSectionFocus();
+  const { formOpened, closeForm, advancedOpened, closeAdvanced } =
+    useSectionFocus();
+  const mdUp = useMdUp();
+  const lgUp = useLgUp();
   const [activeTab, setActiveTab] = useState<string | null>("docker-compose");
+  const shellKind = desktopShellKind({ advancedOpened, lgUp });
 
   useEffect(() => {
     const mediaQuery = window.matchMedia(MD_UP);
@@ -62,6 +149,11 @@ export default function Main() {
     mediaQuery.addEventListener("change", closeIfDesktop);
     return () => mediaQuery.removeEventListener("change", closeIfDesktop);
   }, [closeForm]);
+
+  useHotkeys(
+    mdUp && advancedOpened ? [["Escape", closeAdvanced]] : [],
+    []
+  );
 
   const checkedServices = useMemo(
     () => Object.values(services).filter(
@@ -147,6 +239,71 @@ export default function Main() {
 
   const effectiveTab = !envString && activeTab === "env" ? "docker-compose" : activeTab;
 
+  const previewCard = (fill: boolean) => (
+    <Card
+      withBorder
+      padding={0}
+      radius="md"
+      h={fill ? "100%" : undefined}
+      style={fill ? { overflow: "auto" } : undefined}
+    >
+      <Tabs value={effectiveTab} onChange={setActiveTab}>
+        <Tabs.List style={{ flexWrap: "nowrap", overflowX: "auto" }}>
+          <Tabs.Tab value="docker-compose" leftSection={<FaDocker />}>
+            <TabLabel full="Docker Compose" short="Compose" />
+          </Tabs.Tab>
+          {hasBashCommands && (
+            <Tabs.Tab value="bash-script" leftSection={<SiGnubash />}>
+              <TabLabel full="Bash Commands" short="Bash" />
+            </Tabs.Tab>
+          )}
+          {envString && (
+            <Tabs.Tab value="env" leftSection={<SiDotenv />}>
+              <TabLabel full="Environment Variables" short="Env" />
+            </Tabs.Tab>
+          )}
+          <Tabs.Tab value="install-script" leftSection={<FaLinux />}>
+            <TabLabel
+              full="Install Script (optional)"
+              short="Install"
+            />
+          </Tabs.Tab>
+        </Tabs.List>
+
+        <Tabs.Panel value="install-script" p="md">
+          <InstallScriptPanel
+            fullScript={fullScript}
+            scriptSummary={scriptSummary}
+            hasDefaultDomain={hasDefaultDomain}
+            hasP2PoolInvalidAddress={hasP2PoolInvalidAddress}
+            hasMonerodPortCollision={hasMonerodPortCollision}
+            defaultSecretWarnings={defaultSecretWarnings}
+            installationCommand={installationCommand}
+            currentConfigIsUploaded={currentConfigIsUploaded}
+            isUploading={isUploading}
+            onGenerate={handleScriptGeneration}
+          />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="docker-compose" p="md">
+          <ComposePreview dockerCompose={dockerCompose} />
+        </Tabs.Panel>
+
+        {hasBashCommands && (
+          <Tabs.Panel value="bash-script" p="md">
+            <BashPreview bashCommands={bashCommands} />
+          </Tabs.Panel>
+        )}
+
+        {envString && (
+          <Tabs.Panel value="env" p="md">
+            <EnvPreview env={envString} hasDefaultDomain={hasDefaultDomain} />
+          </Tabs.Panel>
+        )}
+      </Tabs>
+    </Card>
+  );
+
   return (
     <>
       <Drawer
@@ -162,77 +319,17 @@ export default function Main() {
       >
         {formOpened ? <Selection /> : null}
       </Drawer>
-      <Grid
-        gap="lg"
-        align="stretch"
-        styles={{
-          root: {
-            padding: "0 8px",
-          },
-        }}
-      >
-        <Grid.Col span={5} visibleFrom="md">
-          {formOpened ? null : <Selection />}
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, md: 7 }}>
-          <Card withBorder padding={0} radius="md">
-            <Tabs value={effectiveTab} onChange={setActiveTab}>
-              <Tabs.List style={{ flexWrap: "nowrap", overflowX: "auto" }}>
-                <Tabs.Tab value="docker-compose" leftSection={<FaDocker />}>
-                  <TabLabel full="Docker Compose" short="Compose" />
-                </Tabs.Tab>
-                {hasBashCommands && (
-                  <Tabs.Tab value="bash-script" leftSection={<SiGnubash />}>
-                    <TabLabel full="Bash Commands" short="Bash" />
-                  </Tabs.Tab>
-                )}
-                {envString && (
-                  <Tabs.Tab value="env" leftSection={<SiDotenv />}>
-                    <TabLabel full="Environment Variables" short="Env" />
-                  </Tabs.Tab>
-                )}
-                <Tabs.Tab value="install-script" leftSection={<FaLinux />}>
-                  <TabLabel
-                    full="Install Script (optional)"
-                    short="Install"
-                  />
-                </Tabs.Tab>
-              </Tabs.List>
-
-            <Tabs.Panel value="install-script" p="md">
-              <InstallScriptPanel
-                fullScript={fullScript}
-                scriptSummary={scriptSummary}
-                hasDefaultDomain={hasDefaultDomain}
-                hasP2PoolInvalidAddress={hasP2PoolInvalidAddress}
-                hasMonerodPortCollision={hasMonerodPortCollision}
-                defaultSecretWarnings={defaultSecretWarnings}
-                installationCommand={installationCommand}
-                currentConfigIsUploaded={currentConfigIsUploaded}
-                isUploading={isUploading}
-                onGenerate={handleScriptGeneration}
-              />
-            </Tabs.Panel>
-
-            <Tabs.Panel value="docker-compose" p="md">
-              <ComposePreview dockerCompose={dockerCompose} />
-            </Tabs.Panel>
-
-            {hasBashCommands && (
-              <Tabs.Panel value="bash-script" p="md">
-                <BashPreview bashCommands={bashCommands} />
-              </Tabs.Panel>
-            )}
-
-            {envString && (
-              <Tabs.Panel value="env" p="md">
-                <EnvPreview env={envString} hasDefaultDomain={hasDefaultDomain} />
-              </Tabs.Panel>
-            )}
-          </Tabs>
-        </Card>
-      </Grid.Col>
-    </Grid>
+      {/* CSS visibility, not useMdUp: that hook is false on the server and mismatches desktop. */}
+      <Box hiddenFrom="md" px={8}>
+        {previewCard(false)}
+      </Box>
+      <Box visibleFrom="md">
+        <DesktopShell kind={shellKind} preview={previewCard(true)} />
+      </Box>
+      <AdvancedConfigModal
+        opened={advancedOpened && !mdUp}
+        onClose={closeAdvanced}
+      />
     </>
   );
 }

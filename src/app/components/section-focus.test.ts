@@ -15,6 +15,7 @@ const Probe = ({
   const {
     focusSection,
     openAdvanced,
+    toggleAdvanced,
     accordionItems,
     advancedOpened,
     formOpened,
@@ -38,6 +39,11 @@ const Probe = ({
         },
       },
       "go"
+    ),
+    createElement(
+      "button",
+      { type: "button", onClick: toggleAdvanced },
+      "toggle-advanced"
     )
   );
 };
@@ -137,5 +143,27 @@ describe("SectionFocusProvider", () => {
     expect(
       document.getElementById("section-mainnet-node")?.dataset.advanced
     ).toBe("true");
+  });
+
+  it("toggles advanced config closed", () => {
+    stubMatchMedia(true);
+
+    render(
+      createElement(
+        SectionFocusProvider,
+        null,
+        createElement(Probe, { target: "mainnet-node" })
+      )
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "toggle-advanced" }));
+    expect(
+      document.getElementById("section-mainnet-node")?.dataset.advanced
+    ).toBe("true");
+
+    fireEvent.click(screen.getByRole("button", { name: "toggle-advanced" }));
+    expect(
+      document.getElementById("section-mainnet-node")?.dataset.advanced
+    ).toBe("false");
   });
 });

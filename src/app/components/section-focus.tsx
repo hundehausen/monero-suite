@@ -16,6 +16,7 @@ import {
   ensureSectionOpen,
   sectionElementId,
 } from "./services/sections";
+import { MD_UP } from "./shell-breakpoints";
 
 type SectionFocusContextValue = {
   accordionItems: string[];
@@ -24,6 +25,7 @@ type SectionFocusContextValue = {
   advancedOpened: boolean;
   openAdvanced: () => void;
   closeAdvanced: () => void;
+  toggleAdvanced: () => void;
   formOpened: boolean;
   openForm: () => void;
   closeForm: () => void;
@@ -45,14 +47,16 @@ export function SectionFocusProvider({ children }: { children: ReactNode }) {
   const [accordionItems, setAccordionItems] = useState<string[]>(() => [
     ...DEFAULT_OPEN_SECTIONS,
   ]);
-  const [advancedOpened, { open: openAdvanced, close: closeAdvanced }] =
-    useDisclosure(false);
+  const [
+    advancedOpened,
+    { open: openAdvanced, close: closeAdvanced, toggle: toggleAdvanced },
+  ] = useDisclosure(false);
   const [formOpened, { open: openForm, close: closeForm, toggle: toggleForm }] =
     useDisclosure(false);
 
   const focusSection = useCallback(
     (value: string) => {
-      if (!window.matchMedia("(min-width: 62em)").matches) {
+      if (!window.matchMedia(MD_UP).matches) {
         openForm();
       }
       setAccordionItems((open) => ensureSectionOpen(open, value));
@@ -69,6 +73,7 @@ export function SectionFocusProvider({ children }: { children: ReactNode }) {
       advancedOpened,
       openAdvanced,
       closeAdvanced,
+      toggleAdvanced,
       formOpened,
       openForm,
       closeForm,
@@ -80,6 +85,7 @@ export function SectionFocusProvider({ children }: { children: ReactNode }) {
       advancedOpened,
       openAdvanced,
       closeAdvanced,
+      toggleAdvanced,
       formOpened,
       openForm,
       closeForm,

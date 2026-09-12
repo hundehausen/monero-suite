@@ -22,13 +22,7 @@ import JumpToSection from "./JumpToSection";
 import { useSectionFocus } from "./section-focus";
 
 const Selection = () => {
-  const {
-    accordionItems,
-    setAccordionItems,
-    advancedOpened,
-    openAdvanced,
-    closeAdvanced,
-  } = useSectionFocus();
+  const { accordionItems, setAccordionItems } = useSectionFocus();
 
   return (
     <>
@@ -47,11 +41,7 @@ const Selection = () => {
       >
         <ArchitectureSection />
         <NetworkModeSection />
-        <MoneroNodeSection
-          advancedOpened={advancedOpened}
-          onOpenAdvanced={openAdvanced}
-          onCloseAdvanced={closeAdvanced}
-        />
+        <MoneroNodeSection />
         <StagenetNodeSection />
         <MoneroWalletRpcSection />
         <MoneroLwsSection />

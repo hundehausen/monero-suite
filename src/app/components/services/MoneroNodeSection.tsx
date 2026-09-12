@@ -8,21 +8,13 @@ import {
 } from "@mantine/core";
 import { useServicesContext, useMonerodState } from "@/hooks/services-context";
 import ExplainingLabel from "../ExplainingLabel";
-import AdvancedConfigModal from "./MoneroNode/AdvancedConfigModal";
 import AccordionItemComponent from "./AccordionItemComponent";
+import { useSectionFocus } from "../section-focus";
+import { ADVANCED_CONFIG_ID } from "./MoneroNode/AdvancedConfigModal";
 
-interface MoneroNodeSectionProps {
-  advancedOpened: boolean;
-  onOpenAdvanced: () => void;
-  onCloseAdvanced: () => void;
-}
-
-const MoneroNodeSection = ({
-  advancedOpened,
-  onOpenAdvanced,
-  onCloseAdvanced,
-}: MoneroNodeSectionProps) => {
+const MoneroNodeSection = () => {
   const { services } = useServicesContext();
+  const { advancedOpened, toggleAdvanced } = useSectionFocus();
   const {
     isMoneroPublicNode,
     setIsMoneroPublicNode,
@@ -74,13 +66,15 @@ const MoneroNodeSection = ({
       />
 
       <Group mt="md">
-        <Button onClick={onOpenAdvanced} variant="outline">Advanced Configuration</Button>
+        <Button
+          onClick={toggleAdvanced}
+          variant="outline"
+          aria-expanded={advancedOpened}
+          aria-controls={ADVANCED_CONFIG_ID}
+        >
+          Advanced Configuration
+        </Button>
       </Group>
-
-      <AdvancedConfigModal
-        opened={advancedOpened}
-        onClose={onCloseAdvanced}
-      />
     </AccordionItemComponent>
   );
 };
