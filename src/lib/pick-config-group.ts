@@ -1,4 +1,4 @@
-import type { z } from "zod/v4";
+import type { z } from "zod";
 
 type ConfigGroup<T extends z.ZodRawShape> = z.infer<z.ZodObject<T>>;
 

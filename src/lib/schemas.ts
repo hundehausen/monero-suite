@@ -1,4 +1,4 @@
-import { z } from "zod/v4";
+import { z } from "zod";
 
 export const MONERO_ADDRESS_BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
@@ -94,7 +94,7 @@ export const hostListSchema = z
   )
   .check(
     z.superRefine((entries: string[], ctx) => {
-      const invalid = entries.filter((e) => !hostPortSchema.safeParse(e).success);
+      const invalid = entries.filter((e) => !hostPortSchema.validate(e));
       if (invalid.length > 0) {
         ctx.addIssue(`Invalid host entries: ${invalid.join(", ")}`);
       }
@@ -115,7 +115,7 @@ export const hostListStringSchema = z
   .check(
     z.superRefine((val, ctx) => {
       const entries = val.split(/[\s,]+/).filter((e) => e.length > 0);
-      const invalid = entries.filter((e) => !hostPortSchema.safeParse(e).success);
+      const invalid = entries.filter((e) => !hostPortSchema.validate(e));
       if (invalid.length > 0) {
         ctx.addIssue(`Invalid host entries: ${invalid.join(", ")}`);
       }
@@ -163,13 +163,16 @@ export const envCredentialSchema = z
   );
 
 export function envCredentialError(value: string): string | null {
-  if (envCredentialSchema.safeParse(value).success) return null;
+  const valid: boolean = envCredentialSchema.validate(value);
+  if (valid) return null;
   if (value.trim() === "") return "Required";
   return "Use letters, numbers, and _!@%^*()+.=- so the generated .env stays valid";
 }
 
 export function rpcLoginError(value: string): string | null {
-  if (value === "" || rpcLoginSchema.safeParse(value).success) return null;
+  if (value === "") return null;
+  const valid: boolean = rpcLoginSchema.validate(value);
+  if (valid) return null;
   return "Format: username:password";
 }
 

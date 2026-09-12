@@ -1,10 +1,19 @@
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 import { fullConfigSchema } from "./config-schema";
 import { makeFullConfig } from "./make-full-config";
 
 describe("makeFullConfig", () => {
   it("returns a schema-valid default config", () => {
-    expect(fullConfigSchema.safeParse(makeFullConfig()).success).toBe(true);
+    expect(fullConfigSchema.validate(makeFullConfig())).toBe(true);
+  });
+
+  it("z.compile of fullConfigSchema still accepts defaults and rejects collisions", () => {
+    const compiled = z.compile(fullConfigSchema);
+    expect(compiled.parse(makeFullConfig())).toEqual(fullConfigSchema.parse(makeFullConfig()));
+    expect(
+      compiled.safeParse(makeFullConfig({ monerod: { p2pBindPort: "18081" } })).success
+    ).toBe(false);
   });
 
   it("defaults banList to the path the sethforprivacy image ships", () => {

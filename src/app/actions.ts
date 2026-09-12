@@ -3,6 +3,7 @@
 import { put } from "@vercel/blob";
 import { nanoid } from "nanoid";
 import { stringify } from "yaml";
+import { z } from "zod";
 import { fullConfigSchema, type FullConfig } from "@/lib/config-schema";
 import {
   filterServicesByArchitecture,
@@ -16,10 +17,12 @@ import {
 } from "@/app/utils";
 import { generateInstallationScript } from "@/lib/script-generator";
 
+const compiledFullConfigSchema = z.compile(fullConfigSchema);
+
 export async function uploadInstallScript(
   config: FullConfig
 ): Promise<string> {
-  const parsed = fullConfigSchema.parse(config);
+  const parsed = compiledFullConfigSchema.parse(config);
 
   const services = generateAllServices(parsed);
   const checkedServices = Object.values(
