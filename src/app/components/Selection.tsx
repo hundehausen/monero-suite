@@ -4,6 +4,7 @@ import { Accordion } from "@mantine/core";
 import {
   ArchitectureSection,
   NetworkModeSection,
+  SystemPackagesSection,
   MoneroNodeSection,
   StagenetNodeSection,
   MoneroWalletRpcSection,
@@ -41,6 +42,7 @@ const Selection = () => {
       >
         <ArchitectureSection />
         <NetworkModeSection />
+        <SystemPackagesSection />
         <MoneroNodeSection />
         <StagenetNodeSection />
         <MoneroWalletRpcSection />

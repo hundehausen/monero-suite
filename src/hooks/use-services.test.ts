@@ -9,15 +9,19 @@ vi.mock("nuqs", async () => {
     parseAsString: Object.assign(() => ({ withDefault: () => ({}) }), {
       withDefault: () => ({}),
     }),
-    parseAsBoolean: () => ({ withDefault: () => ({}) }),
+    parseAsBoolean: Object.assign(() => ({ withDefault: () => ({}) }), {
+      withDefault: () => ({}),
+    }),
     parseAsInteger: () => ({ withDefault: () => ({}) }),
     useQueryState: (key: string) => {
       // Always call the same hooks so rules-of-hooks is satisfied; pick by key.
       const architecture = React.useState("linux/amd64");
       const networkMode = React.useState("local");
+      const upgradeSystemPackages = React.useState(false);
       const rpcLogin = React.useState(null);
       const bootstrapDaemonLogin = React.useState(null);
       if (key === "networkMode") return networkMode;
+      if (key === "upgradeSystemPackages") return upgradeSystemPackages;
       if (key === "rpcLogin") return rpcLogin;
       if (key === "bootstrapDaemonLogin") return bootstrapDaemonLogin;
       return architecture;

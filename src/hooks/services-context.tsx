@@ -69,6 +69,14 @@ export function useNetworkModeState() {
   return { networkMode: s.networkMode, setNetworkMode: s.setNetworkMode };
 }
 
+export function useUpgradeSystemPackagesState() {
+  const { stateFunctions: s } = useServicesContext();
+  return {
+    upgradeSystemPackages: s.upgradeSystemPackages,
+    setUpgradeSystemPackages: s.setUpgradeSystemPackages,
+  };
+}
+
 export function useMonerodState(): MonerodState {
   const { stateFunctions } = useServicesContext();
   return stateFunctions;

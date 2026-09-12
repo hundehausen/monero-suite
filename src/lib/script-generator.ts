@@ -1,8 +1,11 @@
 import {
-  DOCKER_INSTALLATION_TEMPLATE,
-  SETUP_TEMPLATE,
-  ENV_FILE_TEMPLATE,
+  APT_UPGRADE_BIN,
+  APT_UPGRADE_ENV,
   COMPLETION_TEMPLATE,
+  DNF_UPGRADE_BIN,
+  DOCKER_INSTALLATION_TEMPLATE,
+  ENV_FILE_TEMPLATE,
+  SETUP_TEMPLATE,
 } from "./bash-templates";
 
 export const MONITORING_BASH_COMMANDS = `
@@ -24,6 +27,13 @@ mkdir -p cuprate
 # Download Cuprated.toml (enables restricted RPC on 0.0.0.0:18089, required for the healthcheck)
 curl -fsSL -o cuprate/Cuprated.toml https://raw.githubusercontent.com/hundehausen/cuprate-docker/main/config/Cuprated.toml`;
 
+export const SYSTEM_PACKAGE_UPGRADE_BASH = `
+# Upgrade existing system packages
+# Debian/Ubuntu
+${APT_UPGRADE_ENV} ${APT_UPGRADE_BIN}
+# Fedora, CentOS Stream, Rocky, AlmaLinux, RHEL
+${DNF_UPGRADE_BIN}`;
+
 function getSpinnerMessage(cmd: string, fallback: string): string {
   // Extract filepath from curl -o <path> for a meaningful message
   const curlMatch = cmd.match(/curl\s.*-o\s+(\S+)/);
@@ -44,7 +54,11 @@ function getSpinnerMessage(cmd: string, fallback: string): string {
   }
 
   if (cmd.startsWith("pkg_update")) {
-    return "Updating system packages";
+    return "Refreshing package indexes";
+  }
+
+  if (cmd.startsWith("pkg_upgrade")) {
+    return "Upgrading existing packages";
   }
 
   // mkdir
@@ -85,12 +99,18 @@ export function generateInstallationScript(
   customBashCommands: string,
   envContent?: string,
   isExposed = false,
-  firewallPorts = ""
+  firewallPorts = "",
+  upgradeSystemPackages = false
 ): string {
   let script = DOCKER_INSTALLATION_TEMPLATE.replace(
     "${NETWORK_MODE_PLACEHOLDER}",
     isExposed ? "exposed" : "local"
-  ).replace("${FIREWALL_PORTS_PLACEHOLDER}", firewallPorts);
+  )
+    .replace("${FIREWALL_PORTS_PLACEHOLDER}", firewallPorts)
+    .replace(
+      "${UPGRADE_SYSTEM_PACKAGES_PLACEHOLDER}",
+      upgradeSystemPackages ? "true" : "false"
+    );
 
   script += SETUP_TEMPLATE.replace(
     "${DOCKER_COMPOSE_CONTENT}",

@@ -57,3 +57,35 @@ describe("generateInstallationScript home path expansion", () => {
     expect(script).toContain("docker-compose.yml");
   });
 });
+
+describe("generateInstallationScript system package upgrade", () => {
+  it("refreshes indexes only by default and does not run pkg_upgrade", () => {
+    const script = sampleScript();
+
+    expect(script).toContain('UPGRADE_SYSTEM_PACKAGES="false"');
+    expect(script).toContain("$SUDO apt-get update ;;");
+    expect(script).toContain("$SUDO dnf makecache ;;");
+    expect(script).not.toMatch(/apt-get update && .*apt-get upgrade/);
+    expect(script).toContain('show_spinner $! "Refreshing package indexes"');
+    expect(script).toContain('if [ "$UPGRADE_SYSTEM_PACKAGES" = "true" ]; then');
+    expect(script).toContain("run_cmd pkg_upgrade &");
+  });
+
+  it("emits a noninteractive distro upgrade when upgradeSystemPackages is on", () => {
+    const script = generateInstallationScript(
+      "services: {}\n",
+      "",
+      undefined,
+      false,
+      "",
+      true
+    );
+
+    expect(script).toContain('UPGRADE_SYSTEM_PACKAGES="true"');
+    expect(script).toContain("DEBIAN_FRONTEND=noninteractive");
+    expect(script).toContain("NEEDRESTART_MODE=l");
+    expect(script).toContain("Dpkg::Options::=--force-confold");
+    expect(script).toContain("$SUDO dnf upgrade -y ;;");
+    expect(script).toContain('show_spinner $! "Upgrading existing packages"');
+  });
+});

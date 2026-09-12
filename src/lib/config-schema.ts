@@ -146,6 +146,7 @@ export const fullConfigSchema = z
   .object({
     architecture: architectureSchema,
     networkMode: networkModeSchema,
+    upgradeSystemPackages: z.boolean(),
     monerod: monerodConfigSchema,
     stagenet: stagenetConfigSchema,
     p2pool: p2poolConfigSchema,

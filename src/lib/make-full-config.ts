@@ -40,6 +40,7 @@ function deepMerge<T>(base: T, override?: DeepPartial<T>): T {
 const defaultFullConfig = (): FullConfig => ({
   architecture: "linux/amd64",
   networkMode: "local",
+  upgradeSystemPackages: false,
   monerod: {
     isMoneroPublicNode: false,
     moneroNodeNoLogs: false,

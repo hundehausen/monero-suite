@@ -1,5 +1,6 @@
 import type { Service } from "@/hooks/use-services";
 import { Compose } from "compose-spec-schema";
+import { SYSTEM_PACKAGE_UPGRADE_BASH } from "@/lib/script-generator";
 
 const dockerComposeBase: Compose = {
   name: "monero-suite",
@@ -60,6 +61,21 @@ export const generateBashScriptFile = (services: Service[]) => {
     .replace(/\n{2,}/g, "\n\n");
 };
 
+export function generateBashPreview(
+  services: Service[],
+  upgradeSystemPackages = false
+): string {
+  const parts: string[] = [];
+  if (upgradeSystemPackages) {
+    parts.push(SYSTEM_PACKAGE_UPGRADE_BASH.trim());
+  }
+  const serviceBash = generateBashScriptFile(services);
+  if (serviceBash) {
+    parts.push(serviceBash);
+  }
+  return parts.join("\n\n");
+}
+
 function convertToEnvString(obj: {
   [key: string]: string | number | boolean;
 }): string {
@@ -86,13 +102,18 @@ export function generateScriptSummary(
   checkedServices: Service[],
   envString: string | null,
   isExposed: boolean,
-  firewallPorts: string
+  firewallPorts: string,
+  upgradeSystemPackages = false
 ): string[] {
   const steps: string[] = [];
 
   steps.push("Check for root/sudo privileges");
   steps.push("Detect OS and package manager");
   steps.push("Validate network environment");
+  steps.push("Refresh package indexes");
+  if (upgradeSystemPackages) {
+    steps.push("Upgrade existing system packages");
+  }
   steps.push("Install Docker (skipped if already installed)");
 
   const serviceNames = checkedServices.map((s) => s.name);
@@ -106,7 +127,6 @@ export function generateScriptSummary(
 
   const hasBash = checkedServices.some((s) => s.bash);
   if (hasBash) {
-    steps.push("Update system packages and install dependencies");
     steps.push("Run service-specific setup commands");
   }
 

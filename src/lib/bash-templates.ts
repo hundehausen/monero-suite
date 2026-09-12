@@ -1,5 +1,11 @@
 const installationPath = "~/monero-suite";
 
+export const APT_UPGRADE_ENV =
+  "DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l";
+export const APT_UPGRADE_BIN =
+  "apt-get upgrade -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold";
+export const DNF_UPGRADE_BIN = "dnf upgrade -y";
+
 export const DOCKER_INSTALLATION_TEMPLATE = `#!/bin/bash
 
 # Colors
@@ -151,8 +157,15 @@ validate_network() {
 # Distro-agnostic package helpers
 pkg_update() {
     case "$PKG_MANAGER" in
-        apt) $SUDO apt-get update && $SUDO apt-get upgrade -y ;;
-        dnf) $SUDO dnf upgrade -y ;;
+        apt) $SUDO apt-get update ;;
+        dnf) $SUDO dnf makecache ;;
+    esac
+}
+
+pkg_upgrade() {
+    case "$PKG_MANAGER" in
+        apt) ${APT_UPGRADE_ENV} $SUDO ${APT_UPGRADE_BIN} ;;
+        dnf) $SUDO ${DNF_UPGRADE_BIN} ;;
     esac
 }
 
@@ -301,6 +314,7 @@ echo -e "\${GRAY}Tip: For verbose output, use: curl -sSL <url> | bash -s -- --ve
 
 NETWORK_MODE="\${NETWORK_MODE_PLACEHOLDER}"
 FIREWALL_PORTS="\${FIREWALL_PORTS_PLACEHOLDER}"
+UPGRADE_SYSTEM_PACKAGES="\${UPGRADE_SYSTEM_PACKAGES_PLACEHOLDER}"
 
 section "System Checks"
 check_privileges
@@ -308,7 +322,12 @@ detect_os
 validate_network
 
 run_cmd pkg_update &
-show_spinner $! "Updating system packages"
+show_spinner $! "Refreshing package indexes"
+
+if [ "$UPGRADE_SYSTEM_PACKAGES" = "true" ]; then
+    run_cmd pkg_upgrade &
+    show_spinner $! "Upgrading existing packages"
+fi
 
 run_cmd pkg_install curl &
 show_spinner $! "Installing packages: curl"

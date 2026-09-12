@@ -7,16 +7,25 @@ import {
 } from "./sections";
 
 describe("SECTIONS", () => {
-  it("has 15 unique accordion values", () => {
+  it("has 16 unique accordion values", () => {
     const values = SECTIONS.map((section) => section.value);
-    expect(values).toHaveLength(15);
-    expect(new Set(values).size).toBe(15);
+    expect(values).toHaveLength(16);
+    expect(new Set(values).size).toBe(16);
   });
 
-  it("default-opens architecture, network mode, and mainnet node", () => {
+  it("lists system-packages after network mode and before the mainnet node", () => {
+    const values = SECTIONS.map((section) => section.value);
+    expect(values.indexOf("system-packages")).toBe(values.indexOf("exposed") + 1);
+    expect(values.indexOf("mainnet-node")).toBe(
+      values.indexOf("system-packages") + 1
+    );
+  });
+
+  it("default-opens architecture, network mode, system packages, and mainnet node", () => {
     expect(DEFAULT_OPEN_SECTIONS).toEqual([
       "architecture",
       "exposed",
+      "system-packages",
       "mainnet-node",
     ]);
     for (const value of DEFAULT_OPEN_SECTIONS) {

@@ -22,6 +22,7 @@ import { useSectionFocus } from "./section-focus";
 import {
   generateDockerComposeFile,
   generateBashScriptFile,
+  generateBashPreview,
   generateEnvFile,
   getFirewallPorts,
   generateScriptSummary,
@@ -217,27 +218,54 @@ export default function Main() {
   );
 
   const dockerCompose = useMemo(() => generateDockerComposeFile(checkedServices), [checkedServices]);
-  const bashCommands = useMemo(() => generateBashScriptFile(checkedServices), [checkedServices]);
-  const hasBashCommands = useMemo(() => checkedServices.some((s) => s.bash), [checkedServices]);
+  const serviceBashCommands = useMemo(
+    () => generateBashScriptFile(checkedServices),
+    [checkedServices]
+  );
   const envString = useMemo(() => generateEnvFile(checkedServices), [checkedServices]);
   const isExposed = stateFunctions.networkMode === networkModes.exposed;
   const firewallPorts = useMemo(() => getFirewallPorts(checkedServices), [checkedServices]);
   const dockerComposeYaml = useMemo(() => stringify(dockerCompose), [dockerCompose]);
 
+  const upgradeSystemPackages = stateFunctions.upgradeSystemPackages;
+  const bashCommands = useMemo(
+    () => generateBashPreview(checkedServices, upgradeSystemPackages),
+    [checkedServices, upgradeSystemPackages]
+  );
+  const hasBashCommands = bashCommands.length > 0;
   const fullScript = useMemo(
-    () => generateInstallationScript(dockerComposeYaml, bashCommands, envString || undefined, isExposed, firewallPorts),
-    [dockerComposeYaml, bashCommands, envString, isExposed, firewallPorts]
+    () =>
+      generateInstallationScript(
+        dockerComposeYaml,
+        serviceBashCommands,
+        envString || undefined,
+        isExposed,
+        firewallPorts,
+        upgradeSystemPackages
+      ),
+    [dockerComposeYaml, serviceBashCommands, envString, isExposed, firewallPorts, upgradeSystemPackages]
   );
 
   const scriptSummary = useMemo(
-    () => generateScriptSummary(checkedServices, envString, isExposed, firewallPorts),
-    [checkedServices, envString, isExposed, firewallPorts]
+    () =>
+      generateScriptSummary(
+        checkedServices,
+        envString,
+        isExposed,
+        firewallPorts,
+        upgradeSystemPackages
+      ),
+    [checkedServices, envString, isExposed, firewallPorts, upgradeSystemPackages]
   );
 
   const { installationCommand, isUploading, currentConfigIsUploaded, handleScriptGeneration } =
     useInstallScript({ config });
 
-  const effectiveTab = !envString && activeTab === "env" ? "docker-compose" : activeTab;
+  const effectiveTab =
+    (!envString && activeTab === "env") ||
+    (!hasBashCommands && activeTab === "bash-script")
+      ? "docker-compose"
+      : activeTab;
 
   const previewCard = (fill: boolean) => (
     <Card

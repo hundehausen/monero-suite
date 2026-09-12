@@ -1,5 +1,6 @@
 export { default as ArchitectureSection } from "./ArchitectureSection";
 export { default as NetworkModeSection } from "./NetworkModeSection";
+export { default as SystemPackagesSection } from "./SystemPackagesSection";
 export { default as MoneroNodeSection } from "./MoneroNodeSection";
 export { default as StagenetNodeSection } from "./StagenetNodeSection";
 export { default as MoneroWalletRpcSection } from "./MoneroWalletRpcSection";

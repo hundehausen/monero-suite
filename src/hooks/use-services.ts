@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { parseAsStringEnum, useQueryState } from "nuqs";
+import { parseAsBoolean, parseAsStringEnum, useQueryState } from "nuqs";
 
 import {
   Architecture,
@@ -54,6 +54,10 @@ export const useServices = () => {
     parseAsStringEnum(Object.values(networkModes)).withDefault(
       networkModes.local
     )
+  );
+  const [upgradeSystemPackages, setUpgradeSystemPackages] = useQueryState(
+    "upgradeSystemPackages",
+    parseAsBoolean.withDefault(false)
   );
 
   useStripSecretQueryParams();
@@ -158,6 +162,8 @@ export const useServices = () => {
     setArchitecture,
     networkMode,
     setNetworkMode,
+    upgradeSystemPackages,
+    setUpgradeSystemPackages,
     ...monerodService.stateFunctions,
     ...monerodStagenetService.stateFunctions,
     ...p2PoolService.stateFunctions,
@@ -177,6 +183,7 @@ export const useServices = () => {
   const config = {
     architecture,
     networkMode,
+    upgradeSystemPackages,
     monerod: pickConfigGroup(monerodService.stateFunctions, monerodConfigSchema),
     stagenet: pickConfigGroup(monerodStagenetService.stateFunctions, stagenetConfigSchema),
     p2pool: pickConfigGroup(p2PoolService.stateFunctions, p2poolConfigSchema),

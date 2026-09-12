@@ -44,7 +44,8 @@ export async function uploadInstallScript(
     bashCommands,
     envString || undefined,
     isExposed,
-    firewallPorts
+    firewallPorts,
+    parsed.upgradeSystemPackages
   );
 
   const configId = nanoid();

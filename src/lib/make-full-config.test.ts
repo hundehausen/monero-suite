@@ -8,6 +8,10 @@ describe("makeFullConfig", () => {
     expect(fullConfigSchema.validate(makeFullConfig())).toBe(true);
   });
 
+  it("defaults upgradeSystemPackages to off", () => {
+    expect(makeFullConfig().upgradeSystemPackages).toBe(false);
+  });
+
   it("z.compile of fullConfigSchema still accepts defaults and rejects collisions", () => {
     const compiled = z.compile(fullConfigSchema);
     expect(compiled.parse(makeFullConfig())).toEqual(fullConfigSchema.parse(makeFullConfig()));

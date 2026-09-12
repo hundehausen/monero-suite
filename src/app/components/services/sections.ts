@@ -17,6 +17,12 @@ export const SECTIONS = [
     description: "Local network or VPS",
   },
   {
+    value: "system-packages",
+    label: "System packages",
+    description: "Optional apt/dnf upgrade during install",
+    keywords: ["apt", "dnf", "upgrade", "packages", "update"],
+  },
+  {
     value: "mainnet-node",
     label: "Monero Node",
     description: "Always-on mainnet monerod",
@@ -89,6 +95,7 @@ export type SectionValue = (typeof SECTIONS)[number]["value"];
 export const DEFAULT_OPEN_SECTIONS: SectionValue[] = [
   "architecture",
   "exposed",
+  "system-packages",
   "mainnet-node",
 ];
 
