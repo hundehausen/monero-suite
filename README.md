@@ -19,7 +19,7 @@
 
 Running a Monero node should be accessible to everyone, not just sysadmins. Monero Suite gives you a web UI to configure a full Monero stack — node, mining, monitoring, Tor, reverse proxy — and generates a single `docker-compose.yml` you can deploy anywhere.
 
-**You see everything before it runs.** Every Docker image, every config file, every shell command is shown in full before you execute anything. No hidden network calls, no telemetry, no black boxes. The generated install script is fully self-contained — it embeds your `docker-compose.yml` and `.env` inline and makes zero callbacks to our servers at runtime.
+**You see everything before it runs.** The full install script is shown in the browser before you execute anything. There is no telemetry. The generated script embeds your `docker-compose.yml` and `.env` inline, so it does not call back to our servers at runtime. It still needs the internet to install Docker if needed, pull images, and download extra config files for some services.
 
 ## Services
 
@@ -83,7 +83,7 @@ Monero Suite is designed with the assumption that you should never blindly trust
 ### Transparency by design
 
 - **Full script preview.** The entire install script is rendered in the browser before you run anything. Every shell command, every Docker image, every config line is visible and reviewable.
-- **Self-contained scripts.** Generated install scripts embed `docker-compose.yml` and `.env` as inline heredocs. Once generated, the script makes zero network calls back to Monero Suite — it runs entirely offline.
+- **Self-contained scripts.** Generated install scripts embed `docker-compose.yml` and `.env` as inline heredocs. Once generated, they do not contact Monero Suite again. They still need the internet for Docker installation, image pulls, and extra config files some services download at install time.
 - **Temporary storage only.** Uploaded configs are stored in Vercel Blob and automatically deleted within 24 hours via an authenticated cron job. Config IDs are random and non-sequential.
 - **Open source.** The entire codebase is public. You can audit every line, build it yourself, or fork it.
 
