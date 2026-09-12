@@ -102,7 +102,7 @@ The generated bash script includes several runtime protections:
 - **Privilege checks** — Verifies root or sudo access before modifying the system
 - **OS detection** — Identifies the distro and exits cleanly on unsupported systems
 - **Network mode validation** — Warns if you're running an exposed (Traefik) config on a NAT network or vice versa
-- **Firewall setup** — Auto-detects ufw vs firewalld, detects your SSH port from `sshd_config`, and prompts before modifying SSH rules
+- **Firewall setup** — Auto-detects ufw vs firewalld. SSH ports come from the live session, listening sockets, `sshd -T`, systemd sockets, and sshd config. Detected SSH is always allowed. Default-deny is skipped when SSH cannot be confirmed, so the installer will not lock you out.
 
 ### What we recommend
 

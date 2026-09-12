@@ -53,6 +53,162 @@ resolve_pkg_manager() {
     esac
 }`;
 
+/** Collect SSH listen ports from session, sockets, sshd -T, systemd, and config. Shared with tests. */
+export const DETECT_SSH_PORTS_FN = `add_ssh_port() {
+    local port="$1"
+    case "$port" in
+        ''|*[!0-9]*) return 1 ;;
+    esac
+    if [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
+        return 1
+    fi
+    local existing
+    for existing in "\${SSH_PORTS[@]}"; do
+        if [ "$existing" = "$port" ]; then
+            return 0
+        fi
+    done
+    SSH_PORTS+=("$port")
+    return 0
+}
+
+add_ssh_source() {
+    local src="$1"
+    case " \${SSH_SOURCES} " in
+        *" $src "*) ;;
+        *) SSH_SOURCES="\${SSH_SOURCES:+\$SSH_SOURCES }$src" ;;
+    esac
+}
+
+add_port_from_ssh_connection() {
+    local conn="$1"
+    [ -n "$conn" ] || return
+    local port
+    port=$(printf '%s\\n' "$conn" | awk '{print $4}')
+    add_ssh_port "$port" && add_ssh_source "session"
+}
+
+read_ssh_connection_from_proc() {
+    local envfile="$1"
+    [ -r "$envfile" ] || return 1
+    tr '\\0' '\\n' < "$envfile" 2>/dev/null | grep -m1 '^SSH_CONNECTION=' | cut -d= -f2-
+}
+
+detect_ssh_ports_from_session() {
+    add_port_from_ssh_connection "\${SSH_CONNECTION:-}"
+    if [ -z "\${SSH_CONNECTION:-}" ]; then
+        local proc_env="\${SSH_PROC_ENVIRON:-/proc/\$PPID/environ}"
+        local parent_conn
+        parent_conn=$(read_ssh_connection_from_proc "$proc_env") || parent_conn=""
+        add_port_from_ssh_connection "$parent_conn"
+    fi
+}
+
+detect_ssh_ports_from_listening() {
+    command -v ss >/dev/null 2>&1 || return
+    local ss_out=""
+    ss_out=$($SUDO ss -tlnp 2>/dev/null) || ss_out=$(ss -tlnp 2>/dev/null) || ss_out=$(ss -tln 2>/dev/null) || ss_out=""
+    [ -n "$ss_out" ] || return
+    local line port
+    while IFS= read -r line; do
+        case "$line" in
+            *sshd*|*dropbear*)
+                port=$(printf '%s\\n' "$line" | awk '{print $4}' | sed -E 's/.*[.:]([0-9]+)\$/\\1/')
+                add_ssh_port "$port" && add_ssh_source "listening"
+                ;;
+        esac
+    done <<< "$ss_out"
+}
+
+detect_ssh_ports_from_sshd_t() {
+    local sshd_bin=""
+    if command -v sshd >/dev/null 2>&1; then
+        sshd_bin=$(command -v sshd)
+    elif [ -x /usr/sbin/sshd ]; then
+        sshd_bin=/usr/sbin/sshd
+    else
+        return
+    fi
+    local out
+    out=$($SUDO "$sshd_bin" -T 2>/dev/null) || out=""
+    [ -n "$out" ] || return
+    local port
+    while IFS= read -r port; do
+        [ -n "$port" ] || continue
+        add_ssh_port "$port" && add_ssh_source "sshd_t"
+    done < <(printf '%s\\n' "$out" | awk 'tolower(\$1)=="port" {print \$2}')
+}
+
+detect_ssh_ports_from_systemd() {
+    command -v systemctl >/dev/null 2>&1 || return
+    local unit_text
+    unit_text=$($SUDO systemctl cat ssh.socket sshd.socket 2>/dev/null) || unit_text=""
+    [ -n "$unit_text" ] || return
+    local line trimmed val port
+    while IFS= read -r line; do
+        trimmed=\$(printf '%s\\n' "$line" | sed 's/^[[:space:]]*//')
+        case "$trimmed" in
+            ListenStream=*)
+                val="\${trimmed#ListenStream=}"
+                case "$val" in
+                    /*) continue ;;
+                esac
+                port="\${val##*:}"
+                add_ssh_port "$port" && add_ssh_source "systemd"
+                ;;
+        esac
+    done <<< "$unit_text"
+}
+
+parse_ports_from_sshd_file() {
+    local file="$1"
+    [ -f "$file" ] || return
+    local in_match=0
+    local line trimmed val
+    while IFS= read -r line || [ -n "$line" ]; do
+        trimmed=\$(printf '%s\\n' "$line" | sed 's/^[[:space:]]*//')
+        case "$trimmed" in
+            ''|'#'*) continue ;;
+            [Mm]atch|[Mm]atch[[:space:]]*)
+                in_match=1
+                continue
+                ;;
+        esac
+        [ "$in_match" -eq 1 ] && continue
+        case "$trimmed" in
+            [Pp]ort[[:space:]]*)
+                val=\$(printf '%s\\n' "$trimmed" | awk '{print \$2}')
+                add_ssh_port "$val" && add_ssh_source "config"
+                ;;
+        esac
+    done < "$file"
+}
+
+detect_ssh_ports_from_config() {
+    local config_d="\${SSHD_CONFIG_D:-/etc/ssh/sshd_config.d}"
+    local config="\${SSHD_CONFIG:-/etc/ssh/sshd_config}"
+    if [ -d "$config_d" ]; then
+        local conf
+        for conf in "$config_d"/*.conf; do
+            parse_ports_from_sshd_file "$conf"
+        done
+    fi
+    parse_ports_from_sshd_file "$config"
+}
+
+detect_ssh_ports() {
+    SSH_PORTS=()
+    SSH_SOURCES=""
+    detect_ssh_ports_from_session
+    detect_ssh_ports_from_listening
+    detect_ssh_ports_from_sshd_t
+    detect_ssh_ports_from_systemd
+    detect_ssh_ports_from_config
+    if [ \${#SSH_PORTS[@]} -eq 0 ]; then
+        SSH_SOURCES="none"
+    fi
+}`;
+
 export const DOCKER_INSTALLATION_TEMPLATE = `#!/bin/bash
 
 # Colors
@@ -218,33 +374,171 @@ pkg_install() {
     esac
 }
 
-# Detect SSH port from sshd configuration
-detect_ssh_port() {
-    local ssh_port=""
+${DETECT_SSH_PORTS_FN}
 
-    # Check sshd_config.d drop-in files first (takes precedence on modern systems)
-    if [ -d /etc/ssh/sshd_config.d ]; then
-        for conf in /etc/ssh/sshd_config.d/*.conf; do
-            if [ -f "$conf" ]; then
-                local p=$(grep -Ei '^\\s*Port\\s+' "$conf" 2>/dev/null | awk '{print $2}' | tail -1)
-                if [ -n "$p" ]; then
-                    ssh_port=$p
-                fi
-            fi
-        done
+# Run a firewall command in the foreground. Do not swallow failures.
+fw_cmd() {
+    echo -e "\${GRAY}$*\${NC}"
+    $SUDO "$@"
+}
+
+ufw_is_active() {
+    $SUDO ufw status 2>/dev/null | grep -qi '^Status:[[:space:]]*active'
+}
+
+ufw_port_allowed() {
+    local port="\$1"
+    if $SUDO ufw show added 2>/dev/null | grep -Eq "allow[[:space:]]+\$port/tcp"; then
+        return 0
+    fi
+    if $SUDO ufw status 2>/dev/null | grep -Eq "(^|[[:space:]])\$port/tcp"; then
+        return 0
+    fi
+    return 1
+}
+
+ufw_allow_docker_forward() {
+    local ufw_default="/etc/default/ufw"
+    [ -f "\$ufw_default" ] || return 0
+    if grep -Eq '^DEFAULT_FORWARD_POLICY="ACCEPT"' "\$ufw_default"; then
+        return 0
+    fi
+    echo -e "\${GRAY}Setting DEFAULT_FORWARD_POLICY=ACCEPT in \$ufw_default (Docker published ports)\${NC}"
+    $SUDO sed -i -E 's/^DEFAULT_FORWARD_POLICY=.*/DEFAULT_FORWARD_POLICY="ACCEPT"/' "\$ufw_default"
+}
+
+firewalld_is_running() {
+    $SUDO firewall-cmd --state 2>/dev/null | grep -qx running
+}
+
+skip_firewall() {
+    echo -e "\${YELLOW}Warning: \$1\${NC}"
+    echo -e "\${YELLOW}Skipping host firewall enable. Services will still start. Configure the firewall by hand if needed.\${NC}"
+}
+
+setup_firewall_ufw() {
+    local ports=("\$@")
+    local port
+    local ufw_was_active=false
+    if ufw_is_active; then
+        ufw_was_active=true
+        echo -e "\${GRAY}ufw is already active; adding rules only (not changing default policy)\${NC}"
     fi
 
-    # Fall back to main sshd_config
-    if [ -z "$ssh_port" ] && [ -f /etc/ssh/sshd_config ]; then
-        ssh_port=$(grep -Ei '^\\s*Port\\s+' /etc/ssh/sshd_config 2>/dev/null | awk '{print $2}' | tail -1)
+    for port in "\${SSH_PORTS[@]}"; do
+        echo -e "\${GRAY}Allowing SSH on port \$port/tcp\${NC}"
+        if ! fw_cmd ufw allow "\$port/tcp"; then
+            skip_firewall "Failed to allow SSH port \$port/tcp"
+            return 0
+        fi
+    done
+
+    for port in "\${SSH_PORTS[@]}"; do
+        if ! ufw_port_allowed "\$port"; then
+            skip_firewall "SSH port \$port/tcp is not in the ufw rule list"
+            return 0
+        fi
+    done
+
+    for port in "\${ports[@]}"; do
+        echo -e "\${GRAY}Allowing port \$port\${NC}"
+        fw_cmd ufw allow "\$port" || echo -e "\${YELLOW}Warning: failed to allow \$port\${NC}"
+    done
+
+    ufw_allow_docker_forward
+
+    if [ "\$ufw_was_active" = true ]; then
+        echo -e "\${GREEN}[✓] ufw rules updated (SSH ports \${SSH_PORTS[*]})\${NC}"
+        return 0
     fi
 
-    echo "\${ssh_port:-22}"
+    echo -e "\${GRAY}Setting default policy: deny incoming, allow outgoing\${NC}"
+    if ! fw_cmd ufw default deny incoming; then
+        skip_firewall "Failed to set ufw default deny incoming"
+        return 0
+    fi
+    fw_cmd ufw default allow outgoing || true
+
+    echo -e "\${GRAY}Enabling ufw\${NC}"
+    if ! fw_cmd ufw --force enable; then
+        skip_firewall "Failed to enable ufw"
+        return 0
+    fi
+
+    for port in "\${SSH_PORTS[@]}"; do
+        if ! ufw_port_allowed "\$port"; then
+            echo -e "\${YELLOW}SSH port \$port/tcp missing after enable; disabling ufw to avoid lockout\${NC}"
+            $SUDO ufw disable
+            skip_firewall "ufw rolled back (disabled)"
+            return 0
+        fi
+    done
+
+    echo -e "\${GREEN}[✓] Firewall configured successfully\${NC}"
+}
+
+setup_firewall_firewalld() {
+    local ports=("\$@")
+    local port
+
+    if ! firewalld_is_running; then
+        skip_firewall "firewalld is installed but not running"
+        return 0
+    fi
+
+    for port in "\${SSH_PORTS[@]}"; do
+        echo -e "\${GRAY}Allowing SSH on port \$port/tcp\${NC}"
+        if ! fw_cmd firewall-cmd --permanent --add-port="\$port/tcp"; then
+            skip_firewall "Failed to allow SSH port \$port/tcp in firewalld"
+            return 0
+        fi
+    done
+
+    for port in "\${SSH_PORTS[@]}"; do
+        if ! $SUDO firewall-cmd --permanent --query-port="\$port/tcp" >/dev/null 2>&1; then
+            skip_firewall "SSH port \$port/tcp is not in the firewalld permanent rules"
+            return 0
+        fi
+    done
+
+    for port in "\${ports[@]}"; do
+        echo -e "\${GRAY}Allowing port \$port\${NC}"
+        fw_cmd firewall-cmd --permanent --add-port="\$port" || echo -e "\${YELLOW}Warning: failed to allow \$port\${NC}"
+    done
+
+    echo -e "\${GRAY}Reloading firewalld\${NC}"
+    if ! fw_cmd firewall-cmd --reload; then
+        skip_firewall "Failed to reload firewalld"
+        return 0
+    fi
+
+    for port in "\${SSH_PORTS[@]}"; do
+        if ! $SUDO firewall-cmd --query-port="\$port/tcp" >/dev/null 2>&1; then
+            skip_firewall "SSH port \$port/tcp missing after firewalld reload"
+            return 0
+        fi
+    done
+
+    echo -e "\${GREEN}[✓] Firewall configured successfully\${NC}"
 }
 
 # Firewall setup (auto-detects ufw vs firewalld)
 setup_firewall() {
-    local ports=("$@")
+    local ports=("\$@")
+
+    section "Firewall Configuration"
+
+    detect_ssh_ports
+
+    if [ \${#SSH_PORTS[@]} -eq 0 ]; then
+        echo -e "\${YELLOW}SSH port could not be confirmed (no live session, listener, sshd -T, systemd socket, or Port in sshd_config).\${NC}"
+        echo -e "\${YELLOW}Skipping host firewall enable so we do not block SSH. Configure it by hand, for example:\${NC}"
+        echo -e "  \${GRAY}ufw allow <ssh-port>/tcp && ufw --force enable\${NC}"
+        echo -e "  \${GRAY}firewall-cmd --permanent --add-port=<ssh-port>/tcp && firewall-cmd --reload\${NC}"
+        return 0
+    fi
+
+    echo -e "\${GREEN}[✓]\${NC} SSH on TCP ports: \${SSH_PORTS[*]} (\${SSH_SOURCES})"
 
     local fw_tool=""
     if command -v ufw &> /dev/null; then
@@ -253,51 +547,16 @@ setup_firewall() {
         fw_tool="firewalld"
     else
         echo -e "\${YELLOW}Warning: No supported firewall found (ufw or firewalld). Please configure your firewall manually.\${NC}"
-        return
+        return 0
     fi
 
-    section "Firewall Configuration"
     echo -e "Detected firewall tool: \${GREEN}\${fw_tool}\${NC}"
 
-    # Detect SSH port and ask user
-    local ssh_port=$(detect_ssh_port)
-    echo ""
-    read -r -p "$(echo -e "\${YELLOW}Detected SSH on port \${ssh_port}. Add firewall rule to allow it? [Y/n]: \${NC}")" allow_ssh
-    allow_ssh=\${allow_ssh:-Y}
-
-    if [ "$fw_tool" = "ufw" ]; then
-        echo -e "\${GRAY}Setting default policy: deny incoming, allow outgoing\${NC}"
-        run_cmd $SUDO ufw default deny incoming
-        run_cmd $SUDO ufw default allow outgoing
-        if [[ ! "\${allow_ssh}" =~ ^[Nn]$ ]]; then
-            echo -e "\${GRAY}Allowing SSH on port \${ssh_port}/tcp\${NC}"
-            run_cmd $SUDO ufw allow "\${ssh_port}/tcp"
-        fi
-        for port in "\${ports[@]}"; do
-            echo -e "\${GRAY}Allowing port $port\${NC}"
-            run_cmd $SUDO ufw allow "$port"
-        done
-        echo -e "\${GRAY}Enabling ufw\${NC}"
-        run_cmd $SUDO ufw --force enable
-    elif [ "$fw_tool" = "firewalld" ]; then
-        if [[ ! "\${allow_ssh}" =~ ^[Nn]$ ]]; then
-            if [ "\${ssh_port}" = "22" ]; then
-                echo -e "\${GRAY}Allowing SSH service\${NC}"
-                run_cmd $SUDO firewall-cmd --permanent --add-service=ssh
-            else
-                echo -e "\${GRAY}Allowing SSH on port \${ssh_port}/tcp\${NC}"
-                run_cmd $SUDO firewall-cmd --permanent --add-port="\${ssh_port}/tcp"
-            fi
-        fi
-        for port in "\${ports[@]}"; do
-            echo -e "\${GRAY}Allowing port $port\${NC}"
-            run_cmd $SUDO firewall-cmd --permanent --add-port="$port"
-        done
-        echo -e "\${GRAY}Reloading firewalld\${NC}"
-        run_cmd $SUDO firewall-cmd --reload
+    if [ "\$fw_tool" = "ufw" ]; then
+        setup_firewall_ufw "\${ports[@]}"
+    else
+        setup_firewall_firewalld "\${ports[@]}"
     fi
-
-    echo -e "\${GREEN}[✓] Firewall configured successfully\${NC}"
 }
 
 # Function to install Docker using convenience script

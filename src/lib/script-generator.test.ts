@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import { generateInstallationScript } from "./script-generator";
 
@@ -90,3 +91,61 @@ describe("generateInstallationScript system package upgrade", () => {
     expect(script).toContain('show_spinner $! "Upgrading existing packages"');
   });
 });
+
+describe("generateInstallationScript firewall", () => {
+  function exposedScript() {
+    return generateInstallationScript(
+      "services: {}\n",
+      "",
+      undefined,
+      true,
+      "80/tcp 443/tcp"
+    );
+  }
+
+  it("detects SSH ports without defaulting to 22 or prompting", () => {
+    const script = exposedScript();
+
+    expect(script).toContain("detect_ssh_ports");
+    expect(script).toContain("SSH_PORTS");
+    expect(script).not.toContain("${ssh_port:-22}");
+    expect(script).not.toContain("Detected SSH on port");
+    expect(script).not.toContain("read -r -p");
+    expect(script).toContain("SSH port could not be confirmed");
+    expect(script).toContain("Skipping host firewall enable");
+    expect(script).toContain("DEFAULT_FORWARD_POLICY");
+    expect(script).toContain('NETWORK_MODE="exposed"');
+    expect(script).toContain('FIREWALL_PORTS="80/tcp 443/tcp"');
+    expect(script).toContain("setup_firewall $FIREWALL_PORTS");
+  });
+
+  it("allows SSH before default deny and before ufw enable", () => {
+    const script = exposedScript();
+
+    const allowSsh = script.indexOf("Allowing SSH on port");
+    const deny = script.indexOf("ufw default deny incoming");
+    const enable = script.indexOf("ufw --force enable");
+    const rollback = script.indexOf("disabling ufw to avoid lockout");
+
+    expect(allowSsh).toBeGreaterThan(-1);
+    expect(deny).toBeGreaterThan(allowSsh);
+    expect(enable).toBeGreaterThan(deny);
+    expect(rollback).toBeGreaterThan(enable);
+  });
+
+  it("keeps firewall setup gated on exposed mode with ports", () => {
+    const local = sampleScript();
+    expect(local).toContain('NETWORK_MODE="local"');
+    expect(local).toContain('FIREWALL_PORTS=""');
+    expect(local).toContain(
+      'if [ "$NETWORK_MODE" = "exposed" ] && [ -n "${FIREWALL_PORTS:-}" ]; then'
+    );
+  });
+
+  it("emits bash that parses (bash -n)", () => {
+    const script = exposedScript();
+    const bashN = spawnSync("bash", ["-n"], { input: script, encoding: "utf8" });
+    expect(bashN.status, bashN.stderr || bashN.stdout).toBe(0);
+  });
+});
+
