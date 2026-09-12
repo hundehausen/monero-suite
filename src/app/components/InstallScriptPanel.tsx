@@ -66,8 +66,9 @@ export default function InstallScriptPanel({
     <Stack gap="md">
       <Text size="sm" c="dimmed">
         Every command is visible below — review it before running. Supported
-        distros: Ubuntu, Debian, Fedora, CentOS Stream, Rocky Linux, AlmaLinux,
-        and RHEL. Pass <strong>--verbose</strong> for full command output.
+        distros: Debian/Ubuntu and derivatives (Mint, Pop!_OS, Raspberry Pi OS),
+        Fedora, CentOS Stream, Rocky Linux, AlmaLinux, and RHEL. Pass{" "}
+        <strong>--verbose</strong> for full command output.
       </Text>
 
       <Card shadow="sm" padding="md" radius="md" withBorder>

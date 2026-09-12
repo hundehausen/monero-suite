@@ -41,7 +41,7 @@ Running a Monero node should be accessible to everyone, not just sysadmins. Mone
 
 ## Quick Start
 
-Supported distros: Ubuntu, Debian, Fedora, CentOS Stream, Rocky Linux, AlmaLinux, RHEL.
+Supported distros: Debian/Ubuntu and derivatives (Mint, Pop!_OS, Raspberry Pi OS), Fedora, CentOS Stream, Rocky Linux, AlmaLinux, RHEL.
 
 1. Go to [monerosuite.org](https://monerosuite.org)
 2. Select and configure the services you want

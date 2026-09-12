@@ -65,6 +65,7 @@ describe("generateInstallationScript system package upgrade", () => {
     expect(script).toContain('UPGRADE_SYSTEM_PACKAGES="false"');
     expect(script).toContain("$SUDO apt-get update ;;");
     expect(script).toContain("$SUDO dnf makecache ;;");
+    expect(script).toContain("$SUDO yum makecache ;;");
     expect(script).not.toMatch(/apt-get update && .*apt-get upgrade/);
     expect(script).toContain('show_spinner $! "Refreshing package indexes"');
     expect(script).toContain('if [ "$UPGRADE_SYSTEM_PACKAGES" = "true" ]; then');

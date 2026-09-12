@@ -5,6 +5,53 @@ export const APT_UPGRADE_ENV =
 export const APT_UPGRADE_BIN =
   "apt-get upgrade -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold";
 export const DNF_UPGRADE_BIN = "dnf upgrade -y";
+export const YUM_UPGRADE_BIN = "yum update -y";
+
+/** Maps os-release ID + ID_LIKE to apt, dnf, or yum. Shared with tests. */
+export const RESOLVE_PKG_MANAGER_FN = `pick_rpm_pkg_manager() {
+    if command -v dnf >/dev/null 2>&1; then
+        PKG_MANAGER="dnf"
+    elif command -v yum >/dev/null 2>&1; then
+        PKG_MANAGER="yum"
+    else
+        echo -e "$RED""Error: No dnf or yum found.""$NC"
+        exit 1
+    fi
+}
+
+resolve_pkg_manager() {
+    local id="$1"
+    local like
+    like=$(printf '%s' "$2" | tr '[:upper:]' '[:lower:]')
+
+    case "$id" in
+        ubuntu|debian|linuxmint|pop|elementary|zorin|raspbian|kali)
+            PKG_MANAGER="apt"
+            return
+            ;;
+        fedora)
+            PKG_MANAGER="dnf"
+            return
+            ;;
+        centos|rhel|rocky|almalinux|ol|amzn)
+            pick_rpm_pkg_manager
+            return
+            ;;
+    esac
+
+    case " $like " in
+        *" debian "*|*" ubuntu "*)
+            PKG_MANAGER="apt"
+            ;;
+        *" fedora "*|*" rhel "*|*" centos "*)
+            pick_rpm_pkg_manager
+            ;;
+        *)
+            echo -e "$RED""Error: Unsupported OS '$id'. Supported: Debian/Ubuntu and derivatives, Fedora, CentOS, Rocky, AlmaLinux, RHEL.""$NC"
+            exit 1
+            ;;
+    esac
+}`;
 
 export const DOCKER_INSTALLATION_TEMPLATE = `#!/bin/bash
 
@@ -101,27 +148,19 @@ check_privileges() {
     fi
 }
 
+${RESOLVE_PKG_MANAGER_FN}
+
 # Function to detect OS and package manager
 detect_os() {
     if [ -f /etc/os-release ]; then
         . /etc/os-release
         OS=$ID
-        VERSION_CODENAME=\${VERSION_CODENAME:-}
     else
         echo -e "\${RED}Error: Cannot detect OS\${NC}"
         exit 1
     fi
 
-    case "$OS" in
-        ubuntu|debian) PKG_MANAGER="apt" ;;
-        fedora)        PKG_MANAGER="dnf" ;;
-        centos|rhel|rocky|almalinux) PKG_MANAGER="dnf" ;;
-        *)
-            echo -e "\${RED}Error: Unsupported OS '$OS'. Supported: Ubuntu, Debian, Fedora, CentOS, Rocky, AlmaLinux, RHEL.\${NC}"
-            exit 1
-            ;;
-    esac
-
+    resolve_pkg_manager "$OS" "\${ID_LIKE:-}"
     echo -e "\${GREEN}[✓]\${NC} Detected OS: $OS (package manager: $PKG_MANAGER)"
 }
 
@@ -159,6 +198,7 @@ pkg_update() {
     case "$PKG_MANAGER" in
         apt) $SUDO apt-get update ;;
         dnf) $SUDO dnf makecache ;;
+        yum) $SUDO yum makecache ;;
     esac
 }
 
@@ -166,6 +206,7 @@ pkg_upgrade() {
     case "$PKG_MANAGER" in
         apt) ${APT_UPGRADE_ENV} $SUDO ${APT_UPGRADE_BIN} ;;
         dnf) $SUDO ${DNF_UPGRADE_BIN} ;;
+        yum) $SUDO ${YUM_UPGRADE_BIN} ;;
     esac
 }
 
@@ -173,6 +214,7 @@ pkg_install() {
     case "$PKG_MANAGER" in
         apt) $SUDO apt-get install -y "$@" ;;
         dnf) $SUDO dnf install -y "$@" ;;
+        yum) $SUDO yum install -y "$@" ;;
     esac
 }
 
