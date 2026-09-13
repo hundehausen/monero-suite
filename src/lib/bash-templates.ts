@@ -149,6 +149,212 @@ add_selinux_z_to_bind_mounts() {
     fi
 }`
 
+/** Quiet commands tee to CMD_LOG; show_spinner dumps that log on failure. Shared with tests. */
+export const RUN_CMD_FN = `init_cmd_log() {
+    CMD_LOG=\$(mktemp /tmp/monero-suite-cmd.XXXXXX 2>/dev/null) || CMD_LOG="/tmp/monero-suite-cmd.log"
+}
+
+dump_cmd_log() {
+    if [ -z "\${CMD_LOG:-}" ] || [ ! -s "\$CMD_LOG" ]; then
+        return 0
+    fi
+    echo -e "\${GRAY}----- command output -----\${NC}"
+    tail -n 80 "\$CMD_LOG"
+    echo -e "\${GRAY}----- end (full log: \$CMD_LOG) -----\${NC}"
+}
+
+# Run a command, suppressing output unless verbose mode is enabled.
+# stdin is /dev/null so piped curl|bash is never consumed by sudo/apt.
+run_cmd() {
+    if [ "\$VERBOSE" = true ]; then
+        "\$@" </dev/null
+    else
+        if [ -n "\${CMD_LOG:-}" ]; then
+            : > "\$CMD_LOG"
+            "\$@" > "\$CMD_LOG" 2>&1 </dev/null
+        else
+            "\$@" > /dev/null 2>&1 </dev/null
+        fi
+    fi
+}
+
+# Function to show spinner (quiet mode) or live output (verbose mode)
+# Usage: show_spinner <pid> <message> [nofail]
+# Pass "nofail" as 3rd arg to show a warning instead of exiting on failure
+show_spinner() {
+    local pid=\$1
+    local message=\$2
+    local nofail=\${3:-}
+    local i=0
+    local spin_len=\${#SPINNER}
+
+    if [ "\$VERBOSE" = true ]; then
+        printf "\${BLUE}[...]\${NC} %s\\n" "\$message"
+        wait \$pid
+    else
+        while kill -0 \$pid 2>/dev/null; do
+            i=\$(( (i + 1) % spin_len ))
+            printf "\\r\${MONERO_ORANGE}[\${SPINNER:\$i:1}]\${NC} %s..." "\$message"
+            sleep 0.1
+        done
+        wait \$pid
+    fi
+
+    local ret=\$?
+    printf "\\r\\033[2K"
+    if [ \$ret -eq 0 ]; then
+        printf "\${GREEN}[✓]\${NC} %s\\n" "\$message"
+    elif [ "\$nofail" = "nofail" ]; then
+        printf "\${YELLOW}[!]\${NC} %s\\n" "\$message"
+        dump_cmd_log
+    else
+        printf "\${RED}[✗]\${NC} %s\\n" "\$message"
+        dump_cmd_log
+        echo -e "\${RED}Re-run with --verbose for live command output.\${NC}"
+        exit 1
+    fi
+    return \$ret
+}`
+
+/** Refresh sudo while long steps (image pulls) run. Shared with tests. */
+export const SUDO_KEEPALIVE_FN = `start_sudo_keepalive() {
+    [ -n "\${SUDO:-}" ] || return 0
+    (
+        while true; do
+            sleep "\${SUDO_KEEPALIVE_SLEEP:-60}"
+            \$SUDO -n true >/dev/null 2>&1 || exit 0
+        done
+    ) &
+    SUDO_KEEPALIVE_PID=\$!
+}
+
+stop_sudo_keepalive() {
+    if [ -n "\${SUDO_KEEPALIVE_PID:-}" ]; then
+        kill "\$SUDO_KEEPALIVE_PID" 2>/dev/null || true
+        wait "\$SUDO_KEEPALIVE_PID" 2>/dev/null || true
+        SUDO_KEEPALIVE_PID=""
+    fi
+}`
+
+/** Prompt on /dev/tty before clobbering an existing compose/.env. Shared with tests. */
+export const CONFIRM_OVERWRITE_FN = `confirm_overwrite_install_dir() {
+    local compose="\$INSTALL_DIR/docker-compose.yml"
+    local envfile="\$INSTALL_DIR/.env"
+    if [ ! -f "\$compose" ] && [ ! -f "\$envfile" ]; then
+        return 0
+    fi
+    echo -e "\${YELLOW}Existing install found at \$INSTALL_DIR\${NC}"
+    echo -e "\${YELLOW}Continuing overwrites docker-compose.yml and .env. Docker volumes (blockchain, Grafana, etc.) are left alone.\${NC}"
+
+    local tty="\${OVERWRITE_TTY:-/dev/tty}"
+    if [ ! -e "\$tty" ] || [ ! -r "\$tty" ] || [ ! -w "\$tty" ]; then
+        echo -e "\${YELLOW}No terminal to confirm; overwriting because this run is non-interactive.\${NC}"
+        return 0
+    fi
+    printf "\${YELLOW}Overwrite and continue? [Y/n]: \${NC}"
+    local reply=""
+    if ! read -r reply < "\$tty"; then
+        echo -e "\${RED}Could not read confirmation. Aborting.\${NC}"
+        exit 1
+    fi
+    case "\$reply" in
+        ""|Y|y|yes|YES) return 0 ;;
+        *)
+            echo -e "\${RED}Aborted. Existing files were not changed.\${NC}"
+            exit 1
+            ;;
+    esac
+}`
+
+/** Warn when free space looks tight for the chain. Shared with tests. */
+export const WARN_DISK_SPACE_FN = `warn_disk_space() {
+    local need_gb="\$1"
+    local kind="\$2"
+    local path="\$3"
+
+    case "\$path" in
+        "")
+            if command -v docker >/dev/null 2>&1; then
+                path=\$(\$SUDO docker info --format '{{.DockerRootDir}}' 2>/dev/null || true)
+            fi
+            path=\${path:-\$INSTALL_HOME}
+            ;;
+        ~) path="\$INSTALL_HOME" ;;
+        ~/*) path="\$INSTALL_HOME/\${path#~/}" ;;
+    esac
+
+    local probe="\$path"
+    while [ ! -e "\$probe" ] && [ "\$probe" != "/" ] && [ -n "\$probe" ]; do
+        probe=\$(dirname "\$probe")
+    done
+    [ -n "\$probe" ] || probe="/"
+
+    local avail_kb
+    avail_kb=\$(df -Pk "\$probe" 2>/dev/null | awk 'NR==2 {print \$4}')
+    case "\$avail_kb" in
+        ''|*[!0-9]*)
+            echo -e "\${YELLOW}Could not measure free disk at \$probe. A \$kind node typically needs about \${need_gb} GiB.\${NC}"
+            return 0
+            ;;
+    esac
+    local avail_gb=\$((avail_kb / 1024 / 1024))
+    if [ "\$avail_gb" -lt "\$need_gb" ]; then
+        echo -e "\${YELLOW}Warning: \${avail_gb} GiB free at \$probe. A \$kind node typically needs about \${need_gb} GiB.\${NC}"
+        echo -e "\${YELLOW}The installer will continue. Sync can fill the disk later.\${NC}"
+    else
+        echo -e "\${GREEN}[✓]\${NC} Disk space: \${avail_gb} GiB free at \$probe (about \${need_gb} GiB for a \$kind node)"
+    fi
+}`
+
+/** Post-install status, access URLs, onions, sync note. Shared with tests. */
+export const PRINT_NEXT_STEPS_FN = `print_tor_onions() {
+    echo -e "\${BLUE}Tor hidden services:\${NC}"
+    local attempt=0
+    local out=""
+    while [ "\$attempt" -lt 10 ]; do
+        out=\$(\$SUDO docker compose exec -T tor sh -c 'for f in $(find /var/lib/tor -name hostname 2>/dev/null); do printf "%s: %s\\n" "$(basename "$(dirname "$f")")" "$(cat "$f")"; done' </dev/null 2>/dev/null) || out=""
+        if [ -n "\$out" ]; then
+            printf '%s\\n' "\$out" | sed 's/^/  /'
+            return 0
+        fi
+        attempt=\$((attempt + 1))
+        sleep 2
+    done
+    echo -e "  \${YELLOW}Addresses not ready yet. Run:\${NC} docker compose logs tor"
+}
+
+print_next_steps() {
+    section "Next steps"
+    \$SUDO docker compose ps </dev/null || true
+
+    echo -e "\\n\${BLUE}Access:\${NC}"
+__ACCESS_URLS__
+
+    if [ "\$HAS_HIDDEN_SERVICES" = "true" ]; then
+        echo
+        print_tor_onions
+    fi
+
+    echo
+    if [ "\$OFFLINE_MODE" = "true" ]; then
+        echo -e "\${YELLOW}This node is in offline mode. It will not sync from the network.\${NC}"
+    else
+        echo -e "\${YELLOW}monerod is started, not fully synced. First mainnet sync takes hours to days.\${NC}"
+    fi
+
+__SECRET_WARNINGS__
+
+    if [ "\${PULL_FAILED:-false}" = "true" ]; then
+        echo -e "\${YELLOW}Image pull reported errors. Containers may be using older images already on disk.\${NC}"
+    fi
+
+    echo -e "\\n\${GREEN}Monero Suite installation completed successfully!\${NC}\\n"
+    echo -e "\${BLUE}Useful commands:\${NC}"
+    echo -e "  \${YELLOW}cd \$INSTALL_DIR\${NC}         — Change to the installation directory"
+    echo -e "  \${YELLOW}docker compose ps\${NC}        — Check the status of the containers"
+    echo -e "  \${YELLOW}docker compose logs -f\${NC}   — View container logs (exit with Ctrl+C)"
+}`
+
 /** Collect SSH listen ports from session, sockets, sshd -T, systemd, and config. Shared with tests. */
 export const DETECT_SSH_PORTS_FN = `add_ssh_port() {
     local port="$1"
@@ -336,50 +542,7 @@ BANNER="
 # Progress animation characters
 SPINNER="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
 
-# Run a command, suppressing output unless verbose mode is enabled.
-# stdin is /dev/null so piped curl|bash is never consumed by sudo/apt.
-run_cmd() {
-    if [ "$VERBOSE" = true ]; then
-        "$@" </dev/null
-    else
-        "$@" > /dev/null 2>&1 </dev/null
-    fi
-}
-
-# Function to show spinner (quiet mode) or live output (verbose mode)
-# Usage: show_spinner <pid> <message> [nofail]
-# Pass "nofail" as 3rd arg to show a warning instead of exiting on failure
-show_spinner() {
-    local pid=$1
-    local message=$2
-    local nofail=\${3:-}
-    local i=0
-    local spin_len=\${#SPINNER}
-
-    if [ "$VERBOSE" = true ]; then
-        printf "\${BLUE}[...]\${NC} %s\n" "$message"
-        wait $pid
-    else
-        while kill -0 $pid 2>/dev/null; do
-            i=$(( (i + 1) % spin_len ))
-            printf "\\r\${MONERO_ORANGE}[\${SPINNER:$i:1}]\${NC} %s..." "$message"
-            sleep 0.1
-        done
-        wait $pid
-    fi
-
-    local ret=$?
-    printf "\\r\\033[2K"
-    if [ $ret -eq 0 ]; then
-        printf "\${GREEN}[✓]\${NC} %s\n" "$message"
-    elif [ "$nofail" = "nofail" ]; then
-        printf "\${YELLOW}[!]\${NC} %s\n" "$message"
-    else
-        printf "\${RED}[✗]\${NC} %s\n" "$message"
-        exit 1
-    fi
-    return $ret
-}
+${RUN_CMD_FN}
 
 # Print a section header
 section() {
@@ -393,6 +556,14 @@ ${RESOLVE_INSTALL_DIR_FN}
 ${RESOLVE_PKG_MANAGER_FN}
 
 ${SELINUX_BIND_MOUNTS_FN}
+
+${SUDO_KEEPALIVE_FN}
+
+${CONFIRM_OVERWRITE_FN}
+
+${WARN_DISK_SPACE_FN}
+
+${PRINT_NEXT_STEPS_FN}
 
 # Function to detect OS and package manager
 detect_os() {
@@ -661,7 +832,8 @@ install_docker() {
     fi
 
     echo -e "Installing Docker via the official convenience script (https://get.docker.com)."
-    echo -e "This will install: Docker Engine, Docker CLI, containerd, and Docker Compose plugin.\n"
+    echo -e "This will install: Docker Engine, Docker CLI, containerd, and Docker Compose plugin."
+    echo -e "This can take several minutes.\\n"
 
     curl -fsSL https://get.docker.com -o /tmp/get-docker.sh > /dev/null 2>&1 &
     show_spinner $! "Downloading Docker install script from get.docker.com"
@@ -682,7 +854,7 @@ install_docker() {
         fi
         run_cmd $SUDO usermod -aG docker $USER &
         show_spinner $! "Adding user '$USER' to docker group"
-        echo -e "\n\${YELLOW}Note: Please log out and log back in for docker group changes to take effect.\${NC}"
+        echo -e "\n\${YELLOW}Note: \$USER was added to the docker group. This script keeps using sudo for docker, so you can continue now. Log out and back in later if you want to run docker without sudo.\${NC}"
     fi
 
     if docker --version > /dev/null 2>&1; then
@@ -694,6 +866,9 @@ install_docker() {
 }
 
 # Main execution
+init_cmd_log
+trap 'stop_sudo_keepalive' EXIT
+
 echo -e "$BANNER"
 echo -e "\n\${BLUE}Monero Suite Installation Script\${NC}"
 if [ "$VERBOSE" = true ]; then
@@ -704,9 +879,16 @@ echo -e "\${GRAY}Tip: For verbose output, use: curl -sSL <url> | bash -s -- --ve
 NETWORK_MODE="\${NETWORK_MODE_PLACEHOLDER}"
 FIREWALL_PORTS="\${FIREWALL_PORTS_PLACEHOLDER}"
 UPGRADE_SYSTEM_PACKAGES="\${UPGRADE_SYSTEM_PACKAGES_PLACEHOLDER}"
+HAS_HIDDEN_SERVICES="\${HAS_HIDDEN_SERVICES_PLACEHOLDER}"
+OFFLINE_MODE="\${OFFLINE_MODE_PLACEHOLDER}"
+IS_PRUNED_NODE="\${IS_PRUNED_NODE_PLACEHOLDER}"
+BLOCKCHAIN_PATH=\${BLOCKCHAIN_PATH_PLACEHOLDER}
+PRUNED_DISK_GB="\${PRUNED_DISK_GB_PLACEHOLDER}"
+FULL_DISK_GB="\${FULL_DISK_GB_PLACEHOLDER}"
 
 section "System Checks"
 check_privileges
+start_sudo_keepalive
 resolve_install_dir
 detect_os
 validate_network
@@ -730,6 +912,14 @@ export const SETUP_TEMPLATE = `
 setup_monero_suite() {
     section "Monero Suite Setup"
     echo -e "Installing to \${BLUE}$INSTALL_DIR\${NC}\\n"
+
+    confirm_overwrite_install_dir
+
+    if [ "\$IS_PRUNED_NODE" = "true" ]; then
+        warn_disk_space "\$PRUNED_DISK_GB" "pruned" "\$BLOCKCHAIN_PATH"
+    else
+        warn_disk_space "\$FULL_DISK_GB" "full" "\$BLOCKCHAIN_PATH"
+    fi
 
     # Create installation directory
     mkdir -p "$INSTALL_DIR" > /dev/null 2>&1 &
@@ -774,17 +964,27 @@ export const COMPLETION_TEMPLATE = `
     section "Starting Services"
     cd "$INSTALL_DIR"
 
-    run_cmd $SUDO docker compose pull &
-    show_spinner $! "Pulling container images" nofail
+    echo -e "Pulling container images (this can take several minutes)..."
+    PULL_FAILED=false
+    if $SUDO docker compose pull </dev/null; then
+        echo -e "\${GREEN}[✓]\${NC} Pulling container images"
+    else
+        echo -e "\${YELLOW}[!] Image pull failed. Trying to start with images already on disk.\${NC}"
+        PULL_FAILED=true
+    fi
 
-    run_cmd $SUDO docker compose up -d &
-    show_spinner $! "Starting Monero Suite containers"
+    echo -e "Starting Monero Suite containers..."
+    if $SUDO docker compose up -d </dev/null; then
+        echo -e "\${GREEN}[✓]\${NC} Starting Monero Suite containers"
+    else
+        echo -e "\${RED}[✗]\${NC} Starting Monero Suite containers"
+        $SUDO docker compose ps </dev/null || true
+        $SUDO docker compose logs --tail=80 </dev/null || true
+        echo -e "\${RED}Re-run with --verbose if the logs above are not enough.\${NC}"
+        exit 1
+    fi
 
-    echo -e "\\n\${GREEN}Monero Suite installation completed successfully!\${NC}\\n"
-    echo -e "\${BLUE}Useful commands:\${NC}"
-    echo -e "  \${YELLOW}cd $INSTALL_DIR\${NC}         — Change to the installation directory"
-    echo -e "  \${YELLOW}docker compose ps\${NC}        — Check the status of the containers"
-    echo -e "  \${YELLOW}docker compose logs -f\${NC}   — View container logs (exit with Ctrl+C)"
+    print_next_steps
 }
 
 setup_monero_suite

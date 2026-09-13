@@ -19,6 +19,11 @@ export function useInstallScript({ config }: UseInstallScriptParams) {
     () => (scriptUrl ? `curl -sSL ${scriptUrl} | bash` : undefined),
     [scriptUrl]
   );
+  const verboseInstallationCommand = useMemo(
+    () =>
+      scriptUrl ? `curl -sSL ${scriptUrl} | bash -s -- --verbose` : undefined,
+    [scriptUrl]
+  );
 
   const lastUploadedConfig = useRef<string | null>(null);
 
@@ -74,5 +79,11 @@ export function useInstallScript({ config }: UseInstallScriptParams) {
     }
   }, [configHash, currentConfigIsUploaded]);
 
-  return { installationCommand, isUploading, currentConfigIsUploaded, handleScriptGeneration };
+  return {
+    installationCommand,
+    verboseInstallationCommand,
+    isUploading,
+    currentConfigIsUploaded,
+    handleScriptGeneration,
+  };
 }

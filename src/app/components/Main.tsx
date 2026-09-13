@@ -27,7 +27,10 @@ import {
   getFirewallPorts,
   generateScriptSummary,
 } from "../utils";
-import { generateInstallationScript } from "@/lib/script-generator";
+import {
+  generateInstallationScript,
+  installScriptHintsFromConfig,
+} from "@/lib/script-generator";
 import { stringify } from "yaml";
 import { useInstallScript } from "@/hooks/use-install-script";
 import InstallScriptPanel from "./InstallScriptPanel";
@@ -233,6 +236,10 @@ export default function Main() {
     [checkedServices, upgradeSystemPackages]
   );
   const hasBashCommands = bashCommands.length > 0;
+  const installHints = useMemo(
+    () => installScriptHintsFromConfig(config),
+    [config]
+  );
   const fullScript = useMemo(
     () =>
       generateInstallationScript(
@@ -241,9 +248,18 @@ export default function Main() {
         envString || undefined,
         isExposed,
         firewallPorts,
-        upgradeSystemPackages
+        upgradeSystemPackages,
+        installHints
       ),
-    [dockerComposeYaml, serviceBashCommands, envString, isExposed, firewallPorts, upgradeSystemPackages]
+    [
+      dockerComposeYaml,
+      serviceBashCommands,
+      envString,
+      isExposed,
+      firewallPorts,
+      upgradeSystemPackages,
+      installHints,
+    ]
   );
 
   const scriptSummary = useMemo(
@@ -258,8 +274,13 @@ export default function Main() {
     [checkedServices, envString, isExposed, firewallPorts, upgradeSystemPackages]
   );
 
-  const { installationCommand, isUploading, currentConfigIsUploaded, handleScriptGeneration } =
-    useInstallScript({ config });
+  const {
+    installationCommand,
+    verboseInstallationCommand,
+    isUploading,
+    currentConfigIsUploaded,
+    handleScriptGeneration,
+  } = useInstallScript({ config });
 
   const effectiveTab =
     (!envString && activeTab === "env") ||
@@ -307,6 +328,7 @@ export default function Main() {
             hasMonerodPortCollision={hasMonerodPortCollision}
             defaultSecretWarnings={defaultSecretWarnings}
             installationCommand={installationCommand}
+            verboseInstallationCommand={verboseInstallationCommand}
             currentConfigIsUploaded={currentConfigIsUploaded}
             isUploading={isUploading}
             onGenerate={handleScriptGeneration}

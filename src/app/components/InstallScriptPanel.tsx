@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { TbCheck, TbCopy, TbDownload } from "react-icons/tb";
 import {
   ActionIcon,
@@ -9,6 +10,7 @@ import {
   CopyButton,
   List,
   Stack,
+  Switch,
   Text,
   TextInput,
   Tooltip,
@@ -25,6 +27,7 @@ interface InstallScriptPanelProps {
   hasMonerodPortCollision: boolean;
   defaultSecretWarnings: string[];
   installationCommand: string | undefined;
+  verboseInstallationCommand: string | undefined;
   currentConfigIsUploaded: boolean;
   isUploading: boolean;
   onGenerate: () => void;
@@ -38,10 +41,16 @@ export default function InstallScriptPanel({
   hasMonerodPortCollision,
   defaultSecretWarnings,
   installationCommand,
+  verboseInstallationCommand,
   currentConfigIsUploaded,
   isUploading,
   onGenerate,
 }: InstallScriptPanelProps) {
+  const [verboseCommand, setVerboseCommand] = useState(false);
+  const commandToCopy = verboseCommand
+    ? verboseInstallationCommand
+    : installationCommand;
+
   const handleDownload = () => {
     const blob = new Blob([fullScript], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -65,11 +74,12 @@ export default function InstallScriptPanel({
   return (
     <Stack gap="md">
       <Text size="sm" c="dimmed">
-        Every command is visible below — review it before running. Supported
+        Every command is visible below. Review it before running. Supported
         distros: Debian/Ubuntu and derivatives (Mint, Pop!_OS, Raspberry Pi OS),
-        Fedora, CentOS Stream, Rocky Linux, AlmaLinux, and RHEL. Pass{" "}
-        <strong>--verbose</strong> for full command output. If you are not
-        root, the script may ask for your sudo password on the terminal.
+        Fedora, CentOS Stream, Rocky Linux, AlmaLinux, and RHEL. Image pulls
+        print live progress. Toggle verbose below for apt and Docker-install
+        output. If you are not root, the script may ask for your sudo password
+        on the terminal.
       </Text>
 
       <Card shadow="sm" padding="md" radius="md" withBorder>
@@ -150,13 +160,20 @@ export default function InstallScriptPanel({
         </Button>
       </Tooltip>
 
+      <Switch
+        checked={verboseCommand}
+        onChange={(event) => setVerboseCommand(event.currentTarget.checked)}
+        label="Verbose command (apt and Docker-install output)"
+        disabled={!installationCommand}
+      />
+
       <TextInput
         placeholder="Press Generate Install Command"
         label="Paste this into your terminal:"
-        value={installationCommand ?? ""}
-        disabled={!installationCommand}
+        value={commandToCopy ?? ""}
+        disabled={!commandToCopy}
         rightSection={
-          <CopyButton value={installationCommand ?? ""} timeout={2000}>
+          <CopyButton value={commandToCopy ?? ""} timeout={2000}>
             {({ copied, copy }) => (
               <Tooltip label={copied ? "Copied" : "Copy"} withArrow position="right">
                 <ActionIcon

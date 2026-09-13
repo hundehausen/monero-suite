@@ -115,6 +115,8 @@ export function generateScriptSummary(
     steps.push("Upgrade existing system packages");
   }
   steps.push("Install Docker (skipped if already installed)");
+  steps.push("Ask before overwriting docker-compose.yml and .env if they already exist");
+  steps.push("Check free disk space for the blockchain");
 
   const serviceNames = checkedServices.map((s) => s.name);
   steps.push(
@@ -135,6 +137,7 @@ export function generateScriptSummary(
   }
 
   steps.push("Pull container images and start services");
+  steps.push("Print container status and access URLs");
 
   return steps;
 }

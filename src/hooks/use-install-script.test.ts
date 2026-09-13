@@ -44,6 +44,9 @@ describe("useInstallScript", () => {
     expect(result.current.installationCommand).toBe(
       "curl -sSL https://monerosuite.app/install/abc123 | bash"
     );
+    expect(result.current.verboseInstallationCommand).toBe(
+      "curl -sSL https://monerosuite.app/install/abc123 | bash -s -- --verbose"
+    );
     expect(result.current.currentConfigIsUploaded).toBe(true);
 
     // Change config -> stale command must be cleared
@@ -52,6 +55,7 @@ describe("useInstallScript", () => {
     });
     expect(result.current.currentConfigIsUploaded).toBe(false);
     expect(result.current.installationCommand).toBeUndefined();
+    expect(result.current.verboseInstallationCommand).toBeUndefined();
   });
 
   it("surfaces a generic error notification when upload fails", async () => {

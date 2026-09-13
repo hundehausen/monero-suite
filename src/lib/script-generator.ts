@@ -7,6 +7,21 @@ import {
   ENV_FILE_TEMPLATE,
   SETUP_TEMPLATE,
 } from "./bash-templates";
+import {
+  bashSingleQuote,
+  emptyInstallScriptHints,
+  FULL_NODE_DISK_GB,
+  PRUNED_NODE_DISK_GB,
+  renderAccessUrlEchoes,
+  renderSecretWarningEchoes,
+  type InstallScriptHints,
+} from "./install-next-steps";
+
+export type { InstallScriptHints } from "./install-next-steps";
+export {
+  emptyInstallScriptHints,
+  installScriptHintsFromConfig,
+} from "./install-next-steps";
 
 export const MONITORING_BASH_COMMANDS = `
 # Set up monitoring configuration
@@ -100,7 +115,8 @@ export function generateInstallationScript(
   envContent?: string,
   isExposed = false,
   firewallPorts = "",
-  upgradeSystemPackages = false
+  upgradeSystemPackages = false,
+  hints: InstallScriptHints = emptyInstallScriptHints()
 ): string {
   let script = DOCKER_INSTALLATION_TEMPLATE.replace(
     "${NETWORK_MODE_PLACEHOLDER}",
@@ -110,6 +126,26 @@ export function generateInstallationScript(
     .replace(
       "${UPGRADE_SYSTEM_PACKAGES_PLACEHOLDER}",
       upgradeSystemPackages ? "true" : "false"
+    )
+    .replace(
+      "${HAS_HIDDEN_SERVICES_PLACEHOLDER}",
+      hints.hasHiddenServices ? "true" : "false"
+    )
+    .replace("${OFFLINE_MODE_PLACEHOLDER}", hints.offlineMode ? "true" : "false")
+    .replace(
+      "${IS_PRUNED_NODE_PLACEHOLDER}",
+      hints.isPrunedNode ? "true" : "false"
+    )
+    .replace(
+      "${BLOCKCHAIN_PATH_PLACEHOLDER}",
+      bashSingleQuote(hints.blockchainPath)
+    )
+    .replace("${PRUNED_DISK_GB_PLACEHOLDER}", String(PRUNED_NODE_DISK_GB))
+    .replace("${FULL_DISK_GB_PLACEHOLDER}", String(FULL_NODE_DISK_GB))
+    .replace("__ACCESS_URLS__", renderAccessUrlEchoes(hints.accessLines))
+    .replace(
+      "__SECRET_WARNINGS__",
+      renderSecretWarningEchoes(hints.secretWarnings)
     );
 
   script += SETUP_TEMPLATE.replace(

@@ -21,6 +21,22 @@ describe("generateScriptSummary system packages", () => {
       on.indexOf("Install Docker (skipped if already installed)")
     );
   });
+
+  it("mentions overwrite, disk space, and access URLs", () => {
+    const steps = generateScriptSummary([], null, false, "");
+    expect(steps).toContain(
+      "Ask before overwriting docker-compose.yml and .env if they already exist"
+    );
+    expect(steps).toContain("Check free disk space for the blockchain");
+    expect(steps).toContain("Print container status and access URLs");
+    expect(
+      steps.indexOf("Install Docker (skipped if already installed)")
+    ).toBeLessThan(
+      steps.indexOf(
+        "Ask before overwriting docker-compose.yml and .env if they already exist"
+      )
+    );
+  });
 });
 
 describe("generateBashPreview system packages", () => {

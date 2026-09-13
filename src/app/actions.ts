@@ -15,7 +15,10 @@ import {
   generateBashScriptFile,
   getFirewallPorts,
 } from "@/app/utils";
-import { generateInstallationScript } from "@/lib/script-generator";
+import {
+  generateInstallationScript,
+  installScriptHintsFromConfig,
+} from "@/lib/script-generator";
 
 const compiledFullConfigSchema = z.compile(fullConfigSchema);
 
@@ -45,7 +48,8 @@ export async function uploadInstallScript(
     envString || undefined,
     isExposed,
     firewallPorts,
-    parsed.upgradeSystemPackages
+    parsed.upgradeSystemPackages,
+    installScriptHintsFromConfig(parsed)
   );
 
   const configId = nanoid();
