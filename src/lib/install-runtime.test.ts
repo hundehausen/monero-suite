@@ -30,7 +30,7 @@ function writeExec(file: string, body: string) {
 
 function runBash(
   body: string,
-  env: NodeJS.ProcessEnv = {}
+  env: Readonly<Record<string, string>> = {}
 ): { status: number; output: string } {
   const result = spawnSync("/bin/bash", ["-c", body], {
     encoding: "utf8",
