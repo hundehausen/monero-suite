@@ -2,6 +2,7 @@ import type { FullConfig } from "./config-schema";
 import { isPlaceholderDomain } from "./docker-helpers";
 import { getDefaultSecretWarnings } from "./default-secrets";
 import {
+  MONEROD_FCMP_STRESSNET_PORTS,
   MONEROD_PORTS,
   MONEROD_STAGENET_PORTS,
   P2POOL_PORTS,
@@ -179,6 +180,18 @@ export function installScriptHintsFromConfig(
     accessLines.push({
       label: "Cuprate RPC",
       url: localUrl(config, SERVICE_PORTS.cuprateRpc, "http"),
+    });
+  }
+
+  if (s.isFcmpStressnet) {
+    accessLines.push({
+      label: "FCMP++ stressnet restricted RPC",
+      url: localUrl(
+        config,
+        MONEROD_FCMP_STRESSNET_PORTS.rpcRestricted,
+        "http",
+        s.isFcmpStressnetPublic
+      ),
     });
   }
 

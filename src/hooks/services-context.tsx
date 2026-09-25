@@ -15,6 +15,7 @@ import {
   useTraefikService,
   usePortainerService,
   useCuprateService,
+  useFcmpStressnetService,
   useMoneroLwsService,
   useMoneroPayService,
 } from "./services";
@@ -32,6 +33,7 @@ export type XmrigProxyState = ReturnType<typeof useXmrigProxyService>["stateFunc
 export type TraefikState = ReturnType<typeof useTraefikService>["stateFunctions"];
 export type PortainerState = ReturnType<typeof usePortainerService>["stateFunctions"];
 export type CuprateState = ReturnType<typeof useCuprateService>["stateFunctions"];
+export type FcmpStressnetState = ReturnType<typeof useFcmpStressnetService>["stateFunctions"];
 export type MoneroLwsState = ReturnType<typeof useMoneroLwsService>["stateFunctions"];
 export type MoneroPayState = ReturnType<typeof useMoneroPayService>["stateFunctions"];
 
@@ -191,6 +193,18 @@ export function usePortainerState(): PortainerState {
 export function useCuprateState(): CuprateState {
   const { stateFunctions: s } = useServicesContext();
   return { isCuprateEnabled: s.isCuprateEnabled, setIsCuprateEnabled: s.setIsCuprateEnabled };
+}
+
+export function useFcmpStressnetState(): FcmpStressnetState {
+  const { stateFunctions: s } = useServicesContext();
+  return {
+    isFcmpStressnet: s.isFcmpStressnet,
+    setIsFcmpStressnet: s.setIsFcmpStressnet,
+    isFcmpStressnetPublic: s.isFcmpStressnetPublic,
+    setIsFcmpStressnetPublic: s.setIsFcmpStressnetPublic,
+    isFcmpStressnetPruned: s.isFcmpStressnetPruned,
+    setIsFcmpStressnetPruned: s.setIsFcmpStressnetPruned,
+  };
 }
 
 export function useMoneroLwsState(): MoneroLwsState {

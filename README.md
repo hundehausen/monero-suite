@@ -27,6 +27,7 @@ Running a Monero node should be accessible to everyone, not just sysadmins. Mone
 |---------|-------------|
 | [monerod](https://getmonero.org) | The Monero daemon — syncs and validates the blockchain |
 | [Cuprate](https://github.com/cuprate/cuprate) | Alternative Monero node written in Rust (experimental) |
+| [FCMP++ Stressnet](https://github.com/hundehausen/monero-fcmp-docker) | monerod for the FCMP++ & Carrot beta stressnet (experimental, testnet only) |
 | [monero-wallet-rpc](https://web.getmonero.org/resources/developer-guides/wallet-rpc.html) | Control a Monero wallet programmatically |
 | [monero-lws](https://github.com/vtnerd/monero-lws) | Light wallet server — scan view keys for Cake/Skylight/MyMonero-compatible wallets |
 | [MoneroPay](https://github.com/moneropay/moneropay) | HTTP payment API on top of wallet-rpc (hot wallet, SQLite) |

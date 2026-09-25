@@ -13,6 +13,7 @@ import { createXmrigProxyService, isXmrigProxyEffective } from "./xmrig-proxy";
 import { createTraefikService } from "./traefik";
 import { createPortainerService } from "./portainer";
 import { createCuprateService } from "./cuprate";
+import { createMonerodFcmpStressnetService } from "./monerod-fcmp-stressnet";
 import { createMoneroLwsService } from "./monero-lws";
 import { createMoneroPayService } from "./moneropay";
 import { anyHiddenService, type GenerationCtx } from "./ctx";
@@ -65,6 +66,7 @@ export function generateAllServices(config: FullConfig): ServiceMap {
     traefik: createTraefikService(config),
     portainer: createPortainerService(config),
     cuprate: createCuprateService(config),
+    "monerod-fcmp-stressnet": createMonerodFcmpStressnetService(config),
     "monero-lws": createMoneroLwsService(config, ctx),
     moneropay: createMoneroPayService(config),
   };

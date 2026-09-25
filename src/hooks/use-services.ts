@@ -20,6 +20,7 @@ import {
   useTraefikService,
   usePortainerService,
   useCuprateService,
+  useFcmpStressnetService,
   useMoneroLwsService,
   useMoneroPayService,
 } from "./services";
@@ -74,6 +75,7 @@ export const useServices = () => {
   const traefikService = useTraefikService();
   const portainerService = usePortainerService();
   const cuprateService = useCuprateService();
+  const fcmpStressnetService = useFcmpStressnetService();
   const moneroLwsService = useMoneroLwsService();
   const moneroPayService = useMoneroPayService();
 
@@ -176,6 +178,7 @@ export const useServices = () => {
     ...traefikService.stateFunctions,
     ...portainerService.stateFunctions,
     ...cuprateService.stateFunctions,
+    ...fcmpStressnetService.stateFunctions,
     ...moneroLwsService.stateFunctions,
     ...moneroPayService.stateFunctions,
   };
@@ -197,6 +200,7 @@ export const useServices = () => {
         ...traefikService.stateFunctions,
         ...portainerService.stateFunctions,
         ...cuprateService.stateFunctions,
+        ...fcmpStressnetService.stateFunctions,
         ...moneroLwsService.stateFunctions,
         ...moneroPayService.stateFunctions,
         ...xmrigProxyService.stateFunctions,

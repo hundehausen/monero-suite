@@ -42,6 +42,12 @@ export const P2POOL_PORTS = {
   p2pNano: 37890,
 } as const;
 
+// FCMP++ & Carrot beta stressnet daemon ports (testnet network)
+export const MONEROD_FCMP_STRESSNET_PORTS = {
+  p2p: 28080,
+  rpcRestricted: 28089,
+} as const;
+
 // Other service ports
 export const SERVICE_PORTS = {
   grafana: 3000,
@@ -89,6 +95,7 @@ export const DOCKER_IMAGES = {
   xmrig: "ghcr.io/metal3d/xmrig:latest",
   portainer: "portainer/portainer-ce:latest",
   cuprate: "ghcr.io/hundehausen/cuprate-docker:latest",
+  monerodFcmpStressnet: "ghcr.io/hundehausen/monero-fcmp-docker:latest",
   moneroLws: "ghcr.io/vtnerd/monero-lws:latest",
   moneroPay: "registry.gitlab.com/moneropay/moneropay:v2",
   xmrigProxy: "xmrig/xmrig-proxy:latest",

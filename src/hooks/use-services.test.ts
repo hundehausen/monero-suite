@@ -144,6 +144,13 @@ vi.mock("./services", async () => {
     useCuprateService: () => ({
       stateFunctions: { isCuprateEnabled: false },
     }),
+    useFcmpStressnetService: () => ({
+      stateFunctions: {
+        isFcmpStressnet: false,
+        isFcmpStressnetPublic: false,
+        isFcmpStressnetPruned: false,
+      },
+    }),
     useMoneroLwsService: () => {
       const [isMoneroLws, setIsMoneroLws] = React.useState(false);
       return {

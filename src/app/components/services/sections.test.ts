@@ -7,10 +7,10 @@ import {
 } from "./sections";
 
 describe("SECTIONS", () => {
-  it("has 16 unique accordion values", () => {
+  it("has 17 unique accordion values", () => {
     const values = SECTIONS.map((section) => section.value);
-    expect(values).toHaveLength(16);
-    expect(new Set(values).size).toBe(16);
+    expect(values).toHaveLength(17);
+    expect(new Set(values).size).toBe(17);
   });
 
   it("lists system-packages after network mode and before the mainnet node", () => {

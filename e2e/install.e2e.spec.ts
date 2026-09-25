@@ -21,6 +21,7 @@ const CANNED_URL =
   "&offlineMode=true" +
   "&isStagenetNode=false" +
   "&isCuprateEnabled=false" +
+  "&isFcmpStressnet=false" +
   "&isMoneroWalletRpc=false" +
   "&isTraefik=false" +
   "&isMonitoring=true" +

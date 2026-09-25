@@ -18,6 +18,7 @@ import {
   PortainerSection,
   WatchtowerSection,
   CuprateSection,
+  FcmpStressnetSection,
 } from "./services";
 import JumpToSection from "./JumpToSection";
 import { useSectionFocus } from "./section-focus";
@@ -56,6 +57,7 @@ const Selection = () => {
         <PortainerSection />
         <WatchtowerSection />
         <CuprateSection />
+        <FcmpStressnetSection />
       </Accordion>
     </>
   );

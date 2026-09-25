@@ -59,6 +59,7 @@ const hotStack: DeepPartial<FullConfig> = {
     isPortainer: true,
     portainerDomain: "portainer.mydomain.com",
     isCuprateEnabled: true,
+    isFcmpStressnet: true,
   },
 };
 

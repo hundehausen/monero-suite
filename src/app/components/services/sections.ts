@@ -88,6 +88,12 @@ export const SECTIONS = [
     label: "Cuprate Node",
     description: "Experimental alternative node",
   },
+  {
+    value: "fcmp-stressnet-node",
+    label: "FCMP++ Stressnet Node",
+    description: "Experimental FCMP++ & Carrot beta stressnet node",
+    keywords: ["fcmp", "carrot", "stressnet", "testnet", "beta"],
+  },
 ] as const satisfies readonly SectionDef[];
 
 export type SectionValue = (typeof SECTIONS)[number]["value"];

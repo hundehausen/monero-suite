@@ -11,5 +11,6 @@ export * from "./xmrig-proxy";
 export * from "./traefik";
 export * from "./portainer";
 export * from "./cuprate";
+export * from "./fcmp-stressnet";
 export * from "./monero-lws";
 export * from "./moneropay";
