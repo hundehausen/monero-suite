@@ -60,7 +60,7 @@ If you prefer to handle Docker yourself:
 3. Run it:
 
 ```bash
-UID="$(id -u)" GID="$(id -g)" docker compose up -d
+docker compose up -d
 ```
 
 Check container status:

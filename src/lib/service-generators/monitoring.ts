@@ -88,7 +88,6 @@ export const createMonitoringService = (
       grafana: {
         image: DOCKER_IMAGES.grafana,
         container_name: "grafana",
-        user: "${UID:-1000}:${GID:-1000}",
         command: "-config=/etc/grafana/grafana.ini",
         restart: "unless-stopped",
         ports: [getPortBinding(networkMode, 3000)],
