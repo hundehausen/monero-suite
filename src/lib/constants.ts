@@ -15,6 +15,9 @@ export const SERVICE_IPS = {
   monerod: "172.28.1.3",
   monerodStagenet: "172.28.1.4",
   p2pool: "172.28.1.5",
+  grafana: "172.28.1.6",
+  moneroLws: "172.28.1.7",
+  moneropay: "172.28.1.8",
 } as const;
 
 // Monero daemon ports

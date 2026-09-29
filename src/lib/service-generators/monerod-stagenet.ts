@@ -13,6 +13,9 @@ export const createMonerodStagenetService = (
   const networkMode = config.networkMode;
   const isTraefik = config.services.isTraefik && config.services.isTraefikStagenet;
   const torProxyMode = config.tor.torProxyMode;
+  const attachTorNet =
+    torProxyMode !== torProxyModes.none ||
+    (config.tor.hsStagenet && state.isStagenetNode);
   const { labels } = getTraefikConfig(isTraefik, "monerod-stagenet", state.stagenetNodeDomain, MONEROD_STAGENET_PORTS.rpcRestricted.toString(), CERT_RESOLVER_NAME);
   const sPath = safeParse(pathSchema, state.moneroStagenetBlockchainLocation, "~/.bitmonero");
   return ({
@@ -53,7 +56,7 @@ export const createMonerodStagenetService = (
                 },
               }
             : undefined,
-        ...getTorNetworkConfig(torProxyMode, SERVICE_IPS.monerodStagenet),
+        ...getTorNetworkConfig(attachTorNet, SERVICE_IPS.monerodStagenet),
         command: [
           "--stagenet",
           "--rpc-restricted-bind-ip=0.0.0.0",

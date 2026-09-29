@@ -46,9 +46,10 @@ export const createTorService = (
     },
   };
 
-  if (isProxyEnabled) {
-    // Stay on default so non-Tor peers can still resolve "tor" if needed;
-    // static IP on tor-proxy is what monerod --tx-proxy/--proxy use.
+  if (isProxyEnabled || isHiddenServices) {
+    // Stay on default so non-Tor peers can still resolve "tor" if needed.
+    // HiddenServicePort targets are IPv4 addresses on tor-proxy, so this
+    // network exists even when the SOCKS proxy is off.
     service.code.tor.networks = {
       default: {},
       [DOCKER_NETWORK.name]: {
@@ -82,33 +83,36 @@ export const createTorService = (
 
     service.code.tor.volumes = ["tor-data:/var/lib/tor/"];
 
+    const target = (ip: string, port: number, virtualPort = port) =>
+      `${ip}:${port}:${virtualPort}`;
+
     service.code.tor.environment = {
       ...(hsMonerod
-        ? { HS_MONEROD_MAINNET: `monerod:${MONEROD_PORTS.rpcRestricted}:${MONEROD_PORTS.rpcRestricted}` }
+        ? { HS_MONEROD_MAINNET: target(SERVICE_IPS.monerod, MONEROD_PORTS.rpcRestricted) }
         : {}),
       ...(hsMonerodP2P
-        ? { HS_MONEROD_P2P: `monerod:${MONEROD_PORTS.torP2p}:${MONEROD_PORTS.torP2p}` }
+        ? { HS_MONEROD_P2P: target(SERVICE_IPS.monerod, MONEROD_PORTS.torP2p) }
         : {}),
       ...(hsStagenet && isStagenetNode
-        ? { HS_MONEROD_MAINNET_STAGENET: `monerod-stagenet:${MONEROD_STAGENET_PORTS.rpcRestricted}:${MONEROD_STAGENET_PORTS.rpcRestricted}` }
+        ? { HS_MONEROD_MAINNET_STAGENET: target(SERVICE_IPS.monerodStagenet, MONEROD_STAGENET_PORTS.rpcRestricted) }
         : {}),
       ...(hsP2Pool && p2PoolMode === p2poolModes.full
-        ? { HS_P2POOL: `p2pool:${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}` }
+        ? { HS_P2POOL: target(SERVICE_IPS.p2pool, P2POOL_PORTS.stratum) }
         : {}),
       ...(hsP2Pool && p2PoolMode === p2poolModes.mini
-        ? { HS_P2POOL_MINI: `p2pool-mini:${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}` }
+        ? { HS_P2POOL_MINI: target(SERVICE_IPS.p2pool, P2POOL_PORTS.stratum) }
         : {}),
       ...(hsP2Pool && p2PoolMode === p2poolModes.nano
-        ? { HS_P2POOL_NANO: `p2pool-nano:${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}` }
+        ? { HS_P2POOL_NANO: target(SERVICE_IPS.p2pool, P2POOL_PORTS.stratum) }
         : {}),
       ...(hsGrafana && isMonitoring
-        ? { HS_GRAFANA: `grafana:${SERVICE_PORTS.grafana}:80` }
+        ? { HS_GRAFANA: target(SERVICE_IPS.grafana, SERVICE_PORTS.grafana, 80) }
         : {}),
       ...(hsLws && isMoneroLws
-        ? { HS_MONERO_LWS: `monero-lws:${SERVICE_PORTS.moneroLws}:${SERVICE_PORTS.moneroLws}` }
+        ? { HS_MONERO_LWS: target(SERVICE_IPS.moneroLws, SERVICE_PORTS.moneroLws) }
         : {}),
       ...(hsMoneroPay && isMoneroPay
-        ? { HS_MONEROPAY: `moneropay:${SERVICE_PORTS.moneroPay}:${SERVICE_PORTS.moneroPay}` }
+        ? { HS_MONEROPAY: target(SERVICE_IPS.moneropay, SERVICE_PORTS.moneroPay) }
         : {}),
     };
   }

@@ -2,11 +2,12 @@ import {
   Service,
   architectures,
 } from "@/lib/service-types";
-import { DOCKER_IMAGES, SERVICE_PORTS } from "@/lib/constants";
+import { DOCKER_IMAGES, SERVICE_IPS, SERVICE_PORTS } from "@/lib/constants";
 import {
   getTraefikConfig,
   getPortBinding,
   getTorClientNetworkConfig,
+  getTorNetworkConfig,
 } from "@/lib/docker-helpers";
 import type { FullConfig } from "@/lib/config-schema";
 import { CERT_RESOLVER_NAME } from "./traefik";
@@ -46,7 +47,9 @@ export const createMoneroPayService = (
           ZERO_CONF: "true",
         },
         depends_on: { "monero-wallet-rpc": { condition: "service_healthy" } },
-        ...getTorClientNetworkConfig(config.tor.torProxyMode),
+        ...(config.tor.hsMoneroPay && config.services.isMoneroPay
+          ? getTorNetworkConfig(true, SERVICE_IPS.moneropay)
+          : getTorClientNetworkConfig(config.tor.torProxyMode)),
         labels,
       },
     },

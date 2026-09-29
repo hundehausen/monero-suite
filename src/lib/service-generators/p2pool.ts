@@ -26,6 +26,9 @@ export const createP2PoolService = (
   const { p2PoolMode, p2PoolPayoutAddress, p2PoolMiningThreads, isP2PoolStratumPublic } = config.p2pool;
   const miningMode = config.mining.miningMode;
   const torProxyMode = config.tor.torProxyMode;
+  const attachTorNet =
+    torProxyMode !== torProxyModes.none ||
+    (config.tor.hsP2Pool && p2PoolMode !== p2poolModes.none);
   const networkMode = config.networkMode;
   const zmqPubPort = ctx.zmqPubPort ?? MONEROD_PORTS.zmqPub;
   const sPayoutAddress = safeParse(moneroAddressSchema, p2PoolPayoutAddress, "");
@@ -72,7 +75,7 @@ export const createP2PoolService = (
             : getPortBinding(networkMode, P2POOL_PORTS.stratum),
           `${p2pPort}:${p2pPort}`,
         ],
-        ...getTorNetworkConfig(torProxyMode, SERVICE_IPS.p2pool, [p2PoolContainerName]),
+        ...getTorNetworkConfig(attachTorNet, SERVICE_IPS.p2pool, [p2PoolContainerName]),
         depends_on: {
           monerod: {
             condition: "service_started",

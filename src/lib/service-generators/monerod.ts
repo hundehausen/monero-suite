@@ -134,6 +134,10 @@ export const createMonerodService = (
 ): Service => {
   const networkMode = config.networkMode;
   const torProxyMode = config.tor.torProxyMode;
+  const attachTorNet =
+    torProxyMode !== torProxyModes.none ||
+    config.tor.hsMonerod ||
+    config.tor.hsMonerodP2P;
   const isMoneroLws = config.services.isMoneroLws;
   const isHiddenServices = ctx.anyHiddenService;
   const isTraefik = config.services.isTraefik && config.services.isTraefikMonerod;
@@ -262,7 +266,7 @@ export const createMonerodService = (
         // No healthcheck override: rely on the image's built-in HEALTHCHECK
         // (/healthcheck.sh), which reads --rpc-bind-port and --rpc-login from
         // the daemon's own cmdline and validates the get_height response body.
-        ...getTorNetworkConfig(torProxyMode, SERVICE_IPS.monerod),
+        ...getTorNetworkConfig(attachTorNet, SERVICE_IPS.monerod),
         command: [
           "--rpc-restricted-bind-ip=0.0.0.0",
           "--rpc-restricted-bind-port=18089",

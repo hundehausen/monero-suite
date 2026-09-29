@@ -1,6 +1,6 @@
 import { Service, architectures } from "@/lib/service-types";
-import { DOCKER_IMAGES, SERVICE_PORTS, MONEROD_PORTS } from "@/lib/constants";
-import { getTraefikConfig, getPortBinding, getTorClientNetworkConfig, hostBind } from "@/lib/docker-helpers";
+import { DOCKER_IMAGES, SERVICE_IPS, SERVICE_PORTS, MONEROD_PORTS } from "@/lib/constants";
+import { getTraefikConfig, getPortBinding, getTorClientNetworkConfig, getTorNetworkConfig, hostBind } from "@/lib/docker-helpers";
 import { MONITORING_BASH_COMMANDS } from "@/lib/script-generator";
 import type { FullConfig } from "@/lib/config-schema";
 import { CERT_RESOLVER_NAME } from "./traefik";
@@ -15,7 +15,10 @@ export const createMonitoringService = (
   const torProxyMode = config.tor.torProxyMode;
   const { domain, labels } = getTraefikConfig(isTraefik, "monitoring", grafanaDomain, SERVICE_PORTS.grafana.toString(), CERT_RESOLVER_NAME, `localhost:${SERVICE_PORTS.grafana}`);
   const torClientNet = getTorClientNetworkConfig(torProxyMode);
-  const grafanaTorNet = getTorClientNetworkConfig(torProxyMode, ["grafana"]);
+  const grafanaHiddenService = config.tor.hsGrafana && isMonitoring;
+  const grafanaTorNet = grafanaHiddenService
+    ? getTorNetworkConfig(true, SERVICE_IPS.grafana, ["grafana"])
+    : getTorClientNetworkConfig(torProxyMode, ["grafana"]);
   return ({
     name: "Monitoring",
     description:

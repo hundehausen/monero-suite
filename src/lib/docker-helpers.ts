@@ -103,14 +103,16 @@ export function getP2pPortBinding(
  * Dual-home a service on the default Compose network and tor-proxy
  * with a static IP. Listing only the Tor net would drop the default network
  * and break peers that stay on default (monitoring, wallet-rpc, Traefik, etc.).
- * Returns empty object when Tor proxy is disabled.
+ * Attach when the SOCKS proxy is on, or when this container is a hidden-service
+ * target: current Tor rejects hostnames in HiddenServicePort.
+ * Returns empty object when `attach` is false.
  */
 export function getTorNetworkConfig(
-  torProxyMode: TorProxyMode,
+  attach: boolean,
   ipv4Address: string,
   aliases?: string[]
 ): Record<string, unknown> {
-  if (torProxyMode === torProxyModes.none) return {};
+  if (!attach) return {};
   return {
     networks: {
       default: {},

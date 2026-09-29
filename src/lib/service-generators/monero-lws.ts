@@ -2,11 +2,12 @@ import {
   Service,
   architectures,
 } from "@/lib/service-types";
-import { DOCKER_IMAGES, SERVICE_PORTS, MONEROD_PORTS } from "@/lib/constants";
+import { DOCKER_IMAGES, SERVICE_IPS, SERVICE_PORTS, MONEROD_PORTS } from "@/lib/constants";
 import {
   getTraefikConfig,
   getPortBinding,
   getTorClientNetworkConfig,
+  getTorNetworkConfig,
 } from "@/lib/docker-helpers";
 import type { FullConfig } from "@/lib/config-schema";
 import type { GenerationCtx } from "./ctx";
@@ -50,7 +51,9 @@ export const createMoneroLwsService = (
           "monero-lws-data:/home/monero-lws/.bitmonero/light_wallet_server",
         ],
         depends_on: { monerod: { condition: "service_started" } },
-        ...getTorClientNetworkConfig(config.tor.torProxyMode),
+        ...(config.tor.hsLws && config.services.isMoneroLws
+          ? getTorNetworkConfig(true, SERVICE_IPS.moneroLws)
+          : getTorClientNetworkConfig(config.tor.torProxyMode)),
         labels,
         command: [
           `--daemon=tcp://monerod:${MONEROD_PORTS.zmqRpc}`,

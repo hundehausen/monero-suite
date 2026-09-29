@@ -92,6 +92,13 @@ const cmd = (c: ContainerSpec): string[] =>
 const flagValue = (command: string[], flag: string): string | undefined =>
   command[command.indexOf(flag) + 1];
 
+const torIpv4 = (spec: ContainerSpec): string | undefined => {
+  const nets = spec.networks as
+    | Record<string, { ipv4_address?: string }>
+    | undefined;
+  return nets?.[DOCKER_NETWORK.name]?.ipv4_address;
+};
+
 describe("monerod <-> p2pool connection", () => {
   it.each([p2poolModes.full, p2poolModes.mini, p2poolModes.nano])(
     "p2pool (%s) reaches monerod's restricted RPC and ZMQ pub ports that monerod actually binds",
@@ -241,18 +248,84 @@ describe("monero-wallet-rpc <-> monerod connection", () => {
 });
 
 describe("tor connections", () => {
-  it("hidden service forwards point at real containers and their actual ports", () => {
-    const services = generateAllServices(makeConfig());
+  it("hidden service forwards use the static IP of the container Tor shares a network with", () => {
+    const config = makeConfig();
+    expect(config.tor.torProxyMode).toBe("none");
+    const services = generateAllServices(config);
     const tor = services.tor.code.tor as ContainerSpec;
     const env = tor.environment ?? {};
+    const monerod = services.monerod.code.monerod as ContainerSpec;
+    const stagenet = services["monerod-stagenet"].code["monerod-stagenet"] as ContainerSpec;
+    const p2pool = services.p2pool.code.p2pool as ContainerSpec;
+    const grafana = services.monitoring.code.grafana as ContainerSpec;
 
     expect(env.HS_MONEROD_MAINNET).toBe(
-      `monerod:${MONEROD_PORTS.rpcRestricted}:${MONEROD_PORTS.rpcRestricted}`
+      `${SERVICE_IPS.monerod}:${MONEROD_PORTS.rpcRestricted}:${MONEROD_PORTS.rpcRestricted}`
     );
-    expect(env.HS_P2POOL).toBe(`p2pool:${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}`);
-    expect(env.HS_GRAFANA).toBe(`grafana:${SERVICE_PORTS.grafana}:80`);
+    expect(env.HS_MONEROD_P2P).toBe(
+      `${SERVICE_IPS.monerod}:${MONEROD_PORTS.torP2p}:${MONEROD_PORTS.torP2p}`
+    );
+    expect(env.HS_P2POOL).toBe(
+      `${SERVICE_IPS.p2pool}:${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}`
+    );
+    expect(env.HS_GRAFANA).toBe(`${SERVICE_IPS.grafana}:${SERVICE_PORTS.grafana}:80`);
     expect(env.HS_MONEROD_MAINNET_STAGENET).toBe(
-      `monerod-stagenet:${MONEROD_STAGENET_PORTS.rpcRestricted}:${MONEROD_STAGENET_PORTS.rpcRestricted}`
+      `${SERVICE_IPS.monerodStagenet}:${MONEROD_STAGENET_PORTS.rpcRestricted}:${MONEROD_STAGENET_PORTS.rpcRestricted}`
+    );
+    expect(torIpv4(monerod)).toBe(SERVICE_IPS.monerod);
+    expect(torIpv4(stagenet)).toBe(SERVICE_IPS.monerodStagenet);
+    expect(torIpv4(p2pool)).toBe(SERVICE_IPS.p2pool);
+    expect(torIpv4(grafana)).toBe(SERVICE_IPS.grafana);
+    expect(torIpv4(tor)).toBe(SERVICE_IPS.tor);
+    expect(torIpv4(services.monitoring.code.prometheus as ContainerSpec)).toBeUndefined();
+
+    const compose = generateDockerComposeFile(checkedServicesOf(config));
+    const networks = compose.networks as Record<string, { ipam?: { config?: Array<{ subnet?: string }> } }>;
+    expect(networks[DOCKER_NETWORK.name]?.ipam?.config?.[0]?.subnet).toBe(DOCKER_NETWORK.subnet);
+    expect(torIpv4(compose.services?.monerod as ContainerSpec)).toBe(SERVICE_IPS.monerod);
+  });
+
+  it("mini and nano hidden services use the single p2pool address", () => {
+    for (const mode of [p2poolModes.mini, p2poolModes.nano] as const) {
+      const services = generateAllServices(
+        makeConfig({
+          p2pool: {
+            p2PoolMode: mode,
+            p2PoolPayoutAddress: VALID_ADDRESS,
+            p2PoolMiningThreads: 4,
+            isP2PoolStratumPublic: false,
+          },
+        })
+      );
+      const env = (services.tor.code.tor as ContainerSpec).environment ?? {};
+      const key = mode === p2poolModes.mini ? "HS_P2POOL_MINI" : "HS_P2POOL_NANO";
+      expect(env[key]).toBe(
+        `${SERVICE_IPS.p2pool}:${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}`
+      );
+      expect(env.HS_P2POOL).toBeUndefined();
+      const container = services.p2pool.code[getP2PoolContainerName(mode)] as ContainerSpec;
+      expect(torIpv4(container)).toBe(SERVICE_IPS.p2pool);
+    }
+  });
+
+  it("pins grafana only when its hidden service is on", () => {
+    const proxyOnly = generateAllServices(
+      makeConfig({
+        tor: { ...makeConfig().tor, torProxyMode: "full", hsGrafana: false },
+      })
+    );
+    const proxyGrafana = proxyOnly.monitoring.code.grafana as ContainerSpec;
+    const proxyNets = proxyGrafana.networks as Record<string, { ipv4_address?: string }>;
+    expect(proxyNets[DOCKER_NETWORK.name]).toEqual({ aliases: ["grafana"] });
+
+    const both = generateAllServices(
+      makeConfig({
+        tor: { ...makeConfig().tor, torProxyMode: "full", hsGrafana: true },
+      })
+    );
+    expect(torIpv4(both.monitoring.code.grafana as ContainerSpec)).toBe(SERVICE_IPS.grafana);
+    expect((both.tor.code.tor as ContainerSpec).environment?.HS_GRAFANA).toBe(
+      `${SERVICE_IPS.grafana}:${SERVICE_PORTS.grafana}:80`
     );
   });
 
@@ -295,8 +368,10 @@ describe("tor connections", () => {
     const tor = services.tor.code.tor as ContainerSpec;
     expect(lws.command).toContain(`--rest-server=http://0.0.0.0:${SERVICE_PORTS.moneroLws}`);
     expect(tor.environment?.HS_MONERO_LWS).toBe(
-      `monero-lws:${SERVICE_PORTS.moneroLws}:${SERVICE_PORTS.moneroLws}`
+      `${SERVICE_IPS.moneroLws}:${SERVICE_PORTS.moneroLws}:${SERVICE_PORTS.moneroLws}`
     );
+    expect(torIpv4(lws)).toBe(SERVICE_IPS.moneroLws);
+    expect(config.tor.torProxyMode).toBe("none");
   });
 
   it("MoneroPay hidden service forwards the API port moneropay actually binds", () => {
@@ -309,8 +384,10 @@ describe("tor connections", () => {
     const tor = services.tor.code.tor as ContainerSpec;
     expect(pay.environment?.BIND).toBe(`0.0.0.0:${SERVICE_PORTS.moneroPay}`);
     expect(tor.environment?.HS_MONEROPAY).toBe(
-      `moneropay:${SERVICE_PORTS.moneroPay}:${SERVICE_PORTS.moneroPay}`
+      `${SERVICE_IPS.moneropay}:${SERVICE_PORTS.moneroPay}:${SERVICE_PORTS.moneroPay}`
     );
+    expect(torIpv4(pay)).toBe(SERVICE_IPS.moneropay);
+    expect(config.tor.torProxyMode).toBe("none");
   });
 });
 
