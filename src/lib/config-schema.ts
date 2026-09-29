@@ -109,7 +109,6 @@ export const torConfigSchema = z.object({
   hsGrafana: z.boolean(),
   hsLws: z.boolean(),
   hsMoneroPay: z.boolean(),
-  hsXmrigProxy: z.boolean(),
   isGlobalTorProxy: z.boolean(),
 });
 
@@ -137,8 +136,6 @@ export const serviceToggleSchema = z.object({
   isFcmpStressnetPruned: z.boolean(),
   isMoneroLws: z.boolean(),
   isMoneroPay: z.boolean(),
-  isXmrigProxy: z.boolean(),
-  isXmrigProxyPublic: z.boolean(),
   isTraefikLws: z.boolean(),
   isTraefikMoneroPay: z.boolean(),
   lwsDomain: domainSchema,

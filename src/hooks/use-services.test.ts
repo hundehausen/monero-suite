@@ -101,19 +101,14 @@ vi.mock("./services", async () => {
         },
       };
     },
-    useTorService: () => {
-      const [hsXmrigProxy, setHsXmrigProxy] = React.useState(false);
-      return {
-        stateFunctions: {
-          torProxyMode: "none",
-          isHiddenServices: false,
-          hsLws: false,
-          hsMoneroPay: false,
-          hsXmrigProxy,
-          setHsXmrigProxy,
-        },
-      };
-    },
+    useTorService: () => ({
+      stateFunctions: {
+        torProxyMode: "none",
+        isHiddenServices: false,
+        hsLws: false,
+        hsMoneroPay: false,
+      },
+    }),
     useWatchtowerService: () => ({
       stateFunctions: {
         isWatchtower: false,
@@ -123,18 +118,6 @@ vi.mock("./services", async () => {
     }),
     useMonitoringService,
     useXmrigService,
-    useXmrigProxyService: () => {
-      const [isXmrigProxy, setIsXmrigProxy] = React.useState(false);
-      const [isXmrigProxyPublic, setIsXmrigProxyPublic] = React.useState(false);
-      return {
-        stateFunctions: {
-          isXmrigProxy,
-          setIsXmrigProxy,
-          isXmrigProxyPublic,
-          setIsXmrigProxyPublic,
-        },
-      };
-    },
     useTraefikService: () => ({
       stateFunctions: { isTraefik: false, isTraefikMonerod: false, isTraefikStagenet: false, isTraefikGrafana: false, isTraefikPortainer: false, isTraefikLws: false, isTraefikMoneroPay: false },
     }),
@@ -181,65 +164,6 @@ describe("useServices miningMode reset (fix 6)", () => {
     act(() => setP2PoolMode("none"));
     expect(result.current.stateFunctions.p2PoolMode).toBe("none");
     expect(result.current.stateFunctions.miningMode).toBe("none");
-  });
-});
-
-describe("useServices xmrig-proxy reset", () => {
-  it("enabling proxy while p2PoolMode is none is reset to false", () => {
-    const { result } = renderHook(() => useServices());
-
-    act(() => {
-      result.current.stateFunctions.setP2PoolMode("none");
-    });
-    expect(result.current.stateFunctions.p2PoolMode).toBe("none");
-
-    act(() => {
-      result.current.stateFunctions.setIsXmrigProxy(true);
-    });
-
-    expect(result.current.stateFunctions.isXmrigProxy).toBe(false);
-  });
-
-  it("clears public and hidden-service flags when P2Pool is switched to none", () => {
-    const { result } = renderHook(() => useServices());
-
-    act(() => {
-      result.current.stateFunctions.setIsXmrigProxy(true);
-      result.current.stateFunctions.setIsXmrigProxyPublic(true);
-      result.current.stateFunctions.setHsXmrigProxy(true);
-    });
-    expect(result.current.stateFunctions.isXmrigProxy).toBe(true);
-    expect(result.current.stateFunctions.isXmrigProxyPublic).toBe(true);
-    expect(result.current.stateFunctions.hsXmrigProxy).toBe(true);
-
-    act(() => {
-      result.current.stateFunctions.setP2PoolMode("none");
-    });
-
-    expect(result.current.stateFunctions.isXmrigProxy).toBe(false);
-    expect(result.current.stateFunctions.isXmrigProxyPublic).toBe(false);
-    expect(result.current.stateFunctions.hsXmrigProxy).toBe(false);
-  });
-
-  it("enabling proxy then switching architecture to arm64 resets the flags", () => {
-    const { result } = renderHook(() => useServices());
-
-    act(() => {
-      result.current.stateFunctions.setIsXmrigProxy(true);
-      result.current.stateFunctions.setIsXmrigProxyPublic(true);
-      result.current.stateFunctions.setHsXmrigProxy(true);
-    });
-    expect(result.current.stateFunctions.isXmrigProxy).toBe(true);
-    expect(result.current.stateFunctions.architecture).toBe("linux/amd64");
-
-    act(() => {
-      result.current.stateFunctions.setArchitecture("linux/arm64");
-    });
-
-    expect(result.current.stateFunctions.architecture).toBe("linux/arm64");
-    expect(result.current.stateFunctions.isXmrigProxy).toBe(false);
-    expect(result.current.stateFunctions.isXmrigProxyPublic).toBe(false);
-    expect(result.current.stateFunctions.hsXmrigProxy).toBe(false);
   });
 });
 

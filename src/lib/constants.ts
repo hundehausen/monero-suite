@@ -55,7 +55,6 @@ export const SERVICE_PORTS = {
   moneroLws: 8443,
   moneroLwsAdmin: 8081,
   moneroPay: 5000,
-  xmrigProxy: 3334,
   portainer: 9000,
   portainerSsl: 9443,
   traefikHttp: 80,
@@ -98,7 +97,6 @@ export const DOCKER_IMAGES = {
   monerodFcmpStressnet: "ghcr.io/hundehausen/monero-fcmp-docker:latest",
   moneroLws: "ghcr.io/vtnerd/monero-lws:latest",
   moneroPay: "registry.gitlab.com/moneropay/moneropay:v2",
-  xmrigProxy: "xmrig/xmrig-proxy:latest",
 } as const;
 
 export const LWS_TRAEFIK_DEFAULT_DOMAIN = "lws.example.com" as const;

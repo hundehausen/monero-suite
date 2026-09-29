@@ -10,7 +10,6 @@ import {
 } from "./constants";
 import { networkModes, p2poolModes, torProxyModes } from "./service-types";
 import { anyHiddenService } from "./service-generators/ctx";
-import { isXmrigProxyEffective } from "./service-generators/xmrig-proxy";
 
 /** GiB we warn below for a pruned mainnet node. About 2/3 smaller than full. */
 export const PRUNED_NODE_DISK_GB = 100;
@@ -160,19 +159,6 @@ export function installScriptHintsFromConfig(
     accessLines.push({
       label: "P2Pool stratum",
       url: `${publishedHost(config.networkMode, config.p2pool.isP2PoolStratumPublic)}:${P2POOL_PORTS.stratum}`,
-    });
-  }
-
-  if (
-    isXmrigProxyEffective(
-      s.isXmrigProxy,
-      config.p2pool.p2PoolMode,
-      config.architecture
-    )
-  ) {
-    accessLines.push({
-      label: "XMRig proxy",
-      url: `${publishedHost(config.networkMode, s.isXmrigProxyPublic)}:${SERVICE_PORTS.xmrigProxy}`,
     });
   }
 

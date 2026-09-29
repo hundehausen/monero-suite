@@ -11,7 +11,6 @@ import {
   useWatchtowerService,
   useMonitoringService,
   useXmrigService,
-  useXmrigProxyService,
   useTraefikService,
   usePortainerService,
   useCuprateService,
@@ -29,7 +28,6 @@ export type TorState = ReturnType<typeof useTorService>["stateFunctions"];
 export type WatchtowerState = ReturnType<typeof useWatchtowerService>["stateFunctions"];
 export type MonitoringState = ReturnType<typeof useMonitoringService>["stateFunctions"];
 export type XmrigState = ReturnType<typeof useXmrigService>["stateFunctions"];
-export type XmrigProxyState = ReturnType<typeof useXmrigProxyService>["stateFunctions"];
 export type TraefikState = ReturnType<typeof useTraefikService>["stateFunctions"];
 export type PortainerState = ReturnType<typeof usePortainerService>["stateFunctions"];
 export type CuprateState = ReturnType<typeof useCuprateService>["stateFunctions"];
@@ -126,7 +124,6 @@ export function useTorState(): TorState {
     hsGrafana: s.hsGrafana, setHsGrafana: s.setHsGrafana,
     hsLws: s.hsLws, setHsLws: s.setHsLws,
     hsMoneroPay: s.hsMoneroPay, setHsMoneroPay: s.setHsMoneroPay,
-    hsXmrigProxy: s.hsXmrigProxy, setHsXmrigProxy: s.setHsXmrigProxy,
     isGlobalTorProxy: s.isGlobalTorProxy, setIsGlobalTorProxy: s.setIsGlobalTorProxy,
   };
 }
@@ -158,14 +155,6 @@ export function useXmrigState(): XmrigState {
   return {
     miningMode: s.miningMode, setMiningMode: s.setMiningMode,
     xmrigDonateLevel: s.xmrigDonateLevel, setXmrigDonateLevel: s.setXmrigDonateLevel,
-  };
-}
-
-export function useXmrigProxyState(): XmrigProxyState {
-  const { stateFunctions: s } = useServicesContext();
-  return {
-    isXmrigProxy: s.isXmrigProxy, setIsXmrigProxy: s.setIsXmrigProxy,
-    isXmrigProxyPublic: s.isXmrigProxyPublic, setIsXmrigProxyPublic: s.setIsXmrigProxyPublic,
   };
 }
 

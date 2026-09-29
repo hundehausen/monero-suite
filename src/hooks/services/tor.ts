@@ -25,7 +25,6 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
   const [hsGrafana, setHsGrafana] = useQueryState("hsGrafana", parseAsBoolean.withDefault(false));
   const [hsLws, setHsLws] = useQueryState("hsLws", parseAsBoolean.withDefault(false));
   const [hsMoneroPay, setHsMoneroPay] = useQueryState("hsMoneroPay", parseAsBoolean.withDefault(false));
-  const [hsXmrigProxy, setHsXmrigProxy] = useQueryState("hsXmrigProxy", parseAsBoolean.withDefault(false));
 
   const [isGlobalTorProxy, setIsGlobalTorProxy] = useQueryState(
     "isGlobalTorProxy",
@@ -41,7 +40,6 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
     hsGrafana,
     hsLws,
     hsMoneroPay,
-    hsXmrigProxy,
     isGlobalTorProxy,
   });
 
@@ -70,8 +68,6 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
       setHsLws,
       hsMoneroPay,
       setHsMoneroPay,
-      hsXmrigProxy,
-      setHsXmrigProxy,
       isGlobalTorProxy,
       setIsGlobalTorProxy,
     },

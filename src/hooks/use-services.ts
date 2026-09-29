@@ -16,7 +16,6 @@ import {
   useWatchtowerService,
   useMonitoringService,
   useXmrigService,
-  useXmrigProxyService,
   useTraefikService,
   usePortainerService,
   useCuprateService,
@@ -71,7 +70,6 @@ export const useServices = () => {
   const watchtowerService = useWatchtowerService();
   const monitoringService = useMonitoringService();
   const xmrigService = useXmrigService();
-  const xmrigProxyService = useXmrigProxyService();
   const traefikService = useTraefikService();
   const portainerService = usePortainerService();
   const cuprateService = useCuprateService();
@@ -83,13 +81,6 @@ export const useServices = () => {
   const { grafanaDomain, setGrafanaDomain } = monitoringService.stateFunctions;
   const { p2PoolMode } = p2PoolService.stateFunctions;
   const { miningMode, setMiningMode } = xmrigService.stateFunctions;
-  const {
-    isXmrigProxy,
-    setIsXmrigProxy,
-    isXmrigProxyPublic,
-    setIsXmrigProxyPublic,
-  } = xmrigProxyService.stateFunctions;
-  const { hsXmrigProxy, setHsXmrigProxy } = torService.stateFunctions;
   const { isPrunedNode, isSyncPrunedBlocks } = monerodService.stateFunctions;
   const { isMoneroPay } = moneroPayService.stateFunctions;
   const { isMoneroWalletRpc, setIsMoneroWalletRpc } = moneroWalletRpcService.stateFunctions;
@@ -111,39 +102,6 @@ export const useServices = () => {
       setMiningMode("none");
     }
   }, [p2PoolMode, miningMode, setMiningMode]);
-
-  // Proxy requires P2Pool (it upstreams to p2pool stratum) and amd64
-  // images. Reset the toggle plus public/HS flags so a stale selection
-  // cannot publish ports or point Tor at a container that was filtered out.
-  useEffect(() => {
-    if (p2PoolMode !== "none") return;
-    if (isXmrigProxy) setIsXmrigProxy(false);
-    if (isXmrigProxyPublic) setIsXmrigProxyPublic(false);
-    if (hsXmrigProxy) setHsXmrigProxy(false);
-  }, [
-    p2PoolMode,
-    isXmrigProxy,
-    isXmrigProxyPublic,
-    hsXmrigProxy,
-    setIsXmrigProxy,
-    setIsXmrigProxyPublic,
-    setHsXmrigProxy,
-  ]);
-
-  useEffect(() => {
-    if (architecture === architectures.linuxAmd) return;
-    if (isXmrigProxy) setIsXmrigProxy(false);
-    if (isXmrigProxyPublic) setIsXmrigProxyPublic(false);
-    if (hsXmrigProxy) setHsXmrigProxy(false);
-  }, [
-    architecture,
-    isXmrigProxy,
-    isXmrigProxyPublic,
-    hsXmrigProxy,
-    setIsXmrigProxy,
-    setIsXmrigProxyPublic,
-    setHsXmrigProxy,
-  ]);
 
   // Should remove sync-pruned-blocks flag, if user switches from pruned node to full node
   useEffect(() => {
@@ -174,7 +132,6 @@ export const useServices = () => {
     ...watchtowerService.stateFunctions,
     ...monitoringService.stateFunctions,
     ...xmrigService.stateFunctions,
-    ...xmrigProxyService.stateFunctions,
     ...traefikService.stateFunctions,
     ...portainerService.stateFunctions,
     ...cuprateService.stateFunctions,
@@ -203,7 +160,6 @@ export const useServices = () => {
         ...fcmpStressnetService.stateFunctions,
         ...moneroLwsService.stateFunctions,
         ...moneroPayService.stateFunctions,
-        ...xmrigProxyService.stateFunctions,
       },
       serviceToggleSchema
     ),

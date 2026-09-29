@@ -183,84 +183,6 @@ describe("xmrig <-> p2pool connection", () => {
   );
 });
 
-describe("xmrig-proxy <-> p2pool / xmrig connection", () => {
-  it("when proxy+xmrig+p2pool-mini, proxy -o is p2pool-mini:3333 and xmrig POOL_URL is xmrig-proxy:3334", () => {
-    const config = makeConfig({
-      p2pool: {
-        p2PoolMode: p2poolModes.mini,
-        p2PoolPayoutAddress: VALID_ADDRESS,
-        p2PoolMiningThreads: 4,
-        isP2PoolStratumPublic: false,
-      },
-      mining: { miningMode: "xmrig", xmrigDonateLevel: 1 },
-      services: { ...makeConfig().services, isXmrigProxy: true },
-    });
-    const services = generateAllServices(config);
-    const proxy = services["xmrig-proxy"].code["xmrig-proxy"] as ContainerSpec;
-    const xmrig = services.xmrig.code.xmrig as ContainerSpec;
-
-    expect(flagValue(cmd(proxy), "-o")).toBe(`p2pool-mini:${P2POOL_PORTS.stratum}`);
-    expect(xmrig.environment?.POOL_URL).toBe(`xmrig-proxy:${SERVICE_PORTS.xmrigProxy}`);
-    expect(xmrig.depends_on).toHaveProperty("xmrig-proxy");
-  });
-
-  it("XMRig-proxy hidden service forwards the stratum port the proxy actually binds", () => {
-    const config = makeConfig({
-      services: { ...makeConfig().services, isXmrigProxy: true },
-      tor: { ...makeConfig().tor, hsXmrigProxy: true },
-    });
-    const services = generateAllServices(config);
-    const proxy = services["xmrig-proxy"].code["xmrig-proxy"] as ContainerSpec;
-    const tor = services.tor.code.tor as ContainerSpec;
-    expect(cmd(proxy)).toContain("--bind");
-    expect(cmd(proxy)).toContain(`0.0.0.0:${SERVICE_PORTS.xmrigProxy}`);
-    expect(tor.environment?.HS_XMRIG_PROXY).toBe(
-      `xmrig-proxy:${SERVICE_PORTS.xmrigProxy}:${SERVICE_PORTS.xmrigProxy}`
-    );
-  });
-
-  it("leaves xmrig-proxy unchecked when p2PoolMode is none even if the raw flag is true", () => {
-    const services = generateAllServices(
-      makeConfig({
-        p2pool: {
-          p2PoolMode: p2poolModes.none,
-          p2PoolPayoutAddress: "",
-          p2PoolMiningThreads: 1,
-          isP2PoolStratumPublic: false,
-        },
-        services: { ...makeConfig().services, isXmrigProxy: true, isXmrigProxyPublic: true },
-        tor: { ...makeConfig().tor, hsXmrigProxy: true },
-      })
-    );
-    expect(services["xmrig-proxy"].checked).toBe(false);
-    const xmrig = services.xmrig.code.xmrig as ContainerSpec;
-    expect(xmrig.environment?.POOL_URL).not.toBe(
-      `xmrig-proxy:${SERVICE_PORTS.xmrigProxy}`
-    );
-    expect(xmrig.depends_on?.["xmrig-proxy"]).toBeUndefined();
-    const tor = services.tor.code.tor as ContainerSpec;
-    expect(tor.environment?.HS_XMRIG_PROXY).toBeUndefined();
-  });
-
-  it("does not emit HS_XMRIG_PROXY or point xmrig at the proxy on arm64", () => {
-    const services = generateAllServices(
-      makeConfig({
-        architecture: "linux/arm64",
-        services: { ...makeConfig().services, isXmrigProxy: true },
-        tor: { ...makeConfig().tor, hsXmrigProxy: true },
-      })
-    );
-    expect(services["xmrig-proxy"].checked).toBe(false);
-    const xmrig = services.xmrig.code.xmrig as ContainerSpec;
-    expect(xmrig.environment?.POOL_URL).not.toBe(
-      `xmrig-proxy:${SERVICE_PORTS.xmrigProxy}`
-    );
-    expect(xmrig.depends_on?.["xmrig-proxy"]).toBeUndefined();
-    const tor = services.tor.code.tor as ContainerSpec;
-    expect(tor.environment?.HS_XMRIG_PROXY).toBeUndefined();
-  });
-});
-
 describe("monitoring stack connections", () => {
   const services = generateAllServices(makeConfig());
   const monitoring = services.monitoring.code as Record<string, ContainerSpec>;
@@ -582,22 +504,5 @@ describe("architecture filtering", () => {
     const names = checkedServicesForArch("linux/amd64").map((s) => s.name);
     expect(names).toContain("Monitoring");
     expect(names).toContain("XMRig");
-  });
-
-  it("drops XMRig Proxy on linux/arm64 and keeps it on linux/amd64", () => {
-    const withProxy = (architecture: FullConfig["architecture"]) =>
-      Object.values(
-        generateAllServices(
-          makeConfig({ architecture, services: { ...makeConfig().services, isXmrigProxy: true } })
-        )
-      ).filter(
-        (s) =>
-          s.checked !== false &&
-          s.checked !== "none" &&
-          s.architecture?.includes(architecture)
-      ).map((s) => s.name);
-
-    expect(withProxy("linux/arm64")).not.toContain("XMRig Proxy");
-    expect(withProxy("linux/amd64")).toContain("XMRig Proxy");
   });
 });

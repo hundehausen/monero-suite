@@ -9,7 +9,6 @@ import { createTorService } from "./tor";
 import { createWatchtowerService } from "./watchtower";
 import { createMonitoringService } from "./monitoring";
 import { createXmrigService } from "./xmrig";
-import { createXmrigProxyService, isXmrigProxyEffective } from "./xmrig-proxy";
 import { createTraefikService } from "./traefik";
 import { createPortainerService } from "./portainer";
 import { createCuprateService } from "./cuprate";
@@ -30,11 +29,6 @@ export function generationCtx(config: FullConfig): GenerationCtx {
         config.services.isMonitoring,
         config.services.isMoneroLws
       )
-    ),
-    isXmrigProxyOn: isXmrigProxyEffective(
-      config.services.isXmrigProxy,
-      config.p2pool.p2PoolMode,
-      config.architecture
     ),
     anyHiddenService: anyHiddenService(config.tor),
   };
@@ -61,8 +55,7 @@ export function generateAllServices(config: FullConfig): ServiceMap {
     tor: createTorService(config, ctx),
     watchtower: createWatchtowerService(config),
     monitoring: createMonitoringService(config),
-    xmrig: createXmrigService(config, ctx),
-    "xmrig-proxy": createXmrigProxyService(config, ctx),
+    xmrig: createXmrigService(config),
     traefik: createTraefikService(config),
     portainer: createPortainerService(config),
     cuprate: createCuprateService(config),

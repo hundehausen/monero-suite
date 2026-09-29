@@ -25,8 +25,8 @@ describe("makeFullConfig", () => {
   });
 
   it("deep-merges a services override without dropping the rest of the group", () => {
-    const config = makeFullConfig({ services: { isXmrigProxy: true } });
-    expect(config.services.isXmrigProxy).toBe(true);
+    const config = makeFullConfig({ services: { isMoneroPay: true } });
+    expect(config.services.isMoneroPay).toBe(true);
     expect(config.services.isMonitoring).toBe(false);
     expect(config.services.grafanaDomain).toBe("grafana.example.com");
     expect(config.services.grafanaAdminPassword).toBe("admin");

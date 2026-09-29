@@ -17,7 +17,6 @@ export const createTorService = (
     hsGrafana,
     hsLws,
     hsMoneroPay,
-    hsXmrigProxy,
     isGlobalTorProxy,
   } = config.tor;
   const networkMode = config.networkMode;
@@ -26,7 +25,6 @@ export const createTorService = (
   const isMonitoring = config.services.isMonitoring;
   const isMoneroLws = config.services.isMoneroLws;
   const isMoneroPay = config.services.isMoneroPay;
-  const isXmrigProxy = ctx.isXmrigProxyOn;
 
   const isHiddenServices = ctx.anyHiddenService;
   const isTorEnabled = torProxyMode !== torProxyModes.none || isHiddenServices;
@@ -111,9 +109,6 @@ export const createTorService = (
         : {}),
       ...(hsMoneroPay && isMoneroPay
         ? { HS_MONEROPAY: `moneropay:${SERVICE_PORTS.moneroPay}:${SERVICE_PORTS.moneroPay}` }
-        : {}),
-      ...(hsXmrigProxy && isXmrigProxy
-        ? { HS_XMRIG_PROXY: `xmrig-proxy:${SERVICE_PORTS.xmrigProxy}:${SERVICE_PORTS.xmrigProxy}` }
         : {}),
     };
   }

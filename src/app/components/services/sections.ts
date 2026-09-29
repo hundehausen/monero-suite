@@ -59,11 +59,6 @@ export const SECTIONS = [
     description: "Decentralized mining pool",
   },
   {
-    value: "xmrig-proxy",
-    label: "XMRig-proxy",
-    description: "Stratum proxy in front of P2Pool",
-  },
-  {
     value: "tor",
     label: "Tor Proxy & Tor Hidden Services",
     description: "Tor proxy and onion services",
