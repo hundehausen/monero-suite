@@ -101,6 +101,24 @@ describe("p2pool port publishing", () => {
   });
 });
 
+describe("p2pool file log", () => {
+  it("passes --no-log-file and does not mount a log path", () => {
+    const service = run();
+    const c = service.code.p2pool as {
+      command: string[];
+      volumes: string[];
+      tty?: boolean;
+      stdin_open?: boolean;
+    };
+    expect(c.command).toContain("--no-log-file");
+    expect(c.command).not.toContain("--disable-log");
+    expect(c.volumes.join("\n")).not.toContain("p2pool.log");
+    expect(c.volumes).toContain("p2pool-data:/home/p2pool");
+    expect(c.tty).toBe(true);
+    expect(c.stdin_open).toBe(true);
+  });
+});
+
 describe("p2pool ufw rules", () => {
   it("opens only the P2P port in exposed mode when the stratum is not public", () => {
     expect(run({}, networkModes.exposed).ufw).toEqual([

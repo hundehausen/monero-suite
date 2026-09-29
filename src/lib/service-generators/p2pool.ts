@@ -66,7 +66,6 @@ export const createP2PoolService = (
         stdin_open: true,
         volumes: [
           "p2pool-data:/home/p2pool",
-          "/dev/null:/home/p2pool/.p2pool/p2pool.log:rw",
           "/dev/hugepages:/dev/hugepages:rw",
         ],
         ports: [
@@ -100,6 +99,8 @@ export const createP2PoolService = (
             : []),
           ...(p2PoolMode === p2poolModes.mini ? ["--mini"] : []),
           ...(p2PoolMode === p2poolModes.nano ? ["--nano"] : []),
+          // /home/p2pool is writable, so p2pool v4.18 writes ./p2pool.log there.
+          "--no-log-file",
         ],
       },
     },
