@@ -190,7 +190,7 @@ show_spinner() {
     local i=0
     local spin_len=\${#SPINNER}
 
-    if [ "\$VERBOSE" = true ]; then
+    if [ "\$VERBOSE" = true ] || [ ! -t 1 ]; then
         printf "\${BLUE}[...]\${NC} %s\\n" "\$message"
         wait \$pid
     else
@@ -203,7 +203,9 @@ show_spinner() {
     fi
 
     local ret=\$?
-    printf "\\r\\033[2K"
+    if [ "\$VERBOSE" != true ] && [ -t 1 ]; then
+        printf "\\r\\033[2K"
+    fi
     if [ \$ret -eq 0 ]; then
         printf "\${GREEN}[✓]\${NC} %s\\n" "\$message"
     elif [ "\$nofail" = "nofail" ]; then
@@ -217,6 +219,43 @@ show_spinner() {
     fi
     return \$ret
 }`
+
+export const RUN_COMPOSE_FN = `run_compose() {
+    if [ "\$VERBOSE" = true ] || [ -t 2 ]; then
+        \$SUDO docker compose "\$@" </dev/null
+    else
+        \$SUDO docker compose --progress quiet "\$@" </dev/null
+    fi
+}`;
+
+export const PRINT_INSTALL_HEADER_FN = `print_install_header() {
+    if [ -t 1 ]; then
+        local columns="\${COLUMNS:-$(tput cols 2>/dev/null || true)}"
+        case "\$columns" in
+            ''|*[!0-9]*) columns=80 ;;
+        esac
+        if [ "\$columns" -ge 92 ]; then
+            echo -e "\$BANNER"
+        fi
+    fi
+    echo -e "\${BLUE}Monero Suite Installation Script\${NC}"
+    if [ -n "\$INSTALL_SERVICES" ]; then
+        printf 'Services: %s\\n' "\$INSTALL_SERVICES"
+    fi
+    local blockchain=full
+    if [ "\$IS_PRUNED_NODE" = true ]; then blockchain=pruned; fi
+    printf 'Mode: %s | Blockchain: %s' "\$NETWORK_MODE" "\$blockchain"
+    if [ "\$OFFLINE_MODE" = true ]; then printf ' | Offline'; fi
+    printf '\\n'
+    if [ "\$UPGRADE_SYSTEM_PACKAGES" = true ]; then
+        echo 'System package upgrades enabled.'
+    fi
+    if [ "\$VERBOSE" = true ]; then
+        echo -e "\${GRAY}Verbose mode enabled. Full command output will be shown.\${NC}"
+    else
+        echo -e "\${GRAY}Tip: Add --verbose to show full command output.\${NC}"
+    fi
+}`;
 
 /** Refresh sudo while long steps (image pulls) run. Shared with tests. */
 export const SUDO_KEEPALIVE_FN = `start_sudo_keepalive() {
@@ -554,6 +593,10 @@ BANNER="
 SPINNER="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
 
 ${RUN_CMD_FN}
+
+${RUN_COMPOSE_FN}
+
+${PRINT_INSTALL_HEADER_FN}
 
 # Print a section header
 section() {
@@ -904,14 +947,8 @@ init_cmd_log
 FIREWALL_WARNINGS=()
 trap 'stop_sudo_keepalive' EXIT
 
-echo -e "$BANNER"
-echo -e "\n\${BLUE}Monero Suite Installation Script\${NC}"
-if [ "$VERBOSE" = true ]; then
-    echo -e "\${GRAY}Verbose mode enabled — full command output will be shown.\${NC}"
-fi
-echo -e "\${GRAY}Tip: For verbose output, use: curl -sSL <url> | bash -s -- --verbose\${NC}\n"
-
 NETWORK_MODE="\${NETWORK_MODE_PLACEHOLDER}"
+INSTALL_SERVICES=\${INSTALL_SERVICES_PLACEHOLDER}
 FIREWALL_PORTS="\${FIREWALL_PORTS_PLACEHOLDER}"
 UPGRADE_SYSTEM_PACKAGES="\${UPGRADE_SYSTEM_PACKAGES_PLACEHOLDER}"
 HAS_HIDDEN_SERVICES="\${HAS_HIDDEN_SERVICES_PLACEHOLDER}"
@@ -920,6 +957,8 @@ IS_PRUNED_NODE="\${IS_PRUNED_NODE_PLACEHOLDER}"
 BLOCKCHAIN_PATH=\${BLOCKCHAIN_PATH_PLACEHOLDER}
 PRUNED_DISK_GB="\${PRUNED_DISK_GB_PLACEHOLDER}"
 FULL_DISK_GB="\${FULL_DISK_GB_PLACEHOLDER}"
+
+print_install_header
 
 section "System Checks"
 check_privileges
@@ -972,7 +1011,7 @@ MONERO_COMPOSE_EOF
 
     # Expand ~/ in bind-mount sources to the install home (effective uid).
     # Compose later runs under $SUDO, which would otherwise resolve ~ to /root.
-    if [ -n "$INSTALL_HOME" ] && [ -f "$INSTALL_DIR"/docker-compose.yml ]; then
+    if [ -n "$INSTALL_HOME" ] && grep -Eq '[:[:space:]]~/' "$INSTALL_DIR"/docker-compose.yml; then
         if ! sed -i.bak -E "s|([:[:space:]])~/|\\1\${INSTALL_HOME}/|g" "$INSTALL_DIR"/docker-compose.yml; then
             printf "\${RED}[✗]\${NC} Expanding ~/ paths in docker-compose.yml\\n"
             exit 1
@@ -1015,7 +1054,7 @@ export const COMPLETION_TEMPLATE = `
 
     echo -e "Pulling container images (this can take several minutes)..."
     PULL_FAILED=false
-    if $SUDO docker compose pull </dev/null; then
+    if run_compose pull; then
         echo -e "\${GREEN}[✓]\${NC} Pulling container images"
     else
         echo -e "\${YELLOW}[!] Image pull failed. Trying to start with images already on disk.\${NC}"
@@ -1023,7 +1062,7 @@ export const COMPLETION_TEMPLATE = `
     fi
 
     echo -e "Starting Monero Suite containers and waiting up to 120s for startup checks..."
-    if $SUDO docker compose up -d --wait --wait-timeout 120 </dev/null; then
+    if run_compose up -d --wait --wait-timeout 120; then
         echo -e "\${GREEN}[✓]\${NC} Container startup checks passed"
     else
         echo -e "\${RED}[✗]\${NC} Container startup checks failed"

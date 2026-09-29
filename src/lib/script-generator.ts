@@ -1,3 +1,4 @@
+import { isMap, isScalar, parseDocument } from "yaml";
 import {
   APT_UPGRADE_BIN,
   APT_UPGRADE_ENV,
@@ -84,7 +85,7 @@ function getSpinnerMessage(cmd: string, fallback: string): string {
   return fallback;
 }
 
-function processCustomCommands(commands: string): string {
+function processIndividualCommands(commands: string): string {
   let currentDescription = "Running service configuration";
   const lines = commands.split("\n").filter((cmd) => cmd.trim());
 
@@ -109,6 +110,30 @@ function processCustomCommands(commands: string): string {
     .join("");
 }
 
+function processCustomCommands(commands: string): string {
+  const monitoringSteps = MONITORING_BASH_COMMANDS.trim()
+    .split("\n")
+    .filter((cmd) => !cmd.startsWith("#"))
+    .map((cmd) => {
+      const label = cmd.startsWith("cd ")
+        ? ""
+        : `        printf '%s\\n' ${bashSingleQuote(getSpinnerMessage(cmd, "Configuring monitoring"))}\n`;
+      return `${label}        ${cmd} || return $?`;
+    })
+    .join("\n");
+
+  return commands
+    .split(MONITORING_BASH_COMMANDS)
+    .map(processIndividualCommands)
+    .join(`
+    configure_monitoring() {
+${monitoringSteps}
+    }
+    run_cmd configure_monitoring &
+    show_spinner $! "Configuring Grafana and Prometheus"
+`);
+}
+
 export function generateInstallationScript(
   dockerComposeYaml: string,
   customBashCommands: string,
@@ -118,10 +143,17 @@ export function generateInstallationScript(
   upgradeSystemPackages = false,
   hints: InstallScriptHints = emptyInstallScriptHints()
 ): string {
+  const services = parseDocument(dockerComposeYaml).get("services");
+  const serviceNames = isMap(services)
+    ? services.items.flatMap(({ key }) =>
+        isScalar(key) && typeof key.value === "string" ? [key.value] : []
+      )
+    : [];
   let script = DOCKER_INSTALLATION_TEMPLATE.replace(
     "${NETWORK_MODE_PLACEHOLDER}",
     isExposed ? "exposed" : "local"
   )
+    .replace("${INSTALL_SERVICES_PLACEHOLDER}", bashSingleQuote(serviceNames.join(", ")))
     .replace("${FIREWALL_PORTS_PLACEHOLDER}", firewallPorts)
     .replace(
       "${UPGRADE_SYSTEM_PACKAGES_PLACEHOLDER}",

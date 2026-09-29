@@ -1,10 +1,16 @@
 import { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   CUPRATE_BASH_COMMANDS,
   generateInstallationScript,
   MONITORING_BASH_COMMANDS,
 } from "./script-generator";
+import { generateBashScriptFile } from "@/app/utils";
+import { generateAllServices } from "./service-generators";
+import { makeFullConfig } from "./make-full-config";
 
 function sampleScript() {
   return generateInstallationScript(
@@ -32,19 +38,96 @@ describe("generateInstallationScript spinner escapes", () => {
 });
 
 describe("generateInstallationScript docker compose", () => {
+  it("summarizes the services from the embedded Compose file", () => {
+    const script = generateInstallationScript(
+      "services:\n  monerod: {}\n  grafana: {}\n  tor: {}\n", ""
+    );
+    expect(script).toContain("INSTALL_SERVICES='monerod, grafana, tor'");
+  });
+
   it("runs compose via $SUDO in the foreground, pull warn, up fatal", () => {
     const script = sampleScript();
 
-    expect(script).toContain("$SUDO docker compose pull </dev/null");
+    expect(script).toContain("run_compose pull");
     expect(script).not.toContain("run_cmd $SUDO docker compose pull");
     expect(script).toContain("PULL_FAILED=true");
 
-    expect(script).toContain("$SUDO docker compose up -d --wait --wait-timeout 120 </dev/null");
+    expect(script).toContain("run_compose up -d --wait --wait-timeout 120");
+    expect(script).toContain('$SUDO docker compose --progress quiet "$@" </dev/null');
     expect(script).not.toContain("run_cmd $SUDO docker compose up -d");
     expect(script).toContain("print_next_steps");
 
     expect(script).toContain("Monero Suite installation completed.");
     expect(script).toContain("Monero Suite installation completed with warnings.");
+  });
+});
+
+describe("monitoring setup output", () => {
+  function runMonitoring(verbose: boolean, fail = false) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "monitoring-output-"));
+    try {
+      const config = makeFullConfig({ services: { isMonitoring: true } });
+      const commands = generateBashScriptFile(
+        Object.values(generateAllServices(config)).filter((s) => s.checked === true)
+      );
+      const script = generateInstallationScript("services: {}", commands);
+      const body = `
+${script.slice(0, script.indexOf("# Main execution"))}
+GREEN=; NC=; RED=; YELLOW=; BLUE=; GRAY=; MONERO_ORANGE=
+VERBOSE=${verbose}
+INSTALL_DIR='${dir}'
+INSTALL_HOME='${dir}'
+IS_PRUNED_NODE=false
+FULL_DISK_GB=0
+BLOCKCHAIN_PATH='${dir}'
+CMD_LOG='${dir}/command.log'
+confirm_overwrite_install_dir() { :; }
+warn_disk_space() { :; }
+selinux_is_enforcing() { return 1; }
+curl() {
+    printf '%s\\n' "$*" >> '${dir}/downloads'
+    if [ "$3" = monitoring/grafana/grafana.ini ] && [ '${fail}' = true ]; then
+        echo 'Grafana download failed' >&2
+        return 22
+    fi
+    printf 'downloaded\\n' > "$3"
+}
+${script.slice(script.indexOf("# Function to setup Monero Suite"), script.indexOf("# Configure firewall if in exposed mode"))}
+}
+setup_monero_suite
+`;
+      const result = spawnSync("bash", ["-c", body], { encoding: "utf8" });
+      return {
+        status: result.status,
+        output: result.stdout + result.stderr,
+        downloads: fs.readFileSync(path.join(dir, "downloads"), "utf8").trim().split("\n"),
+      };
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  it("collapses successful setup in quiet mode and shows individual steps in verbose mode", () => {
+    const quiet = runMonitoring(false);
+    const verbose = runMonitoring(true);
+    for (const result of [quiet, verbose]) {
+      expect(result.status, result.output).toBe(0);
+      expect(result.downloads).toHaveLength(5);
+      expect(result.output).toContain("[✓] Configuring Grafana and Prometheus");
+    }
+    expect(quiet.output).not.toContain("Downloading dashboards/");
+    expect(quiet.output).not.toContain("Creating directories");
+    expect(verbose.output).toContain("Downloading dashboards/node_stats.json");
+    expect(verbose.output).toContain("Downloading datasources/all.yaml");
+  });
+
+  it("stops at a failed download and reveals its file and error in quiet mode", () => {
+    const result = runMonitoring(false, true);
+    expect(result.status, result.output).toBe(1);
+    expect(result.downloads).toHaveLength(2);
+    expect(result.output).toContain("Downloading grafana/grafana.ini");
+    expect(result.output).toContain("Grafana download failed");
+    expect(result.output).not.toContain("[✓] Configuring Grafana and Prometheus");
   });
 });
 

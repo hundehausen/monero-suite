@@ -8,7 +8,9 @@ import {
   CONFIRM_OVERWRITE_FN,
   DOCKER_INSTALLATION_TEMPLATE,
   ENV_FILE_TEMPLATE,
+  PRINT_INSTALL_HEADER_FN,
   PRINT_NEXT_STEPS_FN,
+  RUN_COMPOSE_FN,
   RUN_CMD_FN,
   SELINUX_BIND_MOUNTS_FN,
   SETUP_TEMPLATE,
@@ -47,6 +49,101 @@ function runBash(
     output: `${result.stdout ?? ""}${result.stderr ?? ""}`,
   };
 }
+
+function runTerminal(body: string, columns = "120") {
+  const file = path.join(tempDir(), "terminal.sh");
+  writeExec(file, body);
+  const result = spawnSync("script", ["-qefc", `bash "${file}"`, "/dev/null"], {
+    encoding: "utf8",
+    env: { ...process.env, COLUMNS: columns },
+  });
+  return { status: result.status, output: result.stdout + result.stderr };
+}
+
+describe("installer output modes", () => {
+  const compose = `
+SUDO=""
+VERBOSE=false
+${RUN_COMPOSE_FN}
+docker() { printf '%s\\n' "$*"; }
+run_compose pull
+`;
+
+  it("uses native Compose progress on a terminal and quiet progress in logs", () => {
+    const terminal = runTerminal(compose);
+    expect(terminal.status, terminal.output).toBe(0);
+    expect(terminal.output).toContain("compose pull");
+    expect(terminal.output).not.toContain("--progress quiet");
+
+    const redirected = runBash(compose);
+    expect(redirected.status, redirected.output).toBe(0);
+    expect(redirected.output).toContain("compose --progress quiet pull");
+  });
+
+  it("retains verbose Compose output and propagates errors in quiet mode", () => {
+    const verbose = runBash(compose.replace("VERBOSE=false", "VERBOSE=true"));
+    expect(verbose.output).toContain("compose pull");
+    expect(verbose.output).not.toContain("--progress quiet");
+
+    const failed = runBash(compose.replace(
+      `docker() { printf '%s\\n' "$*"; }`,
+      `docker() { echo 'registry unavailable' >&2; return 1; }`
+    ));
+    expect(failed.status, failed.output).toBe(1);
+    expect(failed.output).toContain("registry unavailable");
+  });
+
+  it("prints static step feedback instead of animation in logs", () => {
+    const result = runBash(`
+GREEN=; NC=; RED=; YELLOW=; BLUE=; GRAY=; MONERO_ORANGE=
+VERBOSE=false
+SPINNER=x
+${RUN_CMD_FN}
+sleep 0.2 &
+show_spinner $! 'Test step'
+`);
+    expect(result.status, result.output).toBe(0);
+    expect(result.output).toContain("[...] Test step\n");
+    expect(result.output).toContain("[✓] Test step\n");
+    expect(result.output).not.toMatch(/[\r\x1b]/);
+  });
+});
+
+describe("installation header", () => {
+  const body = `
+BLUE=; NC=; GRAY=
+BANNER='large-banner'
+INSTALL_SERVICES='monerod, grafana'
+NETWORK_MODE=local
+IS_PRUNED_NODE=true
+OFFLINE_MODE=false
+UPGRADE_SYSTEM_PACKAGES=false
+VERBOSE=false
+${PRINT_INSTALL_HEADER_FN}
+print_install_header
+`;
+
+  it("shows the banner only on a terminal wide enough for it", () => {
+    const wide = runTerminal(body, "120");
+    const narrow = runTerminal(body, "80");
+    const redirected = runBash(body);
+    expect(wide.output).toContain("large-banner");
+    expect(narrow.output).not.toContain("large-banner");
+    expect(redirected.output).not.toContain("large-banner");
+    for (const result of [wide, narrow, redirected]) {
+      expect(result.status, result.output).toBe(0);
+      expect(result.output).toContain("Services: monerod, grafana");
+      expect(result.output).toContain("Mode: local | Blockchain: pruned");
+    }
+  });
+
+  it("does not suggest verbose mode when it is already enabled", () => {
+    const result = runBash(body.replace("VERBOSE=false", "VERBOSE=true"));
+    expect(result.status, result.output).toBe(0);
+    expect(result.output).toContain("Verbose mode enabled");
+    expect(result.output).not.toContain("Tip:");
+  });
+});
 
 describe("confirm_overwrite_install_dir", () => {
   it("is a no-op when the install dir is empty", () => {
@@ -187,7 +284,7 @@ echo SHOULD_NOT_PRINT
 });
 
 describe("configuration failure feedback", () => {
-  function runSetup(installDir: string, commands = "") {
+  function runSetup(installDir: string, commands = "", compose = "services: {}") {
     return runBash(`
 GREEN=; NC=; RED=; YELLOW=; BLUE=; GRAY=; MONERO_ORANGE=
 VERBOSE=false
@@ -204,7 +301,7 @@ confirm_overwrite_install_dir() { :; }
 warn_disk_space() { :; }
 selinux_is_enforcing() { return 1; }
 ${commands}
-${SETUP_TEMPLATE.replace("${DOCKER_COMPOSE_CONTENT}", "services: {}")}
+${SETUP_TEMPLATE.replace("${DOCKER_COMPOSE_CONTENT}", compose)}
 ${ENV_FILE_TEMPLATE.replace("${ENV_CONTENT}", "DEMO=value")}
 echo SETUP_REACHED_END
 }
@@ -229,7 +326,8 @@ setup_monero_suite
   it("stops when expanding bind-mount paths fails", () => {
     const result = runSetup(
       tempDir(),
-      `sed() { echo 'path expansion failed' >&2; return 1; }`
+      `sed() { echo 'path expansion failed' >&2; return 1; }`,
+      "services:\n  app:\n    volumes:\n      - ~/data:/data"
     );
 
     expect(result.status, result.output).toBe(1);
@@ -252,6 +350,21 @@ awk() { echo 'SELinux transform failed' >&2; return 1; }`
     expect(result.output).not.toContain("[✓] Labeling host bind mounts for SELinux");
     expect(result.output).not.toContain("SETUP_REACHED_END");
   });
+
+  it("does not report path expansion when no home-relative paths exist", () => {
+    const result = runSetup(tempDir());
+    expect(result.status, result.output).toBe(0);
+    expect(result.output).not.toContain("Expanding ~/ paths");
+  });
+
+  it("expands home-relative paths and reports the change", () => {
+    const dir = tempDir();
+    const result = runSetup(dir, "", "services:\n  app:\n    volumes:\n      - ~/data:/data");
+    expect(result.status, result.output).toBe(0);
+    expect(result.output).toContain("[✓] Expanding ~/ paths");
+    expect(fs.readFileSync(path.join(dir, "docker-compose.yml"), "utf8"))
+      .toContain(`${dir}/data:/data`);
+  });
 });
 
 describe("completion feedback", () => {
@@ -264,6 +377,7 @@ describe("completion feedback", () => {
     return `
 GREEN=; NC=; RED=; YELLOW=; BLUE=; GRAY=; MONERO_ORANGE=
 SUDO=""
+VERBOSE=true
 INSTALL_DIR="${tempDir()}"
 NETWORK_MODE=local
 HAS_HIDDEN_SERVICES=false
@@ -271,6 +385,7 @@ OFFLINE_MODE=false
 FIREWALL_WARNINGS=()
 section() { echo "$1"; }
 ${nextSteps}
+${RUN_COMPOSE_FN}
 ${commands}
 setup_monero_suite() {
 ${COMPLETION_TEMPLATE}
