@@ -166,11 +166,13 @@ dump_cmd_log() {
 # Run a command, suppressing output unless verbose mode is enabled.
 # stdin is /dev/null so piped curl|bash is never consumed by sudo/apt.
 run_cmd() {
+    if [ -n "\${CMD_LOG:-}" ]; then
+        : > "\$CMD_LOG"
+    fi
     if [ "\$VERBOSE" = true ]; then
         "\$@" </dev/null
     else
         if [ -n "\${CMD_LOG:-}" ]; then
-            : > "\$CMD_LOG"
             "\$@" > "\$CMD_LOG" 2>&1 </dev/null
         else
             "\$@" > /dev/null 2>&1 </dev/null
@@ -339,16 +341,25 @@ __ACCESS_URLS__
     if [ "\$OFFLINE_MODE" = "true" ]; then
         echo -e "\${YELLOW}This node is in offline mode. It will not sync from the network.\${NC}"
     else
-        echo -e "\${YELLOW}monerod is started, not fully synced. First mainnet sync takes hours to days.\${NC}"
+        echo -e "\${BLUE}Blockchain sync status was not checked. A first mainnet sync can take hours to days.\${NC}"
     fi
 
 __SECRET_WARNINGS__
 
-    if [ "\${PULL_FAILED:-false}" = "true" ]; then
-        echo -e "\${YELLOW}Image pull reported errors. Containers may be using older images already on disk.\${NC}"
+    if [ "\${PULL_FAILED:-false}" = "true" ] || [ "\${#FIREWALL_WARNINGS[@]}" -gt 0 ]; then
+        echo -e "\\n\${YELLOW}Monero Suite installation completed with warnings.\${NC}"
+        echo -e "\${YELLOW}Needs attention:\${NC}"
+        if [ "\${PULL_FAILED:-false}" = "true" ]; then
+            echo -e "  \${YELLOW}Image pull reported errors. Containers may be using older images already on disk.\${NC}"
+        fi
+        local warning
+        for warning in "\${FIREWALL_WARNINGS[@]}"; do
+            printf "  \${YELLOW}Firewall: %s\${NC}\\n" "\$warning"
+        done
+    else
+        echo -e "\\n\${GREEN}Monero Suite installation completed.\${NC}"
     fi
-
-    echo -e "\\n\${GREEN}Monero Suite installation completed successfully!\${NC}\\n"
+    echo -e "Startup checks passed. Services without healthchecks were checked for running state.\\n"
     echo -e "\${BLUE}Useful commands:\${NC}"
     echo -e "  \${YELLOW}cd \$INSTALL_DIR\${NC}         — Change to the installation directory"
     echo -e "  \${YELLOW}docker compose ps\${NC}        — Check the status of the containers"
@@ -670,8 +681,13 @@ firewalld_is_running() {
     $SUDO firewall-cmd --state 2>/dev/null | grep -qx running
 }
 
-skip_firewall() {
+warn_firewall() {
+    FIREWALL_WARNINGS+=("\$1")
     echo -e "\${YELLOW}Warning: \$1\${NC}"
+}
+
+skip_firewall() {
+    warn_firewall "\$1"
     echo -e "\${YELLOW}Skipping host firewall enable. Services will still start. Configure the firewall by hand if needed.\${NC}"
 }
 
@@ -701,13 +717,20 @@ setup_firewall_ufw() {
 
     for port in "\${ports[@]}"; do
         echo -e "\${GRAY}Allowing port \$port\${NC}"
-        fw_cmd ufw allow "\$port" || echo -e "\${YELLOW}Warning: failed to allow \$port\${NC}"
+        fw_cmd ufw allow "\$port" || warn_firewall "Failed to allow \$port in ufw"
     done
 
-    ufw_allow_docker_forward
+    if ! ufw_allow_docker_forward; then
+        skip_firewall "Failed to configure ufw forwarding for Docker"
+        return 0
+    fi
 
     if [ "\$ufw_was_active" = true ]; then
-        echo -e "\${GREEN}[✓] ufw rules updated (SSH ports \${SSH_PORTS[*]})\${NC}"
+        if [ "\${#FIREWALL_WARNINGS[@]}" -eq 0 ]; then
+            echo -e "\${GREEN}[✓] ufw rules updated (SSH ports \${SSH_PORTS[*]})\${NC}"
+        else
+            echo -e "\${YELLOW}[!] ufw rules updated with warnings\${NC}"
+        fi
         return 0
     fi
 
@@ -716,7 +739,10 @@ setup_firewall_ufw() {
         skip_firewall "Failed to set ufw default deny incoming"
         return 0
     fi
-    fw_cmd ufw default allow outgoing || true
+    if ! fw_cmd ufw default allow outgoing; then
+        skip_firewall "Failed to set ufw default allow outgoing"
+        return 0
+    fi
 
     echo -e "\${GRAY}Enabling ufw\${NC}"
     if ! fw_cmd ufw --force enable; then
@@ -733,7 +759,11 @@ setup_firewall_ufw() {
         fi
     done
 
-    echo -e "\${GREEN}[✓] Firewall configured successfully\${NC}"
+    if [ "\${#FIREWALL_WARNINGS[@]}" -eq 0 ]; then
+        echo -e "\${GREEN}[✓] Firewall configured successfully\${NC}"
+    else
+        echo -e "\${YELLOW}[!] Firewall configured with warnings\${NC}"
+    fi
 }
 
 setup_firewall_firewalld() {
@@ -762,7 +792,7 @@ setup_firewall_firewalld() {
 
     for port in "\${ports[@]}"; do
         echo -e "\${GRAY}Allowing port \$port\${NC}"
-        fw_cmd firewall-cmd --permanent --add-port="\$port" || echo -e "\${YELLOW}Warning: failed to allow \$port\${NC}"
+        fw_cmd firewall-cmd --permanent --add-port="\$port" || warn_firewall "Failed to allow \$port in firewalld"
     done
 
     echo -e "\${GRAY}Reloading firewalld\${NC}"
@@ -778,7 +808,11 @@ setup_firewall_firewalld() {
         fi
     done
 
-    echo -e "\${GREEN}[✓] Firewall configured successfully\${NC}"
+    if [ "\${#FIREWALL_WARNINGS[@]}" -eq 0 ]; then
+        echo -e "\${GREEN}[✓] Firewall configured successfully\${NC}"
+    else
+        echo -e "\${YELLOW}[!] Firewall configured with warnings\${NC}"
+    fi
 }
 
 # Firewall setup (auto-detects ufw vs firewalld)
@@ -790,7 +824,7 @@ setup_firewall() {
     detect_ssh_ports
 
     if [ \${#SSH_PORTS[@]} -eq 0 ]; then
-        echo -e "\${YELLOW}SSH port could not be confirmed (no live session, listener, sshd -T, systemd socket, or Port in sshd_config).\${NC}"
+        warn_firewall "SSH port could not be confirmed (no live session, listener, sshd -T, systemd socket, or Port in sshd_config)."
         echo -e "\${YELLOW}Skipping host firewall enable so we do not block SSH. Configure it by hand, for example:\${NC}"
         echo -e "  \${GRAY}ufw allow <ssh-port>/tcp && ufw --force enable\${NC}"
         echo -e "  \${GRAY}firewall-cmd --permanent --add-port=<ssh-port>/tcp && firewall-cmd --reload\${NC}"
@@ -805,7 +839,7 @@ setup_firewall() {
     elif command -v firewall-cmd &> /dev/null; then
         fw_tool="firewalld"
     else
-        echo -e "\${YELLOW}Warning: No supported firewall found (ufw or firewalld). Please configure your firewall manually.\${NC}"
+        skip_firewall "No supported firewall found (ufw or firewalld). Please configure your firewall manually."
         return 0
     fi
 
@@ -835,7 +869,7 @@ install_docker() {
     echo -e "This will install: Docker Engine, Docker CLI, containerd, and Docker Compose plugin."
     echo -e "This can take several minutes.\\n"
 
-    curl -fsSL https://get.docker.com -o /tmp/get-docker.sh > /dev/null 2>&1 &
+    run_cmd curl -fsSL https://get.docker.com -o /tmp/get-docker.sh &
     show_spinner $! "Downloading Docker install script from get.docker.com"
 
     run_cmd $SUDO sh /tmp/get-docker.sh &
@@ -867,6 +901,7 @@ install_docker() {
 
 # Main execution
 init_cmd_log
+FIREWALL_WARNINGS=()
 trap 'stop_sudo_keepalive' EXIT
 
 echo -e "$BANNER"
@@ -922,25 +957,35 @@ setup_monero_suite() {
     fi
 
     # Create installation directory
-    mkdir -p "$INSTALL_DIR" > /dev/null 2>&1 &
+    run_cmd mkdir -p "$INSTALL_DIR" &
     show_spinner $! "Creating directory $INSTALL_DIR"
 
     # Write Docker Compose file
-    cat > "$INSTALL_DIR"/docker-compose.yml << 'MONERO_COMPOSE_EOF'
+    if ! cat > "$INSTALL_DIR"/docker-compose.yml << 'MONERO_COMPOSE_EOF'
 \${DOCKER_COMPOSE_CONTENT}
 MONERO_COMPOSE_EOF
+    then
+        printf "\${RED}[✗]\${NC} Writing docker-compose.yml to %s\\n" "$INSTALL_DIR"
+        exit 1
+    fi
     echo -e "\${GREEN}[✓]\${NC} Writing docker-compose.yml"
 
     # Expand ~/ in bind-mount sources to the install home (effective uid).
     # Compose later runs under $SUDO, which would otherwise resolve ~ to /root.
     if [ -n "$INSTALL_HOME" ] && [ -f "$INSTALL_DIR"/docker-compose.yml ]; then
-        sed -i.bak -E "s|([:[:space:]])~/|\\1\${INSTALL_HOME}/|g" "$INSTALL_DIR"/docker-compose.yml
+        if ! sed -i.bak -E "s|([:[:space:]])~/|\\1\${INSTALL_HOME}/|g" "$INSTALL_DIR"/docker-compose.yml; then
+            printf "\${RED}[✗]\${NC} Expanding ~/ paths in docker-compose.yml\\n"
+            exit 1
+        fi
         rm -f "$INSTALL_DIR"/docker-compose.yml.bak
         echo -e "\${GREEN}[✓]\${NC} Expanding ~/ paths in docker-compose.yml"
     fi
 
     if selinux_is_enforcing; then
-        add_selinux_z_to_bind_mounts "$INSTALL_DIR"/docker-compose.yml
+        if ! add_selinux_z_to_bind_mounts "$INSTALL_DIR"/docker-compose.yml; then
+            printf "\${RED}[✗]\${NC} Labeling host bind mounts for SELinux\\n"
+            exit 1
+        fi
         echo -e "\${GREEN}[✓]\${NC} Labeling host bind mounts for SELinux"
     fi
 `;
@@ -948,9 +993,13 @@ MONERO_COMPOSE_EOF
 
 export const ENV_FILE_TEMPLATE = `
     # Write environment file
-    cat > "$INSTALL_DIR"/.env << 'MONERO_ENV_EOF'
+    if ! cat > "$INSTALL_DIR"/.env << 'MONERO_ENV_EOF'
 \${ENV_CONTENT}
 MONERO_ENV_EOF
+    then
+        printf "\${RED}[✗]\${NC} Writing .env configuration to %s\\n" "$INSTALL_DIR"
+        exit 1
+    fi
     echo -e "\${GREEN}[✓]\${NC} Writing .env configuration"
 `;
 
@@ -973,11 +1022,11 @@ export const COMPLETION_TEMPLATE = `
         PULL_FAILED=true
     fi
 
-    echo -e "Starting Monero Suite containers..."
-    if $SUDO docker compose up -d </dev/null; then
-        echo -e "\${GREEN}[✓]\${NC} Starting Monero Suite containers"
+    echo -e "Starting Monero Suite containers and waiting up to 120s for startup checks..."
+    if $SUDO docker compose up -d --wait --wait-timeout 120 </dev/null; then
+        echo -e "\${GREEN}[✓]\${NC} Container startup checks passed"
     else
-        echo -e "\${RED}[✗]\${NC} Starting Monero Suite containers"
+        echo -e "\${RED}[✗]\${NC} Container startup checks failed"
         $SUDO docker compose ps </dev/null || true
         $SUDO docker compose logs --tail=80 </dev/null || true
         echo -e "\${RED}Re-run with --verbose if the logs above are not enough.\${NC}"

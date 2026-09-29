@@ -4,8 +4,14 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import {
+  COMPLETION_TEMPLATE,
   CONFIRM_OVERWRITE_FN,
+  DOCKER_INSTALLATION_TEMPLATE,
+  ENV_FILE_TEMPLATE,
+  PRINT_NEXT_STEPS_FN,
   RUN_CMD_FN,
+  SELINUX_BIND_MOUNTS_FN,
+  SETUP_TEMPLATE,
   SUDO_KEEPALIVE_FN,
   WARN_DISK_SPACE_FN,
 } from "./bash-templates";
@@ -178,6 +184,241 @@ echo SHOULD_NOT_PRINT
     expect(result.output).toContain("Re-run with --verbose");
     expect(result.output).not.toContain("SHOULD_NOT_PRINT");
   });
+});
+
+describe("configuration failure feedback", () => {
+  function runSetup(installDir: string, commands = "") {
+    return runBash(`
+GREEN=; NC=; RED=; YELLOW=; BLUE=; GRAY=; MONERO_ORANGE=
+VERBOSE=false
+SPINNER=x
+INSTALL_DIR="${installDir}"
+INSTALL_HOME="${installDir}"
+IS_PRUNED_NODE=false
+FULL_DISK_GB=250
+BLOCKCHAIN_PATH=""
+${RUN_CMD_FN}
+${SELINUX_BIND_MOUNTS_FN}
+section() { :; }
+confirm_overwrite_install_dir() { :; }
+warn_disk_space() { :; }
+selinux_is_enforcing() { return 1; }
+${commands}
+${SETUP_TEMPLATE.replace("${DOCKER_COMPOSE_CONTENT}", "services: {}")}
+${ENV_FILE_TEMPLATE.replace("${ENV_CONTENT}", "DEMO=value")}
+echo SETUP_REACHED_END
+}
+setup_monero_suite
+`);
+  }
+
+  it.each(["docker-compose.yml", ".env"])(
+    "stops when %s cannot be written without printing a green check",
+    (filename) => {
+      const dir = tempDir();
+      fs.mkdirSync(path.join(dir, filename));
+      const result = runSetup(dir);
+
+      expect(result.status, result.output).toBe(1);
+      expect(result.output).toContain(`[✗] Writing ${filename}`);
+      expect(result.output).not.toContain(`[✓] Writing ${filename}`);
+      expect(result.output).not.toContain("SETUP_REACHED_END");
+    }
+  );
+
+  it("stops when expanding bind-mount paths fails", () => {
+    const result = runSetup(
+      tempDir(),
+      `sed() { echo 'path expansion failed' >&2; return 1; }`
+    );
+
+    expect(result.status, result.output).toBe(1);
+    expect(result.output).toContain("path expansion failed");
+    expect(result.output).toContain("[✗] Expanding ~/ paths");
+    expect(result.output).not.toContain("[✓] Expanding ~/ paths");
+    expect(result.output).not.toContain("SETUP_REACHED_END");
+  });
+
+  it("stops when labeling SELinux bind mounts fails", () => {
+    const result = runSetup(
+      tempDir(),
+      `selinux_is_enforcing() { return 0; }
+awk() { echo 'SELinux transform failed' >&2; return 1; }`
+    );
+
+    expect(result.status, result.output).toBe(1);
+    expect(result.output).toContain("SELinux transform failed");
+    expect(result.output).toContain("[✗] Labeling host bind mounts for SELinux");
+    expect(result.output).not.toContain("[✓] Labeling host bind mounts for SELinux");
+    expect(result.output).not.toContain("SETUP_REACHED_END");
+  });
+});
+
+describe("completion feedback", () => {
+  const nextSteps = PRINT_NEXT_STEPS_FN.replace("__ACCESS_URLS__", "").replace(
+    "__SECRET_WARNINGS__",
+    ""
+  );
+
+  function completionBody(commands: string) {
+    return `
+GREEN=; NC=; RED=; YELLOW=; BLUE=; GRAY=; MONERO_ORANGE=
+SUDO=""
+INSTALL_DIR="${tempDir()}"
+NETWORK_MODE=local
+HAS_HIDDEN_SERVICES=false
+OFFLINE_MODE=false
+FIREWALL_WARNINGS=()
+section() { echo "$1"; }
+${nextSteps}
+${commands}
+setup_monero_suite() {
+${COMPLETION_TEMPLATE}
+`;
+  }
+
+  it("waits for startup checks before completing and does not claim sync status", () => {
+    const result = runBash(completionBody(`
+docker() {
+    case "$2" in
+        up)
+            case " $* " in
+                *" --wait --wait-timeout 120 "*) echo STARTUP_CHECKS_PASSED ;;
+                *) echo 'startup checks missing' >&2; return 1 ;;
+            esac
+            ;;
+    esac
+}
+`));
+
+    expect(result.status, result.output).toBe(0);
+    expect(result.output).toContain("STARTUP_CHECKS_PASSED");
+    expect(result.output).toContain("Monero Suite installation completed.");
+    expect(result.output).toContain("Blockchain sync status was not checked.");
+    expect(result.output).not.toContain("not fully synced");
+    expect(result.output).not.toContain("completed with warnings");
+  });
+
+  it("fails with diagnostics when startup checks fail", () => {
+    const result = runBash(completionBody(`
+docker() {
+    case "$2" in
+        up) echo 'container unhealthy' >&2; return 1 ;;
+        ps) echo 'monerod restarting' ;;
+        logs) echo 'database could not open' ;;
+    esac
+}
+`));
+
+    expect(result.status, result.output).toBe(1);
+    expect(result.output).toContain("container unhealthy");
+    expect(result.output).toContain("monerod restarting");
+    expect(result.output).toContain("database could not open");
+    expect(result.output).not.toContain("installation completed");
+  });
+
+  it("carries a skipped firewall reason into the final summary", () => {
+    const start = DOCKER_INSTALLATION_TEMPLATE.indexOf("warn_firewall() {");
+    const end = DOCKER_INSTALLATION_TEMPLATE.indexOf("setup_firewall_ufw() {");
+    const result = runBash(completionBody(`
+${DOCKER_INSTALLATION_TEMPLATE.slice(start, end)}
+docker() { :; }
+skip_firewall 'firewalld is installed but not running'
+`));
+
+    expect(result.status, result.output).toBe(0);
+    expect(result.output).toContain("installation completed with warnings");
+    expect(result.output).toContain("Needs attention:");
+    const summary = result.output.slice(result.output.indexOf("Needs attention:"));
+    expect(summary).toContain("firewalld is installed but not running");
+    expect(result.output).not.toContain("completed successfully");
+  });
+
+  it("reports an image pull failure as a warning when cached images start", () => {
+    const result = runBash(completionBody(`
+docker() {
+    if [ "$2" = pull ]; then
+        echo 'registry unavailable' >&2
+        return 1
+    fi
+}
+`));
+
+    expect(result.status, result.output).toBe(0);
+    expect(result.output).toContain("installation completed with warnings");
+    expect(result.output).toContain("Needs attention:");
+    expect(result.output).toContain("older images already on disk");
+  });
+
+  it.each(["ufw", "firewalld"])("reports failed %s rules without claiming full firewall success", (firewall) => {
+    const start = DOCKER_INSTALLATION_TEMPLATE.indexOf("fw_cmd() {");
+    const end = DOCKER_INSTALLATION_TEMPLATE.indexOf("install_docker() {");
+    const result = runBash(completionBody(`
+${DOCKER_INSTALLATION_TEMPLATE.slice(start, end)}
+docker() { :; }
+detect_ssh_ports() { SSH_PORTS=(2222); SSH_SOURCES=test; }
+command() {
+    if [ "$*" = '-v ufw' ]; then ${firewall === "ufw" ? "return 0" : "return 1"}; fi
+    if [ "$*" = '-v firewall-cmd' ]; then return 0; fi
+    builtin command "$@"
+}
+ufw_is_active() { return 0; }
+ufw_port_allowed() { return 0; }
+ufw_allow_docker_forward() { return 0; }
+ufw() {
+    if [ "$*" = 'allow 80/tcp' ]; then
+        echo 'could not add port rule' >&2
+        return 1
+    fi
+}
+firewalld_is_running() { return 0; }
+firewall-cmd() {
+    if [ "$*" = '--permanent --add-port=80/tcp' ]; then
+        echo 'could not add port rule' >&2
+        return 1
+    fi
+}
+setup_firewall 80/tcp
+`));
+
+    expect(result.status, result.output).toBe(0);
+    expect(result.output).toContain("installation completed with warnings");
+    const summary = result.output.slice(result.output.indexOf("Needs attention:"));
+    expect(summary).toContain("80/tcp");
+    expect(result.output).not.toContain("[✓] ufw rules updated");
+    expect(result.output).not.toContain("[✓] Firewall configured successfully");
+  });
+});
+
+describe("Docker installer download failure", () => {
+  it.each([false, true])(
+    "reports the download error with verbose=%s instead of a stale command log",
+    (verbose) => {
+      const dir = tempDir();
+      const log = path.join(dir, "command.log");
+      fs.writeFileSync(log, "previous package command output\n");
+      const start = DOCKER_INSTALLATION_TEMPLATE.indexOf("install_docker() {");
+      const end = DOCKER_INSTALLATION_TEMPLATE.indexOf("# Main execution");
+      const result = runBash(`
+GREEN=; NC=; RED=; YELLOW=; BLUE=; GRAY=; MONERO_ORANGE=
+SUDO=""
+VERBOSE=${verbose}
+SPINNER=x
+CMD_LOG="${log}"
+${RUN_CMD_FN}
+section() { :; }
+docker() { return 1; }
+curl() { echo 'curl: HTTP 503 from Docker installer' >&2; return 22; }
+${DOCKER_INSTALLATION_TEMPLATE.slice(start, end)}
+install_docker
+`);
+
+      expect(result.status, result.output).toBe(1);
+      expect(result.output).toContain("[✗] Downloading Docker install script");
+      expect(result.output).toContain("curl: HTTP 503 from Docker installer");
+      expect(result.output).not.toContain("previous package command output");
+    }
+  );
 });
 
 describe("sudo keepalive", () => {

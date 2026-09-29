@@ -39,11 +39,12 @@ describe("generateInstallationScript docker compose", () => {
     expect(script).not.toContain("run_cmd $SUDO docker compose pull");
     expect(script).toContain("PULL_FAILED=true");
 
-    expect(script).toContain("$SUDO docker compose up -d </dev/null");
+    expect(script).toContain("$SUDO docker compose up -d --wait --wait-timeout 120 </dev/null");
     expect(script).not.toContain("run_cmd $SUDO docker compose up -d");
     expect(script).toContain("print_next_steps");
 
-    expect(script).toContain("Monero Suite installation completed successfully!");
+    expect(script).toContain("Monero Suite installation completed.");
+    expect(script).toContain("Monero Suite installation completed with warnings.");
   });
 });
 
@@ -199,4 +200,3 @@ describe("generateInstallationScript firewall", () => {
     expect(bashN.status, bashN.stderr || bashN.stdout).toBe(0);
   });
 });
-
