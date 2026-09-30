@@ -65,6 +65,7 @@ export const createTorService = (
           config: [
             {
               subnet: DOCKER_NETWORK.subnet,
+              ip_range: DOCKER_NETWORK.ipRange,
             },
           ],
         },

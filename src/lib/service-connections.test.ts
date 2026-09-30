@@ -92,6 +92,17 @@ const cmd = (c: ContainerSpec): string[] =>
 const flagValue = (command: string[], flag: string): string | undefined =>
   command[command.indexOf(flag) + 1];
 
+function ipv4ToInt(ip: string): number {
+  return ip.split(".").reduce((acc, octet) => acc * 256 + Number(octet), 0);
+}
+
+function cidrContains(cidr: string, ip: string): boolean {
+  const [base, prefix] = cidr.split("/");
+  const bits = Number(prefix);
+  const mask = bits === 0 ? 0 : (0xffffffff << (32 - bits)) >>> 0;
+  return (ipv4ToInt(ip) & mask) === (ipv4ToInt(base) & mask);
+}
+
 const torIpv4 = (spec: ContainerSpec): string | undefined => {
   const nets = spec.networks as
     | Record<string, { ipv4_address?: string }>
@@ -280,8 +291,9 @@ describe("tor connections", () => {
     expect(torIpv4(services.monitoring.code.prometheus as ContainerSpec)).toBeUndefined();
 
     const compose = generateDockerComposeFile(checkedServicesOf(config));
-    const networks = compose.networks as Record<string, { ipam?: { config?: Array<{ subnet?: string }> } }>;
+    const networks = compose.networks as Record<string, { ipam?: { config?: Array<{ subnet?: string; ip_range?: string }> } }>;
     expect(networks[DOCKER_NETWORK.name]?.ipam?.config?.[0]?.subnet).toBe(DOCKER_NETWORK.subnet);
+    expect(networks[DOCKER_NETWORK.name]?.ipam?.config?.[0]?.ip_range).toBe(DOCKER_NETWORK.ipRange);
     expect(torIpv4(compose.services?.monerod as ContainerSpec)).toBe(SERVICE_IPS.monerod);
   });
 
@@ -351,10 +363,13 @@ describe("tor connections", () => {
     expect(p2poolCmd).toContain("--no-dns");
   });
 
-  it("all static service IPs sit inside the tor-proxy subnet", () => {
-    const subnetPrefix = DOCKER_NETWORK.subnet.split("/")[0].split(".").slice(0, 3).join(".");
+  it("all static service IPs sit inside the subnet and outside the dynamic pool", () => {
+    expect(cidrContains(DOCKER_NETWORK.ipRange, "172.28.1.64")).toBe(true);
+    expect(cidrContains(DOCKER_NETWORK.ipRange, "172.28.1.127")).toBe(true);
+    expect(cidrContains(DOCKER_NETWORK.ipRange, "172.28.1.128")).toBe(false);
     for (const ip of Object.values(SERVICE_IPS)) {
-      expect(ip.startsWith(`${subnetPrefix}.`)).toBe(true);
+      expect(cidrContains(DOCKER_NETWORK.subnet, ip)).toBe(true);
+      expect(cidrContains(DOCKER_NETWORK.ipRange, ip)).toBe(false);
     }
   });
 

@@ -6,6 +6,10 @@
 export const DOCKER_NETWORK = {
   name: "tor-proxy",
   subnet: "172.28.1.0/24",
+  // Dynamic clients draw from .64-.127. Static pins stay at .2-.5 and
+  // .250-.252, outside this range. An existing network already handed the
+  // low addresses to proxy clients, and compose does not rebuild IPAM.
+  ipRange: "172.28.1.64/26",
   driver: "bridge",
 } as const;
 
@@ -15,9 +19,11 @@ export const SERVICE_IPS = {
   monerod: "172.28.1.3",
   monerodStagenet: "172.28.1.4",
   p2pool: "172.28.1.5",
-  grafana: "172.28.1.6",
-  moneroLws: "172.28.1.7",
-  moneropay: "172.28.1.8",
+  // High addresses: .6-.8 are the first free addresses on a network created
+  // before ip_range existed, so proxy clients already hold them.
+  grafana: "172.28.1.250",
+  moneroLws: "172.28.1.251",
+  moneropay: "172.28.1.252",
 } as const;
 
 // Monero daemon ports
