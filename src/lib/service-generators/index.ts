@@ -30,7 +30,7 @@ export function generationCtx(config: FullConfig): GenerationCtx {
         config.services.isMoneroLws
       )
     ),
-    anyHiddenService: anyHiddenService(config.tor),
+    anyHiddenService: anyHiddenService(config.tor, config.p2pool.p2PoolMode),
   };
 }
 

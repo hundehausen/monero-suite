@@ -66,7 +66,10 @@ export const useServices = () => {
   const monerodStagenetService = useMonerodStagenetService();
   const p2PoolService = useP2PoolService();
   const moneroWalletRpcService = useMoneroWalletRpcService();
-  const torService = useTorService({ networkMode });
+  const torService = useTorService({
+    networkMode,
+    p2PoolMode: p2PoolService.stateFunctions.p2PoolMode,
+  });
   const watchtowerService = useWatchtowerService();
   const monitoringService = useMonitoringService();
   const xmrigService = useXmrigService();
@@ -81,6 +84,7 @@ export const useServices = () => {
   const { grafanaDomain, setGrafanaDomain } = monitoringService.stateFunctions;
   const { p2PoolMode } = p2PoolService.stateFunctions;
   const { miningMode, setMiningMode } = xmrigService.stateFunctions;
+  const { hsP2Pool, setHsP2Pool } = torService.stateFunctions;
   const { isPrunedNode, isSyncPrunedBlocks } = monerodService.stateFunctions;
   const { isMoneroPay } = moneroPayService.stateFunctions;
   const { isMoneroWalletRpc, setIsMoneroWalletRpc } = moneroWalletRpcService.stateFunctions;
@@ -102,6 +106,15 @@ export const useServices = () => {
       setMiningMode("none");
     }
   }, [p2PoolMode, miningMode, setMiningMode]);
+
+  // The P2Pool onion checkbox is hidden while P2Pool is off. Drop the flag
+  // too, or it keeps Tor enabled and monerod gets --disable-rpc-ban with no
+  // control left to turn it off.
+  useEffect(() => {
+    if (p2PoolMode === "none" && hsP2Pool) {
+      setHsP2Pool(false);
+    }
+  }, [p2PoolMode, hsP2Pool, setHsP2Pool]);
 
   // Should remove sync-pruned-blocks flag, if user switches from pruned node to full node
   useEffect(() => {

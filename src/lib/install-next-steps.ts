@@ -210,7 +210,7 @@ export function installScriptHintsFromConfig(
       ? ""
       : config.monerod.moneroMainnetBlockchainLocation,
     isPrunedNode: config.monerod.isPrunedNode,
-    hasHiddenServices: anyHiddenService(config.tor),
+    hasHiddenServices: anyHiddenService(config.tor, config.p2pool.p2PoolMode),
     offlineMode: config.monerod.offlineMode,
   };
 }

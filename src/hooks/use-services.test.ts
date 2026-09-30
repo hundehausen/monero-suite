@@ -101,14 +101,19 @@ vi.mock("./services", async () => {
         },
       };
     },
-    useTorService: () => ({
-      stateFunctions: {
-        torProxyMode: "none",
-        isHiddenServices: false,
-        hsLws: false,
-        hsMoneroPay: false,
-      },
-    }),
+    useTorService: () => {
+      const [hsP2Pool, setHsP2Pool] = React.useState(false);
+      return {
+        stateFunctions: {
+          torProxyMode: "none",
+          isHiddenServices: false,
+          hsLws: false,
+          hsMoneroPay: false,
+          hsP2Pool,
+          setHsP2Pool,
+        },
+      };
+    },
     useWatchtowerService: () => ({
       stateFunctions: {
         isWatchtower: false,
@@ -164,6 +169,21 @@ describe("useServices miningMode reset (fix 6)", () => {
     act(() => setP2PoolMode("none"));
     expect(result.current.stateFunctions.p2PoolMode).toBe("none");
     expect(result.current.stateFunctions.miningMode).toBe("none");
+  });
+
+  it("clears hsP2Pool when P2Pool is switched to none", () => {
+    const { result } = renderHook(() => useServices());
+
+    act(() => {
+      result.current.stateFunctions.setHsP2Pool(true);
+    });
+    expect(result.current.stateFunctions.hsP2Pool).toBe(true);
+
+    act(() => {
+      result.current.stateFunctions.setP2PoolMode("none");
+    });
+    expect(result.current.stateFunctions.p2PoolMode).toBe("none");
+    expect(result.current.stateFunctions.hsP2Pool).toBe(false);
   });
 });
 

@@ -6,11 +6,18 @@ import {
   torProxyModes,
   TorProxyMode,
   NetworkMode,
+  P2PoolMode,
 } from "./types";
 import { useEffect } from "react";
 import { anyHiddenService } from "@/lib/service-generators/ctx";
 
-export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => {
+export const useTorService = ({
+  networkMode,
+  p2PoolMode,
+}: {
+  networkMode: NetworkMode;
+  p2PoolMode: P2PoolMode;
+}) => {
   const [torProxyMode, setTorProxyMode] = useQueryState<TorProxyMode>(
     "torProxyMode",
     parseAsStringEnum(Object.values(torProxyModes)).withDefault(
@@ -31,17 +38,20 @@ export const useTorService = ({ networkMode }: { networkMode: NetworkMode }) => 
     parseAsBoolean.withDefault(false)
   );
 
-  const isHiddenServices = anyHiddenService({
-    torProxyMode,
-    hsMonerod,
-    hsMonerodP2P,
-    hsStagenet,
-    hsP2Pool,
-    hsGrafana,
-    hsLws,
-    hsMoneroPay,
-    isGlobalTorProxy,
-  });
+  const isHiddenServices = anyHiddenService(
+    {
+      torProxyMode,
+      hsMonerod,
+      hsMonerodP2P,
+      hsStagenet,
+      hsP2Pool,
+      hsGrafana,
+      hsLws,
+      hsMoneroPay,
+      isGlobalTorProxy,
+    },
+    p2PoolMode,
+  );
 
   useEffect(() => {
     if (networkMode === networkModes.exposed) {

@@ -8,11 +8,27 @@ import { generateBashScriptFile } from "@/app/utils";
 
 describe("anyHiddenService", () => {
   it("is false when every hidden-service flag is off", () => {
-    expect(anyHiddenService(makeFullConfig().tor)).toBe(false);
+    const config = makeFullConfig();
+    expect(anyHiddenService(config.tor, config.p2pool.p2PoolMode)).toBe(false);
   });
 
   it("is true when only hsMonerod is on", () => {
-    expect(anyHiddenService(makeFullConfig({ tor: { hsMonerod: true } }).tor)).toBe(true);
+    const config = makeFullConfig({ tor: { hsMonerod: true } });
+    expect(anyHiddenService(config.tor, config.p2pool.p2PoolMode)).toBe(true);
+  });
+
+  it("ignores hsP2Pool when P2Pool mode is none", () => {
+    const config = makeFullConfig({ tor: { hsP2Pool: true } });
+    expect(config.p2pool.p2PoolMode).toBe("none");
+    expect(anyHiddenService(config.tor, config.p2pool.p2PoolMode)).toBe(false);
+  });
+
+  it("counts hsP2Pool when a P2Pool sidechain is selected", () => {
+    const config = makeFullConfig({
+      tor: { hsP2Pool: true },
+      p2pool: { p2PoolMode: "mini" },
+    });
+    expect(anyHiddenService(config.tor, config.p2pool.p2PoolMode)).toBe(true);
   });
 });
 
@@ -25,6 +41,17 @@ describe("generateAllServices hidden services", () => {
     );
     const command = services.monerod.code.monerod?.command as string[];
     expect(command).toContain("--disable-rpc-ban");
+  });
+
+  it("does not enable Tor or disable RPC bans for a stale P2Pool onion flag", () => {
+    const services = generateAllServices(
+      makeFullConfig({
+        tor: { hsP2Pool: true },
+      })
+    );
+    const command = services.monerod.code.monerod?.command as string[];
+    expect(command).not.toContain("--disable-rpc-ban");
+    expect(services.tor.checked).toBe(false);
   });
 });
 
