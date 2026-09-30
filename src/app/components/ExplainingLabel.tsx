@@ -13,7 +13,7 @@ const ExplainingLabel = ({
   size,
 }: ExplainingLabelProps) => (
   <Group gap={4} wrap="nowrap" align="center" justify="center">
-    <Text span size={size}>
+    <Text span size={size} inherit={size === undefined}>
       {label}
     </Text>
     <Popover width={360} shadow="md" withArrow>
