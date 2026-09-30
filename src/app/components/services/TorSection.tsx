@@ -162,7 +162,7 @@ const TorSection = () => {
                 onChange={(event) => setHsStagenet(event.currentTarget.checked)}
               />
             )}
-            {services["p2pool"]?.checked && (
+            {services["p2pool"]?.checked && services["p2pool"].checked !== "none" && (
               <Checkbox
                 checked={hsP2Pool}
                 label="P2Pool (Stratum)"
