@@ -259,17 +259,17 @@ describe("tor connections", () => {
     const p2pool = services.p2pool.code.p2pool as ContainerSpec;
     const grafana = services.monitoring.code.grafana as ContainerSpec;
 
-    expect(env.HS_MONEROD_MAINNET).toBe(
+    expect(env.HS_MONEROD_MAINNET_RESTRICTED_RPC).toBe(
       `${SERVICE_IPS.monerod}:${MONEROD_PORTS.rpcRestricted}:${MONEROD_PORTS.rpcRestricted}`
     );
-    expect(env.HS_MONEROD_P2P).toBe(
+    expect(env.HS_MONEROD_MAINNET_P2P).toBe(
       `${SERVICE_IPS.monerod}:${MONEROD_PORTS.torP2p}:${MONEROD_PORTS.torP2p}`
     );
-    expect(env.HS_P2POOL).toBe(
+    expect(env.HS_P2POOL_FULL_STRATUM).toBe(
       `${SERVICE_IPS.p2pool}:${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}`
     );
     expect(env.HS_GRAFANA).toBe(`${SERVICE_IPS.grafana}:${SERVICE_PORTS.grafana}:80`);
-    expect(env.HS_MONEROD_MAINNET_STAGENET).toBe(
+    expect(env.HS_MONEROD_STAGENET_RESTRICTED_RPC).toBe(
       `${SERVICE_IPS.monerodStagenet}:${MONEROD_STAGENET_PORTS.rpcRestricted}:${MONEROD_STAGENET_PORTS.rpcRestricted}`
     );
     expect(torIpv4(monerod)).toBe(SERVICE_IPS.monerod);
@@ -285,8 +285,8 @@ describe("tor connections", () => {
     expect(torIpv4(compose.services?.monerod as ContainerSpec)).toBe(SERVICE_IPS.monerod);
   });
 
-  it("mini and nano hidden services use the single p2pool address", () => {
-    for (const mode of [p2poolModes.mini, p2poolModes.nano] as const) {
+  it("p2pool hidden service names identify the selected mode and Stratum endpoint", () => {
+    for (const mode of [p2poolModes.full, p2poolModes.mini, p2poolModes.nano]) {
       const services = generateAllServices(
         makeConfig({
           p2pool: {
@@ -298,11 +298,11 @@ describe("tor connections", () => {
         })
       );
       const env = (services.tor.code.tor as ContainerSpec).environment ?? {};
-      const key = mode === p2poolModes.mini ? "HS_P2POOL_MINI" : "HS_P2POOL_NANO";
+      const key = `HS_P2POOL_${mode.toUpperCase()}_STRATUM`;
       expect(env[key]).toBe(
         `${SERVICE_IPS.p2pool}:${P2POOL_PORTS.stratum}:${P2POOL_PORTS.stratum}`
       );
-      expect(env.HS_P2POOL).toBeUndefined();
+      expect(Object.keys(env).filter((name) => name.startsWith("HS_P2POOL"))).toEqual([key]);
       const container = services.p2pool.code[getP2PoolContainerName(mode)] as ContainerSpec;
       expect(torIpv4(container)).toBe(SERVICE_IPS.p2pool);
     }
@@ -367,7 +367,7 @@ describe("tor connections", () => {
     const lws = services["monero-lws"].code["monero-lws"] as ContainerSpec;
     const tor = services.tor.code.tor as ContainerSpec;
     expect(lws.command).toContain(`--rest-server=http://0.0.0.0:${SERVICE_PORTS.moneroLws}`);
-    expect(tor.environment?.HS_MONERO_LWS).toBe(
+    expect(tor.environment?.HS_MONERO_LWS_REST_API).toBe(
       `${SERVICE_IPS.moneroLws}:${SERVICE_PORTS.moneroLws}:${SERVICE_PORTS.moneroLws}`
     );
     expect(torIpv4(lws)).toBe(SERVICE_IPS.moneroLws);
@@ -383,7 +383,7 @@ describe("tor connections", () => {
     const pay = services.moneropay.code.moneropay as ContainerSpec;
     const tor = services.tor.code.tor as ContainerSpec;
     expect(pay.environment?.BIND).toBe(`0.0.0.0:${SERVICE_PORTS.moneroPay}`);
-    expect(tor.environment?.HS_MONEROPAY).toBe(
+    expect(tor.environment?.HS_MONEROPAY_API).toBe(
       `${SERVICE_IPS.moneropay}:${SERVICE_PORTS.moneroPay}:${SERVICE_PORTS.moneroPay}`
     );
     expect(torIpv4(pay)).toBe(SERVICE_IPS.moneropay);

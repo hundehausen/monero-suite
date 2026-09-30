@@ -74,6 +74,9 @@ Find your Tor hidden service addresses:
 docker compose logs tor
 ```
 
+If you regenerate an existing deployment with the renamed hidden services, follow
+[Keep existing Tor onion addresses](docs/tor-hidden-service-names.md) before restarting Tor.
+
 Requirements: [Docker](https://docs.docker.com/install/) and [Docker Compose](https://docs.docker.com/compose/install/).
 
 ## Security

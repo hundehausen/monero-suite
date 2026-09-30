@@ -117,7 +117,7 @@ const TorSection = () => {
             {services["monerod"]?.checked && (
               <Checkbox
                 checked={hsMonerod}
-                label="Monerod (Restricted RPC)"
+                label="Monerod Mainnet (Restricted RPC)"
                 onChange={(event) => setHsMonerod(event.currentTarget.checked)}
               />
             )}
@@ -127,7 +127,7 @@ const TorSection = () => {
                   checked={hsMonerodP2P}
                   label={
                     <ExplainingLabel
-                      label="Monerod (P2P Anonymous Inbound)"
+                      label="Monerod Mainnet (P2P Anonymous Inbound)"
                       explanation={
                         "Creates a hidden service for monerod P2P traffic on port 18084, allowing other Tor nodes to peer with your node anonymously. "
                         + "After first deployment, run `docker logs tor` to find the generated .onion address. "
@@ -148,7 +148,7 @@ const TorSection = () => {
                 )}
                 {!hsMonerodP2P && anonymousInbound.trim().length > 0 && (
                   <Alert variant="light" color="blue" title="Anonymous Inbound Has No Hidden Service">
-                    This Anonymous Inbound value has no effect: the Monerod (P2P Anonymous Inbound) hidden service is
+                    This Anonymous Inbound value has no effect: the Monerod Mainnet (P2P Anonymous Inbound) hidden service is
                     disabled, so nothing listens on or forwards to port 18084. Enable the hidden service above and complete
                     its setup steps to accept inbound P2P connections.
                   </Alert>

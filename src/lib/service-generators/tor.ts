@@ -88,31 +88,31 @@ export const createTorService = (
 
     service.code.tor.environment = {
       ...(hsMonerod
-        ? { HS_MONEROD_MAINNET: target(SERVICE_IPS.monerod, MONEROD_PORTS.rpcRestricted) }
+        ? { HS_MONEROD_MAINNET_RESTRICTED_RPC: target(SERVICE_IPS.monerod, MONEROD_PORTS.rpcRestricted) }
         : {}),
       ...(hsMonerodP2P
-        ? { HS_MONEROD_P2P: target(SERVICE_IPS.monerod, MONEROD_PORTS.torP2p) }
+        ? { HS_MONEROD_MAINNET_P2P: target(SERVICE_IPS.monerod, MONEROD_PORTS.torP2p) }
         : {}),
       ...(hsStagenet && isStagenetNode
-        ? { HS_MONEROD_MAINNET_STAGENET: target(SERVICE_IPS.monerodStagenet, MONEROD_STAGENET_PORTS.rpcRestricted) }
+        ? { HS_MONEROD_STAGENET_RESTRICTED_RPC: target(SERVICE_IPS.monerodStagenet, MONEROD_STAGENET_PORTS.rpcRestricted) }
         : {}),
       ...(hsP2Pool && p2PoolMode === p2poolModes.full
-        ? { HS_P2POOL: target(SERVICE_IPS.p2pool, P2POOL_PORTS.stratum) }
+        ? { HS_P2POOL_FULL_STRATUM: target(SERVICE_IPS.p2pool, P2POOL_PORTS.stratum) }
         : {}),
       ...(hsP2Pool && p2PoolMode === p2poolModes.mini
-        ? { HS_P2POOL_MINI: target(SERVICE_IPS.p2pool, P2POOL_PORTS.stratum) }
+        ? { HS_P2POOL_MINI_STRATUM: target(SERVICE_IPS.p2pool, P2POOL_PORTS.stratum) }
         : {}),
       ...(hsP2Pool && p2PoolMode === p2poolModes.nano
-        ? { HS_P2POOL_NANO: target(SERVICE_IPS.p2pool, P2POOL_PORTS.stratum) }
+        ? { HS_P2POOL_NANO_STRATUM: target(SERVICE_IPS.p2pool, P2POOL_PORTS.stratum) }
         : {}),
       ...(hsGrafana && isMonitoring
         ? { HS_GRAFANA: target(SERVICE_IPS.grafana, SERVICE_PORTS.grafana, 80) }
         : {}),
       ...(hsLws && isMoneroLws
-        ? { HS_MONERO_LWS: target(SERVICE_IPS.moneroLws, SERVICE_PORTS.moneroLws) }
+        ? { HS_MONERO_LWS_REST_API: target(SERVICE_IPS.moneroLws, SERVICE_PORTS.moneroLws) }
         : {}),
       ...(hsMoneroPay && isMoneroPay
-        ? { HS_MONEROPAY: target(SERVICE_IPS.moneropay, SERVICE_PORTS.moneroPay) }
+        ? { HS_MONEROPAY_API: target(SERVICE_IPS.moneropay, SERVICE_PORTS.moneroPay) }
         : {}),
     };
   }
