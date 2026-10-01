@@ -398,7 +398,7 @@ docker() {
     case "$2" in
         up)
             case " $* " in
-                *" --wait --wait-timeout 120 "*) echo STARTUP_CHECKS_PASSED ;;
+                *" --wait --wait-timeout 360 "*) echo STARTUP_CHECKS_PASSED ;;
                 *) echo 'startup checks missing' >&2; return 1 ;;
             esac
             ;;

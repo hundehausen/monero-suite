@@ -88,7 +88,7 @@ test.describe("install artifact e2e", () => {
     expect(installContents).toContain("monerod");
     expect(installContents).toContain("--offline");
     expect(installContents).toContain('docker compose "$@" </dev/null');
-    expect(installContents).toContain("run_compose up -d --wait --wait-timeout 120");
+    expect(installContents).toContain("run_compose up -d --wait --wait-timeout 360");
     // Monitoring path must be present in the generated install.
     expect(installContents).toContain("MONERO_ENV_EOF");
     expect(installContents).toContain("monitoring/grafana");

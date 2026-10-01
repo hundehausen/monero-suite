@@ -52,7 +52,7 @@ describe("generateInstallationScript docker compose", () => {
     expect(script).not.toContain("run_cmd $SUDO docker compose pull");
     expect(script).toContain("PULL_FAILED=true");
 
-    expect(script).toContain("run_compose up -d --wait --wait-timeout 120");
+    expect(script).toContain("run_compose up -d --wait --wait-timeout 360");
     expect(script).toContain('$SUDO docker compose --progress quiet "$@" </dev/null');
     expect(script).not.toContain("run_cmd $SUDO docker compose up -d");
     expect(script).toContain("print_next_steps");

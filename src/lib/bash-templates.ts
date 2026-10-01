@@ -1061,8 +1061,8 @@ export const COMPLETION_TEMPLATE = `
         PULL_FAILED=true
     fi
 
-    echo -e "Starting Monero Suite containers and waiting up to 120s for startup checks..."
-    if run_compose up -d --wait --wait-timeout 120; then
+    echo -e "Starting Monero Suite containers and waiting up to 360s for startup checks..."
+    if run_compose up -d --wait --wait-timeout 360; then
         echo -e "\${GREEN}[✓]\${NC} Container startup checks passed"
     else
         echo -e "\${RED}[✗]\${NC} Container startup checks failed"
