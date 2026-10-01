@@ -11,10 +11,6 @@
     "test": "vitest run",
     "test:e2e": "playwright test --config e2e/playwright.config.ts",
     "test:e2e:container": "E2E_RUN_CONTAINER=1 playwright test --config e2e/playwright.config.ts",
-    "release": "standard-version",
-    "release:minor": "standard-version --release-as minor",
-    "release:patch": "standard-version --release-as patch",
-    "release:major": "standard-version --release-as major",
     "prepare": "husky"
   },
   "dependencies": {
@@ -53,7 +49,6 @@
     "postcss": "8.5.28",
     "postcss-preset-mantine": "1.18.0",
     "postcss-simple-vars": "7.0.1",
-    "standard-version": "9.5.0",
     "typescript": "6.0.3",
     "vitest": "5.0.1"
   },
