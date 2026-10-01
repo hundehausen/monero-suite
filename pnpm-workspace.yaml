@@ -1,19 +1,19 @@
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
-  # GHSA-vcvr-r3jv-pc5j: next/og ImageResponse RCE, patched in 16.3.6.
-  # https://github.com/vercel/next.js/security/advisories/GHSA-vcvr-r3jv-pc5j
-  - next@16.3.6
-  - eslint-config-next@16.3.6
-  - '@next/env@16.3.6'
-  - '@next/eslint-plugin-next@16.3.6'
-  - '@next/swc-darwin-arm64@16.3.6'
-  - '@next/swc-darwin-x64@16.3.6'
-  - '@next/swc-linux-arm64-gnu@16.3.6'
-  - '@next/swc-linux-arm64-musl@16.3.6'
-  - '@next/swc-linux-x64-gnu@16.3.6'
-  - '@next/swc-linux-x64-musl@16.3.6'
-  - '@next/swc-win32-arm64-msvc@16.3.6'
-  - '@next/swc-win32-x64-msvc@16.3.6'
+  # Next.js 16.3.8 security patches, including GHSA-cjq9-62q9-8jv4 (image optimization SSRF).
+  # https://github.com/vercel/next.js/releases/tag/v16.3.8
+  - next@16.3.8
+  - eslint-config-next@16.3.8
+  - '@next/env@16.3.8'
+  - '@next/eslint-plugin-next@16.3.8'
+  - '@next/swc-darwin-arm64@16.3.8'
+  - '@next/swc-darwin-x64@16.3.8'
+  - '@next/swc-linux-arm64-gnu@16.3.8'
+  - '@next/swc-linux-arm64-musl@16.3.8'
+  - '@next/swc-linux-x64-gnu@16.3.8'
+  - '@next/swc-linux-x64-musl@16.3.8'
+  - '@next/swc-win32-arm64-msvc@16.3.8'
+  - '@next/swc-win32-x64-msvc@16.3.8'
 allowBuilds:
   sharp: true
   unrs-resolver: true
