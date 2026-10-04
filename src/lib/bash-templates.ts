@@ -398,7 +398,7 @@ __SECRET_WARNINGS__
     else
         echo -e "\\n\${GREEN}Monero Suite installation completed.\${NC}"
     fi
-    echo -e "Startup checks passed. Services without healthchecks were checked for running state.\\n"
+    echo -e "Containers were still running a few seconds after start.\\n"
     echo -e "\${BLUE}Useful commands:\${NC}"
     echo -e "  \${YELLOW}cd \$INSTALL_DIR\${NC}         — Change to the installation directory"
     echo -e "  \${YELLOW}docker compose ps\${NC}        — Check the status of the containers"
@@ -1061,16 +1061,32 @@ export const COMPLETION_TEMPLATE = `
         PULL_FAILED=true
     fi
 
-    echo -e "Starting Monero Suite containers and waiting up to 360s for startup checks..."
-    if run_compose up -d --wait --wait-timeout 360; then
-        echo -e "\${GREEN}[✓]\${NC} Container startup checks passed"
-    else
-        echo -e "\${RED}[✗]\${NC} Container startup checks failed"
+    report_container_failure() {
         $SUDO docker compose ps </dev/null || true
         $SUDO docker compose logs --tail=80 </dev/null || true
         echo -e "\${RED}Re-run with --verbose if the logs above are not enough.\${NC}"
         exit 1
+    }
+
+    echo -e "Starting Monero Suite containers..."
+    if ! run_compose up -d; then
+        echo -e "\${RED}[✗]\${NC} Starting Monero Suite containers"
+        report_container_failure
     fi
+
+    # A few seconds lets a crash loop show up as restarting.
+    echo -e "Checking that containers stay running..."
+    sleep "\${STARTUP_SETTLE_SECONDS:-5}"
+    local failed=""
+    if ! failed=\$(run_compose ps -q --status restarting --status exited --status dead); then
+        echo -e "\${RED}[✗]\${NC} Could not read container status"
+        report_container_failure
+    fi
+    if [ -n "\$failed" ]; then
+        echo -e "\${RED}[✗]\${NC} A container exited or is restarting"
+        report_container_failure
+    fi
+    echo -e "\${GREEN}[✓]\${NC} Containers are running"
 
     print_next_steps
 }

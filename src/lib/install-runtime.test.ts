@@ -378,6 +378,7 @@ describe("completion feedback", () => {
 GREEN=; NC=; RED=; YELLOW=; BLUE=; GRAY=; MONERO_ORANGE=
 SUDO=""
 VERBOSE=true
+STARTUP_SETTLE_SECONDS=0
 INSTALL_DIR="${tempDir()}"
 NETWORK_MODE=local
 HAS_HIDDEN_SERVICES=false
@@ -392,14 +393,19 @@ ${COMPLETION_TEMPLATE}
 `;
   }
 
-  it("waits for startup checks before completing and does not claim sync status", () => {
+  it("completes when containers stay running and does not claim sync status", () => {
     const result = runBash(completionBody(`
 docker() {
     case "$2" in
         up)
             case " $* " in
-                *" --wait --wait-timeout 360 "*) echo STARTUP_CHECKS_PASSED ;;
-                *) echo 'startup checks missing' >&2; return 1 ;;
+                *" --wait "*) echo 'wait flag should be absent' >&2; return 1 ;;
+            esac
+            ;;
+        ps)
+            case " $* " in
+                *" --status restarting "*) ;;
+                *) echo 'monerod Up (health: starting)' ;;
             esac
             ;;
     esac
@@ -407,14 +413,16 @@ docker() {
 `));
 
     expect(result.status, result.output).toBe(0);
-    expect(result.output).toContain("STARTUP_CHECKS_PASSED");
+    expect(result.output).toContain("Containers are running");
+    expect(result.output).toContain("monerod Up (health: starting)");
+    expect(result.output).toContain("still running a few seconds after start");
     expect(result.output).toContain("Monero Suite installation completed.");
     expect(result.output).toContain("Blockchain sync status was not checked.");
     expect(result.output).not.toContain("not fully synced");
     expect(result.output).not.toContain("completed with warnings");
   });
 
-  it("fails with diagnostics when startup checks fail", () => {
+  it("fails with diagnostics when compose up fails", () => {
     const result = runBash(completionBody(`
 docker() {
     case "$2" in
@@ -429,6 +437,52 @@ docker() {
     expect(result.output).toContain("container unhealthy");
     expect(result.output).toContain("monerod restarting");
     expect(result.output).toContain("database could not open");
+    expect(result.output).not.toContain("installation completed");
+  });
+
+  it("fails with diagnostics when a container is restarting or exited", () => {
+    const result = runBash(completionBody(`
+docker() {
+    case "$2" in
+        up) ;;
+        ps)
+            case " $* " in
+                *" --status restarting "*) echo abc123 ;;
+                *) echo 'monerod Restarting' ;;
+            esac
+            ;;
+        logs) echo 'database could not open' ;;
+    esac
+}
+`));
+
+    expect(result.status, result.output).toBe(1);
+    expect(result.output).toContain("A container exited or is restarting");
+    expect(result.output).toContain("monerod Restarting");
+    expect(result.output).toContain("database could not open");
+    expect(result.output).not.toContain("installation completed");
+  });
+
+  it("fails with diagnostics when container status cannot be read", () => {
+    const result = runBash(completionBody(`
+docker() {
+    case "$2" in
+        up) ;;
+        ps)
+            case " $* " in
+                *" --status restarting "*) echo 'daemon unreachable' >&2; return 1 ;;
+                *) echo 'monerod Up' ;;
+            esac
+            ;;
+        logs) echo 'no logs' ;;
+    esac
+}
+`));
+
+    expect(result.status, result.output).toBe(1);
+    expect(result.output).toContain("Could not read container status");
+    expect(result.output).toContain("monerod Up");
+    expect(result.output).toContain("no logs");
     expect(result.output).not.toContain("installation completed");
   });
 
