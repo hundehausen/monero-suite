@@ -14,11 +14,11 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@mantine/code-highlight": "9.6.2",
-    "@mantine/core": "9.6.2",
-    "@mantine/hooks": "9.6.2",
-    "@mantine/notifications": "9.6.2",
-    "@mantine/spotlight": "9.6.2",
+    "@mantine/code-highlight": "9.6.3",
+    "@mantine/core": "9.6.3",
+    "@mantine/hooks": "9.6.3",
+    "@mantine/notifications": "9.6.3",
+    "@mantine/spotlight": "9.6.3",
     "@vercel/blob": "2.8.0",
     "compose-spec-schema": "1.0.0",
     "date-fns": "4.4.0",
@@ -29,7 +29,7 @@
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-icons": "5.7.0",
-    "sharp": "0.35.4",
+    "sharp": "0.35.5",
     "yaml": "2.9.1",
     "zod": "4.6.5"
   },
@@ -39,18 +39,18 @@
     "@playwright/test": "1.63.0",
     "@testing-library/dom": "10.4.2",
     "@testing-library/react": "16.3.3",
-    "@types/node": "26.6.2",
+    "@types/node": "26.6.4",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "eslint": "10.11.0",
+    "eslint": "10.12.0",
     "eslint-config-next": "16.3.8",
     "husky": "9.1.7",
-    "jsdom": "30.1.0",
+    "jsdom": "30.1.1",
     "postcss": "8.5.28",
     "postcss-preset-mantine": "1.18.0",
     "postcss-simple-vars": "7.0.1",
     "typescript": "6.0.3",
-    "vitest": "5.0.1"
+    "vitest": "5.0.3"
   },
-  "packageManager": "pnpm@12.4.1+sha512.2e81e399d73fe8390dab25e06aa788ab7a5908248d2f5a370f82b481147a6a7a367bf8048f9a6fdb6460f21a66f0542dedb8b94ca2c8723596741920b1656d4c"
+  "packageManager": "pnpm@12.9.0+sha512.8f64efa0b792986ca98ae568791bcd7722807e274c4f0c1d9853c62116495c584119db98762a2a5343b1684d361b9ae26fdd16d551666d7635346d3fae830ddd"
 }
