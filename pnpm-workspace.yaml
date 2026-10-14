@@ -1,19 +1,22 @@
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
-  # Next.js 16.3.8 security patches, including GHSA-cjq9-62q9-8jv4 (image optimization SSRF).
-  # https://github.com/vercel/next.js/releases/tag/v16.3.8
-  - next@16.3.8
-  - eslint-config-next@16.3.8
-  - '@next/env@16.3.8'
-  - '@next/eslint-plugin-next@16.3.8'
-  - '@next/swc-darwin-arm64@16.3.8'
-  - '@next/swc-darwin-x64@16.3.8'
-  - '@next/swc-linux-arm64-gnu@16.3.8'
-  - '@next/swc-linux-arm64-musl@16.3.8'
-  - '@next/swc-linux-x64-gnu@16.3.8'
-  - '@next/swc-linux-x64-musl@16.3.8'
-  - '@next/swc-win32-arm64-msvc@16.3.8'
-  - '@next/swc-win32-x64-msvc@16.3.8'
+  # Next.js 16.4.1 security patches:
+  # GHSA-673q-mjm6-r5xr (use cache typed-array RCE),
+  # GHSA-2464-fhr4-w9xw (image optimization SVG RCE),
+  # GHSA-p3m5-59mp-jv5r (App Router Server Action DoS).
+  # https://github.com/vercel/next.js/releases/tag/v16.4.1
+  - next@16.4.1
+  - eslint-config-next@16.4.1
+  - '@next/env@16.4.1'
+  - '@next/eslint-plugin-next@16.4.1'
+  - '@next/swc-darwin-arm64@16.4.1'
+  - '@next/swc-darwin-x64@16.4.1'
+  - '@next/swc-linux-arm64-gnu@16.4.1'
+  - '@next/swc-linux-arm64-musl@16.4.1'
+  - '@next/swc-linux-x64-gnu@16.4.1'
+  - '@next/swc-linux-x64-musl@16.4.1'
+  - '@next/swc-win32-arm64-msvc@16.4.1'
+  - '@next/swc-win32-x64-msvc@16.4.1'
 allowBuilds:
   sharp: true
   unrs-resolver: true
