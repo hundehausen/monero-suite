@@ -14,43 +14,43 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@mantine/code-highlight": "9.6.3",
-    "@mantine/core": "9.6.3",
-    "@mantine/hooks": "9.6.3",
-    "@mantine/notifications": "9.6.3",
-    "@mantine/spotlight": "9.6.3",
-    "@vercel/blob": "2.8.0",
+    "@mantine/code-highlight": "9.7.2",
+    "@mantine/core": "9.7.2",
+    "@mantine/hooks": "9.7.2",
+    "@mantine/notifications": "9.7.2",
+    "@mantine/spotlight": "9.7.2",
+    "@vercel/blob": "2.8.1",
     "compose-spec-schema": "1.0.0",
     "date-fns": "4.4.0",
     "highlight.js": "11.12.0",
-    "nanoid": "6.0.1",
+    "nanoid": "6.0.2",
     "next": "16.4.1",
-    "nuqs": "2.10.1",
+    "nuqs": "2.10.2",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-icons": "5.7.0",
     "sharp": "0.35.5",
     "yaml": "2.9.1",
-    "zod": "4.6.5"
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.3",
     "@commitlint/config-conventional": "21.2.3",
-    "@playwright/test": "1.63.0",
+    "@playwright/test": "1.64.0",
     "@testing-library/dom": "10.4.2",
     "@testing-library/react": "16.3.3",
-    "@types/node": "26.6.4",
+    "@types/node": "26.6.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "eslint": "10.12.0",
     "eslint-config-next": "16.4.1",
     "husky": "9.1.7",
-    "jsdom": "30.1.1",
-    "postcss": "8.5.28",
+    "jsdom": "30.1.2",
+    "postcss": "8.5.30",
     "postcss-preset-mantine": "1.18.0",
     "postcss-simple-vars": "7.0.1",
     "typescript": "6.0.3",
-    "vitest": "5.0.3"
+    "vitest": "5.0.4"
   },
-  "packageManager": "pnpm@12.9.0+sha512.8f64efa0b792986ca98ae568791bcd7722807e274c4f0c1d9853c62116495c584119db98762a2a5343b1684d361b9ae26fdd16d551666d7635346d3fae830ddd"
+  "packageManager": "pnpm@12.11.2+sha512.25a51652a196785af5f28bda6dfe8dc582ebefa4ac1d180221ce1390231c5fb76637822ea4b6e4633ce74acdcb0a77f725af11bad38177fdeddaee818a955cb9"
 }
