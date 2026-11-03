@@ -1,22 +1,32 @@
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
-  # Next.js 16.4.1 security patches:
-  # GHSA-673q-mjm6-r5xr (use cache typed-array RCE),
-  # GHSA-2464-fhr4-w9xw (image optimization SVG RCE),
-  # GHSA-p3m5-59mp-jv5r (App Router Server Action DoS).
-  # https://github.com/vercel/next.js/releases/tag/v16.4.1
-  - next@16.4.1
-  - eslint-config-next@16.4.1
-  - '@next/env@16.4.1'
-  - '@next/eslint-plugin-next@16.4.1'
-  - '@next/swc-darwin-arm64@16.4.1'
-  - '@next/swc-darwin-x64@16.4.1'
-  - '@next/swc-linux-arm64-gnu@16.4.1'
-  - '@next/swc-linux-arm64-musl@16.4.1'
-  - '@next/swc-linux-x64-gnu@16.4.1'
-  - '@next/swc-linux-x64-musl@16.4.1'
-  - '@next/swc-win32-arm64-msvc@16.4.1'
-  - '@next/swc-win32-x64-msvc@16.4.1'
+  # Next.js 16.4.5 security patches:
+  # GHSA-mfr8-8qww-v76h (use cache cross-tenant disclosure via unstable_cache),
+  # GHSA-vc7v-qv4w-wrv8 (nested use cache root-param leak),
+  # GHSA-vvgp-ww4w-46vf (Cache Components fallback-shell poisoning),
+  # GHSA-rhh4-g77r-r9qj (use cache binary-argument disclosure),
+  # GHSA-pc58-hwjq-p385 (fetched-response injection on self-hosted apps),
+  # GHSA-7qx7-33qx-rqx2 (image optimization SVG rejection bypass),
+  # GHSA-f3mh-rxg3-f5g2 (Edge HttpOnly cookie exposure).
+  # https://github.com/vercel/next.js/releases/tag/v16.4.5
+  - next@16.4.5
+  - eslint-config-next@16.4.5
+  - '@next/env@16.4.5'
+  - '@next/eslint-plugin-next@16.4.5'
+  - '@next/swc-darwin-arm64@16.4.5'
+  - '@next/swc-darwin-x64@16.4.5'
+  - '@next/swc-linux-arm64-gnu@16.4.5'
+  - '@next/swc-linux-arm64-musl@16.4.5'
+  - '@next/swc-linux-x64-gnu@16.4.5'
+  - '@next/swc-linux-x64-musl@16.4.5'
+  - '@next/swc-win32-arm64-msvc@16.4.5'
+  - '@next/swc-win32-x64-msvc@16.4.5'
 allowBuilds:
   sharp: true
   unrs-resolver: true
+overrides:
+  # @vercel/blob -> @vercel/oidc@3.8.10 -> @vercel/cli-config@0.3.1 pins zod exactly
+  # at 4.1.11, which is vulnerable to GHSA-mrhx-c7xc-m3w5. oidc 4.x relaxes the pin
+  # to ^4.6.6, but blob still requires oidc ^3.6.1. Collapse the nested copy onto
+  # the zod version we already ship.
+  'zod@<4.6.6': 4.6.7
