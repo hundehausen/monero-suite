@@ -3,6 +3,7 @@ import { createMoneroLwsService } from "./monero-lws";
 import { generationCtx } from "./index";
 import { DOCKER_IMAGES, MONEROD_PORTS, SERVICE_PORTS } from "@/lib/constants";
 import { makeFullConfig } from "@/lib/make-full-config";
+import { architectures } from "@/lib/service-types";
 
 const run = (on: boolean, zmqPubBindPort: string = String(MONEROD_PORTS.zmqPub)) => {
   const config = makeFullConfig({
@@ -33,6 +34,10 @@ describe("createMoneroLwsService", () => {
     expect(c.command).toContain("--max-subaddresses=50");
     expect(c.ports).toContain(`${SERVICE_PORTS.moneroLws}:${SERVICE_PORTS.moneroLws}`);
     expect(c.ports).toContain(`${SERVICE_PORTS.moneroLwsAdmin}:${SERVICE_PORTS.moneroLwsAdmin}`);
+  });
+
+  it("is amd64-only because the published image has no arm64 manifest", () => {
+    expect(run(true).architecture).toEqual([architectures.linuxAmd]);
   });
 
   it("depends on monerod", () => {

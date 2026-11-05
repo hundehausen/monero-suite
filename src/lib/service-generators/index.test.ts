@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   anyHiddenService,
+  filterServicesByArchitecture,
   generateAllServices,
 } from "./index";
 import { makeFullConfig } from "@/lib/make-full-config";
+import { architectures } from "@/lib/service-types";
 import { generateBashScriptFile } from "@/app/utils";
 
 describe("anyHiddenService", () => {
@@ -52,6 +54,20 @@ describe("generateAllServices hidden services", () => {
     const command = services.monerod.code.monerod?.command as string[];
     expect(command).not.toContain("--disable-rpc-ban");
     expect(services.tor.checked).toBe(false);
+  });
+});
+
+describe("filterServicesByArchitecture", () => {
+  it("hides monero-lws on arm64 because its image is amd64-only", () => {
+    const services = generateAllServices(
+      makeFullConfig({ services: { isMoneroLws: true } })
+    );
+    expect(
+      filterServicesByArchitecture(services, architectures.linuxArm)
+    ).not.toHaveProperty("monero-lws");
+    expect(
+      filterServicesByArchitecture(services, architectures.linuxAmd)
+    ).toHaveProperty("monero-lws");
   });
 });
 

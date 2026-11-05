@@ -36,7 +36,10 @@ export const createMoneroLwsService = (
       ".",
     checked: config.services.isMoneroLws,
     required: false,
-    architecture: [architectures.linuxAmd, architectures.linuxArm],
+    // ghcr.io/vtnerd/monero-lws:latest (v1.0.5) publishes an amd64-only
+    // manifest. Only the alpha `master` tag and commit-pinned arm64 tags have
+    // an arm64 build, so arm64 users must not be offered this service.
+    architecture: [architectures.linuxAmd],
     volumes: { "monero-lws-data": {} },
     code: {
       "monero-lws": {
