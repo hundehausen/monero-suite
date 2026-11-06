@@ -17,13 +17,19 @@ const MoneroLwsSection = () => {
     setIsMoneroLws,
   } = useMoneroLwsState();
 
+  // filterServicesByArchitecture drops this service on arm64 because the
+  // published image is amd64-only. Render nothing rather than dereferencing
+  // an undefined entry and crashing the whole page.
+  const service = services["monero-lws"];
+  if (!service) return null;
+
   return (
     <AccordionItemComponent
       value="monero-lws"
       checked={isMoneroLws}
       title="Light Wallet Server"
     >
-      <Text size="sm">{services["monero-lws"].description}</Text>
+      <Text size="sm">{service.description}</Text>
       <Anchor href="https://github.com/vtnerd/monero-lws" target="_blank">
         Learn more about monero-lws.
       </Anchor>
